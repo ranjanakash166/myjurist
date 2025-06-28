@@ -1,71 +1,93 @@
 import React from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Star, Crown } from 'lucide-react';
 
 const PricingSection = () => {
+  const pricingPlans = [
+    {
+      title: "Subscription-based SaaS",
+      description: "Ideal for law firms and corporate legal teams seeking ongoing support.",
+      features: ["Monthly billing", "24/7 support", "Regular updates"],
+      bgColor: "bg-blue-500",
+      textColor: "text-blue-400",
+      popular: false
+    },
+    {
+      title: "Pay-per-use Options",
+      description: "Practical, scalable pricing designed for startups and smaller businesses.",
+      features: ["Usage-based billing", "No commitments", "Flexible scaling"],
+      bgColor: "bg-purple-500",
+      textColor: "text-purple-400",
+      popular: true
+    },
+    {
+      title: "Enterprise Solutions",
+      description: "Customized integrations for larger organizations with unique requirements.",
+      features: ["Custom integration", "Dedicated support", "SLA guarantees"],
+      bgColor: "bg-cyan-500",
+      textColor: "text-cyan-400",
+      popular: false
+    }
+  ];
+
   return (
-    <section id="pricing" className="py-20 bg-gradient-to-b from-black to-red-950/10">
+    <section id="pricing" className="py-20 bg-gray-900">
       <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-5xl font-bold text-center mb-16 bg-gradient-to-r from-red-400 to-white bg-clip-text text-transparent">
-          Flexible Plans Tailored to Your Needs
-        </h2>
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold mb-4 text-white">
+            Flexible Plans Tailored to Your Needs
+          </h2>
+          <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+        </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-gradient-to-b from-gray-900 to-black p-8 rounded-2xl border border-red-500/20 hover:border-red-500/40 transition-all duration-300 transform hover:scale-105">
-            <h3 className="text-2xl font-bold mb-6 text-red-400">Subscription-based SaaS</h3>
-            <p className="text-gray-300 mb-6">Ideal for law firms and corporate legal teams seeking ongoing support.</p>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">Monthly billing</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">24/7 support</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">Regular updates</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-b from-red-900/20 to-black p-8 rounded-2xl border border-red-500/40 transform scale-105">
-            <h3 className="text-2xl font-bold mb-6 text-red-400">Pay-per-use Options</h3>
-            <p className="text-gray-300 mb-6">Practical, scalable pricing designed for startups and smaller businesses.</p>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">Usage-based billing</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">No commitments</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">Flexible scaling</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-b from-gray-900 to-black p-8 rounded-2xl border border-red-500/20 hover:border-red-500/40 transition-all duration-300 transform hover:scale-105">
-            <h3 className="text-2xl font-bold mb-6 text-red-400">Enterprise Solutions</h3>
-            <p className="text-gray-300 mb-6">Customized integrations for larger organizations with unique requirements.</p>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">Custom integration</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">Dedicated support</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">SLA guarantees</span>
+          {pricingPlans.map((plan, index) => (
+            <div
+              key={index}
+              className={`bg-gray-800 p-8 rounded-2xl border border-gray-700 relative ${
+                plan.popular ? 'border-purple-500' : ''
+              }`}
+            >
+              {/* Popular badge */}
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center">
+                    <Star className="h-4 w-4 mr-1" />
+                    Most Popular
+                  </div>
+                </div>
+              )}
+              
+              <h3 className={`text-2xl font-bold mb-6 ${plan.textColor} flex items-center`}>
+                {plan.popular && <Crown className="h-6 w-6 mr-2 text-purple-400" />}
+                {plan.title}
+              </h3>
+              
+              <p className="text-gray-300 mb-6 leading-relaxed">
+                {plan.description}
+              </p>
+              
+              <div className="space-y-3">
+                {plan.features.map((feature, featureIndex) => (
+                  <div key={featureIndex} className="flex items-center">
+                    <CheckCircle className={`h-5 w-5 ${plan.textColor} mr-3`} />
+                    <span className="text-gray-300">{feature}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          ))}
+        </div>
+        
+        {/* Pricing highlight */}
+        <div className="mt-16 bg-gray-800 p-8 rounded-2xl border border-gray-700">
+          <h3 className="text-2xl font-bold mb-4 text-white text-center">
+            Transparent, Value-Driven Pricing
+          </h3>
+          <p className="text-gray-300 text-lg leading-relaxed text-center max-w-3xl mx-auto">
+            Our flexible pricing model ensures that organizations of all sizes can access 
+            the power of My Jurist's AI platform. From startups to enterprise corporations, 
+            we have a solution that fits your needs and budget.
+          </p>
         </div>
       </div>
     </section>
