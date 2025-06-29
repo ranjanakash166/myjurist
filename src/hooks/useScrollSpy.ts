@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-export const useScrollSpy = (sectionIds) => {
-  const [activeSection, setActiveSection] = useState('home');
+export const useScrollSpy = (sectionIds: string[]): string => {
+  const [activeSection, setActiveSection] = useState<string>('home');
 
   useEffect(() => {
     const handleScroll = () => {

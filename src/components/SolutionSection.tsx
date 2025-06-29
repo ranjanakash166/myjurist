@@ -1,8 +1,16 @@
 import React from 'react';
-import { Shield, Globe, Zap, CheckCircle } from 'lucide-react';
+import { Shield, Globe, Zap, CheckCircle, LucideIcon } from 'lucide-react';
 
-const SolutionSection = () => {
-  const solutions = [
+interface Solution {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  bgColor: string;
+  textColor: string;
+}
+
+const SolutionSection: React.FC = () => {
+  const solutions: Solution[] = [
     {
       icon: Shield,
       title: "Locally-Hosted Security",
@@ -44,22 +52,25 @@ const SolutionSection = () => {
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
-          {solutions.map((solution, index) => (
-            <div
-              key={index}
-              className="bg-gray-900 p-6 rounded-xl border border-gray-700"
-            >
-              <div className={`h-10 w-10 ${solution.bgColor} rounded-lg flex items-center justify-center mb-4`}>
-                <solution.icon className="h-5 w-5 text-white" />
+          {solutions.map((solution, index) => {
+            const IconComponent = solution.icon;
+            return (
+              <div
+                key={index}
+                className="bg-gray-900 p-6 rounded-xl border border-gray-700"
+              >
+                <div className={`h-10 w-10 ${solution.bgColor} rounded-lg flex items-center justify-center mb-4`}>
+                  <IconComponent className="h-5 w-5 text-white" />
+                </div>
+                <h3 className={`text-xl font-bold mb-3 ${solution.textColor}`}>
+                  {solution.title}
+                </h3>
+                <p className="text-gray-300 leading-relaxed">
+                  {solution.description}
+                </p>
               </div>
-              <h3 className={`text-xl font-bold mb-3 ${solution.textColor}`}>
-                {solution.title}
-              </h3>
-              <p className="text-gray-300 leading-relaxed">
-                {solution.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

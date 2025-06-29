@@ -1,8 +1,17 @@
 import React from 'react';
-import { CheckCircle, Star, Crown } from 'lucide-react';
+import { CheckCircle, Star, Crown, ArrowRight } from 'lucide-react';
 
-const PricingSection = () => {
-  const pricingPlans = [
+interface PricingPlan {
+  title: string;
+  description: string;
+  features: string[];
+  bgColor: string;
+  textColor: string;
+  popular: boolean;
+}
+
+const PricingSection: React.FC = () => {
+  const pricingPlans: PricingPlan[] = [
     {
       title: "Subscription-based SaaS",
       description: "Ideal for law firms and corporate legal teams seeking ongoing support.",
@@ -29,6 +38,10 @@ const PricingSection = () => {
     }
   ];
 
+  const handleGetStarted = () => {
+    window.location.href = '/contact';
+  };
+
   return (
     <section id="pricing" className="py-20 bg-gray-900">
       <div className="max-w-6xl mx-auto px-4">
@@ -43,7 +56,7 @@ const PricingSection = () => {
           {pricingPlans.map((plan, index) => (
             <div
               key={index}
-              className={`bg-gray-800 p-8 rounded-2xl border border-gray-700 relative ${
+              className={`bg-gray-800 p-8 rounded-2xl border border-gray-700 relative flex flex-col ${
                 plan.popular ? 'border-purple-500' : ''
               }`}
             >
@@ -66,7 +79,7 @@ const PricingSection = () => {
                 {plan.description}
               </p>
               
-              <div className="space-y-3">
+              <div className="space-y-3 mb-8 flex-grow">
                 {plan.features.map((feature, featureIndex) => (
                   <div key={featureIndex} className="flex items-center">
                     <CheckCircle className={`h-5 w-5 ${plan.textColor} mr-3`} />
@@ -74,6 +87,17 @@ const PricingSection = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Get Started Button */}
+              <button
+                onClick={handleGetStarted}
+                className={`group w-full bg-gradient-to-r ${plan.bgColor} hover:opacity-90 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center ${
+                  plan.popular ? 'shadow-lg shadow-purple-500/25' : ''
+                }`}
+              >
+                <span>Get Started</span>
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </button>
             </div>
           ))}
         </div>

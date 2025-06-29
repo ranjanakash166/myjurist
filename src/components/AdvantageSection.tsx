@@ -1,8 +1,16 @@
 import React from 'react';
-import { Award, Database, TrendingUp, Shield } from 'lucide-react';
+import { Award, Database, TrendingUp, Shield, LucideIcon } from 'lucide-react';
 
-const AdvantageSection = () => {
-  const advantages = [
+interface Advantage {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  bgColor: string;
+  textColor: string;
+}
+
+const AdvantageSection: React.FC = () => {
+  const advantages: Advantage[] = [
     {
       icon: Award,
       title: "First Locally-Hosted AI for Due Diligence",
@@ -46,22 +54,25 @@ const AdvantageSection = () => {
         <div className="space-y-12">
           {[0, 2].map((startIndex) => (
             <div key={startIndex} className="grid md:grid-cols-2 gap-8">
-              {advantages.slice(startIndex, startIndex + 2).map((advantage, index) => (
-                <div
-                  key={startIndex + index}
-                  className="bg-gray-900 p-8 rounded-2xl border border-gray-700"
-                >
-                  <div className={`h-12 w-12 ${advantage.bgColor} rounded-xl flex items-center justify-center mb-6`}>
-                    <advantage.icon className="h-6 w-6 text-white" />
+              {advantages.slice(startIndex, startIndex + 2).map((advantage, index) => {
+                const IconComponent = advantage.icon;
+                return (
+                  <div
+                    key={startIndex + index}
+                    className="bg-gray-900 p-8 rounded-2xl border border-gray-700"
+                  >
+                    <div className={`h-12 w-12 ${advantage.bgColor} rounded-xl flex items-center justify-center mb-6`}>
+                      <IconComponent className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className={`text-2xl font-bold mb-4 ${advantage.textColor}`}>
+                      {advantage.title}
+                    </h3>
+                    <p className="text-gray-300 leading-relaxed">
+                      {advantage.description}
+                    </p>
                   </div>
-                  <h3 className={`text-2xl font-bold mb-4 ${advantage.textColor}`}>
-                    {advantage.title}
-                  </h3>
-                  <p className="text-gray-300 leading-relaxed">
-                    {advantage.description}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ))}
         </div>

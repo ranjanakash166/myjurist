@@ -1,8 +1,16 @@
 import React from 'react';
-import { TrendingUp, Shield, DollarSign } from 'lucide-react';
+import { TrendingUp, Shield, DollarSign, LucideIcon } from 'lucide-react';
 
-const MarketSection = () => {
-  const marketStats = [
+interface MarketStat {
+  icon: LucideIcon;
+  value: string;
+  description: string;
+  bgColor: string;
+  textColor: string;
+}
+
+const MarketSection: React.FC = () => {
+  const marketStats: MarketStat[] = [
     {
       icon: DollarSign,
       value: "$1T",
@@ -37,22 +45,25 @@ const MarketSection = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          {marketStats.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-gray-800 p-8 rounded-2xl border border-gray-700"
-            >
-              <div className={`h-16 w-16 ${stat.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                <stat.icon className="h-8 w-8 text-white" />
+          {marketStats.map((stat, index) => {
+            const IconComponent = stat.icon;
+            return (
+              <div
+                key={index}
+                className="bg-gray-800 p-8 rounded-2xl border border-gray-700"
+              >
+                <div className={`h-16 w-16 ${stat.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
+                  <IconComponent className="h-8 w-8 text-white" />
+                </div>
+                <div className={`text-4xl font-bold ${stat.textColor} mb-4`}>
+                  {stat.value}
+                </div>
+                <p className="text-xl text-gray-300 leading-relaxed">
+                  {stat.description}
+                </p>
               </div>
-              <div className={`text-4xl font-bold ${stat.textColor} mb-4`}>
-                {stat.value}
-              </div>
-              <p className="text-xl text-gray-300 leading-relaxed">
-                {stat.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
         
         {/* Market opportunity highlight */}

@@ -1,8 +1,16 @@
 import React from 'react';
-import { Users, Globe, Award, Target } from 'lucide-react';
+import { Users, Globe, Award, Target, LucideIcon } from 'lucide-react';
 
-const StrategySection = () => {
-  const strategies = [
+interface Strategy {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  bgColor: string;
+  textColor: string;
+}
+
+const StrategySection: React.FC = () => {
+  const strategies: Strategy[] = [
     {
       icon: Users,
       title: "Direct Outreach",
@@ -37,22 +45,25 @@ const StrategySection = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          {strategies.map((strategy, index) => (
-            <div
-              key={index}
-              className="bg-gray-900 p-8 rounded-2xl border border-gray-700 text-center"
-            >
-              <div className={`h-16 w-16 ${strategy.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                <strategy.icon className="h-8 w-8 text-white" />
+          {strategies.map((strategy, index) => {
+            const IconComponent = strategy.icon;
+            return (
+              <div
+                key={index}
+                className="bg-gray-900 p-8 rounded-2xl border border-gray-700 text-center"
+              >
+                <div className={`h-16 w-16 ${strategy.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
+                  <IconComponent className="h-8 w-8 text-white" />
+                </div>
+                <h3 className={`text-2xl font-bold mb-4 ${strategy.textColor}`}>
+                  {strategy.title}
+                </h3>
+                <p className="text-gray-300 leading-relaxed">
+                  {strategy.description}
+                </p>
               </div>
-              <h3 className={`text-2xl font-bold mb-4 ${strategy.textColor}`}>
-                {strategy.title}
-              </h3>
-              <p className="text-gray-300 leading-relaxed">
-                {strategy.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
         
         {/* Strategy roadmap */}

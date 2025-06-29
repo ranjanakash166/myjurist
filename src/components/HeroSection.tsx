@@ -1,8 +1,9 @@
 import React from 'react';
-import { Scale, ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import Image from 'next/image';
 
-const HeroSection = () => {
+const HeroSection: React.FC = () => {
   const heroRef = useScrollAnimation();
 
   return (
@@ -34,7 +35,13 @@ const HeroSection = () => {
         <div className="mb-8 flex justify-center">
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
-            <Scale className="h-24 w-24 text-ai-blue-400 group-hover:text-ai-cyan-400 transition-colors duration-500 animate-bounce-slow relative z-10" />
+            <Image 
+              src="/images/myjurist-logo.png" 
+              alt="My Jurist Logo" 
+              width={150} 
+              height={150} 
+              className="group-hover:scale-110 transition-transform duration-500 animate-bounce-slow relative z-10"
+            />
             <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-ai-purple-400 animate-pulse" />
           </div>
         </div>
@@ -44,7 +51,7 @@ const HeroSection = () => {
         </h1>
         
         <p className="text-2xl md:text-3xl text-slate-300 mb-8 font-light animate-slide-up" style={{ animationDelay: '0.2s' }}>
-          Precision Legal AI: Local Data Privacy
+          Next Gen AI Law Firm
         </p>
         
         <div className="space-y-4 md:space-y-0 md:space-x-6 md:flex justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>

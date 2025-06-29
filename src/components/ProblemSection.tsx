@@ -1,8 +1,16 @@
 import React from 'react';
-import { TrendingUp, Lock, Database } from 'lucide-react';
+import { TrendingUp, Lock, Database, LucideIcon } from 'lucide-react';
 
-const ProblemSection = () => {
-  const problems = [
+interface Problem {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  bgColor: string;
+  textColor: string;
+}
+
+const ProblemSection: React.FC = () => {
+  const problems: Problem[] = [
     {
       icon: TrendingUp,
       title: "High Costs, Slow Results",
@@ -37,22 +45,25 @@ const ProblemSection = () => {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          {problems.map((problem, index) => (
-            <div
-              key={index}
-              className="bg-gray-800 p-8 rounded-2xl border border-gray-700"
-            >
-              <div className={`h-12 w-12 ${problem.bgColor} rounded-xl flex items-center justify-center mb-6`}>
-                <problem.icon className="h-6 w-6 text-white" />
+          {problems.map((problem, index) => {
+            const IconComponent = problem.icon;
+            return (
+              <div
+                key={index}
+                className="bg-gray-800 p-8 rounded-2xl border border-gray-700"
+              >
+                <div className={`h-12 w-12 ${problem.bgColor} rounded-xl flex items-center justify-center mb-6`}>
+                  <IconComponent className="h-6 w-6 text-white" />
+                </div>
+                <h3 className={`text-2xl font-bold mb-4 ${problem.textColor}`}>
+                  {problem.title}
+                </h3>
+                <p className="text-gray-300 leading-relaxed">
+                  {problem.description}
+                </p>
               </div>
-              <h3 className={`text-2xl font-bold mb-4 ${problem.textColor}`}>
-                {problem.title}
-              </h3>
-              <p className="text-gray-300 leading-relaxed">
-                {problem.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

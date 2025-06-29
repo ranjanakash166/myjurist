@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, RefObject } from 'react';
 
-export const useScrollAnimation = () => {
-  const elementRef = useRef(null);
+export const useScrollAnimation = (): RefObject<HTMLDivElement> => {
+  const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

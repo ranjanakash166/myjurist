@@ -11,11 +11,16 @@ import MarketSection from '../components/MarketSection';
 import AdvantageSection from '../components/AdvantageSection';
 import PricingSection from '../components/PricingSection';
 import StrategySection from '../components/StrategySection';
-import TeamSection from '../components/TeamSection';
 import Footer from '../components/Footer';
 
+interface NavigationItem {
+  id: string;
+  label: string;
+  href?: string;
+}
+
 const MyJuristApp = () => {
-  const navigation = [
+  const navigation: NavigationItem[] = [
     { id: 'home', label: 'Home' },
     { id: 'problem', label: 'Problem' },
     { id: 'solution', label: 'Solution' },
@@ -23,13 +28,13 @@ const MyJuristApp = () => {
     { id: 'advantage', label: 'Advantage' },
     { id: 'pricing', label: 'Pricing' },
     { id: 'strategy', label: 'Strategy' },
-    { id: 'team', label: 'Team' }
+    { id: 'contact', label: 'Contact', href: '/contact' }
   ];
 
-  const sectionIds = navigation.map(item => item.id);
+  const sectionIds = navigation.filter(item => !item.href).map(item => item.id);
   const activeSection = useScrollSpy(sectionIds);
 
-  const scrollToSection = (sectionId) => {
+  const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -52,7 +57,6 @@ const MyJuristApp = () => {
       <AdvantageSection />
       <PricingSection />
       <StrategySection />
-      <TeamSection />
       <Footer />
     </div>
   );

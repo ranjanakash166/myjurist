@@ -1,11 +1,11 @@
 import React from 'react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
-const Introduction = () => {
+const Introduction: React.FC = () => {
   const introRef = useScrollAnimation();
 
   return (
-    <section className="py-20 relative">
+    <section className="py-10 relative">
       <div ref={introRef} className="max-w-6xl mx-auto px-4 text-center animate-on-scroll">
         <h2 className="text-4xl md:text-5xl font-bold mb-8 gradient-text-animate">
           Welcome to My Jurist
