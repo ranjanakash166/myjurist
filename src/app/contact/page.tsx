@@ -126,7 +126,7 @@ const ContactPage: React.FC = () => {
                 
                 {/* Social links */}
                 <div className="flex justify-center space-x-4">
-                  <a href="mailto:contact@myjurist.com" className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
+                  <a href="mailto:support@myjurist.io" className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
                     <Mail className="h-5 w-5 text-blue-400" />
                   </a>
                   <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
@@ -172,7 +172,7 @@ const ContactPage: React.FC = () => {
                 
                 {/* Social links */}
                 <div className="flex justify-center space-x-4">
-                  <a href="mailto:support@evalence.io" className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+                  <a href="mailto:support@myjurist.io" className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
                     <Mail className="h-5 w-5 text-purple-400" />
                   </a>
                   <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
