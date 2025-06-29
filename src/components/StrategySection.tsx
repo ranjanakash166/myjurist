@@ -77,17 +77,19 @@ const StrategySection: React.FC = () => {
           </p>
           
           {/* Strategy timeline */}
-          <div className="flex items-center justify-center space-x-8">
+          <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
             <div className="flex items-center">
               <Target className="h-6 w-6 text-blue-400 mr-2" />
               <span className="text-gray-300">Q1: Market Entry</span>
             </div>
-            <div className="w-8 h-0.5 bg-blue-500"></div>
+            <div className="hidden md:block w-8 h-0.5 bg-blue-500"></div>
+            <div className="md:hidden w-0.5 h-8 bg-blue-500"></div>
             <div className="flex items-center">
               <Target className="h-6 w-6 text-purple-400 mr-2" />
               <span className="text-gray-300">Q2: Partnership Growth</span>
             </div>
-            <div className="w-8 h-0.5 bg-purple-500"></div>
+            <div className="hidden md:block w-8 h-0.5 bg-purple-500"></div>
+            <div className="md:hidden w-0.5 h-8 bg-purple-500"></div>
             <div className="flex items-center">
               <Target className="h-6 w-6 text-cyan-400 mr-2" />
               <span className="text-gray-300">Q3: Market Leadership</span>

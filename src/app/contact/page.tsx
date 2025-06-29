@@ -3,6 +3,7 @@
 import React from 'react';
 import { Users, Mail, Linkedin, Twitter, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const ContactPage: React.FC = () => {
   return (
@@ -36,32 +37,93 @@ const ContactPage: React.FC = () => {
               <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
             </div>
             
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="bg-gray-800 p-12 rounded-3xl border border-gray-700">
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* Shashank */}
+              <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 text-center">
                 {/* Profile image */}
-                <div className="mb-8">
-                  <div className="w-32 h-32 bg-blue-500 rounded-full mx-auto flex items-center justify-center">
-                    <Users className="h-16 w-16 text-white" />
+                <div className="mb-6">
+                  <div className="w-32 h-32 bg-blue-500 rounded-full mx-auto flex items-center justify-center overflow-hidden">
+                    <Image 
+                      src="/images/shashank.jpeg" 
+                      alt="Shashank" 
+                      width={128} 
+                      height={128} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to icon if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <Users className="h-16 w-16 text-white hidden" />
                   </div>
                 </div>
                 
-                <h3 className="text-3xl font-bold mb-4 text-white">Shashank</h3>
-                <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                <h3 className="text-2xl font-bold mb-2 text-white">Shashank</h3>
+                <p className="text-lg text-blue-400 font-semibold mb-4">Co-Founder & CEO</p>
+                <p className="text-gray-300 mb-6 leading-relaxed">
                   Shashank holds degrees in Law and Business Administration and is dedicated to developing 
                   innovative legal AI solutions that enable teams to perform at their highest potential.
                 </p>
                 
-                <p className="text-lg text-blue-400 font-semibold mb-8">
+                <p className="text-sm text-blue-400 font-semibold mb-6">
                   Reach out to him for partnership and business inquiries.
                 </p>
                 
                 {/* Social links */}
-                <div className="flex justify-center space-x-6">
+                <div className="flex justify-center space-x-4">
                   <a href="mailto:contact@myjurist.com" className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
                     <Mail className="h-5 w-5 text-blue-400" />
                   </a>
                   <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
                     <Linkedin className="h-5 w-5 text-purple-400" />
+                  </a>
+                  <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-cyan-500/20 rounded-xl border border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300">
+                    <Twitter className="h-5 w-5 text-cyan-400" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Gaurav */}
+              <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 text-center">
+                {/* Profile image */}
+                <div className="mb-6">
+                  <div className="w-32 h-32 bg-purple-500 rounded-full mx-auto flex items-center justify-center overflow-hidden">
+                    <Image 
+                      src="/images/gaurav.jpeg" 
+                      alt="Gaurav Suman" 
+                      width={128} 
+                      height={128} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to icon if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <Users className="h-16 w-16 text-white hidden" />
+                  </div>
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-2 text-white">Gaurav Suman</h3>
+                <p className="text-lg text-purple-400 font-semibold mb-4">Co-Founder & CTO</p>
+                <p className="text-gray-300 mb-6 leading-relaxed">
+                  Gaurav leads our technology and product development. Contact him for technical questions, integrations, or support.
+                </p>
+                
+                <p className="text-sm text-purple-400 font-semibold mb-6">
+                  Reach out to him for technical inquiries and support.
+                </p>
+                
+                {/* Social links */}
+                <div className="flex justify-center space-x-4">
+                  <a href="mailto:support@evalence.io" className="p-3 bg-purple-500/20 rounded-xl border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+                    <Mail className="h-5 w-5 text-purple-400" />
+                  </a>
+                  <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-500/20 rounded-xl border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
+                    <Linkedin className="h-5 w-5 text-blue-400" />
                   </a>
                   <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-cyan-500/20 rounded-xl border border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300">
                     <Twitter className="h-5 w-5 text-cyan-400" />

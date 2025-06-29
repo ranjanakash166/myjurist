@@ -1,10 +1,15 @@
 import React from 'react';
-import { ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
+import { Scale, ArrowRight, ChevronRight, Sparkles } from 'lucide-react';
+
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import Image from 'next/image';
 
 const HeroSection: React.FC = () => {
   const heroRef = useScrollAnimation();
+
+  const handleRequestDemo = () => {
+    window.location.href = '/contact';
+  };
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden floating-elements">
@@ -35,13 +40,7 @@ const HeroSection: React.FC = () => {
         <div className="mb-8 flex justify-center">
           <div className="relative group">
             <div className="absolute inset-0 bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
-            <Image 
-              src="/images/myjurist-logo.png" 
-              alt="My Jurist Logo" 
-              width={150} 
-              height={150} 
-              className="group-hover:scale-110 transition-transform duration-500 animate-bounce-slow relative z-10"
-            />
+            <Scale className="h-24 w-24 text-ai-blue-400 group-hover:text-ai-cyan-400 transition-colors duration-500 animate-bounce-slow relative z-10" />
             <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-ai-purple-400 animate-pulse" />
           </div>
         </div>
@@ -55,11 +54,14 @@ const HeroSection: React.FC = () => {
         </p>
         
         <div className="space-y-4 md:space-y-0 md:space-x-6 md:flex justify-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
-          <button className="group bg-gradient-to-r from-ai-blue-600 to-ai-purple-600 hover:from-ai-blue-700 hover:to-ai-purple-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-ai-blue-500/25 flex items-center mx-auto md:mx-0 ai-shadow">
+          <button 
+            onClick={handleRequestDemo}
+            className="group bg-gradient-to-r from-ai-blue-600 to-ai-purple-600 hover:from-ai-blue-700 hover:to-ai-purple-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-ai-blue-500/25 flex items-center justify-center w-full md:w-auto min-w-[200px] ai-shadow"
+          >
             <span>Request a Demo</span>
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </button>
-          <button className="group border-2 border-ai-blue-500 text-ai-blue-400 hover:bg-ai-blue-500 hover:text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center mx-auto md:mx-0 hover:shadow-lg hover:shadow-ai-blue-500/25">
+          <button className="group border-2 border-ai-blue-500 text-ai-blue-400 hover:bg-ai-blue-500 hover:text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center w-full md:w-auto min-w-[200px] hover:shadow-lg hover:shadow-ai-blue-500/25">
             <span>Learn More</span>
             <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </button>
