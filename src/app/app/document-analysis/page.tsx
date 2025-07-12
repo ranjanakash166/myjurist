@@ -1,9 +1,21 @@
 "use client";
 import React, { useRef, useState } from "react";
 
+interface ApiResponse {
+  document_id: string;
+  filename: string;
+  is_chunked: boolean;
+  total_chunks: number;
+  total_tokens: number;
+  structure_analysis: string;
+  file_size: number;
+}
+
 export default function DocumentAnalysisPage() {
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [apiResult, setApiResult] = useState<ApiResponse | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [chat, setChat] = useState([
     { sender: "system", text: "Upload and process a document to start asking questions." },
   ]);
@@ -13,18 +25,37 @@ export default function DocumentAnalysisPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      setApiResult(null);
+      setApiError(null);
     }
   };
 
-  const handleProcess = () => {
+  const handleProcess = async () => {
     if (!file) return;
     setProcessing(true);
-    setTimeout(() => {
-      setProcessing(false);
+    setApiResult(null);
+    setApiError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("http://20.244.9.18:8000/api/v1/documents/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Upload failed");
+      }
+      const data: ApiResponse = await res.json();
+      setApiResult(data);
       setChat([
-        { sender: "system", text: `Document '${file.name}' processed. You can now ask questions.` },
+        { sender: "system", text: `Document '${data.filename}' processed. You can now ask questions.` },
       ]);
-    }, 1500);
+    } catch (err: any) {
+      setApiError(err.message || "An error occurred during upload.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleSend = (e: React.FormEvent) => {
@@ -62,7 +93,27 @@ export default function DocumentAnalysisPage() {
         >
           {processing ? "Processing..." : "Process Document"}
         </button>
+        {apiError && (
+          <div className="mt-4 w-full bg-red-900/80 text-red-300 rounded-lg px-4 py-3 text-center">
+            {apiError}
+          </div>
+        )}
       </div>
+      {/* API Result Section */}
+      {apiResult && (
+        <div className="glass-effect rounded-2xl p-6 mt-2 shadow-lg">
+          <h3 className="text-lg font-bold gradient-text-animate mb-2">Document Analysis Result</h3>
+          <div className="text-slate-200 text-sm flex flex-col gap-1">
+            <div><span className="font-semibold">Document ID:</span> {apiResult.document_id}</div>
+            <div><span className="font-semibold">Filename:</span> {apiResult.filename}</div>
+            <div><span className="font-semibold">Is Chunked:</span> {apiResult.is_chunked ? "Yes" : "No"}</div>
+            <div><span className="font-semibold">Total Chunks:</span> {apiResult.total_chunks}</div>
+            <div><span className="font-semibold">Total Tokens:</span> {apiResult.total_tokens}</div>
+            <div><span className="font-semibold">File Size:</span> {apiResult.file_size} bytes</div>
+            <div><span className="font-semibold">Structure Analysis:</span> {apiResult.structure_analysis}</div>
+          </div>
+        </div>
+      )}
       {/* Chat Interface below */}
       <div className="glass-effect rounded-2xl p-6 flex flex-col min-h-[350px] max-h-[70vh] h-auto">
         <h2 className="text-xl font-bold gradient-text-animate mb-4">Ask Questions</h2>
@@ -82,12 +133,12 @@ export default function DocumentAnalysisPage() {
             placeholder="Type your question..."
             value={input}
             onChange={e => setInput(e.target.value)}
-            disabled={processing || !file}
+            disabled={processing || !apiResult}
           />
           <button
             type="submit"
             className="px-4 py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50"
-            disabled={processing || !file || !input.trim()}
+            disabled={processing || !apiResult || !input.trim()}
           >
             Send
           </button>
