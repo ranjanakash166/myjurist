@@ -1,5 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
+import { Paperclip } from "lucide-react";
 
 interface ApiResponse {
   document_id: string;
@@ -87,7 +88,7 @@ export default function DocumentAnalysisPage() {
     setStreamedText("");
     for (let i = 1; i <= fullText.length; i++) {
       setStreamedText(fullText.slice(0, i));
-      await new Promise(res => setTimeout(res, 12)); // ~80 chars/sec
+      await new Promise(res => setTimeout(res, 12));
     }
     setStreaming(false);
     setChat(prev => [
@@ -137,24 +138,33 @@ export default function DocumentAnalysisPage() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-6">
-      {/* Uploader and Process Button at the top */}
-      <div className="glass-effect rounded-2xl p-6 flex flex-col items-center justify-center">
-        <h2 className="text-xl font-bold gradient-text-animate mb-4">Document Uploader</h2>
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-        />
+    <div className="w-full max-w-5xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-8">
+      {/* Redesigned Uploader */}
+      <div className="glass-effect rounded-2xl p-8 flex flex-col items-center justify-center w-full">
+        <h2 className="text-xl font-bold gradient-text-animate mb-6">Document Uploader</h2>
+        <div className="w-full flex flex-col sm:flex-row items-center gap-4 mb-4">
+          <div className="flex-1 w-full flex items-center gap-3 bg-slate-800/60 border border-ai-blue-500/30 rounded-lg px-4 py-3 min-h-[48px]">
+            <Paperclip className="w-6 h-6 text-ai-blue-400" />
+            <span className={`truncate text-base ${file ? 'text-white' : 'text-slate-400'}`}>
+              {file ? file.name : "No file selected"}
+            </span>
+          </div>
+          <button
+            className="px-5 py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow w-full sm:w-auto"
+            onClick={() => fileInputRef.current?.click()}
+            type="button"
+          >
+            {file ? "Change File" : "Choose File"}
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
         <button
-          className="px-4 py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow mb-4"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {file ? `Selected: ${file.name}` : "Choose File"}
-        </button>
-        <button
-          className="w-full py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50"
+          className="w-full max-w-md py-3 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50 mt-2"
           onClick={handleProcess}
           disabled={!file || processing}
         >
@@ -166,23 +176,8 @@ export default function DocumentAnalysisPage() {
           </div>
         )}
       </div>
-      {/* API Result Section */}
-      {apiResult && (
-        <div className="glass-effect rounded-2xl p-6 mt-2 shadow-lg">
-          <h3 className="text-lg font-bold gradient-text-animate mb-2">Document Analysis Result</h3>
-          <div className="text-slate-200 text-sm flex flex-col gap-1">
-            <div><span className="font-semibold">Document ID:</span> {apiResult.document_id}</div>
-            <div><span className="font-semibold">Filename:</span> {apiResult.filename}</div>
-            <div><span className="font-semibold">Is Chunked:</span> {apiResult.is_chunked ? "Yes" : "No"}</div>
-            <div><span className="font-semibold">Total Chunks:</span> {apiResult.total_chunks}</div>
-            <div><span className="font-semibold">Total Tokens:</span> {apiResult.total_tokens}</div>
-            <div><span className="font-semibold">File Size:</span> {apiResult.file_size} bytes</div>
-            <div><span className="font-semibold">Structure Analysis:</span> {apiResult.structure_analysis}</div>
-          </div>
-        </div>
-      )}
       {/* Chat Interface below */}
-      <div className="glass-effect rounded-2xl p-6 flex flex-col min-h-[350px] max-h-[70vh] h-auto">
+      <div className="glass-effect rounded-2xl p-8 flex flex-col min-h-[350px] max-h-[70vh] h-auto w-full">
         <h2 className="text-xl font-bold gradient-text-animate mb-4">Ask Questions</h2>
         <div className="flex-1 overflow-y-auto mb-4 bg-slate-800/40 rounded p-3 max-h-60 sm:max-h-96 transition-all">
           {chat.map((msg, idx) => (
