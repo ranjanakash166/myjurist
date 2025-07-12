@@ -11,6 +11,10 @@ interface ApiResponse {
   file_size: number;
 }
 
+function generateSessionId() {
+  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
 export default function DocumentAnalysisPage() {
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -20,6 +24,9 @@ export default function DocumentAnalysisPage() {
     { sender: "system", text: "Upload and process a document to start asking questions." },
   ]);
   const [input, setInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,6 +34,10 @@ export default function DocumentAnalysisPage() {
       setFile(e.target.files[0]);
       setApiResult(null);
       setApiError(null);
+      setChat([
+        { sender: "system", text: "Upload and process a document to start asking questions." },
+      ]);
+      setSessionId(null);
     }
   };
 
@@ -35,6 +46,7 @@ export default function DocumentAnalysisPage() {
     setProcessing(true);
     setApiResult(null);
     setApiError(null);
+    setSessionId(null);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -48,6 +60,7 @@ export default function DocumentAnalysisPage() {
       }
       const data: ApiResponse = await res.json();
       setApiResult(data);
+      setSessionId(generateSessionId());
       setChat([
         { sender: "system", text: `Document '${data.filename}' processed. You can now ask questions.` },
       ]);
@@ -58,15 +71,45 @@ export default function DocumentAnalysisPage() {
     }
   };
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !apiResult || !sessionId) return;
+    setChatError(null);
     setChat((prev) => [
       ...prev,
       { sender: "user", text: input },
-      { sender: "system", text: "(Dummy response) This is where the answer will appear." },
     ]);
+    setChatLoading(true);
+    const question = input;
     setInput("");
+    try {
+      const res = await fetch("http://20.244.9.18:8000/api/v1/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          document_id: apiResult.document_id,
+          session_id: sessionId,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Chat failed");
+      }
+      const data = await res.json();
+      setChat((prev) => [
+        ...prev,
+        { sender: "system", text: data.response },
+      ]);
+    } catch (err: any) {
+      setChat((prev) => [
+        ...prev,
+        { sender: "system", text: "(Error) " + (err.message || "An error occurred during chat.") },
+      ]);
+      setChatError(err.message || "An error occurred during chat.");
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   return (
@@ -125,6 +168,13 @@ export default function DocumentAnalysisPage() {
               </div>
             </div>
           ))}
+          {chatLoading && (
+            <div className="mb-2 flex justify-start">
+              <div className="px-3 py-2 rounded-lg max-w-xs text-sm bg-slate-700 text-slate-200 opacity-70 animate-pulse">
+                Generating response...
+              </div>
+            </div>
+          )}
         </div>
         <form onSubmit={handleSend} className="flex gap-2">
           <input
@@ -133,16 +183,21 @@ export default function DocumentAnalysisPage() {
             placeholder="Type your question..."
             value={input}
             onChange={e => setInput(e.target.value)}
-            disabled={processing || !apiResult}
+            disabled={processing || !apiResult || chatLoading}
           />
           <button
             type="submit"
             className="px-4 py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50"
-            disabled={processing || !apiResult || !input.trim()}
+            disabled={processing || !apiResult || !input.trim() || chatLoading}
           >
-            Send
+            {chatLoading ? "Sending..." : "Send"}
           </button>
         </form>
+        {chatError && (
+          <div className="mt-2 w-full bg-red-900/80 text-red-300 rounded-lg px-4 py-2 text-center text-xs">
+            {chatError}
+          </div>
+        )}
       </div>
     </div>
   );
