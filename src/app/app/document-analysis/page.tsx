@@ -62,7 +62,7 @@ export default function DocumentAnalysisPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("http://20.244.9.18:8000/api/v1/documents/upload", {
+      const res = await fetch("https://api.myjurist.io/api/v1/documents/upload", {
         method: "POST",
         body: formData,
       });
@@ -111,7 +111,7 @@ export default function DocumentAnalysisPage() {
     const question = input;
     setInput("");
     try {
-      const res = await fetch("http://20.244.9.18:8000/api/v1/chat", {
+      const res = await fetch("https://api.myjurist.io/api/v1/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
