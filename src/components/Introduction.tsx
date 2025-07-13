@@ -7,10 +7,10 @@ const Introduction: React.FC = () => {
   return (
     <section className="py-10 relative">
       <div ref={introRef} className="max-w-6xl mx-auto px-4 text-center animate-on-scroll">
-        <h2 className="text-4xl md:text-5xl font-bold mb-8 gradient-text-animate">
+        <h2 className="text-4xl md:text-5xl font-bold mb-8 gradient-text-animate text-slate-800 dark:text-white">
           Welcome to My Jurist
         </h2>
-        <p className="text-xl md:text-2xl text-slate-300 leading-relaxed max-w-4xl mx-auto">
+        <p className="text-xl md:text-2xl text-slate-500 dark:text-slate-300 leading-relaxed max-w-4xl mx-auto">
           The first locally-hosted AI designed exclusively for legal due diligence. 
           Gain efficiency, maintain absolute data privacy, and harness unparalleled global patent insights.
         </p>

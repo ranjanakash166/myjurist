@@ -42,10 +42,10 @@ const SolutionSection: React.FC = () => {
   ];
 
   return (
-    <section id="solution" className="py-20 bg-gray-800">
+    <section id="solution" className="py-20 bg-slate-100 dark:bg-gray-800">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-white">
+          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
             Introducing My Jurist's Proprietary AI Platform
           </h2>
           <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
@@ -57,15 +57,15 @@ const SolutionSection: React.FC = () => {
             return (
               <div
                 key={index}
-                className="bg-gray-900 p-6 rounded-xl border border-gray-700"
+                className="bg-white border border-slate-300 shadow-lg rounded-xl p-6 text-slate-700 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
               >
                 <div className={`h-10 w-10 ${solution.bgColor} rounded-lg flex items-center justify-center mb-4`}>
                   <IconComponent className="h-5 w-5 text-white" />
                 </div>
-                <h3 className={`text-xl font-bold mb-3 ${solution.textColor}`}>
+                <h3 className={`text-xl font-bold mb-3 ${solution.textColor} text-slate-900 dark:text-white`}>
                   {solution.title}
                 </h3>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-slate-800 dark:text-gray-300 leading-relaxed">
                   {solution.description}
                 </p>
               </div>

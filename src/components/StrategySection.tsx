@@ -35,10 +35,10 @@ const StrategySection: React.FC = () => {
   ];
 
   return (
-    <section id="strategy" className="py-20 bg-gray-800">
+    <section id="strategy" className="py-20 bg-slate-100 dark:bg-gray-800">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-white">
+          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
             Strategic Pathways to Market Leadership
           </h2>
           <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
@@ -50,15 +50,15 @@ const StrategySection: React.FC = () => {
             return (
               <div
                 key={index}
-                className="bg-gray-900 p-8 rounded-2xl border border-gray-700 text-center"
+                className="bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 text-center"
               >
                 <div className={`h-16 w-16 ${strategy.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
                   <IconComponent className="h-8 w-8 text-white" />
                 </div>
-                <h3 className={`text-2xl font-bold mb-4 ${strategy.textColor}`}>
+                <h3 className={`text-2xl font-bold mb-4 ${strategy.textColor} text-slate-900 dark:text-white`}>
                   {strategy.title}
                 </h3>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-slate-800 dark:text-gray-300 leading-relaxed">
                   {strategy.description}
                 </p>
               </div>
@@ -67,11 +67,11 @@ const StrategySection: React.FC = () => {
         </div>
         
         {/* Strategy roadmap */}
-        <div className="mt-16 bg-gray-900 p-8 rounded-2xl border border-gray-700">
-          <h3 className="text-2xl font-bold mb-4 text-white text-center">
+        <div className="mt-16 bg-white border border-slate-300 shadow-lg dark:bg-gray-900 dark:border-gray-700 p-8 rounded-2xl text-slate-700 dark:text-gray-300">
+          <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white text-center">
             Comprehensive Go-to-Market Strategy
           </h3>
-          <p className="text-gray-300 text-lg leading-relaxed text-center max-w-4xl mx-auto mb-8">
+          <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed text-center max-w-4xl mx-auto mb-8">
             Our multi-faceted approach combines direct market penetration with strategic partnerships 
             and thought leadership to establish My Jurist as the definitive AI solution for legal due diligence.
           </p>

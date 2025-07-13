@@ -12,7 +12,7 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden floating-elements">
+    <section id="home" className="min-h-screen flex items-center justify-center relative overflow-hidden floating-elements bg-white dark:bg-black">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 morphing-blob rounded-full blur-3xl opacity-30"></div>
@@ -49,7 +49,7 @@ const HeroSection: React.FC = () => {
           My Jurist
         </h1>
         
-        <p className="text-2xl md:text-3xl text-slate-300 mb-8 font-light animate-slide-up" style={{ animationDelay: '0.2s' }}>
+        <p className="text-2xl md:text-3xl text-slate-500 dark:text-slate-300 mb-8 font-light animate-slide-up" style={{ animationDelay: '0.2s' }}>
           Next Gen AI Law Firm
         </p>
         

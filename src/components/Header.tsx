@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTheme } from './ThemeProvider';
 
 interface NavigationItem {
   id: string;
@@ -18,6 +19,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSection }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,9 +63,8 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
               My Jurist
             </span>
           </div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:block">
+          {/* Desktop Navigation + Theme Toggle */}
+          <div className="hidden md:flex items-center gap-4">
             <div className="ml-10 flex items-baseline space-x-1">
               {navigation.map((item, index) => (
                 <button
@@ -80,10 +81,24 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                 </button>
               ))}
             </div>
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="ml-4 p-2 rounded-lg border border-ai-blue-500/20 bg-slate-800/60 hover:bg-slate-700/80 transition-colors text-ai-blue-400 hover:text-ai-blue-200"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
           </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button + Theme Toggle */}
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-lg border border-ai-blue-500/20 bg-slate-800/60 hover:bg-slate-700/80 transition-colors text-ai-blue-400 hover:text-ai-blue-200"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-slate-300 hover:text-ai-blue-400 transition-colors duration-300 p-2 rounded-lg hover:bg-ai-blue-500/10"

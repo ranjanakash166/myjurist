@@ -43,10 +43,10 @@ const PricingSection: React.FC = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-gray-900">
+    <section id="pricing" className="py-20 bg-slate-200 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-white">
+          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
             Flexible Plans Tailored to Your Needs
           </h2>
           <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
@@ -56,7 +56,7 @@ const PricingSection: React.FC = () => {
           {pricingPlans.map((plan, index) => (
             <div
               key={index}
-              className={`bg-gray-800 p-8 rounded-2xl border border-gray-700 relative flex flex-col ${
+              className={`bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 relative flex flex-col ${
                 plan.popular ? 'border-purple-500' : ''
               }`}
             >
@@ -70,12 +70,12 @@ const PricingSection: React.FC = () => {
                 </div>
               )}
               
-              <h3 className={`text-2xl font-bold mb-6 ${plan.textColor} flex items-center`}>
+              <h3 className={`text-2xl font-bold mb-6 ${plan.textColor} flex items-center text-slate-900 dark:text-white`}>
                 {plan.popular && <Crown className="h-6 w-6 mr-2 text-purple-400" />}
                 {plan.title}
               </h3>
               
-              <p className="text-gray-300 mb-6 leading-relaxed">
+              <p className="text-slate-800 dark:text-gray-300 mb-6 leading-relaxed">
                 {plan.description}
               </p>
               
@@ -83,7 +83,7 @@ const PricingSection: React.FC = () => {
                 {plan.features.map((feature, featureIndex) => (
                   <div key={featureIndex} className="flex items-center">
                     <CheckCircle className={`h-5 w-5 ${plan.textColor} mr-3`} />
-                    <span className="text-gray-300">{feature}</span>
+                    <span className="text-slate-800 dark:text-gray-300">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -103,11 +103,11 @@ const PricingSection: React.FC = () => {
         </div>
         
         {/* Pricing highlight */}
-        <div className="mt-16 bg-gray-800 p-8 rounded-2xl border border-gray-700">
-          <h3 className="text-2xl font-bold mb-4 text-white text-center">
+        <div className="mt-16 bg-white border border-slate-300 shadow-lg dark:bg-gray-800 dark:border-gray-700 p-8 rounded-2xl text-slate-700 dark:text-gray-300">
+          <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white text-center">
             Transparent, Value-Driven Pricing
           </h3>
-          <p className="text-gray-300 text-lg leading-relaxed text-center max-w-3xl mx-auto">
+          <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed text-center max-w-3xl mx-auto">
             Our flexible pricing model ensures that organizations of all sizes can access 
             the power of My Jurist's AI platform. From startups to enterprise corporations, 
             we have a solution that fits your needs and budget.

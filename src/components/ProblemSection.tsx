@@ -35,10 +35,10 @@ const ProblemSection: React.FC = () => {
   ];
 
   return (
-    <section id="problem" className="py-20 bg-gray-900">
+    <section id="problem" className="py-20 bg-slate-200 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-white">
+          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
             The Challenge with Traditional Legal Due Diligence
           </h2>
           <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
@@ -50,15 +50,15 @@ const ProblemSection: React.FC = () => {
             return (
               <div
                 key={index}
-                className="bg-gray-800 p-8 rounded-2xl border border-gray-700"
+                className="bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
               >
                 <div className={`h-12 w-12 ${problem.bgColor} rounded-xl flex items-center justify-center mb-6`}>
                   <IconComponent className="h-6 w-6 text-white" />
                 </div>
-                <h3 className={`text-2xl font-bold mb-4 ${problem.textColor}`}>
+                <h3 className={`text-2xl font-bold mb-4 ${problem.textColor} text-slate-900 dark:text-white`}>
                   {problem.title}
                 </h3>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-slate-800 dark:text-gray-300 leading-relaxed">
                   {problem.description}
                 </p>
               </div>
