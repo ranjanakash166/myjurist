@@ -20,9 +20,11 @@ interface ChatInterfaceProps {
   streamedText: string;
   error?: string | null;
   disabled?: boolean;
+  continuingSession?: boolean;
+  continuingSessionId?: string;
 }
 
-export default function ChatInterface({ chat, onSend, input, setInput, loading, streaming, streamedText, error, disabled }: ChatInterfaceProps) {
+export default function ChatInterface({ chat, onSend, input, setInput, loading, streaming, streamedText, error, disabled, continuingSession, continuingSessionId }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,6 +33,12 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
   return (
     <div className="glass-effect rounded-2xl p-8 flex flex-col min-h-[350px] max-h-[70vh] h-auto w-full">
       <h2 className="text-xl font-bold gradient-text-animate mb-4">Ask Questions</h2>
+      {/* Banner for continuing old chat */}
+      {continuingSession && continuingSessionId && (
+        <div className="mb-3 p-3 rounded-lg bg-ai-blue-500/20 text-ai-blue-200 text-sm font-semibold text-center">
+          Continuing previous chat session: <span className="font-mono text-white">{continuingSessionId.slice(0, 8)}...</span>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto mb-4 bg-slate-800/40 rounded p-3 max-h-60 sm:max-h-96 transition-all">
         {chat.map((msg, idx) => (
           <div

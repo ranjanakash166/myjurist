@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../constants";
 import DocumentUploader from "./DocumentUploader";
 import DocumentHistoryList from "./DocumentHistoryList";
@@ -15,32 +15,23 @@ interface ApiResponse {
   file_size: number;
 }
 
-interface HistoryItem {
+interface DocumentHistoryItem {
   document_id: string;
-  session_id: string;
   filename: string;
+  upload_timestamp: string;
+}
+
+interface ChatSessionItem {
+  session_id: string;
+  document_id: string;
   created_at: string;
+  last_activity: string;
+  message_count: number;
 }
 
 function generateSessionId() {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
-
-// Mock history data
-const mockHistory: HistoryItem[] = [
-  {
-    document_id: "doc1",
-    session_id: "1f20e4e8-a730-4302-8ac7-1f0b797bb82d",
-    filename: "EBAV_Patent_Analysis.pdf",
-    created_at: "2025-07-12T18:29:46.080119",
-  },
-  {
-    document_id: "doc2",
-    session_id: "session2",
-    filename: "Crypto_Regulation_Report.pdf",
-    created_at: "2025-07-10T14:12:00.000000",
-  },
-];
 
 export default function DocumentAnalysisPage() {
   const [tab, setTab] = useState<'new' | 'history'>('new');
@@ -58,7 +49,65 @@ export default function DocumentAnalysisPage() {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState("");
+
+  // History state
+  const [documents, setDocuments] = useState<DocumentHistoryItem[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentHistoryItem | null>(null);
+  const [sessions, setSessions] = useState<ChatSessionItem[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<ChatSessionItem | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Add pagination state
+  const [page, setPage] = useState(0);
+  const pageSize = 10; // You can adjust this as needed
+  const [totalCount, setTotalCount] = useState(0);
+  const [allDocuments, setAllDocuments] = useState<DocumentHistoryItem[]>([]);
+
+  // Add session pagination state
+  const [sessionPage, setSessionPage] = useState(0);
+  const sessionPageSize = 5; // Adjust as needed
+  const [sessionTotalCount, setSessionTotalCount] = useState(0);
+  const [allSessions, setAllSessions] = useState<ChatSessionItem[]>([]);
+
+  // Fetch document list when history tab is opened
+  useEffect(() => {
+    if (tab === 'history') {
+      setDocumentsLoading(true);
+      setDocumentsError(null);
+      setSelectedDocument(null);
+      setSessions([]);
+      setSelectedSession(null);
+      setChat([
+        { sender: "system", text: "Select a document to view its chat history.", time: new Date() },
+      ]);
+      fetch(`${API_BASE_URL}/documents`)
+        .then(res => res.json())
+        .then(data => {
+          const allDocs = data.documents || [];
+          setAllDocuments(allDocs);
+          setTotalCount(allDocs.length);
+          // Calculate the current page's documents
+          const startIndex = page * pageSize;
+          const endIndex = startIndex + pageSize;
+          setDocuments(allDocs.slice(startIndex, endIndex));
+        })
+        .catch(() => setDocumentsError("Failed to load documents."))
+        .finally(() => setDocumentsLoading(false));
+    }
+  }, [tab]);
+
+  // Update documents when page changes (frontend pagination)
+  useEffect(() => {
+    if (allDocuments.length > 0) {
+      const startIndex = page * pageSize;
+      const endIndex = startIndex + pageSize;
+      setDocuments(allDocuments.slice(startIndex, endIndex));
+    }
+  }, [page, allDocuments]);
 
   // File upload logic
   const handleFileChange = (file: File | null) => {
@@ -125,7 +174,7 @@ export default function DocumentAnalysisPage() {
   // Send a new chat message
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !sessionId || !documentId) return;
+    if (!input.trim() || !documentId) return;
     setChatError(null);
     const now = new Date();
     setChat((prev) => [
@@ -161,21 +210,54 @@ export default function DocumentAnalysisPage() {
     }
   };
 
-  // Fetch chat history for a selected document/session
-  const handleSelectHistory = async (item: HistoryItem) => {
-    setTab('history');
+  // When a document is selected, fetch its chat sessions (with frontend pagination)
+  const handleSelectDocument = async (item: DocumentHistoryItem) => {
+    setSelectedDocument(item);
+    setSessionsLoading(true);
+    setSessionsError(null);
+    setSessions([]);
+    setSelectedSession(null);
+    setChat([
+      { sender: "system", text: "Select a chat session to view its history.", time: new Date() },
+    ]);
+    try {
+      const res = await fetch(`${API_BASE_URL}/chat/?document_id=${item.document_id}`);
+      if (!res.ok) throw new Error("Failed to fetch chat sessions");
+      const data = await res.json();
+      setAllSessions(data);
+      setSessionTotalCount(data.length);
+      setSessionPage(0); // Reset to first page
+      // Calculate the current page's sessions
+      const startIndex = 0;
+      const endIndex = sessionPageSize;
+      setSessions(data.slice(startIndex, endIndex));
+    } catch (err: any) {
+      setSessionsError("Failed to load chat sessions.");
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  // Update sessions when sessionPage changes (frontend pagination)
+  useEffect(() => {
+    if (allSessions.length > 0) {
+      const startIndex = sessionPage * sessionPageSize;
+      const endIndex = startIndex + sessionPageSize;
+      setSessions(allSessions.slice(startIndex, endIndex));
+    }
+  }, [sessionPage, allSessions]);
+
+  // When a session is selected, fetch its chat history
+  const handleSelectSession = async (session: ChatSessionItem) => {
+    setSelectedSession(session);
+    setSessionId(session.session_id);
+    setDocumentId(session.document_id);
     setHistoryLoading(true);
-    setSessionId(item.session_id);
-    setDocumentId(item.document_id);
-    setApiResult(null);
-    setApiError(null);
-    setFile(null);
     setInput("");
     try {
-      const res = await fetch(`${API_BASE_URL}/chat/${item.session_id}/history`);
+      const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`);
       if (!res.ok) throw new Error("Failed to fetch chat history");
       const data = await res.json();
-      // Convert API history to chat format
       const chatHistory = data.history.map((msg: any) => [
         { sender: "user", text: msg.user, time: new Date(msg.timestamp) },
         { sender: "system", text: msg.assistant, time: new Date(msg.timestamp) },
@@ -230,10 +312,80 @@ export default function DocumentAnalysisPage() {
       )}
       {/* History Section */}
       {tab === 'history' && (
-        <DocumentHistoryList
-          history={mockHistory}
-          onSelect={handleSelectHistory}
-        />
+        <div className="flex flex-col gap-6">
+          {/* Document List */}
+          {documentsLoading ? (
+            <div className="glass-effect rounded-2xl p-8 flex items-center justify-center text-slate-300">Loading documents...</div>
+          ) : documentsError ? (
+            <div className="glass-effect rounded-2xl p-8 flex items-center justify-center text-red-400">{documentsError}</div>
+          ) : (
+            <>
+              <DocumentHistoryList
+                history={documents.map(d => ({
+                  document_id: d.document_id,
+                  filename: d.filename,
+                  upload_timestamp: d.upload_timestamp,
+                }))}
+                onSelect={handleSelectDocument}
+                page={page}
+                pageSize={pageSize}
+                totalCount={totalCount}
+                onPageChange={setPage}
+              />
+              {/* Chat Sessions for selected document */}
+              {selectedDocument && (
+                <div className="glass-effect rounded-2xl p-8 flex flex-col w-full">
+                  <h2 className="text-lg font-bold gradient-text-animate mb-4">Chat Sessions for {selectedDocument.filename}</h2>
+                  {sessionsLoading ? (
+                    <div className="text-slate-300">Loading chat sessions...</div>
+                  ) : sessionsError ? (
+                    <div className="text-red-400">{sessionsError}</div>
+                  ) : (
+                    <>
+                      <div className="flex flex-col gap-3">
+                        {sessions.length === 0 && <div className="text-slate-400">No chat sessions found for this document.</div>}
+                        {sessions.map(session => (
+                          <button
+                            key={session.session_id}
+                            className={`flex items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all ${selectedSession?.session_id === session.session_id ? 'ring-2 ring-ai-blue-400' : ''}`}
+                            onClick={() => handleSelectSession(session)}
+                          >
+                            <div className="flex flex-col">
+                              <span className="font-medium text-white">Session: {session.session_id.slice(0, 8)}...</span>
+                              <span className="text-xs text-slate-400">Created: {new Date(session.created_at).toLocaleString()}</span>
+                              <span className="text-xs text-slate-400">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
+                            </div>
+                            <span className="text-slate-400 text-sm">{session.message_count} messages</span>
+                          </button>
+                        ))}
+                      </div>
+                      {/* Pagination Controls for Sessions */}
+                      {sessionTotalCount > sessionPageSize && (
+                        <div className="flex justify-center items-center gap-2 mt-4">
+                          <button
+                            className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
+                            onClick={() => setSessionPage(sessionPage - 1)}
+                            disabled={sessionPage === 0}
+                          >
+                            Prev
+                          </button>
+                          <span className="text-slate-300 text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
+                          <button
+                            className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
+                            onClick={() => setSessionPage(sessionPage + 1)}
+                            disabled={sessionPage + 1 >= Math.ceil(sessionTotalCount / sessionPageSize)}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       )}
       {/* Chat Interface (always visible, but shows history or new analysis chat) */}
       <ChatInterface
@@ -247,12 +399,14 @@ export default function DocumentAnalysisPage() {
         error={chatError}
         disabled={
           processing ||
-          !sessionId ||
           !documentId ||
           chatLoading ||
           streaming ||
           (tab === 'new' && !file && !apiResult)
         }
+        // Add a prop to indicate if continuing an old chat
+        continuingSession={!!selectedSession}
+        continuingSessionId={selectedSession?.session_id}
       />
     </div>
   );
