@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../constants";
+import { useAuth } from "../../../components/AuthProvider";
 import DocumentUploader from "./DocumentUploader";
 import DocumentHistoryList from "./DocumentHistoryList";
 import ChatInterface from "./ChatInterface";
@@ -34,6 +35,7 @@ function generateSessionId() {
 }
 
 export default function DocumentAnalysisPage() {
+  const { getAuthHeaders } = useAuth();
   const [tab, setTab] = useState<'new' | 'history'>('new');
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -84,7 +86,9 @@ export default function DocumentAnalysisPage() {
       setChat([
         { sender: "system", text: "Select a document to view its chat history.", time: new Date() },
       ]);
-      fetch(`${API_BASE_URL}/documents`)
+      fetch(`${API_BASE_URL}/documents`, {
+        headers: getAuthHeaders(),
+      })
         .then(res => res.json())
         .then(data => {
           const allDocs = data.documents || [];
@@ -134,6 +138,9 @@ export default function DocumentAnalysisPage() {
       formData.append("file", file);
       const res = await fetch(`${API_BASE_URL}/documents/upload`, {
         method: "POST",
+        headers: {
+          "Authorization": getAuthHeaders().Authorization,
+        },
         body: formData,
       });
       if (!res.ok) {
@@ -194,7 +201,7 @@ export default function DocumentAnalysisPage() {
       }
       const res = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(body),
       });
       if (!res.ok) {
@@ -225,7 +232,9 @@ export default function DocumentAnalysisPage() {
       { sender: "system", text: "Select a chat session to view its history.", time: new Date() },
     ]);
     try {
-      const res = await fetch(`${API_BASE_URL}/chat/?document_id=${item.document_id}`);
+      const res = await fetch(`${API_BASE_URL}/chat/?document_id=${item.document_id}`, {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) throw new Error("Failed to fetch chat sessions");
       const data = await res.json();
       setAllSessions(data);
@@ -259,7 +268,9 @@ export default function DocumentAnalysisPage() {
     setHistoryLoading(true);
     setInput("");
     try {
-      const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`);
+      const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`, {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) throw new Error("Failed to fetch chat history");
       const data = await res.json();
       const chatHistory = data.history.map((msg: any) => [

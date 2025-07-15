@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Search, Gavel, ShieldCheck, AlertTriangle } from "lucide-react";
 import { API_BASE_URL } from "../../constants";
+import { useAuth } from "../../../components/AuthProvider";
 
 const dummyResults = {
   prior: "No exact prior art found. Your invention appears novel based on the provided description.",
@@ -10,6 +11,7 @@ const dummyResults = {
 };
 
 export default function PatentAnalysisPage() {
+  const { getAuthHeaders } = useAuth();
   const [desc, setDesc] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export default function PatentAnalysisPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/patents/search`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           query: desc,
           top_k: 10,

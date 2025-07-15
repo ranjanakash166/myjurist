@@ -89,6 +89,21 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
+            {/* Auth Buttons */}
+            <div className="ml-4 flex items-center gap-2">
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-ai-blue-400 hover:bg-ai-blue-500/10 rounded-lg transition-all duration-300"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white rounded-lg hover:scale-105 transition-all duration-300 ai-shadow"
+              >
+                Register
+              </Link>
+            </div>
           </div>
           {/* Mobile menu button + Theme Toggle */}
           <div className="md:hidden flex items-center gap-2">
@@ -123,6 +138,21 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                 {item.label}
               </button>
             ))}
+            {/* Mobile Auth Buttons */}
+            <div className="pt-2 border-t border-ai-blue-500/20 mt-2">
+              <Link
+                href="/login"
+                className="block px-3 py-2 text-base font-medium text-slate-300 hover:text-ai-blue-400 hover:bg-ai-blue-500/10 rounded-lg transition-all duration-300 w-full text-left transform hover:translate-x-2"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="block px-3 py-2 text-base font-medium bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white rounded-lg hover:scale-105 transition-all duration-300 ai-shadow mt-2"
+              >
+                Register
+              </Link>
+            </div>
           </div>
         </div>
       )}

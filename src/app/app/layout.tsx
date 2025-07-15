@@ -1,8 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Home, FileText, FileSearch, Menu, X, Sun, Moon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Home, FileText, FileSearch, Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
 import { useTheme } from "../../components/ThemeProvider";
+import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
 
 const navItems = [
@@ -14,7 +16,16 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { user, isAuthenticated, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Route protection
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative">
@@ -60,6 +71,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
+        {/* User Info and Logout - Desktop */}
+        <div className="border-t border-ai-blue-500/20 pt-4 mt-4">
+          {user && (
+            <div className="flex items-center px-4 py-2 mb-2">
+              <div className="w-8 h-8 bg-ai-blue-500/20 rounded-full flex items-center justify-center mr-3">
+                <User className="w-4 h-4 text-ai-blue-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-200 truncate">
+                  {user.full_name}
+                </p>
+                <p className="text-xs text-slate-400 truncate">
+                  {user.email}
+                </p>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => {
+              logout();
+              router.push("/login");
+            }}
+            className="w-full flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </button>
+        </div>
       </aside>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
@@ -105,6 +145,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 );
               })}
             </nav>
+
+            {/* User Info and Logout - Mobile */}
+            <div className="border-t border-ai-blue-500/20 pt-4 mt-4">
+              {user && (
+                <div className="flex items-center px-4 py-2 mb-2">
+                  <div className="w-8 h-8 bg-ai-blue-500/20 rounded-full flex items-center justify-center mr-3">
+                    <User className="w-4 h-4 text-ai-blue-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-200 truncate">
+                      {user.full_name}
+                    </p>
+                    <p className="text-xs text-slate-400 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  logout();
+                  router.push("/login");
+                  setSidebarOpen(false);
+                }}
+                className="w-full flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400"
+              >
+                <LogOut className="w-5 h-5 mr-2" />
+                Logout
+              </button>
+            </div>
           </aside>
         </>
       )}

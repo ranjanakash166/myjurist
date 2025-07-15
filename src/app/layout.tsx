@@ -1,6 +1,7 @@
 import './globals.css'
-import React, { ReactNode, useEffect, useState, createContext, useContext } from 'react';
+import React, { ReactNode } from 'react';
 import { ThemeProvider } from '../components/ThemeProvider';
+import { AuthProvider } from '../components/AuthProvider';
 
 export const metadata = {
   title: 'My Jurist - Next Gen AI Law Firm',
@@ -16,7 +17,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="apple-touch-icon" href="/icon.png" />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
