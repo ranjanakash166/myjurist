@@ -185,13 +185,17 @@ export default function DocumentAnalysisPage() {
     const question = input;
     setInput("");
     try {
+      const body: any = {
+        question,
+        document_id: documentId,
+      };
+      if (selectedSession && selectedSession.session_id) {
+        body.session_id = selectedSession.session_id;
+      }
       const res = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question,
-          document_id: documentId,
-        }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
