@@ -5,6 +5,7 @@ import { useAuth } from "../../../components/AuthProvider";
 import DocumentUploader from "./DocumentUploader";
 import DocumentHistoryList from "./DocumentHistoryList";
 import ChatInterface from "./ChatInterface";
+import PdfViewerModal from "../../../components/PdfViewerModal";
 
 interface ApiResponse {
   document_id: string;
@@ -74,6 +75,11 @@ export default function DocumentAnalysisPage() {
   const sessionPageSize = 5; // Adjust as needed
   const [sessionTotalCount, setSessionTotalCount] = useState(0);
   const [allSessions, setAllSessions] = useState<ChatSessionItem[]>([]);
+
+  // PDF viewer state
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [pdfFilename, setPdfFilename] = useState("");
 
   // Fetch document list when history tab is opened
   useEffect(() => {
@@ -287,6 +293,63 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  // Handle PDF download
+  const handleDownload = async (documentId: string, filename: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
+        headers: getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to download document");
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error: any) {
+      console.error("Download failed:", error);
+      alert("Failed to download document");
+    }
+  };
+
+  // Handle PDF view
+  const handleView = async (documentId: string, filename: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
+        headers: getAuthHeaders(),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to load document");
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      setPdfUrl(url);
+      setPdfFilename(filename);
+      setPdfModalOpen(true);
+    } catch (error: any) {
+      console.error("View failed:", error);
+      alert("Failed to load document for viewing");
+    }
+  };
+
+  // Close PDF modal
+  const handleClosePdfModal = () => {
+    setPdfModalOpen(false);
+    if (pdfUrl) {
+      window.URL.revokeObjectURL(pdfUrl);
+      setPdfUrl("");
+    }
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-8">
       {/* Tabs */}
@@ -342,6 +405,8 @@ export default function DocumentAnalysisPage() {
                   upload_timestamp: d.upload_timestamp,
                 }))}
                 onSelect={handleSelectDocument}
+                onDownload={handleDownload}
+                onView={handleView}
                 page={page}
                 pageSize={pageSize}
                 totalCount={totalCount}
@@ -422,6 +487,14 @@ export default function DocumentAnalysisPage() {
         // Add a prop to indicate if continuing an old chat
         continuingSession={!!selectedSession}
         continuingSessionId={selectedSession?.session_id}
+      />
+
+      {/* PDF Viewer Modal */}
+      <PdfViewerModal
+        isOpen={pdfModalOpen}
+        onClose={handleClosePdfModal}
+        pdfUrl={pdfUrl}
+        filename={pdfFilename}
       />
     </div>
   );

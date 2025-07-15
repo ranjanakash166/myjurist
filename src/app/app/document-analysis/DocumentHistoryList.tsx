@@ -1,5 +1,5 @@
 import React from "react";
-import { Paperclip, Clock } from "lucide-react";
+import { Paperclip, Clock, Download, Eye } from "lucide-react";
 
 interface HistoryItem {
   document_id: string;
@@ -10,33 +10,61 @@ interface HistoryItem {
 interface DocumentHistoryListProps {
   history: HistoryItem[];
   onSelect: (item: HistoryItem) => void | Promise<void>;
+  onDownload: (documentId: string, filename: string) => void | Promise<void>;
+  onView: (documentId: string, filename: string) => void | Promise<void>;
   page: number;
   pageSize: number;
   totalCount: number;
   onPageChange: (page: number) => void;
 }
 
-export default function DocumentHistoryList({ history, onSelect, page, pageSize, totalCount, onPageChange }: DocumentHistoryListProps) {
+export default function DocumentHistoryList({ history, onSelect, onDownload, onView, page, pageSize, totalCount, onPageChange }: DocumentHistoryListProps) {
   const totalPages = Math.ceil(totalCount / pageSize);
   return (
     <div className="glass-effect rounded-2xl p-8 flex flex-col w-full">
       <h2 className="text-xl font-bold gradient-text-animate mb-6">Document Analysis History</h2>
       <div className="flex flex-col gap-3 mb-4">
         {history.map(item => (
-          <button
+          <div
             key={item.document_id}
             className="flex items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all"
-            onClick={() => onSelect(item)}
           >
-            <div className="flex items-center gap-3">
+            <button
+              className="flex items-center gap-3 flex-1 text-left"
+              onClick={() => onSelect(item)}
+            >
               <Paperclip className="w-5 h-5 text-ai-blue-400" />
               <span className="font-medium text-white">{item.filename}</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-slate-400 text-sm mr-4">
+                <Clock className="w-4 h-4" />
+                {new Date(item.upload_timestamp).toLocaleDateString()}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onView(item.document_id, item.filename);
+                  }}
+                  className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
+                  title="View Document"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDownload(item.document_id, item.filename);
+                  }}
+                  className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
+                  title="Download Document"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <Clock className="w-4 h-4" />
-              {new Date(item.upload_timestamp).toLocaleDateString()}
-            </div>
-          </button>
+          </div>
         ))}
       </div>
       {/* Pagination Controls */}
