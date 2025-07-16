@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../components/AuthProvider";
 import CompanyInfo from "../../components/CompanyInfo";
+import Captcha from "../../components/Captcha";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [captchaValid, setCaptchaValid] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -27,6 +29,12 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    if (!captchaValid) {
+      setError("Please complete the security verification");
+      setLoading(false);
+      return;
+    }
 
     try {
       const result = await login(formData.email, formData.password);
@@ -98,9 +106,11 @@ export default function LoginPage() {
               </div>
             )}
 
+            <Captcha onValidated={setCaptchaValid} />
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !captchaValid}
               className="w-full py-3 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {loading ? "Signing In..." : "Sign In"}

@@ -24,6 +24,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string, full_name: string) => Promise<{ success: boolean; error?: string }>;
+  sendOtp: (email: string, full_name: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  verifyOtp: (email: string, otp_code: string, password: string, full_name: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   getAuthHeaders: () => Record<string, string>;
 }
@@ -34,6 +36,8 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   login: async () => ({ success: false }),
   register: async () => ({ success: false }),
+  sendOtp: async () => ({ success: false }),
+  verifyOtp: async () => ({ success: false }),
   logout: () => {},
   getAuthHeaders: () => ({}),
 });
@@ -99,6 +103,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const sendOtp = async (email: string, full_name: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, full_name }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.detail?.[0]?.msg || "Failed to send OTP";
+        return { success: false, error: errorMessage };
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || "An error occurred while sending OTP" };
+    }
+  };
+
+  const verifyOtp = async (email: string, otp_code: string, password: string, full_name: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp_code, password, full_name }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.detail?.[0]?.msg || "OTP verification failed";
+        return { success: false, error: errorMessage };
+      }
+
+      const data: AuthResponse = await response.json();
+      
+      // Store auth data
+      localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      
+      setToken(data.access_token);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message || "An error occurred during OTP verification" };
+    }
+  };
+
   const register = async (email: string, password: string, full_name: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -154,6 +213,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated,
       login,
       register,
+      sendOtp,
+      verifyOtp,
       logout,
       getAuthHeaders,
     }}>
