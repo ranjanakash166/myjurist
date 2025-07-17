@@ -22,11 +22,12 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, password: string, full_name: string) => Promise<{ success: boolean; error?: string }>;
   sendOtp: (email: string, full_name: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   verifyOtp: (email: string, otp_code: string, password: string, full_name: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   getAuthHeaders: () => Record<string, string>;
 }
 
@@ -34,11 +35,12 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
   isAuthenticated: false,
+  isInitialized: false,
   login: async () => ({ success: false }),
   register: async () => ({ success: false }),
   sendOtp: async () => ({ success: false }),
   verifyOtp: async () => ({ success: false }),
-  logout: () => {},
+  logout: async () => {},
   getAuthHeaders: () => ({}),
 });
 
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize auth state from localStorage
   useEffect(() => {
@@ -59,8 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (storedToken && storedUser) {
         try {
+          // Basic token validation (you could add JWT expiration check here)
+          const user = JSON.parse(storedUser);
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          setUser(user);
           setIsAuthenticated(true);
         } catch (error) {
           // Clear invalid stored data
@@ -68,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem("auth_user");
         }
       }
+      setIsInitialized(true);
     }
   }, []);
 
@@ -190,12 +196,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
-    setToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      // Call logout API to invalidate session on server
+      if (token) {
+        await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: getAuthHeaders(),
+        });
+      }
+    } catch (error) {
+      // Continue with logout even if API call fails
+      console.error("Logout API call failed:", error);
+    } finally {
+      // Clear local storage and state
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+      setToken(null);
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   const getAuthHeaders = () => {
@@ -211,6 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       token,
       isAuthenticated,
+      isInitialized,
       login,
       register,
       sendOtp,

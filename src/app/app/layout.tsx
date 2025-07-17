@@ -16,16 +16,28 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isInitialized, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
-  // Route protection
+  // Route protection - wait for auth to initialize
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isInitialized && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isInitialized, router]);
+
+  // Show loading screen while auth is initializing
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ai-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative">
@@ -90,8 +102,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           )}
           <button
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await logout();
               router.push("/login");
             }}
             className="w-full flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400"
@@ -164,8 +176,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
               <button
-                onClick={() => {
-                  logout();
+                onClick={async () => {
+                  await logout();
                   router.push("/login");
                   setSidebarOpen(false);
                 }}
