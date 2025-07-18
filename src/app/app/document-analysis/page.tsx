@@ -6,6 +6,8 @@ import DocumentUploader from "./DocumentUploader";
 import DocumentHistoryList from "./DocumentHistoryList";
 import ChatInterface from "./ChatInterface";
 import PdfViewerModal from "../../../components/PdfViewerModal";
+import TimelineIndicator from "../../../components/TimelineIndicator";
+import CollapsibleSection from "../../../components/CollapsibleSection";
 
 interface ApiResponse {
   document_id: string;
@@ -81,6 +83,10 @@ export default function DocumentAnalysisPage() {
   const [pdfUrl, setPdfUrl] = useState("");
   const [pdfFilename, setPdfFilename] = useState("");
 
+  // UI state for collapsible sections
+  const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
+  const [sessionsCollapsed, setSessionsCollapsed] = useState(false);
+
   // Fetch document list when history tab is opened
   useEffect(() => {
     if (tab === 'history') {
@@ -92,20 +98,34 @@ export default function DocumentAnalysisPage() {
       setChat([
         { sender: "system", text: "Select a document to view its chat history.", time: new Date() },
       ]);
+      // Ensure documents section is expanded when history tab is opened
+      setDocumentsCollapsed(false);
+      setSessionsCollapsed(false);
+      
       fetch(`${API_BASE_URL}/documents`, {
         headers: getAuthHeaders(),
       })
-        .then(res => res.json())
+        .then(res => {
+          console.log('Documents API response status:', res.status);
+          return res.json();
+        })
         .then(data => {
+          console.log('Documents API response data:', data);
           const allDocs = data.documents || [];
+          console.log('All documents:', allDocs);
           setAllDocuments(allDocs);
           setTotalCount(allDocs.length);
           // Calculate the current page's documents
           const startIndex = page * pageSize;
           const endIndex = startIndex + pageSize;
-          setDocuments(allDocs.slice(startIndex, endIndex));
+          const currentPageDocs = allDocs.slice(startIndex, endIndex);
+          console.log('Current page documents:', currentPageDocs);
+          setDocuments(currentPageDocs);
         })
-        .catch(() => setDocumentsError("Failed to load documents."))
+        .catch((error) => {
+          console.error('Documents fetch error:', error);
+          setDocumentsError("Failed to load documents.");
+        })
         .finally(() => setDocumentsLoading(false));
     }
   }, [tab]);
@@ -237,6 +257,9 @@ export default function DocumentAnalysisPage() {
     setChat([
       { sender: "system", text: "Select a chat session to view its history.", time: new Date() },
     ]);
+    // Collapse documents section and expand sessions section
+    setDocumentsCollapsed(true);
+    setSessionsCollapsed(false);
     try {
       const res = await fetch(`${API_BASE_URL}/chat/?document_id=${item.document_id}`, {
         headers: getAuthHeaders(),
@@ -273,6 +296,8 @@ export default function DocumentAnalysisPage() {
     setDocumentId(session.document_id);
     setHistoryLoading(true);
     setInput("");
+    // Collapse sessions section when chat interface is shown
+    setSessionsCollapsed(true);
     try {
       const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`, {
         headers: getAuthHeaders(),
@@ -350,8 +375,15 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  // Determine current step for timeline
+  const getCurrentStep = () => {
+    if (selectedSession) return "conversation";
+    if (selectedDocument) return "chat";
+    return "documents";
+  };
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-8">
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-6">
       {/* Tabs */}
       <div className="flex gap-4 mb-2">
         <button
@@ -378,26 +410,75 @@ export default function DocumentAnalysisPage() {
           History
         </button>
       </div>
+
       {/* New Analysis Section */}
       {tab === 'new' && (
-        <DocumentUploader
-          file={file}
-          onFileChange={handleFileChange}
-          onProcess={handleProcess}
-          processing={processing}
-          error={apiError}
-        />
+        <div className="space-y-6">
+          <DocumentUploader
+            file={file}
+            onFileChange={handleFileChange}
+            onProcess={handleProcess}
+            processing={processing}
+            error={apiError}
+          />
+          
+          {/* Chat Interface for New Analysis - Show when document is processed */}
+          {apiResult && (
+            <div className="w-full">
+              {/* Document Header for New Analysis */}
+              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">{apiResult.filename}</h2>
+                    <p className="text-sm text-slate-400">
+                      Document processed successfully • {apiResult.total_tokens} tokens • {apiResult.total_chunks} chunks
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400 text-sm font-medium">Ready for chat</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Chat Interface - Full width */}
+              <ChatInterface
+                chat={chat}
+                onSend={handleSend}
+                input={input}
+                setInput={setInput}
+                loading={chatLoading}
+                streaming={streaming}
+                streamedText={streamedText}
+                error={chatError}
+                disabled={chatLoading || streaming}
+                continuingSession={false}
+              />
+            </div>
+          )}
+        </div>
       )}
+
       {/* History Section */}
       {tab === 'history' && (
         <div className="flex flex-col gap-6">
-          {/* Document List */}
-          {documentsLoading ? (
-            <div className="glass-effect rounded-2xl p-8 flex items-center justify-center text-slate-300">Loading documents...</div>
-          ) : documentsError ? (
-            <div className="glass-effect rounded-2xl p-8 flex items-center justify-center text-red-400">{documentsError}</div>
-          ) : (
-            <>
+          {/* Timeline Indicator */}
+          <TimelineIndicator 
+            currentStep={getCurrentStep()}
+            selectedDocument={selectedDocument?.filename}
+            selectedChat={selectedSession?.session_id}
+          />
+
+          {/* Documents Section - Always visible at top */}
+          <CollapsibleSection
+            title="Documents"
+            isCollapsed={documentsCollapsed}
+            onToggle={setDocumentsCollapsed}
+          >
+            {documentsLoading ? (
+              <div className="text-slate-300 text-center py-4">Loading documents...</div>
+            ) : documentsError ? (
+              <div className="text-red-400 text-center py-4">{documentsError}</div>
+            ) : (
               <DocumentHistoryList
                 history={documents.map(d => ({
                   document_id: d.document_id,
@@ -412,82 +493,136 @@ export default function DocumentAnalysisPage() {
                 totalCount={totalCount}
                 onPageChange={setPage}
               />
-              {/* Chat Sessions for selected document */}
-              {selectedDocument && (
-                <div className="glass-effect rounded-2xl p-8 flex flex-col w-full">
-                  <h2 className="text-lg font-bold gradient-text-animate mb-4">Chat Sessions for {selectedDocument.filename}</h2>
-                  {sessionsLoading ? (
-                    <div className="text-slate-300">Loading chat sessions...</div>
-                  ) : sessionsError ? (
-                    <div className="text-red-400">{sessionsError}</div>
-                  ) : (
-                    <>
-                      <div className="flex flex-col gap-3">
-                        {sessions.length === 0 && <div className="text-slate-400">No chat sessions found for this document.</div>}
-                        {sessions.map(session => (
-                          <button
-                            key={session.session_id}
-                            className={`flex items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all ${selectedSession?.session_id === session.session_id ? 'ring-2 ring-ai-blue-400' : ''}`}
-                            onClick={() => handleSelectSession(session)}
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium text-white">Session: {session.session_id.slice(0, 8)}...</span>
-                              <span className="text-xs text-slate-400">Created: {new Date(session.created_at).toLocaleString()}</span>
-                              <span className="text-xs text-slate-400">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
-                            </div>
-                            <span className="text-slate-400 text-sm">{session.message_count} messages</span>
-                          </button>
-                        ))}
+            )}
+          </CollapsibleSection>
+
+          {/* Chat Sessions Section - Appears when document is selected */}
+          {selectedDocument && (
+            <CollapsibleSection
+              title={`Chat Sessions - ${selectedDocument.filename}`}
+              isCollapsed={sessionsCollapsed}
+              onToggle={setSessionsCollapsed}
+            >
+              {sessionsLoading ? (
+                <div className="text-slate-300 text-center py-4">Loading chat sessions...</div>
+              ) : sessionsError ? (
+                <div className="text-red-400 text-center py-4">{sessionsError}</div>
+              ) : (
+                <div className="space-y-3">
+                  {sessions.length === 0 && (
+                    <div className="text-slate-400 text-center py-4">No chat sessions found for this document.</div>
+                  )}
+                  {sessions.map(session => (
+                    <button
+                      key={session.session_id}
+                      className={`w-full flex items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all ${
+                        selectedSession?.session_id === session.session_id ? 'ring-2 ring-ai-blue-400' : ''
+                      }`}
+                      onClick={() => handleSelectSession(session)}
+                    >
+                      <div className="flex flex-col text-left">
+                        <span className="font-medium text-white">Session: {session.session_id.slice(0, 8)}...</span>
+                        <span className="text-xs text-slate-400">Created: {new Date(session.created_at).toLocaleString()}</span>
+                        <span className="text-xs text-slate-400">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
                       </div>
-                      {/* Pagination Controls for Sessions */}
-                      {sessionTotalCount > sessionPageSize && (
-                        <div className="flex justify-center items-center gap-2 mt-4">
-                          <button
-                            className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
-                            onClick={() => setSessionPage(sessionPage - 1)}
-                            disabled={sessionPage === 0}
-                          >
-                            Prev
-                          </button>
-                          <span className="text-slate-300 text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
-                          <button
-                            className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
-                            onClick={() => setSessionPage(sessionPage + 1)}
-                            disabled={sessionPage + 1 >= Math.ceil(sessionTotalCount / sessionPageSize)}
-                          >
-                            Next
-                          </button>
-                        </div>
-                      )}
-                    </>
+                      <span className="text-slate-400 text-sm">{session.message_count} messages</span>
+                    </button>
+                  ))}
+                  
+                  {/* Pagination Controls for Sessions */}
+                  {sessionTotalCount > sessionPageSize && (
+                    <div className="flex justify-center items-center gap-2 mt-4">
+                      <button
+                        className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
+                        onClick={() => setSessionPage(sessionPage - 1)}
+                        disabled={sessionPage === 0}
+                      >
+                        Prev
+                      </button>
+                      <span className="text-slate-300 text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
+                      <button
+                        className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
+                        onClick={() => setSessionPage(sessionPage + 1)}
+                        disabled={sessionPage + 1 >= Math.ceil(sessionTotalCount / sessionPageSize)}
+                      >
+                        Next
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
-            </>
+            </CollapsibleSection>
+          )}
+
+          {/* Chat Interface - Takes full width at bottom */}
+          {selectedSession && (
+            <div className="w-full">
+              {/* Document Header */}
+              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">{selectedDocument?.filename}</h2>
+                    <p className="text-sm text-slate-400">
+                      Session: {selectedSession.session_id.slice(0, 8)}... • {selectedSession.message_count} messages
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleView(selectedDocument!.document_id, selectedDocument!.filename)}
+                      className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
+                      title="View Document"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDownload(selectedDocument!.document_id, selectedDocument!.filename)}
+                      className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
+                      title="Download Document"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Chat Interface - Full width */}
+              <ChatInterface
+                chat={chat}
+                onSend={handleSend}
+                input={input}
+                setInput={setInput}
+                loading={chatLoading}
+                streaming={streaming}
+                streamedText={streamedText}
+                error={chatError}
+                disabled={chatLoading || streaming}
+                continuingSession={true}
+                continuingSessionId={selectedSession.session_id}
+              />
+            </div>
+          )}
+
+          {/* Empty State when no session is selected */}
+          {selectedDocument && !selectedSession && (
+            <div className="w-full flex items-center justify-center text-slate-400 py-12">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/60 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Select a Chat Session</h3>
+                <p className="text-sm">Choose a chat session from the list above to start conversing</p>
+              </div>
+            </div>
           )}
         </div>
       )}
-      {/* Chat Interface (always visible, but shows history or new analysis chat) */}
-      <ChatInterface
-        chat={chat}
-        onSend={handleSend}
-        input={input}
-        setInput={setInput}
-        loading={chatLoading}
-        streaming={streaming}
-        streamedText={streamedText}
-        error={chatError}
-        disabled={
-          processing ||
-          !documentId ||
-          chatLoading ||
-          streaming ||
-          (tab === 'new' && !file && !apiResult)
-        }
-        // Add a prop to indicate if continuing an old chat
-        continuingSession={!!selectedSession}
-        continuingSessionId={selectedSession?.session_id}
-      />
 
       {/* PDF Viewer Modal */}
       <PdfViewerModal

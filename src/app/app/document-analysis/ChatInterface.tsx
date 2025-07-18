@@ -31,15 +31,14 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
   }, [chat, loading, streaming, streamedText]);
 
   return (
-    <div className="glass-effect rounded-2xl p-8 flex flex-col min-h-[350px] max-h-[70vh] h-auto w-full">
-      <h2 className="text-xl font-bold gradient-text-animate mb-4">Ask Questions</h2>
+    <div className="flex flex-col h-full">
       {/* Banner for continuing old chat */}
       {continuingSession && continuingSessionId && (
         <div className="mb-3 p-3 rounded-lg bg-ai-blue-500/20 text-ai-blue-200 text-sm font-semibold text-center">
           Continuing previous chat session: <span className="font-mono text-white">{continuingSessionId.slice(0, 8)}...</span>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto mb-4 bg-slate-800/40 rounded p-3 max-h-60 sm:max-h-96 transition-all">
+      <div className="flex-1 overflow-y-auto mb-4 bg-slate-800/40 rounded p-3 transition-all">
         {chat.map((msg, idx) => (
           <div
             key={idx}
@@ -94,7 +93,7 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
         )}
         <div ref={chatEndRef} />
       </div>
-      <form onSubmit={onSend} className="flex gap-2">
+      <form onSubmit={onSend} className="flex gap-2 p-4 border-t border-slate-700/50">
         <input
           type="text"
           className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-ai-blue-500/20 focus:border-ai-blue-400/40 focus:outline-none text-white"
