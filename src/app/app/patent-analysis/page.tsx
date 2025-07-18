@@ -247,31 +247,54 @@ export default function PatentAnalysisPage() {
       });
   };
 
-  const handleDownloadReport = () => {
-    if (!comprehensiveReport) return;
+  const handleDownloadReport = async (reportId: string, title: string) => {
+    if (!isAuthenticated || !token) {
+      alert("Please log in to download reports.");
+      return;
+    }
     
-    const reportContent = `
-# ${comprehensiveReport.title}
-**Applicant:** ${comprehensiveReport.applicant}
-**Generated:** ${new Date(comprehensiveReport.generated_at).toLocaleString()}
-**Word Count:** ${comprehensiveReport.word_count}
-**Character Count:** ${comprehensiveReport.character_count}
-
-${comprehensiveReport.full_report}
-
----
-${comprehensiveReport.disclaimer}
-    `;
-    
-    const blob = new Blob([reportContent], { type: 'text/markdown' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${comprehensiveReport.title.replace(/[^a-zA-Z0-9]/g, '_')}_Patent_Analysis_Report.md`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    try {
+      const url = `${API_BASE_URL}/reports/patent/report/${reportId}/pdf`;
+      console.log('Downloading PDF from:', url);
+      
+      const headers = {
+        ...getAuthHeaders(),
+        'accept': 'application/pdf',
+      };
+      console.log('Request headers:', headers);
+      
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: headers,
+      });
+      
+      console.log('Response status:', res.status);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Error response:', errorText);
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          errorData = { detail: [{ msg: errorText }] };
+        }
+        throw new Error(errorData?.detail?.[0]?.msg || `HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const blob = await res.blob();
+      const url_download = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url_download;
+      a.download = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_Patent_Analysis_Report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url_download);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      console.error('Download error:', err);
+      alert(`Failed to download PDF: ${err.message}`);
+    }
   };
 
   const totalPages = Math.ceil(totalCount / limit);
@@ -510,7 +533,7 @@ ${comprehensiveReport.disclaimer}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold gradient-text-animate">Comprehensive Patent Analysis Report</h2>
                 <button
-                  onClick={handleDownloadReport}
+                  onClick={() => handleDownloadReport(comprehensiveReport.report_id, comprehensiveReport.title)}
                   className="flex items-center gap-2 px-4 py-2 bg-ai-blue-500 hover:bg-ai-blue-600 text-white rounded-lg transition-colors"
                 >
                   <Download className="w-4 h-4" />
@@ -674,34 +697,11 @@ ${comprehensiveReport.disclaimer}
               <div className="flex items-center gap-2">
                 {selectedReport && (
                   <button
-                    onClick={() => {
-                      const reportContent = `
-# ${selectedReport.title}
-**Applicant:** ${selectedReport.applicant}
-**Generated:** ${new Date(selectedReport.generated_at).toLocaleString()}
-**Word Count:** ${selectedReport.word_count}
-**Character Count:** ${selectedReport.character_count}
-
-${selectedReport.full_report}
-
----
-${selectedReport.disclaimer}
-                      `;
-                      
-                      const blob = new Blob([reportContent], { type: 'text/markdown' });
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `${selectedReport.title.replace(/[^a-zA-Z0-9]/g, '_')}_Patent_Analysis_Report.md`;
-                      document.body.appendChild(a);
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                      document.body.removeChild(a);
-                    }}
+                    onClick={() => handleDownloadReport(selectedReport.report_id, selectedReport.title)}
                     className="flex items-center gap-2 px-4 py-2 bg-ai-blue-500 hover:bg-ai-blue-600 text-white rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
-                    Download
+                    Download PDF
                   </button>
                 )}
                 <button
