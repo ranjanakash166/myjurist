@@ -86,6 +86,7 @@ export default function DocumentAnalysisPage() {
   // UI state for collapsible sections
   const [documentsCollapsed, setDocumentsCollapsed] = useState(false);
   const [sessionsCollapsed, setSessionsCollapsed] = useState(false);
+  const [uploadCollapsed, setUploadCollapsed] = useState(false);
 
   // Fetch document list when history tab is opened
   useEffect(() => {
@@ -181,6 +182,8 @@ export default function DocumentAnalysisPage() {
       setChat([
         { sender: "system", text: `Document '${data.filename}' processed. You can now ask questions.`, time: new Date() },
       ]);
+      // Collapse upload section when document is processed
+      setUploadCollapsed(true);
     } catch (err: any) {
       setApiError(err.message || "An error occurred during upload.");
     } finally {
@@ -377,9 +380,15 @@ export default function DocumentAnalysisPage() {
 
   // Determine current step for timeline
   const getCurrentStep = () => {
-    if (selectedSession) return "conversation";
-    if (selectedDocument) return "chat";
-    return "documents";
+    if (tab === 'new') {
+      if (selectedSession) return "conversation";
+      if (apiResult) return "communication";
+      return "upload";
+    } else {
+      if (selectedSession) return "conversation";
+      if (selectedDocument) return "chat";
+      return "documents";
+    }
   };
 
   return (
@@ -414,13 +423,27 @@ export default function DocumentAnalysisPage() {
       {/* New Analysis Section */}
       {tab === 'new' && (
         <div className="space-y-6">
-          <DocumentUploader
-            file={file}
-            onFileChange={handleFileChange}
-            onProcess={handleProcess}
-            processing={processing}
-            error={apiError}
+          {/* Timeline Indicator */}
+          <TimelineIndicator 
+            currentStep={getCurrentStep()}
+            selectedDocument={selectedDocument?.filename}
+            selectedChat={selectedSession?.session_id}
           />
+
+          {/* Document Upload Section */}
+          <CollapsibleSection
+            title="Upload Document"
+            isCollapsed={uploadCollapsed}
+            onToggle={setUploadCollapsed}
+          >
+            <DocumentUploader
+              file={file}
+              onFileChange={handleFileChange}
+              onProcess={handleProcess}
+              processing={processing}
+              error={apiError}
+            />
+          </CollapsibleSection>
           
           {/* Chat Interface for New Analysis - Show when document is processed */}
           {apiResult && (

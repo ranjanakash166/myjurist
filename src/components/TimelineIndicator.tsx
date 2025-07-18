@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, FileText, MessageSquare, Users } from "lucide-react";
+import { Check, FileText, MessageSquare, Users, Upload, MessageCircle } from "lucide-react";
 
 interface TimelineStep {
   id: string;
@@ -9,32 +9,67 @@ interface TimelineStep {
 }
 
 interface TimelineIndicatorProps {
-  currentStep: "documents" | "chat" | "conversation";
+  currentStep: "documents" | "chat" | "conversation" | "upload" | "communication";
   selectedDocument?: string;
   selectedChat?: string;
 }
 
 export default function TimelineIndicator({ currentStep, selectedDocument, selectedChat }: TimelineIndicatorProps) {
-  const steps: TimelineStep[] = [
+  // Determine which steps to show based on current step
+  const isNewAnalysis = currentStep === "upload" || currentStep === "communication";
+  
+  const getStepStatus = (stepId: string, currentStep: string): "completed" | "current" | "pending" => {
+    if (stepId === currentStep) return "current";
+    if (isNewAnalysis) {
+      const stepOrder = ["upload", "communication", "conversation"];
+      const currentIndex = stepOrder.indexOf(currentStep);
+      const stepIndex = stepOrder.indexOf(stepId);
+      return stepIndex < currentIndex ? "completed" : "pending";
+    } else {
+      const stepOrder = ["documents", "chat", "conversation"];
+      const currentIndex = stepOrder.indexOf(currentStep);
+      const stepIndex = stepOrder.indexOf(stepId);
+      return stepIndex < currentIndex ? "completed" : "pending";
+    }
+  };
+  
+  const steps: TimelineStep[] = isNewAnalysis ? [
     {
-      id: "documents",
-      label: "Select Document",
-      icon: <FileText className="w-4 h-4" />,
-      status: currentStep === "documents" ? "current" : 
-              currentStep === "chat" || currentStep === "conversation" ? "completed" : "pending"
+      id: "upload",
+      label: "Upload Document",
+      icon: <Upload className="w-4 h-4" />,
+      status: getStepStatus("upload", currentStep)
     },
     {
-      id: "chat",
-      label: "Select Chat",
-      icon: <MessageSquare className="w-4 h-4" />,
-      status: currentStep === "chat" ? "current" : 
-              currentStep === "conversation" ? "completed" : "pending"
+      id: "communication",
+      label: "Communication",
+      icon: <MessageCircle className="w-4 h-4" />,
+      status: getStepStatus("communication", currentStep)
     },
     {
       id: "conversation",
       label: "Conversation",
       icon: <Users className="w-4 h-4" />,
-      status: currentStep === "conversation" ? "current" : "pending"
+      status: getStepStatus("conversation", currentStep)
+    }
+  ] : [
+    {
+      id: "documents",
+      label: "Select Document",
+      icon: <FileText className="w-4 h-4" />,
+      status: getStepStatus("documents", currentStep)
+    },
+    {
+      id: "chat",
+      label: "Select Chat",
+      icon: <MessageSquare className="w-4 h-4" />,
+      status: getStepStatus("chat", currentStep)
+    },
+    {
+      id: "conversation",
+      label: "Conversation",
+      icon: <Users className="w-4 h-4" />,
+      status: getStepStatus("conversation", currentStep)
     }
   ];
 
