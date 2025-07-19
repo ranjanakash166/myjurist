@@ -41,14 +41,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative">
-      {/* Mobile Nav Icon */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700/90 transition"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Open navigation"
-      >
-        <Menu className="w-6 h-6 text-white" />
-      </button>
+      {/* Mobile Top Navbar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-sm border-b border-ai-blue-500/20 px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Logo and Company Name */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+              <img 
+                src="/images/myjurist-logo.png" 
+                alt="My Jurist" 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <span className="text-lg font-bold gradient-text-animate">My Jurist</span>
+          </div>
+          
+          {/* Hamburger Menu Button */}
+          <button
+            className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700/90 transition-colors"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open navigation"
+          >
+            <Menu className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      </div>
       {/* Sidebar */}
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex group w-16 hover:w-64 p-4 flex-col gap-4 glass-effect border-r border-ai-blue-500/20 min-h-screen transition-all duration-300 ease-in-out overflow-hidden">
@@ -250,7 +267,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </>
       )}
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 min-h-screen w-full">
+      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 min-h-screen w-full md:pt-0 pt-16">
         {children}
       </main>
       <style jsx global>{`
