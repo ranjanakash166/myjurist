@@ -8,9 +8,9 @@ import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { label: "Dashboard", icon: <Home className="w-5 h-5 mr-2" />, href: "/app/dashboard" },
-  { label: "Patent Analysis", icon: <FileSearch className="w-5 h-5 mr-2" />, href: "/app/patent-analysis" },
-  { label: "Document Analysis", icon: <FileText className="w-5 h-5 mr-2" />, href: "/app/document-analysis" },
+  { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
+  { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
+  { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -51,16 +51,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </button>
       {/* Sidebar */}
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 p-6 flex-col gap-4 glass-effect border-r border-ai-blue-500/20 min-h-screen">
-        <div className="flex items-center mb-8 gap-2">
-          <span className="text-2xl font-bold gradient-text-animate">My Jurist</span>
-          <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="ml-2 p-2 rounded-lg border border-ai-blue-500/20 bg-slate-800/60 hover:bg-slate-700/80 transition-colors text-ai-blue-400 hover:text-ai-blue-200"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
+      <aside className="hidden md:flex group w-16 hover:w-64 p-4 flex-col gap-4 glass-effect border-r border-ai-blue-500/20 min-h-screen transition-all duration-300 ease-in-out overflow-hidden">
+        {/* Company Logo/Icon */}
+        <div className="flex items-center justify-center mb-8 min-w-max">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+            <img 
+              src="/images/myjurist-logo.png" 
+              alt="My Jurist" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <span className="text-2xl font-bold gradient-text-animate opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-3">
+            My Jurist
+          </span>
         </div>
         <nav className="flex flex-col gap-2 flex-1">
           {navItems.map((item) => {
@@ -70,28 +73,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={
-                  `flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none ` +
+                  `flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none min-w-max ` +
                   (isActive
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'hover:bg-ai-blue-500/10 text-slate-300 hover:text-ai-blue-400')
                 }
                 onClick={() => setSidebarOpen(false)}
+                title={item.label}
               >
-                {item.icon}
-                {item.label}
+                <div className={`w-6 h-6 flex items-center justify-center ${isActive ? 'text-white' : ''}`}>
+                  {React.cloneElement(item.icon, { 
+                    className: `w-6 h-6 ${isActive ? 'text-white drop-shadow-lg' : ''}` 
+                  })}
+                </div>
+                <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                  {item.label}
+                </span>
               </Link>
             );
           })}
         </nav>
 
-        {/* User Info and Logout - Desktop */}
-        <div className="border-t border-ai-blue-500/20 pt-4 mt-4">
+        {/* User Info, Theme Switch, and Logout - Desktop */}
+        <div className="border-t border-ai-blue-500/20 pt-4 mt-4 space-y-2">
           {user && (
-            <div className="flex items-center px-4 py-2 mb-2">
-              <div className="w-8 h-8 bg-ai-blue-500/20 rounded-full flex items-center justify-center mr-3">
+            <div className="flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 min-w-max">
+              <div className="w-8 h-8 bg-ai-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="w-4 h-4 text-ai-blue-400" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-3">
                 <p className="text-sm font-medium text-slate-200 truncate">
                   {user.full_name}
                 </p>
@@ -101,15 +111,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           )}
+          
+          {/* Theme Switch */}
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-full flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-ai-blue-500/10 text-slate-300 hover:text-ai-blue-400 min-w-max"
+            title="Toggle theme"
+          >
+            <div className="w-6 h-6 flex items-center justify-center">
+              {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+            </div>
+            <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+          
+          {/* Logout */}
           <button
             onClick={async () => {
               await logout();
               router.push("/login");
             }}
-            className="w-full flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400"
+            className="w-full flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400 min-w-max"
+            title="Logout"
           >
-            <LogOut className="w-5 h-5 mr-2" />
-            Logout
+            <div className="w-6 h-6 flex items-center justify-center">
+              <LogOut className="w-6 h-6" />
+            </div>
+            <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+              Logout
+            </span>
           </button>
         </div>
       </aside>
@@ -122,7 +153,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           />
           <aside className="fixed top-0 left-0 z-50 w-64 h-full p-6 flex flex-col gap-4 glass-effect border-r border-ai-blue-500/20 animate-slide-in">
             <div className="flex items-center mb-8 justify-between">
-              <span className="text-2xl font-bold gradient-text-animate">My Jurist</span>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+                  <img 
+                    src="/images/myjurist-logo.png" 
+                    alt="My Jurist" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="text-2xl font-bold gradient-text-animate">My Jurist</span>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -144,24 +184,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     className={
-                      `flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none ` +
+                      `flex items-center px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none ` +
                       (isActive
                         ? 'bg-blue-600 text-white shadow-lg'
                         : 'hover:bg-ai-blue-500/10 text-slate-300 hover:text-ai-blue-400')
                     }
                     onClick={() => setSidebarOpen(false)}
                   >
-                    {item.icon}
+                    <div className={`w-6 h-6 flex items-center justify-center mr-3 ${isActive ? 'text-white' : ''}`}>
+                      {React.cloneElement(item.icon, { 
+                        className: `w-6 h-6 ${isActive ? 'text-white drop-shadow-lg' : ''}` 
+                      })}
+                    </div>
                     {item.label}
                   </Link>
                 );
               })}
             </nav>
 
-            {/* User Info and Logout - Mobile */}
-            <div className="border-t border-ai-blue-500/20 pt-4 mt-4">
+            {/* User Info, Theme Switch, and Logout - Mobile */}
+            <div className="border-t border-ai-blue-500/20 pt-4 mt-4 space-y-2">
               {user && (
-                <div className="flex items-center px-4 py-2 mb-2">
+                <div className="flex items-center px-4 py-2">
                   <div className="w-8 h-8 bg-ai-blue-500/20 rounded-full flex items-center justify-center mr-3">
                     <User className="w-4 h-4 text-ai-blue-400" />
                   </div>
@@ -175,15 +219,30 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
               )}
+              
+              {/* Theme Switch - Mobile */}
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="w-full flex items-center px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-ai-blue-500/10 text-slate-300 hover:text-ai-blue-400"
+              >
+                <div className="w-6 h-6 flex items-center justify-center mr-3">
+                  {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                </div>
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </button>
+              
+              {/* Logout - Mobile */}
               <button
                 onClick={async () => {
                   await logout();
                   router.push("/login");
                   setSidebarOpen(false);
                 }}
-                className="w-full flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400"
+                className="w-full flex items-center px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 hover:bg-red-500/10 text-slate-300 hover:text-red-400"
               >
-                <LogOut className="w-5 h-5 mr-2" />
+                <div className="w-6 h-6 flex items-center justify-center mr-3">
+                  <LogOut className="w-6 h-6" />
+                </div>
                 Logout
               </button>
             </div>
@@ -191,7 +250,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </>
       )}
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-10 min-h-screen">
+      <main className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 min-h-screen w-full">
         {children}
       </main>
       <style jsx global>{`

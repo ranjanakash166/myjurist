@@ -48,8 +48,8 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
         </div>
       )}
 
-      {/* Scrollable Chat Area */}
-      <div className="flex-1 overflow-y-auto pb-24 bg-gray-50 dark:bg-gray-900/40 rounded-lg p-4 transition-all border border-gray-200 dark:border-gray-700/30">
+      {/* Scrollable Chat Area - Fixed height with proper bottom padding */}
+      <div className="flex-1 overflow-y-auto pb-32 bg-gray-50 dark:bg-gray-900/40 rounded-lg p-4 transition-all border border-gray-200 dark:border-gray-700/30 relative">
         {chat.length === 0 && !loading && !streaming && (
           <div className="flex items-center justify-center h-full text-black dark:text-gray-400">
             <div className="text-center">
@@ -126,87 +126,87 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
         )}
         
         <div ref={chatEndRef} />
-      </div>
-
-      {/* Fixed Input at Bottom - Only in Main Content Area */}
-      <div className="fixed bottom-0 md:left-64 left-0 right-0 bg-white dark:bg-gray-950/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700/50 p-4 z-10 shadow-lg">
-        <form onSubmit={handleSubmit} className="relative">
-          {/* Main Input Field */}
-          <div className="relative">
-            <input
-              ref={inputRef}
-              type="text"
-              className="w-full px-4 py-3 pr-20 rounded-xl bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-600/50 focus:border-blue-500 dark:focus:border-blue-500/50 focus:outline-none text-black dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 text-sm shadow-sm"
-              placeholder="Ask a follow-up question..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              disabled={disabled}
-              autoFocus
-            />
-            
-            {/* Send Button */}
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              disabled={disabled || !input.trim()}
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Icon Bar */}
-          <div className="flex items-center justify-between mt-3 px-2">
-            {/* Left Group - Functionality Icons */}
-            <div className="flex items-center gap-3">
+        
+        {/* Fixed Input at Bottom - Part of Chat Container */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-950/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700/50 p-4 shadow-xl">
+        <form onSubmit={handleSubmit} className="w-full">
+            {/* Main Input Field */}
+            <div className="relative mb-3">
+              <input
+                ref={inputRef}
+                type="text"
+                className="w-full px-4 py-4 pr-16 rounded-2xl bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-600/50 focus:border-blue-500 dark:focus:border-blue-500/50 focus:outline-none text-black dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 text-base shadow-lg transition-all duration-200"
+                placeholder="Ask a follow-up question..."
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                disabled={disabled}
+                autoFocus
+              />
+              
+              {/* Send Button */}
               <button
-                type="button"
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-colors border border-gray-300 dark:border-gray-600/30 shadow-sm"
-                title="Search"
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                disabled={disabled || !input.trim()}
               >
-                <Search className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-colors border border-gray-300 dark:border-gray-600/30 shadow-sm"
-                title="Generate"
-              >
-                <Zap className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-colors border border-gray-300 dark:border-gray-600/30 shadow-sm"
-                title="Visual Search"
-              >
-                <Eye className="w-4 h-4" />
+                <Send className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Right Group - Action Icons */}
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-colors border border-gray-300 dark:border-gray-600/30 shadow-sm"
-                title="Attach File"
-              >
-                <Paperclip className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-colors border border-gray-300 dark:border-gray-600/30 shadow-sm"
-                title="Voice Input"
-              >
-                <Mic className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </form>
+            {/* Enhanced Icon Bar */}
+            <div className="flex items-center justify-between px-2">
+              {/* Left Group - Functionality Icons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                  title="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                  title="Generate"
+                >
+                  <Zap className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                  title="Visual Search"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+              </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mt-3 w-full bg-red-50 dark:bg-red-900/80 text-red-700 dark:text-red-200 rounded-lg px-4 py-2 text-center text-xs border border-red-200 dark:border-red-700/50 shadow-sm">
-            {error}
-          </div>
-        )}
+              {/* Right Group - Action Icons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                  title="Attach File"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                  title="Voice Input"
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mt-3 w-full bg-red-50 dark:bg-red-900/80 text-red-700 dark:text-red-200 rounded-xl px-4 py-3 text-center text-sm border border-red-200 dark:border-red-700/50 shadow-lg">
+                {error}
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );
