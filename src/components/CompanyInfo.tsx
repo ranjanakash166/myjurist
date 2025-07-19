@@ -3,13 +3,13 @@ import { Shield, Zap, Lock, Globe } from 'lucide-react';
 
 export default function CompanyInfo() {
   return (
-    <div className="flex-1 bg-gradient-to-br from-ai-blue-600 via-ai-purple-600 to-ai-blue-800 p-8 md:p-12 flex flex-col justify-center">
+    <div className="flex-1 bg-blue-600 p-8 md:p-12 flex flex-col justify-center">
       <div className="max-w-md mx-auto text-center md:text-left">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             My Jurist
           </h1>
-          <p className="text-xl text-blue-100 mb-6">
+          <p className="text-xl text-white/90 mb-6">
             Next Generation AI-Powered Legal Intelligence
           </p>
         </div>
@@ -23,7 +23,7 @@ export default function CompanyInfo() {
               <h3 className="text-lg font-semibold text-white mb-2">
                 Unmatched Legal Due Diligence
               </h3>
-              <p className="text-blue-100">
+              <p className="text-white/90">
                 AI-powered analysis for comprehensive legal research and patent intelligence.
               </p>
             </div>
@@ -37,7 +37,7 @@ export default function CompanyInfo() {
               <h3 className="text-lg font-semibold text-white mb-2">
                 Lightning Fast Processing
               </h3>
-              <p className="text-blue-100">
+              <p className="text-white/90">
                 Analyze documents and patents in seconds, not hours.
               </p>
             </div>
@@ -51,7 +51,7 @@ export default function CompanyInfo() {
               <h3 className="text-lg font-semibold text-white mb-2">
                 Uncompromised Privacy
               </h3>
-              <p className="text-blue-100">
+              <p className="text-white/90">
                 Your sensitive legal documents stay secure and private.
               </p>
             </div>
@@ -65,7 +65,7 @@ export default function CompanyInfo() {
               <h3 className="text-lg font-semibold text-white mb-2">
                 Global Patent Intelligence
               </h3>
-              <p className="text-blue-100">
+              <p className="text-white/90">
                 Access to worldwide patent databases and legal precedents.
               </p>
             </div>
@@ -73,7 +73,7 @@ export default function CompanyInfo() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/20">
-          <p className="text-blue-100 text-sm">
+          <p className="text-white/90 text-sm">
             Join thousands of legal professionals who trust My Jurist for their AI-powered legal research needs.
           </p>
         </div>

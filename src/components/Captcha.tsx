@@ -40,18 +40,18 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+      <label className="block text-sm font-medium mb-2 text-black">
         Security Verification
       </label>
-      <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600">
+      <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-mono text-slate-900 dark:text-white">
+          <span className="text-lg font-mono text-black">
             {num1} + {num2} = ?
           </span>
           <button
             type="button"
             onClick={handleRefresh}
-            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            className="p-1 rounded hover:bg-gray-100 text-gray-600 hover:text-black transition-colors"
             title="Refresh CAPTCHA"
           >
             <RefreshCw className="w-4 h-4" />
@@ -61,18 +61,18 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
           type="number"
           value={userAnswer}
           onChange={(e) => handleAnswerChange(e.target.value)}
-          className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
+          className="flex-1 px-3 py-2 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors placeholder-gray-500"
           placeholder="Enter answer"
           required
         />
       </div>
       {userAnswer && !isValid && (
-        <div className="text-red-600 dark:text-red-400 text-sm">
+        <div className="text-red-600 text-sm">
           Incorrect answer. Please try again.
         </div>
       )}
       {error && (
-        <div className="text-red-600 dark:text-red-400 text-sm">
+        <div className="text-red-600 text-sm">
           {error}
         </div>
       )}

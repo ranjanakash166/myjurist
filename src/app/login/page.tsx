@@ -52,25 +52,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-white">
       {/* Left Side - Company Info */}
       <CompanyInfo />
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">
+      <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
+            <h1 className="text-3xl font-bold mb-2 text-black">
               Welcome Back
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-gray-600">
               Sign in to your My Jurist account
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-medium mb-2 text-black">
                 Email Address
               </label>
               <input
@@ -78,7 +78,7 @@ export default function LoginPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
                 placeholder="Enter your email"
                 required
                 autoFocus
@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-medium mb-2 text-black">
                 Password
               </label>
               <input
@@ -94,14 +94,14 @@ export default function LoginPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
                 placeholder="Enter your password"
                 required
               />
             </div>
 
             {error && (
-              <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
                 {error}
               </div>
             )}
@@ -111,18 +111,18 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || !captchaValid}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
           </form>
 
           <div className="mt-8 text-center">
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-gray-600">
               Don't have an account?{" "}
               <Link
                 href="/register"
-                className="text-ai-blue-500 hover:text-ai-blue-600 dark:text-ai-blue-400 dark:hover:text-ai-blue-300 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
                 Create one here
               </Link>

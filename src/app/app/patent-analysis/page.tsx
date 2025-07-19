@@ -368,19 +368,19 @@ export default function PatentAnalysisPage() {
       {/* Tabs */}
       <div className="flex gap-4 mb-2">
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'quick' ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white' : 'bg-slate-800 text-slate-300'}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'quick' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
           onClick={() => setTab('quick')}
         >
           Quick Analysis
         </button>
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'detailed' ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white' : 'bg-slate-800 text-slate-300'}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'detailed' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
           onClick={() => setTab('detailed')}
         >
           Detailed Patent Analysis
         </button>
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'history' ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white' : 'bg-slate-800 text-slate-300'}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'history' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
           onClick={() => setTab('history')}
         >
           History
@@ -406,21 +406,21 @@ export default function PatentAnalysisPage() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
             <button
-              className="flex items-center justify-center gap-2 py-4 rounded-lg text-lg font-semibold bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white shadow-lg ai-shadow disabled:opacity-60 transition-all"
+              className="flex items-center justify-center gap-2 py-4 rounded-lg text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-60"
               disabled={!isValid || loading}
               onClick={handlePriorArtAnalysis}
             >
               <Search className="w-5 h-5" /> Prior Art Analysis
             </button>
             <button
-              className="flex items-center justify-center gap-2 py-4 rounded-lg text-lg font-semibold bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white shadow-lg ai-shadow disabled:opacity-60 transition-all"
+              className="flex items-center justify-center gap-2 py-4 rounded-lg text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-60"
               disabled={!isValid}
               onClick={() => handleAnalysis('exclusions')}
             >
               <Gavel className="w-5 h-5" /> Exclusions Check
             </button>
             <button
-              className="flex items-center justify-center gap-2 py-4 rounded-lg text-lg font-semibold bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white shadow-lg ai-shadow disabled:opacity-60 transition-all"
+              className="flex items-center justify-center gap-2 py-4 rounded-lg text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-60"
               disabled={!isValid}
               onClick={() => handleAnalysis('disclosure')}
             >
@@ -508,7 +508,7 @@ export default function PatentAnalysisPage() {
           </div>
 
           <button
-            className="flex items-center justify-center gap-2 py-4 px-8 rounded-lg text-lg font-semibold bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white shadow-lg ai-shadow disabled:opacity-60 transition-all w-full md:w-auto"
+            className="flex items-center justify-center gap-2 py-4 px-8 rounded-lg text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-60 w-full md:w-auto"
             disabled={!isDetailedValid || reportLoading}
             onClick={handleComprehensiveReport}
           >

@@ -171,7 +171,7 @@ export default function DashboardPage() {
             <p className="text-slate-300 mb-4 text-xs sm:text-base">Analyze patents, get insights, and manage your intellectual property efficiently. (Dummy feature for now)</p>
           </div>
           <Link href="/app/patent-analysis">
-            <button className="mt-auto w-full py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow text-xs sm:text-base">
+            <button className="mt-auto w-full py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors text-xs sm:text-base">
               Go to Patent Analysis
             </button>
           </Link>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
             <p className="text-slate-300 mb-4 text-xs sm:text-base">Upload and analyze legal documents for key information and compliance. (Dummy feature for now)</p>
           </div>
           <Link href="/app/document-analysis">
-            <button className="mt-auto w-full py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow text-xs sm:text-base">
+            <button className="mt-auto w-full py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors text-xs sm:text-base">
               Go to Document Analysis
             </button>
           </Link>

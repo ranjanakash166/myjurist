@@ -396,7 +396,7 @@ export default function DocumentAnalysisPage() {
       {/* Tabs */}
       <div className="flex gap-4 mb-2">
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'new' ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white' : 'bg-slate-800 text-slate-300'}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'new' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
           onClick={() => {
             setTab('new');
             setFile(null);
@@ -413,7 +413,7 @@ export default function DocumentAnalysisPage() {
           New Analysis
         </button>
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'history' ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white' : 'bg-slate-800 text-slate-300'}`}
+          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'history' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
           onClick={() => setTab('history')}
         >
           History

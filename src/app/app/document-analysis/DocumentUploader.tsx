@@ -27,7 +27,7 @@ export default function DocumentUploader({ file, onFileChange, onProcess, proces
           <span className={`truncate text-base ${file ? 'text-white' : 'text-slate-400'}`}>{file ? file.name : "No file selected"}</span>
         </div>
         <button
-          className="px-5 py-2 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow w-full sm:w-auto"
+          className="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors w-full sm:w-auto"
           onClick={() => fileInputRef.current?.click()}
           type="button"
         >
@@ -41,7 +41,7 @@ export default function DocumentUploader({ file, onFileChange, onProcess, proces
         />
       </div>
       <button
-        className="w-full max-w-md py-3 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50 mt-2"
+        className="w-full max-w-md py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
         onClick={onProcess}
         disabled={!file || processing}
       >

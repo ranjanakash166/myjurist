@@ -109,7 +109,7 @@ export default function RegisterPage() {
   const renderBasicInfoStep = () => (
     <form onSubmit={handleSendOtp} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+        <label className="block text-sm font-medium mb-2 text-black">
           Full Name
         </label>
         <input
@@ -117,14 +117,14 @@ export default function RegisterPage() {
           name="full_name"
           value={formData.full_name}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
           placeholder="Enter your full name"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+        <label className="block text-sm font-medium mb-2 text-black">
           Email Address
         </label>
         <input
@@ -132,7 +132,7 @@ export default function RegisterPage() {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
           placeholder="Enter your email"
           required
         />
@@ -141,7 +141,7 @@ export default function RegisterPage() {
       <Captcha onValidated={setCaptchaValid} />
 
       {error && (
-        <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+        <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
           {error}
         </div>
       )}
@@ -149,7 +149,7 @@ export default function RegisterPage() {
       <button
         type="submit"
         disabled={loading || !captchaValid}
-        className="w-full py-3 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? "Sending OTP..." : "Send OTP"}
       </button>
@@ -159,21 +159,21 @@ export default function RegisterPage() {
   const renderOtpStep = () => (
     <form onSubmit={handleVerifyOtp} className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-black mb-2">
           Verify Your Email
         </h3>
-        <p className="text-slate-600 dark:text-slate-400">
+        <p className="text-gray-600">
           We've sent a {otpInfo?.otp_length || 6}-digit code to <strong>{formData.email}</strong>
         </p>
         {otpInfo && (
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-sm text-gray-500 mt-2">
             Code expires in {otpInfo.expires_in_minutes} minutes
           </p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+        <label className="block text-sm font-medium mb-2 text-black">
           OTP Code
         </label>
         <input
@@ -181,7 +181,7 @@ export default function RegisterPage() {
           name="otp"
           value={formData.otp}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors text-center text-lg tracking-widest"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors text-center text-lg tracking-widest shadow-sm placeholder-gray-500"
           placeholder="Enter OTP code"
           maxLength={otpInfo?.otp_length || 6}
           required
@@ -190,7 +190,7 @@ export default function RegisterPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+        <label className="block text-sm font-medium mb-2 text-black">
           Password
         </label>
         <input
@@ -198,14 +198,14 @@ export default function RegisterPage() {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
-          placeholder="Create a password"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
+          placeholder="Enter your password"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+        <label className="block text-sm font-medium mb-2 text-black">
           Confirm Password
         </label>
         <input
@@ -213,50 +213,41 @@ export default function RegisterPage() {
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-ai-blue-500 focus:ring-2 focus:ring-ai-blue-500/20 focus:outline-none transition-colors"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
           placeholder="Confirm your password"
           required
         />
       </div>
 
       {error && (
-        <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
+        <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
           {error}
         </div>
       )}
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => setStep("basic")}
-          className="flex-1 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-        >
-          Back
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 py-3 rounded-lg bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white font-semibold hover:scale-105 transition-all ai-shadow disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-        >
-          {loading ? "Verifying..." : "Create Account"}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? "Verifying..." : "Verify & Create Account"}
+      </button>
     </form>
   );
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-white">
       {/* Left Side - Company Info */}
       <CompanyInfo />
 
       {/* Right Side - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">
+      <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
+            <h1 className="text-3xl font-bold mb-2 text-black">
               {step === "basic" ? "Create Account" : "Verify Email"}
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-gray-600">
               {step === "basic" 
                 ? "Join My Jurist and unlock AI-powered legal intelligence"
                 : "Enter the verification code sent to your email"
@@ -268,11 +259,11 @@ export default function RegisterPage() {
           {step === "otp" && renderOtpStep()}
 
           <div className="mt-8 text-center">
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-gray-600">
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-ai-blue-500 hover:text-ai-blue-600 dark:text-ai-blue-400 dark:hover:text-ai-blue-300 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
                 Sign in here
               </Link>

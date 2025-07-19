@@ -72,7 +72,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className={
                   `flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none ` +
                   (isActive
-                    ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white shadow-lg ai-shadow dark:bg-gradient-to-r dark:from-ai-blue-500 dark:to-ai-purple-500 dark:text-white light:bg-gradient-to-r light:from-blue-600 light:to-purple-600 light:text-white'
+                    ? 'bg-blue-600 text-white shadow-lg'
                     : 'hover:bg-ai-blue-500/10 text-slate-300 hover:text-ai-blue-400')
                 }
                 onClick={() => setSidebarOpen(false)}
@@ -146,7 +146,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     className={
                       `flex items-center px-4 py-2 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none ` +
                       (isActive
-                        ? 'bg-gradient-to-r from-ai-blue-500 to-ai-purple-500 text-white shadow-lg ai-shadow dark:bg-gradient-to-r dark:from-ai-blue-500 dark:to-ai-purple-500 dark:text-white light:bg-gradient-to-r light:from-blue-600 light:to-purple-600 light:text-white'
+                        ? 'bg-blue-600 text-white shadow-lg'
                         : 'hover:bg-ai-blue-500/10 text-slate-300 hover:text-ai-blue-400')
                     }
                     onClick={() => setSidebarOpen(false)}
