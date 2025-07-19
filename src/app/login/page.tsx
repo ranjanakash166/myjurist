@@ -54,13 +54,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white dark:bg-slate-900">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white dark:bg-slate-900">
       {/* Left Side - Company Info */}
-      <CompanyInfo />
+      <div className="hidden lg:block">
+        <CompanyInfo />
+      </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-white dark:bg-slate-900">
         <div className="w-full max-w-md">
+          {/* Mobile Header */}
+          <div className="lg:hidden text-center mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+                <img 
+                  src="/images/myjurist-logo.png" 
+                  alt="My Jurist" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <span className="text-2xl font-bold gradient-text-animate">My Jurist</span>
+            </div>
+            <p className="text-gray-600 dark:text-slate-400 text-sm">
+              Next Generation AI-Powered Legal Intelligence
+            </p>
+          </div>
+
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">
               Welcome Back
@@ -80,7 +99,7 @@ export default function LoginPage() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
+                className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
                 placeholder="Enter your email"
                 required
                 autoFocus
@@ -96,7 +115,7 @@ export default function LoginPage() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
+                className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
                 placeholder="Enter your password"
                 required
               />
@@ -113,7 +132,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || !captchaValid}
-              className="w-full py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 sm:py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base"
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
