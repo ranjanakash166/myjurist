@@ -524,7 +524,7 @@ export default function DocumentAnalysisPage() {
           {/* Chat Sessions Section - Appears when document is selected */}
           {selectedDocument && (
             <CollapsibleSection
-              title={`Chat Sessions - ${selectedDocument.filename.length > 30 ? selectedDocument.filename.substring(0, 30) + '...' : selectedDocument.filename}`}
+              title={`Chat Sessions - ${selectedDocument.filename.length > 20 ? selectedDocument.filename.substring(0, 20) + '...' : selectedDocument.filename}`}
               isCollapsed={sessionsCollapsed}
               onToggle={setSessionsCollapsed}
             >
@@ -540,17 +540,17 @@ export default function DocumentAnalysisPage() {
                   {sessions.map(session => (
                     <button
                       key={session.session_id}
-                      className={`w-full flex items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all ${
+                      className={`w-full flex flex-col sm:flex-row sm:items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all gap-2 ${
                         selectedSession?.session_id === session.session_id ? 'ring-2 ring-ai-blue-400' : ''
                       }`}
                       onClick={() => handleSelectSession(session)}
                     >
-                      <div className="flex flex-col text-left">
-                        <span className="font-medium text-white">Session: {session.session_id.slice(0, 8)}...</span>
-                        <span className="text-xs text-slate-400">Created: {new Date(session.created_at).toLocaleString()}</span>
-                        <span className="text-xs text-slate-400">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
+                      <div className="flex flex-col text-left flex-1 min-w-0">
+                        <span className="font-medium text-white text-sm sm:text-base">Session: {session.session_id.slice(0, 8)}...</span>
+                        <span className="text-xs text-slate-400 break-words">Created: {new Date(session.created_at).toLocaleString()}</span>
+                        <span className="text-xs text-slate-400 break-words">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
                       </div>
-                      <span className="text-slate-400 text-sm">{session.message_count} messages</span>
+                      <span className="text-slate-400 text-xs sm:text-sm flex-shrink-0">{session.message_count} messages</span>
                     </button>
                   ))}
                   
