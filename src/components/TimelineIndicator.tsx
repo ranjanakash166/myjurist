@@ -75,16 +75,17 @@ export default function TimelineIndicator({ currentStep, selectedDocument, selec
 
   return (
     <div className="bg-slate-800/60 rounded-lg p-4 mb-6">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
         <h3 className="text-sm font-medium text-slate-300">Analysis Progress</h3>
         {selectedDocument && (
-          <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded">
+          <span className="text-xs text-slate-400 bg-slate-700/50 px-2 py-1 rounded break-words">
             {selectedDocument}
           </span>
         )}
       </div>
       
-      <div className="flex items-center space-x-4">
+      {/* Desktop Timeline - Horizontal */}
+      <div className="hidden md:flex items-center space-x-4">
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>
             <div className="flex items-center space-x-2">
@@ -118,6 +119,43 @@ export default function TimelineIndicator({ currentStep, selectedDocument, selec
               }`} />
             )}
           </React.Fragment>
+        ))}
+      </div>
+
+      {/* Mobile Timeline - Vertical */}
+      <div className="md:hidden space-y-3">
+        {steps.map((step, index) => (
+          <div key={step.id} className="flex items-center space-x-3">
+            <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all flex-shrink-0 ${
+              step.status === "completed" 
+                ? "bg-ai-blue-500 border-ai-blue-500 text-white" 
+                : step.status === "current"
+                ? "bg-ai-blue-500/20 border-ai-blue-500 text-ai-blue-400"
+                : "bg-slate-700 border-slate-600 text-slate-400"
+            }`}>
+              {step.status === "completed" ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                step.icon
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className={`text-sm font-medium ${
+                step.status === "completed" 
+                  ? "text-ai-blue-400" 
+                  : step.status === "current"
+                  ? "text-white"
+                  : "text-slate-400"
+              }`}>
+                {step.label}
+              </span>
+              {index === 0 && selectedDocument && (
+                <div className="text-xs text-slate-400 mt-1 break-words">
+                  {selectedDocument}
+                </div>
+              )}
+            </div>
+          </div>
         ))}
       </div>
     </div>

@@ -392,7 +392,7 @@ export default function DocumentAnalysisPage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-6">
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-6 min-h-screen">
       {/* Tabs */}
       <div className="flex gap-4 mb-2">
         <button
@@ -422,7 +422,7 @@ export default function DocumentAnalysisPage() {
 
       {/* New Analysis Section */}
       {tab === 'new' && (
-        <div className="space-y-6">
+        <div className="space-y-6 flex-1">
           {/* Timeline Indicator */}
           <TimelineIndicator 
             currentStep={getCurrentStep()}
@@ -447,35 +447,37 @@ export default function DocumentAnalysisPage() {
           
           {/* Chat Interface for New Analysis - Show when document is processed */}
           {apiResult && (
-            <div className="w-full">
+            <div className="w-full flex-1 min-h-[500px] flex flex-col">
               {/* Document Header for New Analysis */}
-              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">{apiResult.filename}</h2>
-                    <p className="text-sm text-slate-400">
+              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-semibold text-white break-words truncate">{apiResult.filename}</h2>
+                    <p className="text-sm text-slate-400 mt-1">
                       Document processed successfully • {apiResult.total_tokens} tokens • {apiResult.total_chunks} chunks
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-green-400 text-sm font-medium">Ready for chat</span>
                   </div>
                 </div>
               </div>
               
               {/* Chat Interface - Full width */}
-              <ChatInterface
-                chat={chat}
-                onSend={handleSend}
-                input={input}
-                setInput={setInput}
-                loading={chatLoading}
-                streaming={streaming}
-                streamedText={streamedText}
-                error={chatError}
-                disabled={chatLoading || streaming}
-                continuingSession={false}
-              />
+              <div className="flex-1">
+                <ChatInterface
+                  chat={chat}
+                  onSend={handleSend}
+                  input={input}
+                  setInput={setInput}
+                  loading={chatLoading}
+                  streaming={streaming}
+                  streamedText={streamedText}
+                  error={chatError}
+                  disabled={chatLoading || streaming}
+                  continuingSession={false}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -483,7 +485,7 @@ export default function DocumentAnalysisPage() {
 
       {/* History Section */}
       {tab === 'history' && (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 flex-1">
           {/* Timeline Indicator */}
           <TimelineIndicator 
             currentStep={getCurrentStep()}
@@ -522,7 +524,7 @@ export default function DocumentAnalysisPage() {
           {/* Chat Sessions Section - Appears when document is selected */}
           {selectedDocument && (
             <CollapsibleSection
-              title={`Chat Sessions - ${selectedDocument.filename}`}
+              title={`Chat Sessions - ${selectedDocument.filename.length > 30 ? selectedDocument.filename.substring(0, 30) + '...' : selectedDocument.filename}`}
               isCollapsed={sessionsCollapsed}
               onToggle={setSessionsCollapsed}
             >
@@ -579,17 +581,17 @@ export default function DocumentAnalysisPage() {
 
           {/* Chat Interface - Takes full width at bottom */}
           {selectedSession && (
-            <div className="w-full">
+            <div className="w-full flex-1 min-h-[500px] flex flex-col">
               {/* Document Header */}
-              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">{selectedDocument?.filename}</h2>
-                    <p className="text-sm text-slate-400">
+              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-semibold text-white break-words truncate">{selectedDocument?.filename}</h2>
+                    <p className="text-sm text-slate-400 mt-1">
                       Session: {selectedSession.session_id.slice(0, 8)}... • {selectedSession.message_count} messages
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => handleView(selectedDocument!.document_id, selectedDocument!.filename)}
                       className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
@@ -614,19 +616,21 @@ export default function DocumentAnalysisPage() {
               </div>
               
               {/* Chat Interface - Full width */}
-              <ChatInterface
-                chat={chat}
-                onSend={handleSend}
-                input={input}
-                setInput={setInput}
-                loading={chatLoading}
-                streaming={streaming}
-                streamedText={streamedText}
-                error={chatError}
-                disabled={chatLoading || streaming}
-                continuingSession={true}
-                continuingSessionId={selectedSession.session_id}
-              />
+              <div className="flex-1">
+                <ChatInterface
+                  chat={chat}
+                  onSend={handleSend}
+                  input={input}
+                  setInput={setInput}
+                  loading={chatLoading}
+                  streaming={streaming}
+                  streamedText={streamedText}
+                  error={chatError}
+                  disabled={chatLoading || streaming}
+                  continuingSession={true}
+                  continuingSessionId={selectedSession.session_id}
+                />
+              </div>
             </div>
           )}
 
