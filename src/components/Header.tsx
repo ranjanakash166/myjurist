@@ -63,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
               My Jurist
             </span>
           </div>
-          {/* Desktop Navigation + Theme Toggle */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
             <div className="ml-10 flex items-baseline space-x-1">
               {navigation.map((item, index) => (
@@ -81,14 +81,6 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                 </button>
               ))}
             </div>
-            {/* Theme Toggle Button */}
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="ml-4 p-2 rounded-lg border border-ai-blue-500/20 bg-slate-800/60 hover:bg-slate-700/80 transition-colors text-ai-blue-400 hover:text-ai-blue-200"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
             {/* Auth Buttons */}
             <div className="ml-4 flex items-center gap-2">
               <Link
@@ -104,6 +96,14 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                 Register
               </Link>
             </div>
+            {/* Theme Toggle Button */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="ml-4 p-2 rounded-lg border border-ai-blue-500/20 bg-slate-800/60 hover:bg-slate-700/80 transition-colors text-ai-blue-400 hover:text-ai-blue-200"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
           </div>
           {/* Mobile menu button + Theme Toggle */}
           <div className="md:hidden flex items-center gap-2">

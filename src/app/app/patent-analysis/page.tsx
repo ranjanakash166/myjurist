@@ -226,11 +226,11 @@ export default function PatentAnalysisPage() {
       .split('\n')
       .map((line, index) => {
         if (line.startsWith('# ')) {
-          return <h1 key={index} className="text-2xl font-bold text-white mb-4">{line.substring(2)}</h1>;
+          return <h1 key={index} className="text-2xl font-bold text-black dark:text-white mb-4">{line.substring(2)}</h1>;
         } else if (line.startsWith('## ')) {
-          return <h2 key={index} className="text-xl font-bold text-ai-blue-400 mb-3 mt-6">{line.substring(3)}</h2>;
+          return <h2 key={index} className="text-xl font-bold text-blue-600 dark:text-ai-blue-400 mb-3 mt-6">{line.substring(3)}</h2>;
         } else if (line.startsWith('### ')) {
-          return <h3 key={index} className="text-lg font-semibold text-ai-purple-400 mb-2 mt-4">{line.substring(4)}</h3>;
+          return <h3 key={index} className="text-lg font-semibold text-purple-600 dark:text-ai-purple-400 mb-2 mt-4">{line.substring(4)}</h3>;
         } else if (line.trim() === '') {
           return <br key={index} />;
         } else {
@@ -239,7 +239,7 @@ export default function PatentAnalysisPage() {
           return (
             <p 
               key={index} 
-              className="text-slate-200 mb-2 leading-relaxed"
+              className="text-black dark:text-slate-200 mb-2 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: formattedLine }}
             />
           );
@@ -342,9 +342,6 @@ export default function PatentAnalysisPage() {
       const data: ComprehensiveReport = await res.json();
       console.log('Success response:', data);
       setSelectedReport(data);
-      
-      // Start streaming the full report
-      await simulateStreaming(data.full_report);
     } catch (err: any) {
       console.error('Fetch error:', err);
       setSelectedReportError(err.message || "An error occurred while fetching report details.");
@@ -690,15 +687,15 @@ export default function PatentAnalysisPage() {
       {/* Report Detail Modal */}
       {showReportModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-700">
-              <h2 className="text-xl font-bold gradient-text-animate">Patent Analysis Report</h2>
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Patent Analysis Report</h2>
               <div className="flex items-center gap-2">
                 {selectedReport && (
                   <button
                     onClick={() => handleDownloadReport(selectedReport.report_id, selectedReport.title)}
-                    className="flex items-center gap-2 px-4 py-2 bg-ai-blue-500 hover:bg-ai-blue-600 text-white rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Download PDF
@@ -706,7 +703,7 @@ export default function PatentAnalysisPage() {
                 )}
                 <button
                   onClick={handleCloseReportModal}
-                  className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -718,13 +715,13 @@ export default function PatentAnalysisPage() {
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
               {selectedReportLoading && (
-                <div className="text-center text-ai-blue-400 font-semibold py-8">
+                <div className="text-center text-blue-600 dark:text-ai-blue-400 font-semibold py-8">
                   Loading report details...
                 </div>
               )}
 
               {selectedReportError && (
-                <div className="text-center text-red-400 font-semibold py-8">
+                <div className="text-center text-red-600 dark:text-red-400 font-semibold py-8">
                   {selectedReportError}
                 </div>
               )}
@@ -732,39 +729,32 @@ export default function PatentAnalysisPage() {
               {selectedReport && (
                 <div className="space-y-6">
                   {/* Report Header */}
-                  <div className="bg-slate-800/60 rounded-lg p-4">
+                  <div className="bg-gray-50 dark:bg-slate-800/60 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-white mb-2">{selectedReport.title}</h3>
-                        <p className="text-slate-400 text-sm">Applicant: {selectedReport.applicant}</p>
-                        <p className="text-slate-400 text-sm">Generated: {new Date(selectedReport.generated_at).toLocaleString()}</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{selectedReport.title}</h3>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm">Applicant: {selectedReport.applicant}</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm">Generated: {new Date(selectedReport.generated_at).toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-slate-400 text-sm">Word Count: {selectedReport.word_count.toLocaleString()}</p>
-                        <p className="text-slate-400 text-sm">Character Count: {selectedReport.character_count.toLocaleString()}</p>
-                        <p className="text-slate-400 text-sm">Report ID: {selectedReport.report_id}</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm">Word Count: {selectedReport.word_count.toLocaleString()}</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm">Character Count: {selectedReport.character_count.toLocaleString()}</p>
+                        <p className="text-gray-600 dark:text-slate-400 text-sm">Report ID: {selectedReport.report_id}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Report Content */}
-                  <div className="prose prose-invert max-w-none">
-                    {streamingReport ? (
-                      <div className="space-y-4">
-                        {formatReportText(streamedReportText)}
-                        <div className="inline-block w-2 h-4 bg-ai-blue-400 animate-pulse"></div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {formatReportText(selectedReport.full_report)}
-                      </div>
-                    )}
+                  <div className="prose prose-gray dark:prose-invert max-w-none">
+                    <div className="space-y-4">
+                      {formatReportText(selectedReport.full_report)}
+                    </div>
                   </div>
 
                   {/* Disclaimer */}
-                  <div className="p-4 bg-slate-800/60 rounded-lg">
-                    <h4 className="text-sm font-semibold text-slate-300 mb-2">Disclaimer:</h4>
-                    <p className="text-xs text-slate-400">{selectedReport.disclaimer}</p>
+                  <div className="p-4 bg-gray-50 dark:bg-slate-800/60 rounded-lg">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Disclaimer:</h4>
+                    <p className="text-xs text-gray-600 dark:text-slate-400">{selectedReport.disclaimer}</p>
                   </div>
                 </div>
               )}

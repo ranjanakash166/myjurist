@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../components/AuthProvider";
+import { useTheme } from "../../components/ThemeProvider";
 import CompanyInfo from "../../components/CompanyInfo";
 import Captcha from "../../components/Captcha";
 
@@ -29,6 +30,7 @@ export default function RegisterPage() {
   
   const router = useRouter();
   const { sendOtp, verifyOtp } = useAuth();
+  const { theme } = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -109,7 +111,7 @@ export default function RegisterPage() {
   const renderBasicInfoStep = () => (
     <form onSubmit={handleSendOtp} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium mb-2 text-black">
+        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
           Full Name
         </label>
         <input
@@ -117,14 +119,14 @@ export default function RegisterPage() {
           name="full_name"
           value={formData.full_name}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
           placeholder="Enter your full name"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-black">
+        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
           Email Address
         </label>
         <input
@@ -132,7 +134,7 @@ export default function RegisterPage() {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
           placeholder="Enter your email"
           required
         />
@@ -141,7 +143,7 @@ export default function RegisterPage() {
       <Captcha onValidated={setCaptchaValid} />
 
       {error && (
-        <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
+        <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 shadow-sm">
           {error}
         </div>
       )}
@@ -159,21 +161,21 @@ export default function RegisterPage() {
   const renderOtpStep = () => (
     <form onSubmit={handleVerifyOtp} className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-black mb-2">
+        <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
           Verify Your Email
         </h3>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-slate-400">
           We've sent a {otpInfo?.otp_length || 6}-digit code to <strong>{formData.email}</strong>
         </p>
         {otpInfo && (
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">
             Code expires in {otpInfo.expires_in_minutes} minutes
           </p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-black">
+        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
           OTP Code
         </label>
         <input
@@ -181,7 +183,7 @@ export default function RegisterPage() {
           name="otp"
           value={formData.otp}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors text-center text-lg tracking-widest shadow-sm placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors text-center text-lg tracking-widest shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
           placeholder="Enter OTP code"
           maxLength={otpInfo?.otp_length || 6}
           required
@@ -190,7 +192,7 @@ export default function RegisterPage() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-black">
+        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
           Password
         </label>
         <input
@@ -198,14 +200,14 @@ export default function RegisterPage() {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
           placeholder="Enter your password"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2 text-black">
+        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
           Confirm Password
         </label>
         <input
@@ -213,14 +215,14 @@ export default function RegisterPage() {
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white text-black focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
           placeholder="Confirm your password"
           required
         />
       </div>
 
       {error && (
-        <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg border border-red-200 shadow-sm">
+        <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 shadow-sm">
           {error}
         </div>
       )}
@@ -236,18 +238,18 @@ export default function RegisterPage() {
   );
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-white dark:bg-slate-900">
       {/* Left Side - Company Info */}
       <CompanyInfo />
 
       {/* Right Side - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+      <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-black">
+            <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">
               {step === "basic" ? "Create Account" : "Verify Email"}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-slate-400">
               {step === "basic" 
                 ? "Join My Jurist and unlock AI-powered legal intelligence"
                 : "Enter the verification code sent to your email"
@@ -259,11 +261,11 @@ export default function RegisterPage() {
           {step === "otp" && renderOtpStep()}
 
           <div className="mt-8 text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-slate-400">
               Already have an account?{" "}
               <Link
                 href="/login"
-                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-700 dark:text-ai-blue-400 dark:hover:text-ai-blue-300 font-medium transition-colors"
               >
                 Sign in here
               </Link>
