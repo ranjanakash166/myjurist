@@ -61,12 +61,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Left Side - Company Info */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block lg:w-1/2">
         <CompanyInfo />
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
+      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
         <Card className="w-full max-w-md">
           <CardHeader>
             {/* Mobile Header */}
@@ -79,7 +79,7 @@ export default function LoginPage() {
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className="text-2xl font-bold text-foreground">My Jurist</span>
+                <span className="font-bold text-foreground">My Jurist</span>
               </div>
               <p className="text-muted-foreground text-sm">
                 Next Generation AI-Powered Legal Intelligence

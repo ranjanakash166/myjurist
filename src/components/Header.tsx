@@ -78,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
               />
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:bg-accent/20 transition-all duration-300"></div>
             </div>
-            <span className="text-2xl font-bold text-foreground">
+            <span className="font-bold text-foreground">
               My Jurist
             </span>
           </div>

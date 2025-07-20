@@ -236,12 +236,12 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Left Side - Company Info */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block lg:w-1/2">
         <CompanyInfo />
       </div>
 
       {/* Right Side - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
+      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
         <Card className="w-full max-w-md">
           <CardHeader>
             {/* Mobile Header */}

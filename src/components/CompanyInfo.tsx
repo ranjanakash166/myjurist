@@ -3,7 +3,7 @@ import { Shield, Zap, Lock, Globe } from 'lucide-react';
 
 export default function CompanyInfo() {
   return (
-    <div className="flex-1 bg-primary p-8 md:p-12 flex flex-col justify-center">
+    <div className="w-full h-full bg-primary p-8 md:p-12 flex flex-col justify-center">
       <div className="max-w-md mx-auto text-center md:text-left">
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
