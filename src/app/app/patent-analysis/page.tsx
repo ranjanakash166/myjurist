@@ -315,13 +315,13 @@ export default function PatentAnalysisPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Patent Analysis</h1>
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Patent Analysis</h1>
       
       <Tabs value={tab} onValueChange={(value) => setTab(value as 'quick' | 'detailed' | 'history')} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="quick">Quick Analysis</TabsTrigger>
-          <TabsTrigger value="detailed">Detailed Patent Analysis</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="quick" className="text-xs sm:text-sm py-2 px-1 sm:px-3">Quick</TabsTrigger>
+          <TabsTrigger value="detailed" className="text-xs sm:text-sm py-2 px-1 sm:px-3">Detailed</TabsTrigger>
+          <TabsTrigger value="history" className="text-xs sm:text-sm py-2 px-1 sm:px-3">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="quick" className="space-y-6">
@@ -349,27 +349,33 @@ export default function PatentAnalysisPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <Button
                   onClick={handlePriorArtAnalysis}
                   disabled={!isValid || loading}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-sm"
                 >
-                  <Search className="w-5 h-5" /> Prior Art Analysis
+                  <Search className="w-4 h-4" /> 
+                  <span className="hidden sm:inline">Prior Art</span>
+                  <span className="sm:hidden">Prior Art</span>
                 </Button>
                 <Button
                   onClick={() => handleAnalysis('exclusions')}
                   disabled={!isValid}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-sm"
                 >
-                  <Gavel className="w-5 h-5" /> Exclusions Check
+                  <Gavel className="w-4 h-4" /> 
+                  <span className="hidden sm:inline">Exclusions</span>
+                  <span className="sm:hidden">Exclusions</span>
                 </Button>
                 <Button
                   onClick={() => handleAnalysis('disclosure')}
                   disabled={!isValid}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-sm col-span-1 sm:col-span-2 lg:col-span-1"
                 >
-                  <ShieldCheck className="w-5 h-5" /> Disclosure Check
+                  <ShieldCheck className="w-4 h-4" /> 
+                  <span className="hidden sm:inline">Disclosure</span>
+                  <span className="sm:hidden">Disclosure</span>
                 </Button>
               </div>
 
@@ -430,7 +436,7 @@ export default function PatentAnalysisPage() {
               <CardTitle>Detailed Patent Analysis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="applicant">Applicant Name:</Label>

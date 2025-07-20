@@ -401,7 +401,7 @@ export default function DocumentAnalysisPage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-6 min-h-screen">
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
       <Tabs value={tab} onValueChange={(value) => {
         const newTab = value as 'new' | 'history';
         setTab(newTab);
@@ -417,9 +417,9 @@ export default function DocumentAnalysisPage() {
           setInput("");
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="new">New Analysis</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-auto">
+          <TabsTrigger value="new" className="text-sm py-2 px-2 sm:px-4">New Analysis</TabsTrigger>
+          <TabsTrigger value="history" className="text-sm py-2 px-2 sm:px-4">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="new" className="space-y-6 flex-1">
@@ -552,15 +552,30 @@ export default function DocumentAnalysisPage() {
                       }`}
                       onClick={() => handleSelectSession(session)}
                     >
-                      <CardContent className="p-4">
+                      <CardContent className="p-3 sm:p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div className="flex flex-col text-left flex-1 min-w-0">
-                            <span className="font-medium text-foreground text-sm sm:text-base">Session: {session.session_id.slice(0, 8)}...</span>
-                            <span className="text-xs text-muted-foreground break-words">Created: {new Date(session.created_at).toLocaleString()}</span>
-                            <span className="text-xs text-muted-foreground break-words">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
+                            <span className="font-medium text-foreground text-sm">Session: {session.session_id.slice(0, 8)}...</span>
+                            <span className="text-xs text-muted-foreground">
+                              Created: {new Date(session.created_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Last: {new Date(session.last_activity).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
                           </div>
-                          <Badge variant="outline" className="text-xs sm:text-sm flex-shrink-0">
-                            {session.message_count} messages
+                          <Badge variant="outline" className="text-xs flex-shrink-0">
+                            {session.message_count} msgs
                           </Badge>
                         </div>
                       </CardContent>
