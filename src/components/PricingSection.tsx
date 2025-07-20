@@ -1,12 +1,13 @@
 import React from 'react';
 import { CheckCircle, Star, Crown, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface PricingPlan {
   title: string;
   description: string;
   features: string[];
-  bgColor: string;
-  textColor: string;
   popular: boolean;
 }
 
@@ -16,24 +17,18 @@ const PricingSection: React.FC = () => {
       title: "Subscription-based SaaS",
       description: "Ideal for law firms and corporate legal teams seeking ongoing support.",
       features: ["Monthly billing", "24/7 support", "Regular updates"],
-      bgColor: "bg-blue-500",
-      textColor: "text-blue-400",
       popular: false
     },
     {
       title: "Pay-per-use Options",
       description: "Practical, scalable pricing designed for startups and smaller businesses.",
       features: ["Usage-based billing", "No commitments", "Flexible scaling"],
-      bgColor: "bg-purple-500",
-      textColor: "text-purple-400",
       popular: true
     },
     {
       title: "Enterprise Solutions",
       description: "Customized integrations for larger organizations with unique requirements.",
       features: ["Custom integration", "Dedicated support", "SLA guarantees"],
-      bgColor: "bg-cyan-500",
-      textColor: "text-cyan-400",
       popular: false
     }
   ];
@@ -43,76 +38,84 @@ const PricingSection: React.FC = () => {
   };
 
   return (
-    <section id="pricing" className="py-20 bg-slate-200 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4">
+    <section id="pricing" className="section-legal bg-muted/30">
+      <div className="container-legal">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+          <h2 className="text-legal-title text-foreground mb-4">
             Flexible Plans Tailored to Your Needs
           </h2>
-          <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
           {pricingPlans.map((plan, index) => (
-            <div
+            <Card
               key={index}
-              className={`bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 relative flex flex-col ${
-                plan.popular ? 'border-purple-500' : ''
+              className={`document-card hover-scale relative flex flex-col ${
+                plan.popular ? 'border-accent' : ''
               }`}
             >
               {/* Popular badge */}
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center">
+                  <Badge className="bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold flex items-center">
                     <Star className="h-4 w-4 mr-1" />
                     Most Popular
-                  </div>
+                  </Badge>
                 </div>
               )}
               
-              <h3 className={`text-2xl font-bold mb-6 ${plan.textColor} flex items-center text-slate-900 dark:text-white`}>
-                {plan.popular && <Crown className="h-6 w-6 mr-2 text-purple-400" />}
-                {plan.title}
-              </h3>
+              <CardHeader>
+                <CardTitle className="text-legal-heading text-foreground flex items-center">
+                  {plan.popular && <Crown className="h-6 w-6 mr-2 text-accent" />}
+                  {plan.title}
+                </CardTitle>
+              </CardHeader>
               
-              <p className="text-slate-800 dark:text-gray-300 mb-6 leading-relaxed">
-                {plan.description}
-              </p>
-              
-              <div className="space-y-3 mb-8 flex-grow">
-                {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center">
-                    <CheckCircle className={`h-5 w-5 ${plan.textColor} mr-3`} />
-                    <span className="text-slate-800 dark:text-gray-300">{feature}</span>
-                  </div>
-                ))}
-              </div>
+              <CardContent className="flex-grow">
+                <p className="text-legal-body text-muted-foreground mb-6 leading-relaxed">
+                  {plan.description}
+                </p>
+                
+                <div className="space-y-3 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <div key={featureIndex} className="flex items-center">
+                      <CheckCircle className="h-5 w-5 text-primary mr-3" />
+                      <span className="text-legal-body text-muted-foreground">{feature}</span>
+                    </div>
+                  ))}
+                </div>
 
-              {/* Get Started Button */}
-              <button
-                onClick={handleGetStarted}
-                className={`group w-full bg-gradient-to-r ${plan.bgColor} hover:opacity-90 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center ${
-                  plan.popular ? 'shadow-lg shadow-purple-500/25' : ''
-                }`}
-              >
-                <span>Get Started</span>
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
-            </div>
+                {/* Get Started Button */}
+                <Button
+                  onClick={handleGetStarted}
+                  className={`group w-full ${
+                    plan.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : ''
+                  }`}
+                >
+                  <span>Get Started</span>
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
         
         {/* Pricing highlight */}
-        <div className="mt-16 bg-white border border-slate-300 shadow-lg dark:bg-gray-800 dark:border-gray-700 p-8 rounded-2xl text-slate-700 dark:text-gray-300">
-          <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white text-center">
-            Transparent, Value-Driven Pricing
-          </h3>
-          <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed text-center max-w-3xl mx-auto">
-            Our flexible pricing model ensures that organizations of all sizes can access 
-            the power of My Jurist's AI platform. From startups to enterprise corporations, 
-            we have a solution that fits your needs and budget.
-          </p>
-        </div>
+        <Card className="mt-16 document-card">
+          <CardHeader>
+            <CardTitle className="text-legal-heading text-foreground text-center">
+              Transparent, Value-Driven Pricing
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-legal-body text-muted-foreground leading-relaxed text-center max-w-3xl mx-auto">
+              Our flexible pricing model ensures that organizations of all sizes can access 
+              the power of My Jurist's AI platform. From startups to enterprise corporations, 
+              we have a solution that fits your needs and budget.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

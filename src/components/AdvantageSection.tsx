@@ -1,12 +1,11 @@
 import React from 'react';
 import { Award, Database, TrendingUp, Shield, LucideIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Advantage {
   icon: LucideIcon;
   title: string;
   description: string;
-  bgColor: string;
-  textColor: string;
 }
 
 const AdvantageSection: React.FC = () => {
@@ -14,41 +13,33 @@ const AdvantageSection: React.FC = () => {
     {
       icon: Award,
       title: "First Locally-Hosted AI for Due Diligence",
-      description: "Exclusively tailored solution to address data privacy and security requirements in legal workflows.",
-      bgColor: "bg-blue-500",
-      textColor: "text-blue-400"
+      description: "Exclusively tailored solution to address data privacy and security requirements in legal workflows."
     },
     {
       icon: Database,
       title: "Comprehensive Global Patent Database",
-      description: "Exclusive LLM trained specifically to handle extensive global patent insights.",
-      bgColor: "bg-purple-500",
-      textColor: "text-purple-400"
+      description: "Exclusive LLM trained specifically to handle extensive global patent insights."
     },
     {
       icon: TrendingUp,
       title: "Significant Cost Reduction",
-      description: "My Jurist reduces due diligence costs by approximately 70% compared to traditional methods.",
-      bgColor: "bg-cyan-500",
-      textColor: "text-cyan-400"
+      description: "My Jurist reduces due diligence costs by approximately 70% compared to traditional methods."
     },
     {
       icon: Shield,
       title: "Enhanced Data Privacy",
-      description: "Robust data security measures ensure compliance with even the strictest regulatory frameworks.",
-      bgColor: "bg-blue-500",
-      textColor: "text-blue-400"
+      description: "Robust data security measures ensure compliance with even the strictest regulatory frameworks."
     }
   ];
 
   return (
-    <section id="advantage" className="py-20 bg-slate-100 dark:bg-gray-800">
-      <div className="max-w-6xl mx-auto px-4">
+    <section id="advantage" className="section-legal bg-background">
+      <div className="container-legal">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+          <h2 className="text-legal-title text-foreground mb-4">
             Why My Jurist Stands Apart
           </h2>
-          <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
         
         <div className="space-y-12">
@@ -57,20 +48,21 @@ const AdvantageSection: React.FC = () => {
               {advantages.slice(startIndex, startIndex + 2).map((advantage, index) => {
                 const IconComponent = advantage.icon;
                 return (
-                  <div
-                    key={startIndex + index}
-                    className="bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-                  >
-                    <div className={`h-12 w-12 ${advantage.bgColor} rounded-xl flex items-center justify-center mb-6`}>
-                      <IconComponent className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className={`text-2xl font-bold mb-4 ${advantage.textColor} text-slate-900 dark:text-white`}>
-                      {advantage.title}
-                    </h3>
-                    <p className="text-slate-800 dark:text-gray-300 leading-relaxed">
-                      {advantage.description}
-                    </p>
-                  </div>
+                  <Card key={startIndex + index} className="document-card hover-scale">
+                    <CardHeader>
+                      <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center mb-6">
+                        <IconComponent className="h-6 w-6 text-primary-foreground" />
+                      </div>
+                      <CardTitle className="text-legal-heading text-foreground">
+                        {advantage.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-legal-body text-muted-foreground leading-relaxed">
+                        {advantage.description}
+                      </p>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
@@ -78,16 +70,20 @@ const AdvantageSection: React.FC = () => {
         </div>
         
         {/* Competitive edge highlight */}
-        <div className="mt-16 bg-white border border-slate-300 shadow-lg dark:bg-gray-900 dark:border-gray-700 p-8 rounded-2xl text-slate-700 dark:text-gray-300">
-          <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white text-center">
-            Unmatched Competitive Edge
-          </h3>
-          <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed text-center max-w-4xl mx-auto">
-            My Jurist combines cutting-edge AI technology with unparalleled data privacy, 
-            creating a solution that no competitor can match. Our locally-hosted approach 
-            and comprehensive patent intelligence give us a decisive advantage in the market.
-          </p>
-        </div>
+        <Card className="mt-16 document-card">
+          <CardHeader>
+            <CardTitle className="text-legal-heading text-foreground text-center">
+              Unmatched Competitive Edge
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-legal-body text-muted-foreground leading-relaxed text-center max-w-4xl mx-auto">
+              My Jurist combines cutting-edge AI technology with unparalleled data privacy, 
+              creating a solution that no competitor can match. Our locally-hosted approach 
+              and comprehensive patent intelligence give us a decisive advantage in the market.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

@@ -4,9 +4,14 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../components/AuthProvider";
-import { useTheme } from "../../components/ThemeProvider";
+import { useTheme } from "next-themes";
 import CompanyInfo from "../../components/CompanyInfo";
 import Captcha from "../../components/Captcha";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -54,102 +59,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-white dark:bg-slate-900">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Left Side - Company Info */}
       <div className="hidden lg:block">
         <CompanyInfo />
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-white dark:bg-slate-900">
-        <div className="w-full max-w-md">
-          {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                <img 
-                  src="/images/myjurist-logo.png" 
-                  alt="My Jurist" 
-                  className="w-full h-full object-contain"
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            {/* Mobile Header */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+                  <img 
+                    src="/images/myjurist-logo.png" 
+                    alt="My Jurist" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="text-2xl font-bold text-foreground">My Jurist</span>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Next Generation AI-Powered Legal Intelligence
+              </p>
+            </div>
+
+            <div className="text-center">
+              <CardTitle className="text-3xl font-bold mb-2 text-foreground">
+                Welcome Back
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Sign in to your My Jurist account
+              </p>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                  autoFocus
                 />
               </div>
-              <span className="text-2xl font-bold gradient-text-animate">My Jurist</span>
-            </div>
-            <p className="text-gray-600 dark:text-slate-400 text-sm">
-              Next Generation AI-Powered Legal Intelligence
-            </p>
-          </div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">
-              Welcome Back
-            </h1>
-            <p className="text-gray-600 dark:text-slate-400">
-              Sign in to your My Jurist account
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
-                placeholder="Enter your email"
-                required
-                autoFocus
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 shadow-sm">
-                {error}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  required
+                />
               </div>
-            )}
 
-            <Captcha onValidated={setCaptchaValid} />
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-            <button
-              type="submit"
-              disabled={loading || !captchaValid}
-              className="w-full py-3 sm:py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base"
-            >
-              {loading ? "Signing In..." : "Sign In"}
-            </button>
-          </form>
+              <Captcha onValidated={setCaptchaValid} />
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-600 dark:text-slate-400">
-              Don't have an account?{" "}
-              <Link
-                href="/register"
-                className="text-blue-600 hover:text-blue-700 dark:text-ai-blue-400 dark:hover:text-ai-blue-300 font-medium transition-colors"
+              <Button
+                type="submit"
+                disabled={loading || !captchaValid}
+                className="w-full"
               >
-                Create one here
-              </Link>
-            </p>
-          </div>
-        </div>
+                {loading ? "Signing In..." : "Sign In"}
+              </Button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-muted-foreground">
+                Don't have an account?{" "}
+                <Link
+                  href="/register"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                >
+                  Create one here
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

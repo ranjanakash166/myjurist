@@ -8,6 +8,13 @@ import ChatInterface from "./ChatInterface";
 import PdfViewerModal from "../../../components/PdfViewerModal";
 import TimelineIndicator from "../../../components/TimelineIndicator";
 import CollapsibleSection from "../../../components/CollapsibleSection";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Eye, Download, MessageCircle } from "lucide-react";
 
 interface ApiResponse {
   document_id: string;
@@ -140,6 +147,15 @@ export default function DocumentAnalysisPage() {
     }
   }, [page, allDocuments]);
 
+  // Update sessions when sessionPage changes (frontend pagination)
+  useEffect(() => {
+    if (allSessions.length > 0) {
+      const startIndex = sessionPage * sessionPageSize;
+      const endIndex = startIndex + sessionPageSize;
+      setSessions(allSessions.slice(startIndex, endIndex));
+    }
+  }, [sessionPage, allSessions]);
+
   // File upload logic
   const handleFileChange = (file: File | null) => {
     setFile(file);
@@ -250,24 +266,26 @@ export default function DocumentAnalysisPage() {
     }
   };
 
-  // When a document is selected, fetch its chat sessions (with frontend pagination)
+  // Handle document selection from history
   const handleSelectDocument = async (item: DocumentHistoryItem) => {
     setSelectedDocument(item);
+    setSelectedSession(null);
     setSessionsLoading(true);
     setSessionsError(null);
-    setSessions([]);
-    setSelectedSession(null);
     setChat([
-      { sender: "system", text: "Select a chat session to view its history.", time: new Date() },
+      { sender: "system", text: `Document '${item.filename}' selected. Choose a chat session to continue.`, time: new Date() },
     ]);
-    // Collapse documents section and expand sessions section
-    setDocumentsCollapsed(true);
-    setSessionsCollapsed(false);
+    setDocumentId(item.document_id);
+    setInput("");
+    
     try {
       const res = await fetch(`${API_BASE_URL}/chat/?document_id=${item.document_id}`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error("Failed to fetch chat sessions");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Failed to fetch sessions");
+      }
       const data = await res.json();
       setAllSessions(data);
       setSessionTotalCount(data.length);
@@ -277,35 +295,29 @@ export default function DocumentAnalysisPage() {
       const endIndex = sessionPageSize;
       setSessions(data.slice(startIndex, endIndex));
     } catch (err: any) {
-      setSessionsError("Failed to load chat sessions.");
+      setSessionsError(err.message || "Failed to load chat sessions.");
     } finally {
       setSessionsLoading(false);
     }
   };
 
-  // Update sessions when sessionPage changes (frontend pagination)
-  useEffect(() => {
-    if (allSessions.length > 0) {
-      const startIndex = sessionPage * sessionPageSize;
-      const endIndex = startIndex + sessionPageSize;
-      setSessions(allSessions.slice(startIndex, endIndex));
-    }
-  }, [sessionPage, allSessions]);
-
-  // When a session is selected, fetch its chat history
+  // Handle session selection
   const handleSelectSession = async (session: ChatSessionItem) => {
     setSelectedSession(session);
-    setSessionId(session.session_id);
-    setDocumentId(session.document_id);
-    setHistoryLoading(true);
-    setInput("");
-    // Collapse sessions section when chat interface is shown
-    setSessionsCollapsed(true);
+    setChatLoading(true);
+    setChatError(null);
+    setChat([
+      { sender: "system", text: `Loading chat session: ${session.session_id.slice(0, 8)}...`, time: new Date() },
+    ]);
+    
     try {
       const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error("Failed to fetch chat history");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Failed to fetch session");
+      }
       const data = await res.json();
       const chatHistory = data.history.map((msg: any) => [
         { sender: "user", text: msg.user, time: new Date(msg.timestamp) },
@@ -314,25 +326,24 @@ export default function DocumentAnalysisPage() {
       setChat(chatHistory);
     } catch (err: any) {
       setChat([
-        { sender: "system", text: "Failed to load chat history.", time: new Date() },
+        { sender: "system", text: "(Error) " + (err.message || "Failed to load chat session."), time: new Date() },
       ]);
+      setChatError(err.message || "Failed to load chat session.");
     } finally {
-      setHistoryLoading(false);
+      setChatLoading(false);
     }
   };
 
-  // Handle PDF download
+  // Handle document download
   const handleDownload = async (documentId: string, filename: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
+      const res = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
         headers: getAuthHeaders(),
       });
-      
-      if (!response.ok) {
-        throw new Error("Failed to download document");
+      if (!res.ok) {
+        throw new Error("Download failed");
       }
-      
-      const blob = await response.blob();
+      const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -341,41 +352,39 @@ export default function DocumentAnalysisPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error: any) {
-      console.error("Download failed:", error);
-      alert("Failed to download document");
+    } catch (err: any) {
+      console.error('Download error:', err);
+      alert('Failed to download document: ' + err.message);
     }
   };
 
-  // Handle PDF view
+  // Handle document view
   const handleView = async (documentId: string, filename: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
+      const res = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
         headers: getAuthHeaders(),
       });
-      
-      if (!response.ok) {
-        throw new Error("Failed to load document");
+      if (!res.ok) {
+        throw new Error("View failed");
       }
-      
-      const blob = await response.blob();
+      const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       setPdfUrl(url);
       setPdfFilename(filename);
       setPdfModalOpen(true);
-    } catch (error: any) {
-      console.error("View failed:", error);
-      alert("Failed to load document for viewing");
+    } catch (err: any) {
+      console.error('View error:', err);
+      alert('Failed to view document: ' + err.message);
     }
   };
 
-  // Close PDF modal
   const handleClosePdfModal = () => {
     setPdfModalOpen(false);
     if (pdfUrl) {
       window.URL.revokeObjectURL(pdfUrl);
       setPdfUrl("");
     }
+    setPdfFilename("");
   };
 
   // Determine current step for timeline
@@ -393,36 +402,27 @@ export default function DocumentAnalysisPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-6 md:px-12 py-4 flex flex-col gap-6 min-h-screen">
-      {/* Tabs */}
-      <div className="flex gap-4 mb-2">
-        <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'new' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
-          onClick={() => {
-            setTab('new');
-            setFile(null);
-            setApiResult(null);
-            setApiError(null);
-            setChat([
-              { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
-            ]);
-            setSessionId(null);
-            setDocumentId(null);
-            setInput("");
-          }}
-        >
-          New Analysis
-        </button>
-        <button
-          className={`px-4 py-2 rounded-t-lg font-semibold transition-all ${tab === 'history' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}`}
-          onClick={() => setTab('history')}
-        >
-          History
-        </button>
-      </div>
+      <Tabs value={tab} onValueChange={(value) => {
+        const newTab = value as 'new' | 'history';
+        setTab(newTab);
+        if (newTab === 'new') {
+          setFile(null);
+          setApiResult(null);
+          setApiError(null);
+          setChat([
+            { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
+          ]);
+          setSessionId(null);
+          setDocumentId(null);
+          setInput("");
+        }
+      }} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="new">New Analysis</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
 
-      {/* New Analysis Section */}
-      {tab === 'new' && (
-        <div className="space-y-6 flex-1">
+        <TabsContent value="new" className="space-y-6 flex-1">
           {/* Timeline Indicator */}
           <TimelineIndicator 
             currentStep={getCurrentStep()}
@@ -447,24 +447,26 @@ export default function DocumentAnalysisPage() {
           
           {/* Chat Interface for New Analysis - Show when document is processed */}
           {apiResult && (
-            <div className="w-full flex-1 min-h-[500px] flex flex-col">
+            <Card className="w-full flex-1 min-h-[500px] flex flex-col">
               {/* Document Header for New Analysis */}
-              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4 flex-shrink-0">
+              <CardHeader className="border-b">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold text-white break-words truncate">{apiResult.filename}</h2>
-                    <p className="text-sm text-slate-400 mt-1">
+                    <CardTitle className="text-lg break-words truncate">{apiResult.filename}</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Document processed successfully • {apiResult.total_tokens} tokens • {apiResult.total_chunks} chunks
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-green-400 text-sm font-medium">Ready for chat</span>
+                    <Badge variant="secondary" className="text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20">
+                      Ready for chat
+                    </Badge>
                   </div>
                 </div>
-              </div>
+              </CardHeader>
               
               {/* Chat Interface - Full width */}
-              <div className="flex-1">
+              <CardContent className="flex-1 p-0">
                 <ChatInterface
                   chat={chat}
                   onSend={handleSend}
@@ -477,15 +479,12 @@ export default function DocumentAnalysisPage() {
                   disabled={chatLoading || streaming}
                   continuingSession={false}
                 />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      )}
+        </TabsContent>
 
-      {/* History Section */}
-      {tab === 'history' && (
-        <div className="flex flex-col gap-6 flex-1">
+        <TabsContent value="history" className="flex flex-col gap-6 flex-1">
           {/* Timeline Indicator */}
           <TimelineIndicator 
             currentStep={getCurrentStep()}
@@ -500,9 +499,13 @@ export default function DocumentAnalysisPage() {
             onToggle={setDocumentsCollapsed}
           >
             {documentsLoading ? (
-              <div className="text-slate-300 text-center py-4">Loading documents...</div>
+              <Alert>
+                <AlertDescription>Loading documents...</AlertDescription>
+              </Alert>
             ) : documentsError ? (
-              <div className="text-red-400 text-center py-4">{documentsError}</div>
+              <Alert variant="destructive">
+                <AlertDescription>{documentsError}</AlertDescription>
+              </Alert>
             ) : (
               <DocumentHistoryList
                 history={documents.map(d => ({
@@ -529,49 +532,61 @@ export default function DocumentAnalysisPage() {
               onToggle={setSessionsCollapsed}
             >
               {sessionsLoading ? (
-                <div className="text-slate-300 text-center py-4">Loading chat sessions...</div>
+                <Alert>
+                  <AlertDescription>Loading chat sessions...</AlertDescription>
+                </Alert>
               ) : sessionsError ? (
-                <div className="text-red-400 text-center py-4">{sessionsError}</div>
+                <Alert variant="destructive">
+                  <AlertDescription>{sessionsError}</AlertDescription>
+                </Alert>
               ) : (
                 <div className="space-y-3">
                   {sessions.length === 0 && (
-                    <div className="text-slate-400 text-center py-4">No chat sessions found for this document.</div>
+                    <div className="text-muted-foreground text-center py-4">No chat sessions found for this document.</div>
                   )}
                   {sessions.map(session => (
-                    <button
+                    <Card 
                       key={session.session_id}
-                      className={`w-full flex flex-col sm:flex-row sm:items-center justify-between bg-slate-800/60 border border-ai-blue-500/20 rounded-lg px-4 py-3 hover:bg-ai-blue-500/10 transition-all gap-2 ${
-                        selectedSession?.session_id === session.session_id ? 'ring-2 ring-ai-blue-400' : ''
+                      className={`cursor-pointer hover:bg-muted/50 transition-all ${
+                        selectedSession?.session_id === session.session_id ? 'ring-2 ring-primary' : ''
                       }`}
                       onClick={() => handleSelectSession(session)}
                     >
-                      <div className="flex flex-col text-left flex-1 min-w-0">
-                        <span className="font-medium text-white text-sm sm:text-base">Session: {session.session_id.slice(0, 8)}...</span>
-                        <span className="text-xs text-slate-400 break-words">Created: {new Date(session.created_at).toLocaleString()}</span>
-                        <span className="text-xs text-slate-400 break-words">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
-                      </div>
-                      <span className="text-slate-400 text-xs sm:text-sm flex-shrink-0">{session.message_count} messages</span>
-                    </button>
+                      <CardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex flex-col text-left flex-1 min-w-0">
+                            <span className="font-medium text-foreground text-sm sm:text-base">Session: {session.session_id.slice(0, 8)}...</span>
+                            <span className="text-xs text-muted-foreground break-words">Created: {new Date(session.created_at).toLocaleString()}</span>
+                            <span className="text-xs text-muted-foreground break-words">Last Activity: {new Date(session.last_activity).toLocaleString()}</span>
+                          </div>
+                          <Badge variant="outline" className="text-xs sm:text-sm flex-shrink-0">
+                            {session.message_count} messages
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                   
                   {/* Pagination Controls for Sessions */}
                   {sessionTotalCount > sessionPageSize && (
                     <div className="flex justify-center items-center gap-2 mt-4">
-                      <button
-                        className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setSessionPage(sessionPage - 1)}
                         disabled={sessionPage === 0}
                       >
                         Prev
-                      </button>
-                      <span className="text-slate-300 text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
-                      <button
-                        className="px-3 py-1 rounded bg-slate-700 text-white disabled:opacity-50"
+                      </Button>
+                      <span className="text-foreground text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setSessionPage(sessionPage + 1)}
                         disabled={sessionPage + 1 >= Math.ceil(sessionTotalCount / sessionPageSize)}
                       >
                         Next
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -581,42 +596,39 @@ export default function DocumentAnalysisPage() {
 
           {/* Chat Interface - Takes full width at bottom */}
           {selectedSession && (
-            <div className="w-full flex-1 min-h-[500px] flex flex-col">
+            <Card className="w-full flex-1 min-h-[500px] flex flex-col">
               {/* Document Header */}
-              <div className="bg-slate-800/60 rounded-t-lg p-4 border-b border-slate-700/50 mb-4 flex-shrink-0">
+              <CardHeader className="border-b">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold text-white break-words truncate">{selectedDocument?.filename}</h2>
-                    <p className="text-sm text-slate-400 mt-1">
+                    <CardTitle className="text-lg break-words truncate">{selectedDocument?.filename}</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
                       Session: {selectedSession.session_id.slice(0, 8)}... • {selectedSession.message_count} messages
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleView(selectedDocument!.document_id, selectedDocument!.filename)}
-                      className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
                       title="View Document"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
-                    <button
+                      <Eye className="w-5 h-5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => handleDownload(selectedDocument!.document_id, selectedDocument!.filename)}
-                      className="p-2 rounded-lg hover:bg-ai-blue-500/20 text-ai-blue-400 hover:text-ai-blue-300 transition-colors"
                       title="Download Document"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </button>
+                      <Download className="w-5 h-5" />
+                    </Button>
                   </div>
                 </div>
-              </div>
+              </CardHeader>
               
               {/* Chat Interface - Full width */}
-              <div className="flex-1">
+              <CardContent className="flex-1 p-0">
                 <ChatInterface
                   chat={chat}
                   onSend={handleSend}
@@ -630,26 +642,24 @@ export default function DocumentAnalysisPage() {
                   continuingSession={true}
                   continuingSessionId={selectedSession.session_id}
                 />
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Empty State when no session is selected */}
           {selectedDocument && !selectedSession && (
-            <div className="w-full flex items-center justify-center text-slate-400 py-12">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/60 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+            <Card className="w-full flex items-center justify-center py-12">
+              <CardContent className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Select a Chat Session</h3>
-                <p className="text-sm">Choose a chat session from the list above to start conversing</p>
-              </div>
-            </div>
+                <p className="text-sm text-muted-foreground">Choose a chat session from the list above to start conversing</p>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      )}
+        </TabsContent>
+      </Tabs>
 
       {/* PDF Viewer Modal */}
       <PdfViewerModal

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface CaptchaProps {
   onValidated: (isValid: boolean) => void;
@@ -40,39 +44,44 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <label className="block text-sm font-medium mb-1 sm:mb-2 text-black dark:text-slate-300">
-        Security Verification
-      </label>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm">
-        <div className="flex items-center justify-between sm:justify-start gap-2">
-          <span className="text-base sm:text-lg font-mono text-black dark:text-white">
-            {num1} + {num2} = ?
-          </span>
-          <button
-            type="button"
-            onClick={handleRefresh}
-            className="p-1.5 sm:p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
-            title="Refresh CAPTCHA"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-        <input
-          type="number"
-          value={userAnswer}
-          onChange={(e) => handleAnswerChange(e.target.value)}
-          className="w-full sm:flex-1 px-3 py-2.5 sm:py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors placeholder-gray-500 dark:placeholder-slate-400 text-base"
-          placeholder="Enter answer"
-          required
-        />
-      </div>
+      <Label htmlFor="captcha">Security Verification</Label>
+      <Card>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <div className="flex items-center justify-between sm:justify-start gap-2">
+              <span className="text-base sm:text-lg font-mono text-foreground">
+                {num1} + {num2} = ?
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleRefresh}
+                className="p-1.5 sm:p-1 h-auto"
+                title="Refresh CAPTCHA"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+            <Input
+              type="number"
+              id="captcha"
+              value={userAnswer}
+              onChange={(e) => handleAnswerChange(e.target.value)}
+              className="w-full sm:flex-1"
+              placeholder="Enter answer"
+              required
+            />
+          </div>
+        </CardContent>
+      </Card>
       {userAnswer && !isValid && (
-        <div className="text-red-600 dark:text-red-400 text-sm">
+        <div className="text-destructive text-sm">
           Incorrect answer. Please try again.
         </div>
       )}
       {error && (
-        <div className="text-red-600 dark:text-red-400 text-sm">
+        <div className="text-destructive text-sm">
           {error}
         </div>
       )}

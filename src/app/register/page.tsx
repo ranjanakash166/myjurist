@@ -4,9 +4,14 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../components/AuthProvider";
-import { useTheme } from "../../components/ThemeProvider";
+import { useTheme } from "next-themes";
 import CompanyInfo from "../../components/CompanyInfo";
 import Captcha from "../../components/Captcha";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type RegistrationStep = "basic" | "otp" | "password";
 
@@ -110,31 +115,27 @@ export default function RegisterPage() {
 
   const renderBasicInfoStep = () => (
     <form onSubmit={handleSendOtp} className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-          Full Name
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="full_name">Full Name</Label>
+        <Input
           type="text"
+          id="full_name"
           name="full_name"
           value={formData.full_name}
           onChange={handleChange}
-          className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
           placeholder="Enter your full name"
           required
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-          Email Address
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="email">Email Address</Label>
+        <Input
           type="email"
+          id="email"
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
           placeholder="Enter your email"
           required
         />
@@ -143,47 +144,46 @@ export default function RegisterPage() {
       <Captcha onValidated={setCaptchaValid} />
 
       {error && (
-        <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 shadow-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading || !captchaValid}
-        className="w-full py-3 sm:py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base"
+        className="w-full"
       >
         {loading ? "Sending OTP..." : "Send OTP"}
-      </button>
+      </Button>
     </form>
   );
 
   const renderOtpStep = () => (
     <form onSubmit={handleVerifyOtp} className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-semibold text-black dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-foreground mb-2">
           Verify Your Email
         </h3>
-        <p className="text-gray-600 dark:text-slate-400">
+        <p className="text-muted-foreground">
           We've sent a {otpInfo?.otp_length || 6}-digit code to <strong>{formData.email}</strong>
         </p>
         {otpInfo && (
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Code expires in {otpInfo.expires_in_minutes} minutes
           </p>
         )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-          OTP Code
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="otp">OTP Code</Label>
+        <Input
           type="text"
+          id="otp"
           name="otp"
           value={formData.otp}
           onChange={handleChange}
-          className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors text-center text-lg tracking-widest shadow-sm placeholder-gray-500 dark:placeholder-slate-400"
+          className="text-center text-lg tracking-widest"
           placeholder="Enter OTP code"
           maxLength={otpInfo?.otp_length || 6}
           required
@@ -191,106 +191,103 @@ export default function RegisterPage() {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-          Password
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input
           type="password"
+          id="password"
           name="password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
           placeholder="Enter your password"
           required
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2 text-black dark:text-slate-300">
-          Confirm Password
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Input
           type="password"
+          id="confirmPassword"
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
-          className="w-full px-3 sm:px-4 py-3 sm:py-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-black dark:text-white focus:border-blue-500 dark:focus:border-ai-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-ai-blue-500/20 focus:outline-none transition-colors shadow-sm placeholder-gray-500 dark:placeholder-slate-400 text-base"
           placeholder="Confirm your password"
           required
         />
       </div>
 
       {error && (
-        <div className="text-red-600 dark:text-red-400 text-sm text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800 shadow-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading}
-        className="w-full py-3 sm:py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base"
+        className="w-full"
       >
         {loading ? "Verifying..." : "Verify & Create Account"}
-      </button>
+      </Button>
     </form>
   );
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-white dark:bg-slate-900">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Left Side - Company Info */}
       <div className="hidden lg:block">
         <CompanyInfo />
       </div>
 
       {/* Right Side - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-white dark:bg-slate-900">
-        <div className="w-full max-w-md">
-          {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                <img 
-                  src="/images/myjurist-logo.png" 
-                  alt="My Jurist" 
-                  className="w-full h-full object-contain"
-                />
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            {/* Mobile Header */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+                  <img 
+                    src="/images/myjurist-logo.png" 
+                    alt="My Jurist" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="text-2xl font-bold text-foreground">My Jurist</span>
               </div>
-              <span className="text-2xl font-bold gradient-text-animate">My Jurist</span>
+              <p className="text-muted-foreground text-sm">
+                Next Generation AI-Powered Legal Intelligence
+              </p>
             </div>
-            <p className="text-gray-600 dark:text-slate-400 text-sm">
-              Next Generation AI-Powered Legal Intelligence
-            </p>
-          </div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-black dark:text-white">
-              {step === "basic" ? "Create Account" : "Verify Email"}
-            </h1>
-            <p className="text-gray-600 dark:text-slate-400">
-              {step === "basic" 
-                ? "Join My Jurist and unlock AI-powered legal intelligence"
-                : "Enter the verification code sent to your email"
-              }
-            </p>
-          </div>
+            <div className="text-center">
+              <CardTitle className="text-3xl font-bold mb-2 text-foreground">
+                Create Account
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Join My Jurist and transform your legal due diligence
+              </p>
+            </div>
+          </CardHeader>
 
-          {step === "basic" && renderBasicInfoStep()}
-          {step === "otp" && renderOtpStep()}
+          <CardContent>
+            {step === "basic" && renderBasicInfoStep()}
+            {step === "otp" && renderOtpStep()}
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-600 dark:text-slate-400">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-blue-600 hover:text-blue-700 dark:text-ai-blue-400 dark:hover:text-ai-blue-300 font-medium transition-colors"
-              >
-                Sign in here
-              </Link>
-            </p>
-          </div>
-        </div>
+            <div className="mt-8 text-center">
+              <p className="text-muted-foreground">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                >
+                  Sign in here
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
