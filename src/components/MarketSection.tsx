@@ -1,12 +1,11 @@
 import React from 'react';
 import { TrendingUp, Shield, DollarSign, LucideIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface MarketStat {
   icon: LucideIcon;
   value: string;
   description: string;
-  bgColor: string;
-  textColor: string;
 }
 
 const MarketSection: React.FC = () => {
@@ -14,69 +13,68 @@ const MarketSection: React.FC = () => {
     {
       icon: DollarSign,
       value: "$1T",
-      description: "Global legal services industry",
-      bgColor: "bg-blue-500",
-      textColor: "text-blue-400"
+      description: "Global legal services industry"
     },
     {
       icon: TrendingUp,
       value: "Surging",
-      description: "Demand in patent and IP protection",
-      bgColor: "bg-purple-500",
-      textColor: "text-purple-400"
+      description: "Demand in patent and IP protection"
     },
     {
       icon: Shield,
       value: "Increased",
-      description: "Regulatory pressure for local, secure AI",
-      bgColor: "bg-cyan-500",
-      textColor: "text-cyan-400"
+      description: "Regulatory pressure for local, secure AI"
     }
   ];
 
   return (
-    <section id="market" className="py-20 bg-slate-200 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 text-center">
+    <section id="market" className="section-legal bg-muted/30">
+      <div className="container-legal text-center">
         <div className="mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+          <h2 className="text-legal-title text-foreground mb-4">
             A Rapidly Expanding Legal Tech Market
           </h2>
-          <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
           {marketStats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
-              <div
-                key={index}
-                className="bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
-              >
-                <div className={`h-16 w-16 ${stat.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                  <IconComponent className="h-8 w-8 text-white" />
-                </div>
-                <div className={`text-4xl font-bold ${stat.textColor} mb-4 text-slate-900 dark:text-white`}>
-                  {stat.value}
-                </div>
-                <p className="text-slate-800 dark:text-gray-300 text-xl leading-relaxed">
-                  {stat.description}
-                </p>
-              </div>
+              <Card key={index} className="document-card hover-scale">
+                <CardHeader>
+                  <div className="h-16 w-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <IconComponent className="h-8 w-8 text-primary-foreground" />
+                  </div>
+                  <CardTitle className="text-4xl font-bold text-foreground mb-4">
+                    {stat.value}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-legal-body text-muted-foreground leading-relaxed">
+                    {stat.description}
+                  </p>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
         
         {/* Market opportunity highlight */}
-        <div className="mt-16 bg-white border border-slate-300 shadow-lg dark:bg-gray-800 dark:border-gray-700 p-8 rounded-2xl text-slate-700 dark:text-gray-300">
-          <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">
-            Seizing the Opportunity
-          </h3>
-          <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed max-w-3xl mx-auto">
-            With the legal tech market expanding rapidly and increasing demand for secure, 
-            locally-hosted AI solutions, My Jurist is positioned to capture a significant 
-            share of this trillion-dollar industry.
-          </p>
-        </div>
+        <Card className="mt-16 document-card">
+          <CardHeader>
+            <CardTitle className="text-legal-heading text-foreground">
+              Seizing the Opportunity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-legal-body text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+              With the legal tech market expanding rapidly and increasing demand for secure, 
+              locally-hosted AI solutions, My Jurist is positioned to capture a significant 
+              share of this trillion-dollar industry.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

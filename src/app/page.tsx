@@ -42,7 +42,7 @@ const MyJuristApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-slate-800 dark:text-white overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Header 
         navigation={navigation} 
         activeSection={activeSection} 

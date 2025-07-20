@@ -1,12 +1,12 @@
 import React from 'react';
 import { Users, Globe, Award, Target, LucideIcon } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 interface Strategy {
   icon: LucideIcon;
   title: string;
   description: string;
-  bgColor: string;
-  textColor: string;
 }
 
 const StrategySection: React.FC = () => {
@@ -14,88 +14,87 @@ const StrategySection: React.FC = () => {
     {
       icon: Users,
       title: "Direct Outreach",
-      description: "Proactive engagement with leading law firms and corporate legal departments.",
-      bgColor: "bg-blue-500",
-      textColor: "text-blue-400"
+      description: "Proactive engagement with leading law firms and corporate legal departments."
     },
     {
       icon: Globe,
       title: "Partnership Network",
-      description: "Strategic alliances with regulatory bodies and global patent offices.",
-      bgColor: "bg-purple-500",
-      textColor: "text-purple-400"
+      description: "Strategic alliances with regulatory bodies and global patent offices."
     },
     {
       icon: Award,
       title: "Thought Leadership",
-      description: "Industry visibility via webinars, whitepapers, and AI law conferences.",
-      bgColor: "bg-cyan-500",
-      textColor: "text-cyan-400"
+      description: "Industry visibility via webinars, whitepapers, and AI law conferences."
     }
   ];
 
   return (
-    <section id="strategy" className="py-20 bg-slate-100 dark:bg-gray-800">
-      <div className="max-w-6xl mx-auto px-4">
+    <section id="strategy" className="section-legal bg-background">
+      <div className="container-legal">
         <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:text-white">
+          <h2 className="text-legal-title text-foreground mb-4">
             Strategic Pathways to Market Leadership
           </h2>
-          <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
           {strategies.map((strategy, index) => {
             const IconComponent = strategy.icon;
             return (
-              <div
-                key={index}
-                className="bg-white border border-slate-300 shadow-lg rounded-2xl p-8 text-slate-700 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 text-center"
-              >
-                <div className={`h-16 w-16 ${strategy.bgColor} rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-                  <IconComponent className="h-8 w-8 text-white" />
-                </div>
-                <h3 className={`text-2xl font-bold mb-4 ${strategy.textColor} text-slate-900 dark:text-white`}>
-                  {strategy.title}
-                </h3>
-                <p className="text-slate-800 dark:text-gray-300 leading-relaxed">
-                  {strategy.description}
-                </p>
-              </div>
+              <Card key={index} className="document-card hover-scale text-center">
+                <CardHeader>
+                  <div className="h-16 w-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <IconComponent className="h-8 w-8 text-primary-foreground" />
+                  </div>
+                  <CardTitle className="text-legal-heading text-foreground">
+                    {strategy.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-legal-body text-muted-foreground leading-relaxed">
+                    {strategy.description}
+                  </p>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
         
         {/* Strategy roadmap */}
-        <div className="mt-16 bg-white border border-slate-300 shadow-lg dark:bg-gray-900 dark:border-gray-700 p-8 rounded-2xl text-slate-700 dark:text-gray-300">
-          <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white text-center">
-            Comprehensive Go-to-Market Strategy
-          </h3>
-          <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed text-center max-w-4xl mx-auto mb-8">
-            Our multi-faceted approach combines direct market penetration with strategic partnerships 
-            and thought leadership to establish My Jurist as the definitive AI solution for legal due diligence.
-          </p>
-          
-          {/* Strategy timeline */}
-          <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
-            <div className="flex items-center">
-              <Target className="h-6 w-6 text-blue-400 mr-2" />
-              <span className="text-gray-300">Q1: Market Entry</span>
+        <Card className="mt-16 document-card">
+          <CardHeader>
+            <CardTitle className="text-legal-heading text-foreground text-center">
+              Comprehensive Go-to-Market Strategy
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-legal-body text-muted-foreground leading-relaxed text-center max-w-4xl mx-auto mb-8">
+              Our multi-faceted approach combines direct market penetration with strategic partnerships 
+              and thought leadership to establish My Jurist as the definitive AI solution for legal due diligence.
+            </p>
+            
+            {/* Strategy timeline */}
+            <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+              <div className="flex items-center">
+                <Target className="h-6 w-6 text-primary mr-2" />
+                <span className="text-muted-foreground">Q1: Market Entry</span>
+              </div>
+              <Separator orientation="horizontal" className="hidden md:block w-8" />
+              <Separator orientation="vertical" className="md:hidden h-8" />
+              <div className="flex items-center">
+                <Target className="h-6 w-6 text-accent mr-2" />
+                <span className="text-muted-foreground">Q2: Partnership Growth</span>
+              </div>
+              <Separator orientation="horizontal" className="hidden md:block w-8" />
+              <Separator orientation="vertical" className="md:hidden h-8" />
+              <div className="flex items-center">
+                <Target className="h-6 w-6 text-primary mr-2" />
+                <span className="text-muted-foreground">Q3: Market Leadership</span>
+              </div>
             </div>
-            <div className="hidden md:block w-8 h-0.5 bg-blue-500"></div>
-            <div className="md:hidden w-0.5 h-8 bg-blue-500"></div>
-            <div className="flex items-center">
-              <Target className="h-6 w-6 text-purple-400 mr-2" />
-              <span className="text-gray-300">Q2: Partnership Growth</span>
-            </div>
-            <div className="hidden md:block w-8 h-0.5 bg-purple-500"></div>
-            <div className="md:hidden w-0.5 h-8 bg-purple-500"></div>
-            <div className="flex items-center">
-              <Target className="h-6 w-6 text-cyan-400 mr-2" />
-              <span className="text-gray-300">Q3: Market Leadership</span>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

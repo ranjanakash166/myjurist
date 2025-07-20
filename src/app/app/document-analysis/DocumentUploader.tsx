@@ -1,5 +1,9 @@
 import React, { useRef } from "react";
-import { Paperclip } from "lucide-react";
+import { Paperclip, Upload, FileText } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface DocumentUploaderProps {
   file: File | null;
@@ -19,37 +23,80 @@ export default function DocumentUploader({ file, onFileChange, onProcess, proces
   };
 
   return (
-    <div className="glass-effect rounded-2xl p-8 flex flex-col items-center justify-center w-full">
-      <h2 className="text-xl font-bold gradient-text-animate mb-6">Document Uploader</h2>
-      <div className="w-full flex flex-col sm:flex-row items-center gap-4 mb-4">
-        <div className="flex-1 w-full flex items-center gap-3 bg-slate-800/60 border border-ai-blue-500/30 rounded-lg px-4 py-3 min-h-[48px]">
-          <Paperclip className="w-6 h-6 text-ai-blue-400" />
-          <span className={`truncate text-base ${file ? 'text-white' : 'text-slate-400'}`}>{file ? file.name : "No file selected"}</span>
+    <Card className="w-full">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Upload className="w-5 h-5" />
+          Upload Document
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* File Selection Area */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 bg-muted/30 border border-border rounded-lg px-4 py-3 min-h-[56px]">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <FileText className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground">
+                {file ? file.name : "No file selected"}
+              </div>
+              {file && (
+                <div className="text-xs text-muted-foreground">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </div>
+              )}
+            </div>
+            {file && (
+              <Badge variant="secondary" className="flex-shrink-0">
+                Ready
+              </Badge>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-1"
+            >
+              <Paperclip className="w-4 h-4 mr-2" />
+              {file ? "Change File" : "Choose File"}
+            </Button>
+            <Button
+              onClick={onProcess}
+              disabled={!file || processing}
+              className="flex-1"
+            >
+              {processing ? (
+                <>
+                  <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Process
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-        <button
-          className="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors w-full sm:w-auto"
-          onClick={() => fileInputRef.current?.click()}
-          type="button"
-        >
-          {file ? "Change File" : "Choose File"}
-        </button>
+        
         <input
           type="file"
           ref={fileInputRef}
           className="hidden"
           onChange={handleChange}
+          accept=".pdf,.doc,.docx,.txt"
         />
-      </div>
-      <button
-        className="w-full max-w-md py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 mt-2"
-        onClick={onProcess}
-        disabled={!file || processing}
-      >
-        {processing ? "Processing..." : "Process Document"}
-      </button>
-      {error && (
-        <div className="mt-4 w-full bg-red-900/80 text-red-300 rounded-lg px-4 py-3 text-center">{error}</div>
-      )}
-    </div>
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
   );
 } 
