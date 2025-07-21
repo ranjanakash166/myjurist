@@ -602,43 +602,39 @@ export default function PatentAnalysisPage() {
                       {reportHistory.map((report) => (
                         <Card 
                           key={report.report_id} 
-                          className="cursor-pointer hover:bg-muted/50 transition-colors"
+                          className="cursor-pointer hover:bg-muted/50 transition-colors w-full max-w-full"
                           onClick={() => handleReportClick(report.report_id)}
                         >
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <FileBarChart className="w-5 h-5 text-primary" />
-                                  <h3 className="text-lg font-semibold text-foreground">{report.invention_title}</h3>
-                                  <Badge variant="secondary">
-                                    {report.report_type}
-                                  </Badge>
+                          <CardContent className="px-2 py-4 sm:p-6 w-full max-w-full">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 w-full max-w-full">
+                              <div className="flex-1 min-w-0 w-full max-w-full">
+                                <div className="flex flex-wrap items-center gap-2 mb-2 w-full max-w-full">
+                                  <FileBarChart className="w-5 h-5 text-primary flex-shrink-0" />
+                                  <h3 className="text-lg font-semibold text-foreground break-words w-full max-w-full">{report.invention_title}</h3>
+                                  <Badge variant="secondary" className="whitespace-nowrap">{report.report_type}</Badge>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm w-full max-w-full">
+                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
                                     <User className="w-4 h-4" />
-                                    <span>Applicant: {report.applicant_name}</span>
+                                    <span className="break-words w-full max-w-full">Applicant: {report.applicant_name}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
                                     <Clock className="w-4 h-4" />
-                                    <span>Generated: {new Date(report.generated_at).toLocaleString()}</span>
+                                    <span className="break-words w-full max-w-full">Generated: {new Date(report.generated_at).toLocaleString()}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
                                     <FileText className="w-4 h-4" />
-                                    <span>Words: {report.word_count.toLocaleString()}</span>
+                                    <span className="break-words w-full max-w-full">Words: {report.word_count.toLocaleString()}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
                                     <FileText className="w-4 h-4" />
-                                    <span>Characters: {report.character_count.toLocaleString()}</span>
+                                    <span className="break-words w-full max-w-full">Characters: {report.character_count.toLocaleString()}</span>
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  ID: {report.report_id.slice(0, 8)}...
-                                </Badge>
-                                <div className="text-muted-foreground text-sm">Click to view details</div>
+                              <div className="flex flex-row sm:flex-col items-center gap-2 flex-shrink-0 mt-2 sm:mt-0">
+                                <Badge variant="outline" className="text-xs break-all w-full max-w-[120px] text-center">ID: {report.report_id.slice(0, 8)}...</Badge>
+                                <div className="text-muted-foreground text-xs sm:text-sm text-center w-full max-w-[120px]">Click to view details</div>
                               </div>
                             </div>
                           </CardContent>

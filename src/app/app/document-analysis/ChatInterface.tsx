@@ -43,21 +43,21 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
     <div className="flex flex-col h-full">
       {/* Banner for continuing old chat */}
       {continuingSession && continuingSessionId && (
-        <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700/30 text-blue-800 dark:text-blue-100 text-sm font-semibold text-center">
-          Continuing previous chat session: <span className="font-mono text-blue-900 dark:text-blue-200">{continuingSessionId.slice(0, 8)}...</span>
+        <div className="mb-3 p-3 rounded-lg bg-neutral-900/80 border border-neutral-700 text-neutral-100 text-sm font-semibold text-center">
+          Continuing previous chat session: <span className="font-mono text-neutral-300">{continuingSessionId.slice(0, 8)}...</span>
         </div>
       )}
 
       {/* Scrollable Chat Area - Takes remaining space */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900/40 rounded-lg p-4 transition-all border border-gray-200 dark:border-gray-700/30">
+      <div className="flex-1 overflow-y-auto bg-neutral-950/90 rounded-lg p-4 transition-all border border-neutral-800">
         {chat.length === 0 && !loading && !streaming && (
-          <div className="flex items-center justify-center h-full text-black dark:text-gray-400">
+          <div className="flex items-center justify-center h-full text-neutral-400">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800/60 rounded-full flex items-center justify-center border border-gray-300 dark:border-gray-600/30">
-                <Search className="w-8 h-8 text-black dark:text-gray-300" />
+              <div className="w-16 h-16 mx-auto mb-4 bg-neutral-900 rounded-full flex items-center justify-center border border-neutral-800">
+                <Search className="w-8 h-8 text-neutral-600" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-black dark:text-gray-200">Start a Conversation</h3>
-              <p className="text-sm text-black dark:text-gray-400">Ask questions about your document to get started</p>
+              <h3 className="text-lg font-semibold mb-2 text-neutral-200">Start a Conversation</h3>
+              <p className="text-sm text-neutral-400">Ask questions about your document to get started</p>
             </div>
           </div>
         )}
@@ -68,24 +68,24 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
             className={`mb-4 flex items-end gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.sender === "system" && (
-              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
                 AI
               </div>
             )}
             <div
               className={`px-4 py-3 rounded-2xl max-w-md text-sm shadow-lg transition-all duration-200 ${
                 msg.sender === "user"
-                  ? "bg-blue-600 dark:bg-blue-600 text-white rounded-br-md"
-                  : "bg-white dark:bg-gray-800 text-black dark:text-gray-100 rounded-bl-md border border-gray-200 dark:border-gray-600"
+                  ? "bg-neutral-800 text-neutral-100 rounded-br-md border border-neutral-700"
+                  : "bg-neutral-900 text-neutral-200 rounded-bl-md border border-neutral-800"
               }`}
             >
               <div className="whitespace-pre-wrap">{msg.text}</div>
-              <div className={`text-xs mt-2 ${msg.sender === "user" ? "text-blue-100" : "text-black dark:text-gray-400"}`}>
+              <div className={`text-xs mt-2 ${msg.sender === "user" ? "text-neutral-400" : "text-neutral-500"}`}>
                 {formatTime(new Date(msg.time))}
               </div>
             </div>
             {msg.sender === "user" && (
-              <div className="flex-shrink-0 w-8 h-8 bg-gray-600 dark:bg-gray-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              <div className="flex-shrink-0 w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-800">
                 U
               </div>
             )}
@@ -95,16 +95,16 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
         {/* Simulated streaming bubble */}
         {streaming && (
           <div className="mb-4 flex items-end gap-3 justify-start">
-            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
               AI
             </div>
-            <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-white dark:bg-gray-800 text-black dark:text-gray-100 shadow-lg border border-gray-200 dark:border-gray-600 rounded-bl-md">
+            <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-neutral-900 text-neutral-200 shadow-lg border border-neutral-800 rounded-bl-md">
               <div className="whitespace-pre-wrap">{streamedText || <span className="opacity-60">Typing...</span>}</div>
-              <div className="text-xs text-black dark:text-gray-400 mt-2 flex items-center gap-1">
+              <div className="text-xs text-neutral-500 mt-2 flex items-center gap-1">
                 <div className="flex gap-1">
-                  <div className="w-1 h-1 bg-black dark:bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-1 h-1 bg-black dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-1 h-1 bg-black dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-1 h-1 bg-neutral-500 rounded-full animate-bounce"></div>
+                  <div className="w-1 h-1 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-1 h-1 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             </div>
@@ -113,41 +113,39 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
         
         {loading && !streaming && (
           <div className="mb-4 flex items-end gap-3 justify-start">
-            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 dark:bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
               AI
             </div>
-            <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-white dark:bg-gray-800 text-black dark:text-gray-100 shadow-lg border border-gray-200 dark:border-gray-600 rounded-bl-md">
+            <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-neutral-900 text-neutral-200 shadow-lg border border-neutral-800 rounded-bl-md">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-black dark:border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-neutral-500 border-t-transparent rounded-full animate-spin"></div>
                 <span>Generating response...</span>
               </div>
             </div>
           </div>
         )}
-        
         <div ref={chatEndRef} />
       </div>
       
       {/* Input Area - Fixed at bottom */}
-      <div className="bg-white dark:bg-gray-950/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700/50 p-4 shadow-xl mt-4 rounded-lg">
+      <div className="bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 p-4 shadow-xl mt-4 rounded-lg">
         <form onSubmit={handleSubmit} className="w-full">
           {/* Main Input Field */}
           <div className="relative mb-3">
             <input
               ref={inputRef}
               type="text"
-              className="w-full px-4 py-4 pr-16 rounded-2xl bg-white dark:bg-gray-900/80 border border-gray-300 dark:border-gray-600/50 focus:border-blue-500 dark:focus:border-blue-500/50 focus:outline-none text-black dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 text-base shadow-lg transition-all duration-200"
+              className="w-full px-4 py-4 pr-16 rounded-2xl bg-neutral-900 border border-neutral-800 focus:border-neutral-600 focus:outline-none text-neutral-100 placeholder-neutral-500 text-base shadow-lg transition-all duration-200"
               placeholder="Ask a follow-up question..."
               value={input}
               onChange={e => setInput(e.target.value)}
               disabled={disabled}
               autoFocus
             />
-            
             {/* Send Button */}
             <button
               type="submit"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-3 rounded-xl bg-neutral-800 text-neutral-100 hover:bg-neutral-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               disabled={disabled || !input.trim()}
             >
               <Send className="w-5 h-5" />
@@ -160,39 +158,38 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
                 title="Search"
               >
                 <Search className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
                 title="Generate"
               >
                 <Zap className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
                 title="Visual Search"
               >
                 <Eye className="w-4 h-4" />
               </button>
             </div>
-
             {/* Right Group - Action Icons */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
                 title="Attach File"
               >
                 <Paperclip className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800/50 hover:bg-gray-200 dark:hover:bg-gray-700/50 text-black dark:text-gray-300 hover:text-black dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600/30 shadow-md hover:shadow-lg"
+                className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
                 title="Voice Input"
               >
                 <Mic className="w-4 h-4" />
@@ -202,7 +199,7 @@ export default function ChatInterface({ chat, onSend, input, setInput, loading, 
 
           {/* Error Message */}
           {error && (
-            <div className="mt-3 w-full bg-red-50 dark:bg-red-900/80 text-red-700 dark:text-red-200 rounded-xl px-4 py-3 text-center text-sm border border-red-200 dark:border-red-700/50 shadow-lg">
+            <div className="mt-3 w-full bg-red-900/80 text-red-200 rounded-xl px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">
               {error}
             </div>
           )}
