@@ -483,6 +483,19 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  // Timeline/collapsible logic for new analysis flow
+  const steps = [
+    { key: 'create', label: 'Create Chat' },
+    { key: 'upload', label: 'Upload Documents' },
+    { key: 'select', label: 'Select Documents & Start Session' },
+    { key: 'chat', label: 'Chat' },
+  ];
+  const currentStepIndex = createdSession ? 3 : (sessionSuccess ? 2 : (uploadSuccess ? 1 : 0));
+  const [collapsedSteps, setCollapsedSteps] = useState<{[key: string]: boolean}>({});
+  const handleToggleStep = (key: string) => {
+    setCollapsedSteps(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   // Determine current step for timeline
   const getCurrentStep = () => {
     if (tab === 'new') {
@@ -534,6 +547,18 @@ export default function DocumentAnalysisPage() {
 
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (uploadSuccess) {
+      setCollapsedSteps(prev => ({ ...prev, upload: true }));
+    }
+  }, [uploadSuccess]);
+
+  useEffect(() => {
+    if (sessionSuccess) {
+      setCollapsedSteps(prev => ({ ...prev, select: true, chat: false }));
+    }
+  }, [sessionSuccess]);
+
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
       <Tabs value={tab} onValueChange={(value) => {
@@ -559,11 +584,11 @@ export default function DocumentAnalysisPage() {
 
         <TabsContent value="new" className="space-y-6 flex-1">
           {/* Timeline Indicator */}
-          <TimelineIndicator 
+          {/* <TimelineIndicator 
             currentStep={getCurrentStep()}
             selectedDocument={selectedDocument?.filename}
             selectedChat={selectedSession?.session_id}
-          />
+          /> */}
 
           {/* Document Upload Section */}
           {/* <CollapsibleSection
@@ -618,204 +643,245 @@ export default function DocumentAnalysisPage() {
           )}
 
           {tab === 'new' && (
-            <div className="space-y-6 flex-1">
-              {/* Timeline/Progress Indicator */}
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <div className={`flex items-center gap-2 ${newAnalysisStep === 'create' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>1. Create Chat</div>
-                <div className="w-6 h-0.5 bg-border rounded-full" />
-                <div className={`flex items-center gap-2 ${newAnalysisStep === 'upload' ? 'font-bold text-primary' : 'text-muted-foreground'}`}>2. Upload Documents</div>
+            <div className="w-full">
+              {/* Timeline */}
+              <div className="flex w-full justify-between items-center mb-6">
+                {steps.map((step, idx) => (
+                  <React.Fragment key={step.key}>
+                    <div className={`flex flex-col items-center flex-1 min-w-0 ${idx < currentStepIndex ? 'text-primary' : idx === currentStepIndex ? 'font-bold text-primary' : 'text-muted-foreground'}`}
+                         style={{ minWidth: 0 }}>
+                      <div className={`rounded-full w-8 h-8 flex items-center justify-center mb-1 ${idx < currentStepIndex ? 'bg-primary text-white' : idx === currentStepIndex ? 'bg-primary/80 text-white' : 'bg-muted text-muted-foreground'}`}>{idx + 1}</div>
+                      <span className="text-xs text-center break-words w-full max-w-[80px]">{step.label}</span>
+                    </div>
+                    {idx < steps.length - 1 && <div className="flex-1 h-1 bg-border mx-1" />}
+                  </React.Fragment>
+                ))}
               </div>
-              {/* Step 1: Create New Chat */}
-              {newAnalysisStep === 'create' && !createdChat && (
-                <div className="max-w-lg w-full mx-auto">
-                  <div className="mb-6">
-                    <h2 className="text-xl font-bold mb-2 text-foreground">Start a New Analysis</h2>
-                    <p className="text-muted-foreground text-sm">Create a new chat to begin your document analysis workflow.</p>
-                  </div>
-                  <form onSubmit={handleCreateChat} className="space-y-4">
-                    <div>
-                      <label htmlFor="chat-name" className="block text-sm font-medium mb-1">Chat Name</label>
-                      <input
-                        id="chat-name"
-                        type="text"
-                        className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Enter a name for this chat"
-                        value={newChatName}
-                        onChange={e => setNewChatName(e.target.value)}
-                        required
-                        maxLength={64}
-                      />
+
+              {/* Step 1: Create Chat */}
+              <CollapsibleSection
+                title="1. Create Chat"
+                isCollapsed={currentStepIndex > 0 && collapsedSteps['create'] !== false}
+                onToggle={() => handleToggleStep('create')}
+                className="w-full"
+              >
+                {newAnalysisStep === 'create' && !createdChat && (
+                  <div className="max-w-lg w-full mx-auto">
+                    <div className="mb-6">
+                      <h2 className="text-xl font-bold mb-2 text-foreground">Start a New Analysis</h2>
+                      <p className="text-muted-foreground text-sm">Create a new chat to begin your document analysis workflow.</p>
                     </div>
-                    <div>
-                      <label htmlFor="chat-desc" className="block text-sm font-medium mb-1">Description</label>
-                      <textarea
-                        id="chat-desc"
-                        className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-h-[80px] resize-y"
-                        placeholder="Describe the purpose of this analysis (optional)"
-                        value={newChatDescription}
-                        onChange={e => setNewChatDescription(e.target.value)}
-                        maxLength={256}
-                      />
-                    </div>
-                    {newChatError && (
-                      <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">
-                        {newChatError}
+                    <form onSubmit={handleCreateChat} className="space-y-4">
+                      <div>
+                        <label htmlFor="chat-name" className="block text-sm font-medium mb-1">Chat Name</label>
+                        <input
+                          id="chat-name"
+                          type="text"
+                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter a name for this chat"
+                          value={newChatName}
+                          onChange={e => setNewChatName(e.target.value)}
+                          required
+                          maxLength={64}
+                        />
                       </div>
-                    )}
-                    {newChatSuccess && (
-                      <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">
-                        Chat created successfully!
+                      <div>
+                        <label htmlFor="chat-desc" className="block text-sm font-medium mb-1">Description</label>
+                        <textarea
+                          id="chat-desc"
+                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-h-[80px] resize-y"
+                          placeholder="Describe the purpose of this analysis (optional)"
+                          value={newChatDescription}
+                          onChange={e => setNewChatDescription(e.target.value)}
+                          maxLength={256}
+                        />
                       </div>
-                    )}
-                    <button
-                      type="submit"
-                      className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
-                      disabled={newChatLoading || !newChatName.trim()}
-                    >
-                      {newChatLoading ? "Creating..." : "Create Chat"}
-                    </button>
-                  </form>
-                </div>
-              )}
-              {/* Step 2 and beyond will go here after chat is created */}
-              {newAnalysisStep === 'upload' && createdChat && (
-                <div className="max-w-lg w-full mx-auto">
-                  <div className="mb-6">
-                    <h2 className="text-xl font-bold mb-2 text-foreground">Upload Documents</h2>
-                    <p className="text-muted-foreground text-sm">Upload one or more documents to add to this chat.</p>
-                  </div>
-                  <form onSubmit={handleUploadDocuments} className="space-y-4">
-                    <div>
-                      <label htmlFor="doc-upload" className="block text-sm font-medium mb-1">Select Documents</label>
-                      <input
-                        id="doc-upload"
-                        type="file"
-                        multiple
-                        className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
-                        onChange={handleFileChange}
-                        disabled={uploading}
-                      />
-                      {uploadFiles.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {uploadFiles.map((file, idx) => (
-                            <span key={idx} className="inline-block bg-muted px-3 py-1 rounded text-xs text-foreground/80 max-w-[160px] truncate" title={file.name}>{file.name}</span>
-                          ))}
+                      {newChatError && (
+                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">
+                          {newChatError}
                         </div>
                       )}
+                      {newChatSuccess && (
+                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">
+                          Chat created successfully!
+                        </div>
+                      )}
+                      <button
+                        type="submit"
+                        className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+                        disabled={newChatLoading || !newChatName.trim()}
+                      >
+                        {newChatLoading ? "Creating..." : "Create Chat"}
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              {/* Step 2: Upload Documents */}
+              <CollapsibleSection
+                title="2. Upload Documents"
+                isCollapsed={currentStepIndex > 1 && collapsedSteps['upload'] !== false}
+                onToggle={() => handleToggleStep('upload')}
+                className="w-full"
+              >
+                {newAnalysisStep === 'upload' && createdChat && (
+                  <div className="max-w-lg w-full mx-auto">
+                    <div className="mb-6">
+                      <h2 className="text-xl font-bold mb-2 text-foreground">Upload Documents</h2>
+                      <p className="text-muted-foreground text-sm">Upload one or more documents to add to this chat.</p>
                     </div>
-                    {uploadError && (
-                      <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{uploadError}</div>
+                    <form onSubmit={handleUploadDocuments} className="space-y-4">
+                      <div>
+                        <label htmlFor="doc-upload" className="block text-sm font-medium mb-1">Select Documents</label>
+                        <input
+                          id="doc-upload"
+                          type="file"
+                          multiple
+                          className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+                          onChange={handleFileChange}
+                          disabled={uploading}
+                        />
+                        {uploadFiles.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {uploadFiles.map((file, idx) => (
+                              <span key={idx} className="inline-block bg-muted px-3 py-1 rounded text-xs text-foreground/80 max-w-[160px] truncate" title={file.name}>{file.name}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {uploadError && (
+                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{uploadError}</div>
+                      )}
+                      {uploadSuccess && (
+                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Documents uploaded successfully!</div>
+                      )}
+                      <button
+                        type="submit"
+                        className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+                        disabled={uploading || uploadFiles.length === 0}
+                      >
+                        {uploading ? 'Uploading...' : 'Upload Documents'}
+                      </button>
+                    </form>
+                    {/* Uploaded Documents List */}
+                    {uploadedDocs.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="text-base font-semibold mb-2 text-foreground">Uploaded Documents</h3>
+                        <ul className="space-y-2">
+                          {uploadedDocs.map((doc, idx) => (
+                            <li key={doc.id || idx} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
+                              <span className="flex-shrink-0 w-4 h-4 inline-block"><FileText className="w-4 h-4 text-primary" /></span>
+                              <span className="break-all flex-1">{doc.filename}</span>
+                              <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
+                              <span className="text-xs text-muted-foreground">{doc.processing_status}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
-                    {uploadSuccess && (
-                      <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Documents uploaded successfully!</div>
-                    )}
-                    <button
-                      type="submit"
-                      className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
-                      disabled={uploading || uploadFiles.length === 0}
-                    >
-                      {uploading ? 'Uploading...' : 'Upload Documents'}
-                    </button>
-                  </form>
-                  {/* Uploaded Documents List */}
-                  {uploadedDocs.length > 0 && (
-                    <div className="mt-6">
-                      <h3 className="text-base font-semibold mb-2 text-foreground">Uploaded Documents</h3>
-                      <ul className="space-y-2">
-                        {uploadedDocs.map((doc, idx) => (
-                          <li key={doc.id || idx} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
-                            <span className="flex-shrink-0 w-4 h-4 inline-block"><FileText className="w-4 h-4 text-primary" /></span>
-                            <span className="break-all flex-1">{doc.filename}</span>
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              {/* Step 3: Select Documents & Start Session */}
+              <CollapsibleSection
+                title="3. Select Documents & Start Session"
+                isCollapsed={currentStepIndex > 2 && collapsedSteps['select'] !== false}
+                onToggle={() => handleToggleStep('select')}
+                className="w-full"
+              >
+                {newAnalysisStep === 'upload' && createdChat && uploadedDocs.length > 0 && (
+                  <div className="max-w-lg w-full mx-auto mt-8">
+                    <h3 className="text-lg font-bold mb-2 text-foreground">3. Select Documents & Start Session</h3>
+                    <form onSubmit={handleCreateSession} className="space-y-4">
+                      <div className="space-y-2">
+                        {uploadedDocs.map(doc => (
+                          <label key={doc.id} className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedDocIds.includes(doc.id)}
+                              onChange={() => handleToggleDoc(doc.id)}
+                              className="accent-primary w-5 h-5"
+                            />
+                            <span className="break-all flex-1 text-sm text-foreground">{doc.filename}</span>
                             <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
-                            <span className="text-xs text-muted-foreground">{doc.processing_status}</span>
-                          </li>
+                          </label>
                         ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-              {newAnalysisStep === 'upload' && createdChat && uploadedDocs.length > 0 && (
-                <div className="max-w-lg w-full mx-auto mt-8">
-                  <h3 className="text-lg font-bold mb-2 text-foreground">3. Select Documents & Start Session</h3>
-                  <form onSubmit={handleCreateSession} className="space-y-4">
-                    <div className="space-y-2">
-                      {uploadedDocs.map(doc => (
-                        <label key={doc.id} className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedDocIds.includes(doc.id)}
-                            onChange={() => handleToggleDoc(doc.id)}
-                            className="accent-primary w-5 h-5"
-                          />
-                          <span className="break-all flex-1 text-sm text-foreground">{doc.filename}</span>
-                          <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
-                        </label>
-                      ))}
-                    </div>
-                    <div>
-                      <label htmlFor="session-name" className="block text-sm font-medium mb-1">Session Name</label>
-                      <input
-                        id="session-name"
-                        type="text"
-                        className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                        placeholder="Enter a name for this session"
-                        value={sessionName}
-                        onChange={e => setSessionName(e.target.value)}
-                        required
-                        maxLength={64}
-                      />
-                    </div>
-                    {sessionError && (
-                      <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{sessionError}</div>
+                      </div>
+                      <div>
+                        <label htmlFor="session-name" className="block text-sm font-medium mb-1">Session Name</label>
+                        <input
+                          id="session-name"
+                          type="text"
+                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter a name for this session"
+                          value={sessionName}
+                          onChange={e => setSessionName(e.target.value)}
+                          required
+                          maxLength={64}
+                        />
+                      </div>
+                      {sessionError && (
+                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{sessionError}</div>
+                      )}
+                      {sessionSuccess && (
+                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Session created successfully!</div>
+                      )}
+                      <button
+                        type="submit"
+                        className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+                        disabled={sessionLoading || selectedDocIds.length === 0 || !sessionName.trim()}
+                      >
+                        {sessionLoading ? 'Creating Session...' : 'Start Session'}
+                      </button>
+                    </form>
+                    {createdSession && (
+                      <div className="mt-4 p-4 bg-green-900/80 text-green-200 rounded-lg text-center text-sm border border-green-700/50 shadow-lg">
+                        Session "{createdSession.name}" created! You can now start chatting.
+                      </div>
                     )}
-                    {sessionSuccess && (
-                      <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Session created successfully!</div>
-                    )}
-                    <button
-                      type="submit"
-                      className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
-                      disabled={sessionLoading || selectedDocIds.length === 0 || !sessionName.trim()}
-                    >
-                      {sessionLoading ? 'Creating Session...' : 'Start Session'}
-                    </button>
-                  </form>
-                  {createdSession && (
-                    <div className="mt-4 p-4 bg-green-900/80 text-green-200 rounded-lg text-center text-sm border border-green-700/50 shadow-lg">
-                      Session "{createdSession.name}" created! You can now start chatting.
-                    </div>
-                  )}
-                </div>
-              )}
-              {createdSession && (
-                <div className="max-w-lg w-full mx-auto mt-8">
-                  <h3 className="text-lg font-bold mb-2 text-foreground">4. Chat</h3>
-                  <ChatInterface
-                    chat={chatMessages}
-                    onSend={handleSendChatMessage}
-                    input={chatInput}
-                    setInput={setChatInput}
-                    loading={chatLoading}
-                    streaming={false}
-                    streamedText={""}
-                    error={chatError}
-                    disabled={chatLoading}
-                    continuingSession={true}
-                    continuingSessionId={createdSession.id}
-                  />
-                </div>
-              )}
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              {/* Step 4: Chat */}
+              <CollapsibleSection
+                title="4. Chat"
+                isCollapsed={currentStepIndex < 3 || collapsedSteps['chat'] === true}
+                onToggle={() => handleToggleStep('chat')}
+                className="w-full"
+              >
+                {createdSession && (
+                  <div className="max-w-lg w-full mx-auto mt-8">
+                    <h3 className="text-lg font-bold mb-2 text-foreground">4. Chat</h3>
+                    <ChatInterface
+                      chat={chatMessages}
+                      onSend={handleSendChatMessage}
+                      input={chatInput}
+                      setInput={setChatInput}
+                      loading={chatLoading}
+                      streaming={false}
+                      streamedText={""}
+                      error={chatError}
+                      disabled={chatLoading}
+                      continuingSession={true}
+                      continuingSessionId={createdSession.id}
+                    />
+                  </div>
+                )}
+              </CollapsibleSection>
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="history" className="flex flex-col gap-6 flex-1">
           {/* Timeline Indicator */}
-          <TimelineIndicator 
+          {/* <TimelineIndicator 
             currentStep={getCurrentStep()}
             selectedDocument={selectedDocument?.filename}
             selectedChat={selectedSession?.session_id}
-          />
+          /> */}
 
           {/* Documents Section - Always visible at top */}
           <CollapsibleSection
