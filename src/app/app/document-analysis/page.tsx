@@ -50,12 +50,6 @@ export default function DocumentAnalysisPage() {
   const [processing, setProcessing] = useState(false);
   const [apiResult, setApiResult] = useState<ApiResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [chat, setChat] = useState<any[]>([
-    { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
-  ]);
-  const [input, setInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  const [chatError, setChatError] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
@@ -118,6 +112,12 @@ export default function DocumentAnalysisPage() {
   const [sessionSuccess, setSessionSuccess] = useState(false);
   const [createdSession, setCreatedSession] = useState<any>(null);
 
+  // Step 4 state
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+
   const handleToggleDoc = (docId: string) => {
     setSelectedDocIds(prev =>
       prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
@@ -148,6 +148,8 @@ export default function DocumentAnalysisPage() {
       const data = await res.json();
       setCreatedSession(data);
       setSessionSuccess(true);
+      setChatMessages([]); // Reset chat messages for new session
+      setChatInput(""); // Reset chat input for new session
     } catch (err: any) {
       setSessionError(err.message || 'An error occurred while creating session.');
     } finally {
@@ -163,9 +165,11 @@ export default function DocumentAnalysisPage() {
       setSelectedDocument(null);
       setSessions([]);
       setSelectedSession(null);
-      setChat([
-        { sender: "system", text: "Select a document to view its chat history.", time: new Date() },
-      ]);
+      setChatMessages([]); // Clear old chat history
+      setChatInput(""); // Clear old input
+      setChatLoading(false); // Clear old loading state
+      setChatError(null); // Clear old error state
+      setDocumentId(null); // Clear old document ID
       // Ensure documents section is expanded when history tab is opened
       setDocumentsCollapsed(false);
       setSessionsCollapsed(false);
@@ -269,7 +273,7 @@ export default function DocumentAnalysisPage() {
       await new Promise(res => setTimeout(res, 12));
     }
     setStreaming(false);
-    setChat(prev => [
+    setChatMessages(prev => [
       ...prev,
       { sender: "system", text: fullText, time: new Date() },
     ]);
@@ -279,16 +283,16 @@ export default function DocumentAnalysisPage() {
   // Send a new chat message
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !documentId) return;
+    if (!chatInput.trim() || !documentId) return;
     setChatError(null);
     const now = new Date();
-    setChat((prev) => [
+    setChatMessages(prev => [
       ...prev,
-      { sender: "user", text: input, time: now },
+      { sender: "user", text: chatInput, time: now },
     ]);
     setChatLoading(true);
-    const question = input;
-    setInput("");
+    const question = chatInput;
+    setChatInput("");
     try {
       const body: any = {
         question,
@@ -309,7 +313,7 @@ export default function DocumentAnalysisPage() {
       const data = await res.json();
       await simulateStreaming(data.response);
     } catch (err: any) {
-      setChat((prev) => [
+      setChatMessages(prev => [
         ...prev,
         { sender: "system", text: "(Error) " + (err.message || "An error occurred during chat."), time: new Date() },
       ]);
@@ -325,11 +329,12 @@ export default function DocumentAnalysisPage() {
     setSelectedSession(null);
     setSessionsLoading(true);
     setSessionsError(null);
-    setChat([
-      { sender: "system", text: `Document '${item.filename}' selected. Choose a chat session to continue.`, time: new Date() },
-    ]);
+    setChatMessages([]); // Clear old chat history
+    setChatInput(""); // Clear old input
+    setChatLoading(false); // Clear old loading state
+    setChatError(null); // Clear old error state
     setDocumentId(item.document_id);
-    setInput("");
+    setChatInput("");
     setDocumentsCollapsed(true); // Collapse document list
     setTimeout(() => {
       chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -363,9 +368,10 @@ export default function DocumentAnalysisPage() {
     setSelectedSession(session);
     setChatLoading(true);
     setChatError(null);
-    setChat([
-      { sender: "system", text: `Loading chat session: ${session.session_id.slice(0, 8)}...`, time: new Date() },
-    ]);
+    setChatMessages([]); // Clear old chat history
+    setChatInput(""); // Clear old input
+    setChatLoading(false); // Clear old loading state
+    setChatError(null); // Clear old error state
     
     try {
       const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`, {
@@ -380,9 +386,9 @@ export default function DocumentAnalysisPage() {
         { sender: "user", text: msg.user, time: new Date(msg.timestamp) },
         { sender: "system", text: msg.assistant, time: new Date(msg.timestamp) },
       ]).flat();
-      setChat(chatHistory);
+      setChatMessages(chatHistory);
     } catch (err: any) {
-      setChat([
+      setChatMessages([
         { sender: "system", text: "(Error) " + (err.message || "Failed to load chat session."), time: new Date() },
       ]);
       setChatError(err.message || "Failed to load chat session.");
@@ -490,6 +496,42 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  const handleSendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createdChat?.id || !createdSession?.id || !chatInput.trim()) return;
+    setChatError(null);
+    setChatLoading(true);
+    const userMsg = chatInput;
+    setChatInput("");
+    setChatMessages(prev => [
+      ...prev,
+      { sender: "user", text: userMsg, time: new Date() },
+    ]);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/sessions/${createdSession.id}/messages`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMsg }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to send message');
+      }
+      const data = await res.json();
+      setChatMessages(prev => [
+        ...prev,
+        { sender: "system", text: data.assistant_response, time: new Date(data.timestamp) },
+      ]);
+    } catch (err: any) {
+      setChatError(err.message || 'An error occurred while sending message.');
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -501,12 +543,13 @@ export default function DocumentAnalysisPage() {
           setProcessing(false);
           setApiResult(null);
           setApiError(null);
-          setChat([
-            { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
-          ]);
+          setChatMessages([]); // Clear old chat history
+          setChatInput(""); // Clear old input
+          setChatLoading(false); // Clear old loading state
+          setChatError(null); // Clear old error state
           setSessionId(null);
           setDocumentId(null);
-          setInput("");
+          setChatInput("");
         }
       }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-auto">
@@ -559,10 +602,10 @@ export default function DocumentAnalysisPage() {
               {/* Chat Interface - Full width */}
               <CardContent className="flex-1 p-0">
                 <ChatInterface
-                  chat={chat}
+                  chat={chatMessages}
                   onSend={handleSend}
-                  input={input}
-                  setInput={setInput}
+                  input={chatInput}
+                  setInput={setChatInput}
                   loading={chatLoading}
                   streaming={streaming}
                   streamedText={streamedText}
@@ -744,6 +787,24 @@ export default function DocumentAnalysisPage() {
                   )}
                 </div>
               )}
+              {createdSession && (
+                <div className="max-w-lg w-full mx-auto mt-8">
+                  <h3 className="text-lg font-bold mb-2 text-foreground">4. Chat</h3>
+                  <ChatInterface
+                    chat={chatMessages}
+                    onSend={handleSendChatMessage}
+                    input={chatInput}
+                    setInput={setChatInput}
+                    loading={chatLoading}
+                    streaming={false}
+                    streamedText={""}
+                    error={chatError}
+                    disabled={chatLoading}
+                    continuingSession={true}
+                    continuingSessionId={createdSession.id}
+                  />
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
@@ -911,10 +972,10 @@ export default function DocumentAnalysisPage() {
               {/* Chat Interface - Full width */}
               <CardContent className="flex-1 p-0">
                 <ChatInterface
-                  chat={chat}
-                  onSend={handleSend}
-                  input={input}
-                  setInput={setInput}
+                  chat={chatMessages}
+                  onSend={handleSendChatMessage}
+                  input={chatInput}
+                  setInput={setChatInput}
                   loading={chatLoading}
                   streaming={streaming}
                   streamedText={streamedText}
