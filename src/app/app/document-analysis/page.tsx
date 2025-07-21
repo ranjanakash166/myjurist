@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Download, MessageCircle, FileText } from "lucide-react";
+import { Eye, Download, MessageCircle, FileText, Check } from "lucide-react";
 
 interface ApiResponse {
   document_id: string;
@@ -648,12 +648,47 @@ export default function DocumentAnalysisPage() {
               <div className="flex w-full justify-between items-center mb-6">
                 {steps.map((step, idx) => (
                   <React.Fragment key={step.key}>
-                    <div className={`flex flex-col items-center flex-1 min-w-0 ${idx < currentStepIndex ? 'text-primary' : idx === currentStepIndex ? 'font-bold text-primary' : 'text-muted-foreground'}`}
-                         style={{ minWidth: 0 }}>
-                      <div className={`rounded-full w-8 h-8 flex items-center justify-center mb-1 ${idx < currentStepIndex ? 'bg-primary text-white' : idx === currentStepIndex ? 'bg-primary/80 text-white' : 'bg-muted text-muted-foreground'}`}>{idx + 1}</div>
+                    <div
+                      className={`flex flex-col items-center flex-1 min-w-0 ${
+                        idx < currentStepIndex
+                          ? 'text-primary'
+                          : idx === currentStepIndex
+                          ? 'font-bold text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                      style={{ minWidth: 0 }}
+                    >
+                      <div
+                        className={`rounded-full w-9 h-9 flex items-center justify-center mb-1 border-2 transition-colors
+                          ${
+                            idx < currentStepIndex
+                              ? 'bg-primary text-white border-primary'
+                              : idx === currentStepIndex
+                              ? 'bg-primary/80 text-black dark:text-black border-primary'
+                              : 'bg-muted text-black dark:text-white border-border'
+                          }
+                        `}
+                      >
+                        {idx < currentStepIndex ? (
+                          <Check className="w-5 h-5 text-white dark:text-black" />
+                        ) : (
+                          idx + 1
+                        )}
+                      </div>
                       <span className="text-xs text-center break-words w-full max-w-[80px]">{step.label}</span>
                     </div>
-                    {idx < steps.length - 1 && <div className="flex-1 h-1 bg-border mx-1" />}
+                    {idx < steps.length - 1 && (
+                      <div
+                        className="flex-1 h-1 mx-1 transition-colors"
+                        style={{
+                          background:
+                            idx < currentStepIndex
+                              ? 'var(--tw-prose-bold, hsl(var(--primary)))'
+                              : 'hsl(var(--border))',
+                          opacity: idx < currentStepIndex ? 1 : 0.5,
+                        }}
+                      />
+                    )}
                   </React.Fragment>
                 ))}
               </div>
@@ -708,7 +743,7 @@ export default function DocumentAnalysisPage() {
                       )}
                       <button
                         type="submit"
-                        className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+                        className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
                         disabled={newChatLoading || !newChatName.trim()}
                       >
                         {newChatLoading ? "Creating..." : "Create Chat"}
@@ -726,60 +761,64 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {newAnalysisStep === 'upload' && createdChat && (
-                  <div className="max-w-lg w-full mx-auto">
-                    <div className="mb-6">
-                      <h2 className="text-xl font-bold mb-2 text-foreground">Upload Documents</h2>
-                      <p className="text-muted-foreground text-sm">Upload one or more documents to add to this chat.</p>
-                    </div>
-                    <form onSubmit={handleUploadDocuments} className="space-y-4">
-                      <div>
-                        <label htmlFor="doc-upload" className="block text-sm font-medium mb-1">Select Documents</label>
-                        <input
-                          id="doc-upload"
-                          type="file"
-                          multiple
-                          className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
-                          onChange={handleFileChange}
-                          disabled={uploading}
-                        />
-                        {uploadFiles.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {uploadFiles.map((file, idx) => (
-                              <span key={idx} className="inline-block bg-muted px-3 py-1 rounded text-xs text-foreground/80 max-w-[160px] truncate" title={file.name}>{file.name}</span>
-                            ))}
+                  <div className="w-full max-w-2xl mx-auto">
+                    <Card className="w-full">
+                      <CardHeader>
+                        <CardTitle>Upload Documents</CardTitle>
+                        <p className="text-muted-foreground text-sm">Upload one or more documents to add to this chat.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleUploadDocuments} className="space-y-4">
+                          <div>
+                            <label htmlFor="doc-upload" className="block text-sm font-medium mb-1">Select Documents</label>
+                            <input
+                              id="doc-upload"
+                              type="file"
+                              multiple
+                              className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-border file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100"
+                              onChange={handleFileChange}
+                              disabled={uploading}
+                            />
+                            {uploadFiles.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {uploadFiles.map((file, idx) => (
+                                  <span key={idx} className="inline-block bg-muted px-3 py-1 rounded text-xs text-foreground/80 max-w-[160px] truncate border border-border" title={file.name}>{file.name}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {uploadError && (
+                            <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{uploadError}</div>
+                          )}
+                          {uploadSuccess && (
+                            <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Documents uploaded successfully!</div>
+                          )}
+                          <button
+                            type="submit"
+                            className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
+                            disabled={uploading || uploadFiles.length === 0}
+                          >
+                            {uploading ? 'Uploading...' : 'Upload Documents'}
+                          </button>
+                        </form>
+                        {/* Uploaded Documents List */}
+                        {uploadedDocs.length > 0 && (
+                          <div className="mt-6">
+                            <h3 className="text-base font-semibold mb-2 text-foreground">Uploaded Documents</h3>
+                            <ul className="space-y-2">
+                              {uploadedDocs.map((doc, idx) => (
+                                <li key={doc.id || idx} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm border border-border">
+                                  <span className="flex-shrink-0 w-4 h-4 inline-block"><FileText className="w-4 h-4 text-primary" /></span>
+                                  <span className="break-all flex-1">{doc.filename}</span>
+                                  <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
+                                  <span className="text-xs text-muted-foreground">{doc.processing_status}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         )}
-                      </div>
-                      {uploadError && (
-                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{uploadError}</div>
-                      )}
-                      {uploadSuccess && (
-                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Documents uploaded successfully!</div>
-                      )}
-                      <button
-                        type="submit"
-                        className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
-                        disabled={uploading || uploadFiles.length === 0}
-                      >
-                        {uploading ? 'Uploading...' : 'Upload Documents'}
-                      </button>
-                    </form>
-                    {/* Uploaded Documents List */}
-                    {uploadedDocs.length > 0 && (
-                      <div className="mt-6">
-                        <h3 className="text-base font-semibold mb-2 text-foreground">Uploaded Documents</h3>
-                        <ul className="space-y-2">
-                          {uploadedDocs.map((doc, idx) => (
-                            <li key={doc.id || idx} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
-                              <span className="flex-shrink-0 w-4 h-4 inline-block"><FileText className="w-4 h-4 text-primary" /></span>
-                              <span className="break-all flex-1">{doc.filename}</span>
-                              <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
-                              <span className="text-xs text-muted-foreground">{doc.processing_status}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                      </CardContent>
+                    </Card>
                   </div>
                 )}
               </CollapsibleSection>
@@ -792,55 +831,57 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {newAnalysisStep === 'upload' && createdChat && uploadedDocs.length > 0 && (
-                  <div className="max-w-lg w-full mx-auto mt-8">
-                    <h3 className="text-lg font-bold mb-2 text-foreground">3. Select Documents & Start Session</h3>
-                    <form onSubmit={handleCreateSession} className="space-y-4">
-                      <div className="space-y-2">
-                        {uploadedDocs.map(doc => (
-                          <label key={doc.id} className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 cursor-pointer">
+                  <div className="w-full max-w-2xl mx-auto mt-8">
+                    <Card className="w-full">
+                      <CardHeader>
+                        <CardTitle>Select Documents & Start Session</CardTitle>
+                        <p className="text-muted-foreground text-sm">Select one or more documents and start a chat session for analysis.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleCreateSession} className="space-y-4">
+                          <div className="space-y-2">
+                            {uploadedDocs.map(doc => (
+                              <label key={doc.id} className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 cursor-pointer border border-border">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedDocIds.includes(doc.id)}
+                                  onChange={() => handleToggleDoc(doc.id)}
+                                  className="accent-primary w-5 h-5"
+                                />
+                                <span className="break-all flex-1 text-sm text-foreground">{doc.filename}</span>
+                                <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <div>
+                            <label htmlFor="session-name" className="block text-sm font-medium mb-1">Session Name</label>
                             <input
-                              type="checkbox"
-                              checked={selectedDocIds.includes(doc.id)}
-                              onChange={() => handleToggleDoc(doc.id)}
-                              className="accent-primary w-5 h-5"
+                              id="session-name"
+                              type="text"
+                              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                              placeholder="Enter a name for this session"
+                              value={sessionName}
+                              onChange={e => setSessionName(e.target.value)}
+                              required
+                              maxLength={64}
                             />
-                            <span className="break-all flex-1 text-sm text-foreground">{doc.filename}</span>
-                            <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
-                          </label>
-                        ))}
-                      </div>
-                      <div>
-                        <label htmlFor="session-name" className="block text-sm font-medium mb-1">Session Name</label>
-                        <input
-                          id="session-name"
-                          type="text"
-                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="Enter a name for this session"
-                          value={sessionName}
-                          onChange={e => setSessionName(e.target.value)}
-                          required
-                          maxLength={64}
-                        />
-                      </div>
-                      {sessionError && (
-                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{sessionError}</div>
-                      )}
-                      {sessionSuccess && (
-                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Session created successfully!</div>
-                      )}
-                      <button
-                        type="submit"
-                        className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
-                        disabled={sessionLoading || selectedDocIds.length === 0 || !sessionName.trim()}
-                      >
-                        {sessionLoading ? 'Creating Session...' : 'Start Session'}
-                      </button>
-                    </form>
-                    {createdSession && (
-                      <div className="mt-4 p-4 bg-green-900/80 text-green-200 rounded-lg text-center text-sm border border-green-700/50 shadow-lg">
-                        Session "{createdSession.name}" created! You can now start chatting.
-                      </div>
-                    )}
+                          </div>
+                          {sessionError && (
+                            <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{sessionError}</div>
+                          )}
+                          {sessionSuccess && (
+                            <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Session created successfully!</div>
+                          )}
+                          <button
+                            type="submit"
+                            className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
+                            disabled={sessionLoading || selectedDocIds.length === 0 || !sessionName.trim()}
+                          >
+                            {sessionLoading ? 'Creating Session...' : 'Start Session'}
+                          </button>
+                        </form>
+                      </CardContent>
+                    </Card>
                   </div>
                 )}
               </CollapsibleSection>
