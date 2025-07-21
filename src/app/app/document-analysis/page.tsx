@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
 import DocumentUploader from "./DocumentUploader";
@@ -277,6 +277,10 @@ export default function DocumentAnalysisPage() {
     ]);
     setDocumentId(item.document_id);
     setInput("");
+    setDocumentsCollapsed(true); // Collapse document list
+    setTimeout(() => {
+      chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300); // Wait for UI update
     
     try {
       const res = await fetch(`${API_BASE_URL}/chat/?document_id=${item.document_id}`, {
@@ -399,6 +403,8 @@ export default function DocumentAnalysisPage() {
       return "documents";
     }
   };
+
+  const chatSectionRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
@@ -526,87 +532,89 @@ export default function DocumentAnalysisPage() {
 
           {/* Chat Sessions Section - Appears when document is selected */}
           {selectedDocument && (
-            <CollapsibleSection
-              title={`Chat Sessions - ${selectedDocument.filename.length > 20 ? selectedDocument.filename.substring(0, 20) + '...' : selectedDocument.filename}`}
-              isCollapsed={sessionsCollapsed}
-              onToggle={setSessionsCollapsed}
-            >
-              {sessionsLoading ? (
-                <Alert>
-                  <AlertDescription>Loading chat sessions...</AlertDescription>
-                </Alert>
-              ) : sessionsError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{sessionsError}</AlertDescription>
-                </Alert>
-              ) : (
-                <div className="space-y-3">
-                  {sessions.length === 0 && (
-                    <div className="text-muted-foreground text-center py-4">No chat sessions found for this document.</div>
-                  )}
-                  {sessions.map(session => (
-                    <Card 
-                      key={session.session_id}
-                      className={`cursor-pointer hover:bg-muted/50 transition-all ${
-                        selectedSession?.session_id === session.session_id ? 'ring-2 ring-primary' : ''
-                      }`}
-                      onClick={() => handleSelectSession(session)}
-                    >
-                      <CardContent className="p-3 sm:p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div className="flex flex-col text-left flex-1 min-w-0">
-                            <span className="font-medium text-foreground text-sm">Session: {session.session_id.slice(0, 8)}...</span>
-                            <span className="text-xs text-muted-foreground">
-                              Created: {new Date(session.created_at).toLocaleDateString('en-US', { 
-                                month: 'short', 
-                                day: 'numeric',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              Last: {new Date(session.last_activity).toLocaleDateString('en-US', { 
-                                month: 'short', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
+            <div ref={chatSectionRef}>
+              <CollapsibleSection
+                title={`Chat Sessions - ${selectedDocument.filename.length > 20 ? selectedDocument.filename.substring(0, 20) + '...' : selectedDocument.filename}`}
+                isCollapsed={sessionsCollapsed}
+                onToggle={setSessionsCollapsed}
+              >
+                {sessionsLoading ? (
+                  <Alert>
+                    <AlertDescription>Loading chat sessions...</AlertDescription>
+                  </Alert>
+                ) : sessionsError ? (
+                  <Alert variant="destructive">
+                    <AlertDescription>{sessionsError}</AlertDescription>
+                  </Alert>
+                ) : (
+                  <div className="space-y-3">
+                    {sessions.length === 0 && (
+                      <div className="text-muted-foreground text-center py-4">No chat sessions found for this document.</div>
+                    )}
+                    {sessions.map(session => (
+                      <Card 
+                        key={session.session_id}
+                        className={`cursor-pointer hover:bg-muted/50 transition-all ${
+                          selectedSession?.session_id === session.session_id ? 'ring-2 ring-primary' : ''
+                        }`}
+                        onClick={() => handleSelectSession(session)}
+                      >
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex flex-col text-left flex-1 min-w-0">
+                              <span className="font-medium text-foreground text-sm">Session: {session.session_id.slice(0, 8)}...</span>
+                              <span className="text-xs text-muted-foreground">
+                                Created: {new Date(session.created_at).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                Last: {new Date(session.last_activity).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="text-xs flex-shrink-0">
+                              {session.message_count} msgs
+                            </Badge>
                           </div>
-                          <Badge variant="outline" className="text-xs flex-shrink-0">
-                            {session.message_count} msgs
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  
-                  {/* Pagination Controls for Sessions */}
-                  {sessionTotalCount > sessionPageSize && (
-                    <div className="flex justify-center items-center gap-2 mt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSessionPage(sessionPage - 1)}
-                        disabled={sessionPage === 0}
-                      >
-                        Prev
-                      </Button>
-                      <span className="text-foreground text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSessionPage(sessionPage + 1)}
-                        disabled={sessionPage + 1 >= Math.ceil(sessionTotalCount / sessionPageSize)}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CollapsibleSection>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    
+                    {/* Pagination Controls for Sessions */}
+                    {sessionTotalCount > sessionPageSize && (
+                      <div className="flex justify-center items-center gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSessionPage(sessionPage - 1)}
+                          disabled={sessionPage === 0}
+                        >
+                          Prev
+                        </Button>
+                        <span className="text-foreground text-sm">Page {sessionPage + 1} of {Math.ceil(sessionTotalCount / sessionPageSize)}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSessionPage(sessionPage + 1)}
+                          disabled={sessionPage + 1 >= Math.ceil(sessionTotalCount / sessionPageSize)}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CollapsibleSection>
+            </div>
           )}
 
           {/* Chat Interface - Takes full width at bottom */}
