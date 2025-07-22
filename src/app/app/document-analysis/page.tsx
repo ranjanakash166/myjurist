@@ -652,6 +652,30 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  const handleAddToSession = async (documentIds: string[]) => {
+    if (!createdChat?.id && !selectedSession?.chat_id) return;
+    let chatId = createdChat?.id || selectedSession?.chat_id;
+    let sessionId = createdSession?.id || selectedSession?.session_id;
+    if (!chatId || !sessionId) return;
+    try {
+      for (const docId of documentIds) {
+        const url = `https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents/${docId}`;
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.detail?.[0]?.msg || 'Failed to add document to session');
+        }
+      }
+      // Refresh session documents after adding
+      await fetchSessionDocuments(chatId, sessionId);
+    } catch (err: any) {
+      alert(err.message || 'Failed to add document to session');
+    }
+  };
+
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1035,6 +1059,7 @@ export default function DocumentAnalysisPage() {
                       onViewDocument={handleView}
                       onDownloadDocument={handleDownload}
                       onDeleteDocument={handleDeleteDocument}
+                      onAddToSession={handleAddToSession}
                     />
                   </div>
                 )}
@@ -1224,6 +1249,7 @@ export default function DocumentAnalysisPage() {
                   onViewDocument={handleView}
                   onDownloadDocument={handleDownload}
                   onDeleteDocument={handleDeleteDocument}
+                  onAddToSession={handleAddToSession}
                 />
               </CardContent>
             </Card>

@@ -56,6 +56,7 @@ interface ChatInterfaceProps {
   onViewDocument?: (documentId: string, filename: string) => void;
   onDownloadDocument?: (documentId: string, filename: string) => void;
   onDeleteDocument?: (documentId: string, context: 'chat' | 'session') => void;
+  onAddToSession?: (documentIds: string[]) => void;
 }
 
 export default function ChatInterface({ 
@@ -76,10 +77,12 @@ export default function ChatInterface({
   sessionId,
   onViewDocument,
   onDownloadDocument,
-  onDeleteDocument
+  onDeleteDocument,
+  onAddToSession
 }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedForSession, setSelectedForSession] = React.useState<string[]>([]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -129,6 +132,22 @@ export default function ChatInterface({
                     <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
                       {doc.filename}
                     </h4>
+                    {/* Checkbox for eligible docs */}
+                    {!inSession && onAddToSession && (
+                      <input
+                        type="checkbox"
+                        className="form-checkbox accent-primary w-4 h-4 ml-2"
+                        checked={selectedForSession.includes(doc.id)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedForSession(prev => [...prev, doc.id]);
+                          } else {
+                            setSelectedForSession(prev => prev.filter(id => id !== doc.id));
+                          }
+                        }}
+                        title="Select to add to session"
+                      />
+                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-2">
                     {onViewDocument && (
@@ -165,6 +184,15 @@ export default function ChatInterface({
                 </div>
               );
             })
+          )}
+          {/* Add to session button */}
+          {onAddToSession && selectedForSession.length > 0 && (
+            <button
+              className="mt-4 w-full py-2 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+              onClick={() => onAddToSession(selectedForSession)}
+            >
+              Add to session
+            </button>
           )}
         </div>
       </div>
