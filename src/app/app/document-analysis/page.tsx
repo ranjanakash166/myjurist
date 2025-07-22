@@ -978,7 +978,7 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {createdSession && (
-                  <div className="max-w-lg w-full mx-auto mt-8">
+                  <div className="w-full mx-auto mt-8">
                     <h3 className="text-lg font-bold mb-2 text-foreground">4. Chat</h3>
                     <ChatInterface
                       chat={chatMessages}
