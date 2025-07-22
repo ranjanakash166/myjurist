@@ -80,6 +80,26 @@ interface ExclusionsAnalysisResponse {
   claim_drafting_suggestions?: string[];
 }
 
+// Add Disclosure API response type
+interface DisclosureAnalysisResponse {
+  overall_assessment: string;
+  confidence_score: number;
+  enablement_verdict: string;
+  missing_technical_details?: string[];
+  unclear_aspects?: string[];
+  best_mode_disclosed: string;
+  best_mode_suggestions?: string[];
+  claim_clarity_score: number;
+  vague_terms?: string[];
+  overly_broad_aspects?: string[];
+  applicable_industries?: string[];
+  utility_assessment: string;
+  practical_applications?: string[];
+  technical_improvements?: string[];
+  structural_improvements?: string[];
+  example_suggestions?: string[];
+}
+
 export default function PatentAnalysisPage() {
   const { getAuthHeaders, isAuthenticated, token } = useAuth();
   const [tab, setTab] = useState<'quick' | 'detailed' | 'history'>('quick');
@@ -94,6 +114,10 @@ export default function PatentAnalysisPage() {
   const [exclusionsResult, setExclusionsResult] = useState<ExclusionsAnalysisResponse | null>(null);
   const [exclusionsLoading, setExclusionsLoading] = useState(false);
   const [exclusionsError, setExclusionsError] = useState<string | null>(null);
+  // Disclosure API State
+  const [disclosureResult, setDisclosureResult] = useState<DisclosureAnalysisResponse | null>(null);
+  const [disclosureLoading, setDisclosureLoading] = useState(false);
+  const [disclosureError, setDisclosureError] = useState<string | null>(null);
   
   // Detailed Analysis State
   const [applicantName, setApplicantName] = useState("");
@@ -252,6 +276,43 @@ export default function PatentAnalysisPage() {
       setExclusionsError(err.message || "An error occurred during exclusions analysis.");
     } finally {
       setExclusionsLoading(false);
+    }
+  };
+
+  // Disclosure API handler
+  const handleDisclosureAnalysis = async () => {
+    if (!isValid) return;
+    setDisclosureLoading(true);
+    setDisclosureError(null);
+    setDisclosureResult(null);
+    try {
+      const res = await fetch(
+        `https://api.myjurist.io/api/v1/patents/analysis/disclosure/detailed`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({
+            invention_description: desc,
+            check_enablement: true,
+            check_best_mode: true,
+            check_clarity: true,
+            suggest_improvements: true,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Disclosure analysis failed");
+      }
+      const data: DisclosureAnalysisResponse = await res.json();
+      setDisclosureResult(data);
+    } catch (err: any) {
+      setDisclosureError(err.message || "An error occurred during disclosure analysis.");
+    } finally {
+      setDisclosureLoading(false);
     }
   };
 
@@ -436,8 +497,8 @@ export default function PatentAnalysisPage() {
                   <span className="sm:hidden">Exclusions</span>
                 </Button>
                 <Button
-                  onClick={() => handleAnalysis('disclosure')}
-                  disabled={!isValid}
+                  onClick={handleDisclosureAnalysis}
+                  disabled={!isValid || disclosureLoading}
                   className="flex items-center gap-2 text-sm col-span-1 sm:col-span-2 lg:col-span-1"
                 >
                   <ShieldCheck className="w-4 h-4" /> 
@@ -547,6 +608,146 @@ export default function PatentAnalysisPage() {
                         <strong>Claim Drafting Suggestions:</strong>
                         <ul className="list-disc ml-6">
                           {exclusionsResult.claim_drafting_suggestions.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {disclosureLoading && (
+                <Alert>
+                  <ShieldCheck className="h-4 w-4" />
+                  <AlertDescription>Analyzing disclosure...</AlertDescription>
+                </Alert>
+              )}
+              {disclosureError && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{disclosureError}</AlertDescription>
+                </Alert>
+              )}
+              {disclosureResult && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Disclosure Analysis Result</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-2">
+                      <strong>Overall Assessment:</strong> {disclosureResult.overall_assessment}
+                    </div>
+                    <div className="mb-2">
+                      <strong>Confidence Score:</strong> {disclosureResult.confidence_score}
+                    </div>
+                    <div className="mb-2">
+                      <strong>Enablement Verdict:</strong> {disclosureResult.enablement_verdict}
+                    </div>
+                    {disclosureResult.missing_technical_details && disclosureResult.missing_technical_details.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Missing Technical Details:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.missing_technical_details.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {disclosureResult.unclear_aspects && disclosureResult.unclear_aspects.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Unclear Aspects:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.unclear_aspects.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <div className="mb-2">
+                      <strong>Best Mode Disclosed:</strong> {disclosureResult.best_mode_disclosed}
+                    </div>
+                    {disclosureResult.best_mode_suggestions && disclosureResult.best_mode_suggestions.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Best Mode Suggestions:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.best_mode_suggestions.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <div className="mb-2">
+                      <strong>Claim Clarity Score:</strong> {disclosureResult.claim_clarity_score}
+                    </div>
+                    {disclosureResult.vague_terms && disclosureResult.vague_terms.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Vague Terms:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.vague_terms.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {disclosureResult.overly_broad_aspects && disclosureResult.overly_broad_aspects.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Overly Broad Aspects:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.overly_broad_aspects.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {disclosureResult.applicable_industries && disclosureResult.applicable_industries.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Applicable Industries:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.applicable_industries.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <div className="mb-2">
+                      <strong>Utility Assessment:</strong> {disclosureResult.utility_assessment}
+                    </div>
+                    {disclosureResult.practical_applications && disclosureResult.practical_applications.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Practical Applications:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.practical_applications.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {disclosureResult.technical_improvements && disclosureResult.technical_improvements.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Technical Improvements:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.technical_improvements.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {disclosureResult.structural_improvements && disclosureResult.structural_improvements.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Structural Improvements:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.structural_improvements.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {disclosureResult.example_suggestions && disclosureResult.example_suggestions.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Example Suggestions:</strong>
+                        <ul className="list-disc ml-6">
+                          {disclosureResult.example_suggestions.map((item, idx) => (
                             <li key={idx}>{item}</li>
                           ))}
                         </ul>
