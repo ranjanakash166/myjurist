@@ -2,6 +2,7 @@ import './globals.css'
 import React, { ReactNode } from 'react';
 import { ThemeProvider } from '../components/ThemeProvider';
 import { AuthProvider } from '../components/AuthProvider';
+import { Toaster } from '../components/ui/toaster';
 
 export const metadata = {
   title: 'My Jurist - Next Gen AI Law Firm',
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="apple-touch-icon" href="/icon.png" />
       </head>
       <body>
+        <Toaster />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

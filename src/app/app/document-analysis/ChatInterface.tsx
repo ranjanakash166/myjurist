@@ -56,6 +56,10 @@ interface ChatInterfaceProps {
   onViewDocument?: (documentId: string, filename: string) => void;
   onDownloadDocument?: (documentId: string, filename: string) => void;
   onDeleteDocument?: (documentId: string, context: 'chat' | 'session') => void;
+  onAddToSession?: (documentIds: string[]) => void;
+  addToSessionSuccessTrigger?: number;
+  onUploadNewDocuments?: (files: FileList) => void;
+  uploadingNewDocuments?: boolean;
 }
 
 export default function ChatInterface({ 
@@ -76,10 +80,20 @@ export default function ChatInterface({
   sessionId,
   onViewDocument,
   onDownloadDocument,
-  onDeleteDocument
+  onDeleteDocument,
+  onAddToSession,
+  addToSessionSuccessTrigger,
+  onUploadNewDocuments,
+  uploadingNewDocuments
 }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedForSession, setSelectedForSession] = React.useState<string[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    setSelectedForSession([]);
+  }, [addToSessionSuccessTrigger]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -129,6 +143,22 @@ export default function ChatInterface({
                     <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
                       {doc.filename}
                     </h4>
+                    {/* Checkbox for eligible docs */}
+                    {!inSession && onAddToSession && (
+                      <input
+                        type="checkbox"
+                        className="form-checkbox accent-primary w-4 h-4 ml-2"
+                        checked={selectedForSession.includes(doc.id)}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedForSession(prev => [...prev, doc.id]);
+                          } else {
+                            setSelectedForSession(prev => prev.filter(id => id !== doc.id));
+                          }
+                        }}
+                        title="Select to add to session"
+                      />
+                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-2">
                     {onViewDocument && (
@@ -165,6 +195,15 @@ export default function ChatInterface({
                 </div>
               );
             })
+          )}
+          {/* Add to session button */}
+          {onAddToSession && selectedForSession.length > 0 && (
+            <button
+              className="mt-4 w-full py-2 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60"
+              onClick={() => onAddToSession(selectedForSession)}
+            >
+              Add to session
+            </button>
           )}
         </div>
       </div>
@@ -258,7 +297,14 @@ export default function ChatInterface({
         </div>
         
         {/* Input Area - Fixed at bottom */}
-        <div className="bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 p-4 shadow-xl mt-4 rounded-lg">
+        <div className="bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 p-4 shadow-xl mt-4 rounded-lg relative">
+          {/* Loader overlay when uploading */}
+          {uploadingNewDocuments && (
+            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 rounded-lg">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+              <span className="text-primary-foreground font-semibold">Uploading documents...</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="w-full">
             {/* Main Input Field */}
             <div className="relative mb-3">
@@ -306,16 +352,35 @@ export default function ChatInterface({
                   title="Visual Search"
                 >
                   <Eye className="w-4 h-4" />
-                </button>
+                </button>  
               </div>
               {/* Right Group - Action Icons */}
               <div className="flex items-center gap-2">
+                  {/* Upload icon */}
                 <button
                   type="button"
-                  className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
-                  title="Attach File"
+                  className={`p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 ${uploadingNewDocuments ? 'opacity-60 cursor-wait' : 'text-neutral-400 hover:text-neutral-200'} transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg`}
+                  title="Upload new documents"
+                  onClick={() => !uploadingNewDocuments && fileInputRef.current?.click()}
+                  disabled={uploadingNewDocuments}
                 >
-                  <Paperclip className="w-4 h-4" />
+                  {uploadingNewDocuments ? (
+                    <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <Paperclip className="w-4 h-4" />
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={e => {
+                      if (e.target.files && onUploadNewDocuments) {
+                        onUploadNewDocuments(e.target.files);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
                 </button>
                 <button
                   type="button"
