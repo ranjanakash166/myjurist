@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Download, MessageCircle } from "lucide-react";
+import { Eye, Download, MessageCircle, FileText, Check } from "lucide-react";
 
 interface ApiResponse {
   document_id: string;
@@ -35,6 +35,7 @@ interface DocumentHistoryItem {
 interface ChatSessionItem {
   session_id: string;
   document_id: string;
+  chat_id?: string;
   created_at: string;
   last_activity: string;
   message_count: number;
@@ -47,16 +48,9 @@ function generateSessionId() {
 export default function DocumentAnalysisPage() {
   const { getAuthHeaders } = useAuth();
   const [tab, setTab] = useState<'new' | 'history'>('new');
-  const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [apiResult, setApiResult] = useState<ApiResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [chat, setChat] = useState<any[]>([
-    { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
-  ]);
-  const [input, setInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  const [chatError, setChatError] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
@@ -95,6 +89,85 @@ export default function DocumentAnalysisPage() {
   const [sessionsCollapsed, setSessionsCollapsed] = useState(false);
   const [uploadCollapsed, setUploadCollapsed] = useState(false);
 
+  // Add state for new analysis flow
+  const [newChatName, setNewChatName] = useState("");
+  const [newChatDescription, setNewChatDescription] = useState("");
+  const [newChatLoading, setNewChatLoading] = useState(false);
+  const [newChatError, setNewChatError] = useState<string | null>(null);
+  const [newChatSuccess, setNewChatSuccess] = useState(false);
+  const [createdChat, setCreatedChat] = useState<any>(null);
+  const [newAnalysisStep, setNewAnalysisStep] = useState<'create' | 'upload'>('create');
+
+  // Step 2 state
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedDocs, setUploadedDocs] = useState<any[]>([]);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // Step 3 state
+  const [selectedDocIds, setSelectedDocIds] = useState<string[]>([]);
+  const [sessionName, setSessionName] = useState("");
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const [sessionSuccess, setSessionSuccess] = useState(false);
+  const [createdSession, setCreatedSession] = useState<any>(null);
+
+  // Step 4 state
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+
+  // Document lists state
+  const [chatDocuments, setChatDocuments] = useState<any[]>([]);
+  const [sessionDocuments, setSessionDocuments] = useState<any[]>([]);
+  const [chatDocumentsLoading, setChatDocumentsLoading] = useState(false);
+  const [sessionDocumentsLoading, setSessionDocumentsLoading] = useState(false);
+
+  const handleToggleDoc = (docId: string) => {
+    setSelectedDocIds(prev =>
+      prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
+    );
+  };
+
+  const handleCreateSession = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSessionError(null);
+    setSessionSuccess(false);
+    setSessionLoading(true);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/sessions/`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: sessionName,
+          document_ids: selectedDocIds,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to create session');
+      }
+      const data = await res.json();
+      setCreatedSession(data);
+      setSessionSuccess(true);
+      setChatMessages([]); // Reset chat messages for new session
+      setChatInput(""); // Reset chat input for new session
+      
+      // Fetch documents for the new session
+      await fetchChatDocuments(createdChat.id);
+      await fetchSessionDocuments(createdChat.id, data.id);
+    } catch (err: any) {
+      setSessionError(err.message || 'An error occurred while creating session.');
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
   // Fetch document list when history tab is opened
   useEffect(() => {
     if (tab === 'history') {
@@ -103,9 +176,11 @@ export default function DocumentAnalysisPage() {
       setSelectedDocument(null);
       setSessions([]);
       setSelectedSession(null);
-      setChat([
-        { sender: "system", text: "Select a document to view its chat history.", time: new Date() },
-      ]);
+      setChatMessages([]); // Clear old chat history
+      setChatInput(""); // Clear old input
+      setChatLoading(false); // Clear old loading state
+      setChatError(null); // Clear old error state
+      setDocumentId(null); // Clear old document ID
       // Ensure documents section is expanded when history tab is opened
       setDocumentsCollapsed(false);
       setSessionsCollapsed(false);
@@ -157,53 +232,46 @@ export default function DocumentAnalysisPage() {
   }, [sessionPage, allSessions]);
 
   // File upload logic
-  const handleFileChange = (file: File | null) => {
-    setFile(file);
-    setApiResult(null);
-    setApiError(null);
-    setChat([
-      { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
-    ]);
-    setSessionId(null);
-    setDocumentId(null);
-    setInput("");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setUploadFiles(Array.from(e.target.files));
+      setUploadError(null);
+    }
   };
 
-  const handleProcess = async () => {
-    if (!file) return;
-    setProcessing(true);
-    setApiResult(null);
-    setApiError(null);
-    setSessionId(null);
-    setDocumentId(null);
+  const handleUploadDocuments = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createdChat?.id || uploadFiles.length === 0) return;
+    setUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API_BASE_URL}/documents/upload`, {
-        method: "POST",
-        headers: {
-          "Authorization": getAuthHeaders().Authorization,
-        },
+      uploadFiles.forEach(file => formData.append('files', file));
+      // Debug: log FormData keys and values
+      Array.from(formData.entries()).forEach(pair => {
+        console.log(pair[0], pair[1]);
+      });
+      // Only include Authorization header, never Content-Type
+      const headers = { ...getAuthHeaders() };
+      if ('Content-Type' in headers) delete headers['Content-Type'];
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/documents`, {
+        method: 'POST',
+        headers,
         body: formData,
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Upload failed");
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to upload documents');
       }
-      const data: ApiResponse = await res.json();
-      setApiResult(data);
-      const newSessionId = generateSessionId();
-      setSessionId(newSessionId);
-      setDocumentId(data.document_id);
-      setChat([
-        { sender: "system", text: `Document '${data.filename}' processed. You can now ask questions.`, time: new Date() },
-      ]);
-      // Collapse upload section when document is processed
-      setUploadCollapsed(true);
+      const data = await res.json();
+      setUploadedDocs(data.uploaded_documents || []);
+      setUploadSuccess(true);
+      setUploadFiles([]);
     } catch (err: any) {
-      setApiError(err.message || "An error occurred during upload.");
+      setUploadError(err.message || 'An error occurred while uploading documents.');
     } finally {
-      setProcessing(false);
+      setUploading(false);
     }
   };
 
@@ -216,7 +284,7 @@ export default function DocumentAnalysisPage() {
       await new Promise(res => setTimeout(res, 12));
     }
     setStreaming(false);
-    setChat(prev => [
+    setChatMessages(prev => [
       ...prev,
       { sender: "system", text: fullText, time: new Date() },
     ]);
@@ -226,16 +294,16 @@ export default function DocumentAnalysisPage() {
   // Send a new chat message
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !documentId) return;
+    if (!chatInput.trim() || !documentId) return;
     setChatError(null);
     const now = new Date();
-    setChat((prev) => [
+    setChatMessages(prev => [
       ...prev,
-      { sender: "user", text: input, time: now },
+      { sender: "user", text: chatInput, time: now },
     ]);
     setChatLoading(true);
-    const question = input;
-    setInput("");
+    const question = chatInput;
+    setChatInput("");
     try {
       const body: any = {
         question,
@@ -256,7 +324,7 @@ export default function DocumentAnalysisPage() {
       const data = await res.json();
       await simulateStreaming(data.response);
     } catch (err: any) {
-      setChat((prev) => [
+      setChatMessages(prev => [
         ...prev,
         { sender: "system", text: "(Error) " + (err.message || "An error occurred during chat."), time: new Date() },
       ]);
@@ -272,11 +340,12 @@ export default function DocumentAnalysisPage() {
     setSelectedSession(null);
     setSessionsLoading(true);
     setSessionsError(null);
-    setChat([
-      { sender: "system", text: `Document '${item.filename}' selected. Choose a chat session to continue.`, time: new Date() },
-    ]);
+    setChatMessages([]); // Clear old chat history
+    setChatInput(""); // Clear old input
+    setChatLoading(false); // Clear old loading state
+    setChatError(null); // Clear old error state
     setDocumentId(item.document_id);
-    setInput("");
+    setChatInput("");
     setDocumentsCollapsed(true); // Collapse document list
     setTimeout(() => {
       chatSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -310,9 +379,10 @@ export default function DocumentAnalysisPage() {
     setSelectedSession(session);
     setChatLoading(true);
     setChatError(null);
-    setChat([
-      { sender: "system", text: `Loading chat session: ${session.session_id.slice(0, 8)}...`, time: new Date() },
-    ]);
+    setChatMessages([]); // Clear old chat history
+    setChatInput(""); // Clear old input
+    setChatLoading(false); // Clear old loading state
+    setChatError(null); // Clear old error state
     
     try {
       const res = await fetch(`${API_BASE_URL}/chat/${session.session_id}/history`, {
@@ -327,9 +397,15 @@ export default function DocumentAnalysisPage() {
         { sender: "user", text: msg.user, time: new Date(msg.timestamp) },
         { sender: "system", text: msg.assistant, time: new Date(msg.timestamp) },
       ]).flat();
-      setChat(chatHistory);
+      setChatMessages(chatHistory);
+      
+      // Fetch documents for the selected session
+      if (session.chat_id) {
+        await fetchChatDocuments(session.chat_id);
+        await fetchSessionDocuments(session.chat_id, session.session_id);
+      }
     } catch (err: any) {
-      setChat([
+      setChatMessages([
         { sender: "system", text: "(Error) " + (err.message || "Failed to load chat session."), time: new Date() },
       ]);
       setChatError(err.message || "Failed to load chat session.");
@@ -391,6 +467,52 @@ export default function DocumentAnalysisPage() {
     setPdfFilename("");
   };
 
+  // Step 1: Create Chat handler
+  const handleCreateChat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNewChatError(null);
+    setNewChatSuccess(false);
+    setNewChatLoading(true);
+    try {
+      const res = await fetch("https://api.myjurist.io/api/v1/chats", {
+        method: "POST",
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newChatName,
+          description: newChatDescription,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Failed to create chat");
+      }
+      const data = await res.json();
+      setCreatedChat(data);
+      setNewChatSuccess(true);
+      setNewAnalysisStep('upload');
+    } catch (err: any) {
+      setNewChatError(err.message || "An error occurred while creating chat.");
+    } finally {
+      setNewChatLoading(false);
+    }
+  };
+
+  // Timeline/collapsible logic for new analysis flow
+  const steps = [
+    { key: 'create', label: 'Create Chat' },
+    { key: 'upload', label: 'Upload Documents' },
+    { key: 'select', label: 'Select Documents & Start Session' },
+    { key: 'chat', label: 'Chat' },
+  ];
+  const currentStepIndex = createdSession ? 3 : (sessionSuccess ? 2 : (uploadSuccess ? 1 : 0));
+  const [collapsedSteps, setCollapsedSteps] = useState<{[key: string]: boolean}>({});
+  const handleToggleStep = (key: string) => {
+    setCollapsedSteps(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   // Determine current step for timeline
   const getCurrentStep = () => {
     if (tab === 'new') {
@@ -404,7 +526,157 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  const handleSendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createdChat?.id || !createdSession?.id || !chatInput.trim()) return;
+    setChatError(null);
+    setChatLoading(true);
+    const userMsg = chatInput;
+    setChatInput("");
+    setChatMessages(prev => [
+      ...prev,
+      { sender: "user", text: userMsg, time: new Date() },
+    ]);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/sessions/${createdSession.id}/messages`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMsg }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to send message');
+      }
+      const data = await res.json();
+      setChatMessages(prev => [
+        ...prev,
+        { sender: "system", text: data.assistant_response, time: new Date(data.timestamp) },
+      ]);
+    } catch (err: any) {
+      setChatError(err.message || 'An error occurred while sending message.');
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  // Fetch chat documents
+  const fetchChatDocuments = async (chatId: string) => {
+    if (!chatId) return;
+    setChatDocumentsLoading(true);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${chatId}/documents`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch chat documents');
+      }
+      const data = await res.json();
+      setChatDocuments(data.documents || []);
+    } catch (err: any) {
+      console.error('Error fetching chat documents:', err);
+    } finally {
+      setChatDocumentsLoading(false);
+    }
+  };
+
+  // Fetch session documents
+  const fetchSessionDocuments = async (chatId: string, sessionId: string) => {
+    if (!chatId || !sessionId) return;
+    setSessionDocumentsLoading(true);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch session documents');
+      }
+      const data = await res.json();
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        setSessionDocuments(data);
+      } else if (typeof data === 'string') {
+        // If it's a single document ID string, we'll filter from chat documents
+        const sessionDoc = chatDocuments.find(doc => doc.id === data);
+        setSessionDocuments(sessionDoc ? [sessionDoc] : []);
+      } else if (data && typeof data === 'object' && data.documents) {
+        // If it's an object with documents array
+        setSessionDocuments(data.documents);
+      } else {
+        // Default to empty array
+        setSessionDocuments([]);
+      }
+    } catch (err: any) {
+      console.error('Error fetching session documents:', err);
+      setSessionDocuments([]);
+    } finally {
+      setSessionDocumentsLoading(false);
+    }
+  };
+
+  const handleDeleteDocument = async (documentId: string, context: 'chat' | 'session') => {
+    if (!createdChat?.id && !selectedSession?.chat_id) return;
+    let chatId = createdChat?.id || selectedSession?.chat_id;
+    let sessionId = createdSession?.id || selectedSession?.session_id;
+
+    if (!chatId) return;
+
+    const confirmDelete = window.confirm('Are you sure you want to delete this document?');
+    if (!confirmDelete) return;
+
+    try {
+      let url = '';
+      if (context === 'chat') {
+        url = `https://api.myjurist.io/api/v1/chats/${chatId}/documents/${documentId}`;
+      } else if (context === 'session' && sessionId) {
+        url = `https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents/${documentId}`;
+      } else {
+        return;
+      }
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to delete document');
+      }
+      // Refresh document lists after delete
+      await fetchChatDocuments(chatId);
+      if (sessionId) await fetchSessionDocuments(chatId, sessionId);
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete document');
+    }
+  };
+
   const chatSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (uploadSuccess) {
+      setCollapsedSteps(prev => ({ ...prev, upload: true }));
+    }
+  }, [uploadSuccess]);
+
+  useEffect(() => {
+    if (sessionSuccess) {
+      setCollapsedSteps(prev => ({ ...prev, select: true, chat: false }));
+    }
+  }, [sessionSuccess]);
+
+  useEffect(() => {
+    if (createdChat?.id) {
+      fetchChatDocuments(createdChat.id);
+    }
+  }, [createdChat?.id]);
+
+  useEffect(() => {
+    if (createdChat?.id && createdSession?.id) {
+      fetchSessionDocuments(createdChat.id, createdSession.id);
+    }
+  }, [createdChat?.id, createdSession?.id]);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
@@ -412,15 +684,16 @@ export default function DocumentAnalysisPage() {
         const newTab = value as 'new' | 'history';
         setTab(newTab);
         if (newTab === 'new') {
-          setFile(null);
+          setProcessing(false);
           setApiResult(null);
           setApiError(null);
-          setChat([
-            { sender: "system", text: "Upload and process a document to start asking questions.", time: new Date() },
-          ]);
+          setChatMessages([]); // Clear old chat history
+          setChatInput(""); // Clear old input
+          setChatLoading(false); // Clear old loading state
+          setChatError(null); // Clear old error state
           setSessionId(null);
           setDocumentId(null);
-          setInput("");
+          setChatInput("");
         }
       }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-auto">
@@ -430,26 +703,25 @@ export default function DocumentAnalysisPage() {
 
         <TabsContent value="new" className="space-y-6 flex-1">
           {/* Timeline Indicator */}
-          <TimelineIndicator 
+          {/* <TimelineIndicator 
             currentStep={getCurrentStep()}
             selectedDocument={selectedDocument?.filename}
             selectedChat={selectedSession?.session_id}
-          />
+          /> */}
 
           {/* Document Upload Section */}
-          <CollapsibleSection
+          {/* <CollapsibleSection
             title="Upload Document"
             isCollapsed={uploadCollapsed}
             onToggle={setUploadCollapsed}
           >
             <DocumentUploader
               file={file}
-              onFileChange={handleFileChange}
               onProcess={handleProcess}
               processing={processing}
               error={apiError}
             />
-          </CollapsibleSection>
+          </CollapsibleSection> */}
           
           {/* Chat Interface for New Analysis - Show when document is processed */}
           {apiResult && (
@@ -474,29 +746,310 @@ export default function DocumentAnalysisPage() {
               {/* Chat Interface - Full width */}
               <CardContent className="flex-1 p-0">
                 <ChatInterface
-                  chat={chat}
+                  chat={chatMessages}
                   onSend={handleSend}
-                  input={input}
-                  setInput={setInput}
+                  input={chatInput}
+                  setInput={setChatInput}
                   loading={chatLoading}
                   streaming={streaming}
                   streamedText={streamedText}
                   error={chatError}
                   disabled={chatLoading || streaming}
                   continuingSession={false}
+                  onDeleteDocument={handleDeleteDocument}
                 />
               </CardContent>
             </Card>
+          )}
+
+          {tab === 'new' && (
+            <div className="w-full">
+              {/* Timeline */}
+              <div className="flex w-full justify-between items-center mb-6">
+                {steps.map((step, idx) => (
+                  <React.Fragment key={step.key}>
+                    <div
+                      className={`flex flex-col items-center flex-1 min-w-0 ${
+                        idx < currentStepIndex
+                          ? 'text-primary'
+                          : idx === currentStepIndex
+                          ? 'font-bold text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                      style={{ minWidth: 0 }}
+                    >
+                      <div
+                        className={`rounded-full w-9 h-9 flex items-center justify-center mb-1 border-2 transition-colors
+                          ${
+                            idx < currentStepIndex
+                              ? 'bg-primary text-white border-primary'
+                              : idx === currentStepIndex
+                              ? 'bg-primary/80 text-black dark:text-black border-primary'
+                              : 'bg-muted text-black dark:text-white border-border'
+                          }
+                        `}
+                      >
+                        {idx < currentStepIndex ? (
+                          <Check className="w-5 h-5 text-white dark:text-black" />
+                        ) : (
+                          idx + 1
+                        )}
+                      </div>
+                      <span className="text-xs text-center break-words w-full max-w-[80px]">{step.label}</span>
+                    </div>
+                    {idx < steps.length - 1 && (
+                      <div
+                        className="flex-1 h-1 mx-1 transition-colors"
+                        style={{
+                          background:
+                            idx < currentStepIndex
+                              ? 'var(--tw-prose-bold, hsl(var(--primary)))'
+                              : 'hsl(var(--border))',
+                          opacity: idx < currentStepIndex ? 1 : 0.5,
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* Step 1: Create Chat */}
+              <CollapsibleSection
+                title="1. Create Chat"
+                isCollapsed={currentStepIndex > 0 && collapsedSteps['create'] !== false}
+                onToggle={() => handleToggleStep('create')}
+                className="w-full"
+              >
+                {newAnalysisStep === 'create' && !createdChat && (
+                  <div className="max-w-lg w-full mx-auto">
+                    <div className="mb-6">
+                      <h2 className="text-xl font-bold mb-2 text-foreground">Start a New Analysis</h2>
+                      <p className="text-muted-foreground text-sm">Create a new chat to begin your document analysis workflow.</p>
+                    </div>
+                    <form onSubmit={handleCreateChat} className="space-y-4">
+                      <div>
+                        <label htmlFor="chat-name" className="block text-sm font-medium mb-1">Chat Name</label>
+                        <input
+                          id="chat-name"
+                          type="text"
+                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter a name for this chat"
+                          value={newChatName}
+                          onChange={e => setNewChatName(e.target.value)}
+                          required
+                          maxLength={64}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="chat-desc" className="block text-sm font-medium mb-1">Description</label>
+                        <textarea
+                          id="chat-desc"
+                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-h-[80px] resize-y"
+                          placeholder="Describe the purpose of this analysis (optional)"
+                          value={newChatDescription}
+                          onChange={e => setNewChatDescription(e.target.value)}
+                          maxLength={256}
+                        />
+                      </div>
+                      {newChatError && (
+                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">
+                          {newChatError}
+                        </div>
+                      )}
+                      {newChatSuccess && (
+                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">
+                          Chat created successfully!
+                        </div>
+                      )}
+                      <button
+                        type="submit"
+                        className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
+                        disabled={newChatLoading || !newChatName.trim()}
+                      >
+                        {newChatLoading ? "Creating..." : "Create Chat"}
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              {/* Step 2: Upload Documents */}
+              <CollapsibleSection
+                title="2. Upload Documents"
+                isCollapsed={currentStepIndex > 1 && collapsedSteps['upload'] !== false}
+                onToggle={() => handleToggleStep('upload')}
+                className="w-full"
+              >
+                {newAnalysisStep === 'upload' && createdChat && (
+                  <div className="w-full max-w-2xl mx-auto">
+                    <Card className="w-full">
+                      <CardHeader>
+                        <CardTitle>Upload Documents</CardTitle>
+                        <p className="text-muted-foreground text-sm">Upload one or more documents to add to this chat.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleUploadDocuments} className="space-y-4">
+                          <div>
+                            <label htmlFor="doc-upload" className="block text-sm font-medium mb-1">Select Documents</label>
+                            <input
+                              id="doc-upload"
+                              type="file"
+                              multiple
+                              className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-border file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100"
+                              onChange={handleFileChange}
+                              disabled={uploading}
+                            />
+                            {uploadFiles.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {uploadFiles.map((file, idx) => (
+                                  <span key={idx} className="inline-block bg-muted px-3 py-1 rounded text-xs text-foreground/80 max-w-[160px] truncate border border-border" title={file.name}>{file.name}</span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          {uploadError && (
+                            <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{uploadError}</div>
+                          )}
+                          {uploadSuccess && (
+                            <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Documents uploaded successfully!</div>
+                          )}
+                          <button
+                            type="submit"
+                            className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
+                            disabled={uploading || uploadFiles.length === 0}
+                          >
+                            {uploading ? 'Uploading...' : 'Upload Documents'}
+                          </button>
+                        </form>
+                        {/* Uploaded Documents List */}
+                        {uploadedDocs.length > 0 && (
+                          <div className="mt-6">
+                            <h3 className="text-base font-semibold mb-2 text-foreground">Uploaded Documents</h3>
+                            <ul className="space-y-2">
+                              {uploadedDocs.map((doc, idx) => (
+                                <li key={doc.id || idx} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm border border-border">
+                                  <span className="flex-shrink-0 w-4 h-4 inline-block"><FileText className="w-4 h-4 text-primary" /></span>
+                                  <span className="break-all flex-1">{doc.filename}</span>
+                                  <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
+                                  <span className="text-xs text-muted-foreground">{doc.processing_status}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              {/* Step 3: Select Documents & Start Session */}
+              <CollapsibleSection
+                title="3. Select Documents & Start Session"
+                isCollapsed={currentStepIndex > 2 && collapsedSteps['select'] !== false}
+                onToggle={() => handleToggleStep('select')}
+                className="w-full"
+              >
+                {newAnalysisStep === 'upload' && createdChat && uploadedDocs.length > 0 && (
+                  <div className="w-full max-w-2xl mx-auto mt-8">
+                    <Card className="w-full">
+                      <CardHeader>
+                        <CardTitle>Select Documents & Start Session</CardTitle>
+                        <p className="text-muted-foreground text-sm">Select one or more documents and start a chat session for analysis.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <form onSubmit={handleCreateSession} className="space-y-4">
+                          <div className="space-y-2">
+                            {uploadedDocs.map(doc => (
+                              <label key={doc.id} className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 cursor-pointer border border-border">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedDocIds.includes(doc.id)}
+                                  onChange={() => handleToggleDoc(doc.id)}
+                                  className="accent-primary w-5 h-5"
+                                />
+                                <span className="break-all flex-1 text-sm text-foreground">{doc.filename}</span>
+                                <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <div>
+                            <label htmlFor="session-name" className="block text-sm font-medium mb-1">Session Name</label>
+                            <input
+                              id="session-name"
+                              type="text"
+                              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                              placeholder="Enter a name for this session"
+                              value={sessionName}
+                              onChange={e => setSessionName(e.target.value)}
+                              required
+                              maxLength={64}
+                            />
+                          </div>
+                          {sessionError && (
+                            <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{sessionError}</div>
+                          )}
+                          {sessionSuccess && (
+                            <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Session created successfully!</div>
+                          )}
+                          <button
+                            type="submit"
+                            className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
+                            disabled={sessionLoading || selectedDocIds.length === 0 || !sessionName.trim()}
+                          >
+                            {sessionLoading ? 'Creating Session...' : 'Start Session'}
+                          </button>
+                        </form>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </CollapsibleSection>
+
+              {/* Step 4: Chat */}
+              <CollapsibleSection
+                title="4. Chat"
+                isCollapsed={currentStepIndex < 3 || collapsedSteps['chat'] === true}
+                onToggle={() => handleToggleStep('chat')}
+                className="w-full"
+              >
+                {createdSession && (
+                  <div className="w-full mx-auto mt-8">
+                    <h3 className="text-lg font-bold mb-2 text-foreground">4. Chat</h3>
+                    <ChatInterface
+                      chat={chatMessages}
+                      onSend={handleSendChatMessage}
+                      input={chatInput}
+                      setInput={setChatInput}
+                      loading={chatLoading}
+                      streaming={false}
+                      streamedText={""}
+                      error={chatError}
+                      disabled={chatLoading}
+                      continuingSession={true}
+                      continuingSessionId={createdSession.id}
+                      chatDocuments={chatDocuments}
+                      sessionDocuments={sessionDocuments}
+                      chatId={createdChat?.id}
+                      sessionId={createdSession?.id}
+                      onViewDocument={handleView}
+                      onDownloadDocument={handleDownload}
+                      onDeleteDocument={handleDeleteDocument}
+                    />
+                  </div>
+                )}
+              </CollapsibleSection>
+            </div>
           )}
         </TabsContent>
 
         <TabsContent value="history" className="flex flex-col gap-6 flex-1">
           {/* Timeline Indicator */}
-          <TimelineIndicator 
+          {/* <TimelineIndicator 
             currentStep={getCurrentStep()}
             selectedDocument={selectedDocument?.filename}
             selectedChat={selectedSession?.session_id}
-          />
+          /> */}
 
           {/* Documents Section - Always visible at top */}
           <CollapsibleSection
@@ -653,10 +1206,10 @@ export default function DocumentAnalysisPage() {
               {/* Chat Interface - Full width */}
               <CardContent className="flex-1 p-0">
                 <ChatInterface
-                  chat={chat}
-                  onSend={handleSend}
-                  input={input}
-                  setInput={setInput}
+                  chat={chatMessages}
+                  onSend={handleSendChatMessage}
+                  input={chatInput}
+                  setInput={setChatInput}
                   loading={chatLoading}
                   streaming={streaming}
                   streamedText={streamedText}
@@ -664,6 +1217,13 @@ export default function DocumentAnalysisPage() {
                   disabled={chatLoading || streaming}
                   continuingSession={true}
                   continuingSessionId={selectedSession.session_id}
+                  chatDocuments={chatDocuments}
+                  sessionDocuments={sessionDocuments}
+                  chatId={selectedSession?.chat_id}
+                  sessionId={selectedSession?.session_id}
+                  onViewDocument={handleView}
+                  onDownloadDocument={handleDownload}
+                  onDeleteDocument={handleDeleteDocument}
                 />
               </CardContent>
             </Card>
