@@ -297,7 +297,14 @@ export default function ChatInterface({
         </div>
         
         {/* Input Area - Fixed at bottom */}
-        <div className="bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 p-4 shadow-xl mt-4 rounded-lg">
+        <div className="bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 p-4 shadow-xl mt-4 rounded-lg relative">
+          {/* Loader overlay when uploading */}
+          {uploadingNewDocuments && (
+            <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 rounded-lg">
+              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+              <span className="text-primary-foreground font-semibold">Uploading documents...</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="w-full">
             {/* Main Input Field */}
             <div className="relative mb-3">
@@ -357,7 +364,11 @@ export default function ChatInterface({
                   onClick={() => !uploadingNewDocuments && fileInputRef.current?.click()}
                   disabled={uploadingNewDocuments}
                 >
-                  <Paperclip className="w-4 h-4" />
+                  {uploadingNewDocuments ? (
+                    <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <Paperclip className="w-4 h-4" />
+                  )}
                   <input
                     ref={fileInputRef}
                     type="file"
