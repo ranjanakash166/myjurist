@@ -58,6 +58,8 @@ interface ChatInterfaceProps {
   onDeleteDocument?: (documentId: string, context: 'chat' | 'session') => void;
   onAddToSession?: (documentIds: string[]) => void;
   addToSessionSuccessTrigger?: number;
+  onUploadNewDocuments?: (files: FileList) => void;
+  uploadingNewDocuments?: boolean;
 }
 
 export default function ChatInterface({ 
@@ -80,11 +82,14 @@ export default function ChatInterface({
   onDownloadDocument,
   onDeleteDocument,
   onAddToSession,
-  addToSessionSuccessTrigger
+  addToSessionSuccessTrigger,
+  onUploadNewDocuments,
+  uploadingNewDocuments
 }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedForSession, setSelectedForSession] = React.useState<string[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     setSelectedForSession([]);
@@ -340,16 +345,31 @@ export default function ChatInterface({
                   title="Visual Search"
                 >
                   <Eye className="w-4 h-4" />
-                </button>
+                </button>  
               </div>
               {/* Right Group - Action Icons */}
               <div className="flex items-center gap-2">
+                  {/* Upload icon */}
                 <button
                   type="button"
-                  className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
-                  title="Attach File"
+                  className={`p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 ${uploadingNewDocuments ? 'opacity-60 cursor-wait' : 'text-neutral-400 hover:text-neutral-200'} transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg`}
+                  title="Upload new documents"
+                  onClick={() => !uploadingNewDocuments && fileInputRef.current?.click()}
+                  disabled={uploadingNewDocuments}
                 >
                   <Paperclip className="w-4 h-4" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={e => {
+                      if (e.target.files && onUploadNewDocuments) {
+                        onUploadNewDocuments(e.target.files);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
                 </button>
                 <button
                   type="button"

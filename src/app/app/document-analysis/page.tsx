@@ -128,6 +128,8 @@ export default function DocumentAnalysisPage() {
 
   const [addToSessionSuccessTrigger, setAddToSessionSuccessTrigger] = useState(0);
 
+  const [uploadingNewDocuments, setUploadingNewDocuments] = useState(false);
+
   const handleToggleDoc = (docId: string) => {
     setSelectedDocIds(prev =>
       prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
@@ -681,6 +683,50 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  const handleUploadNewDocuments = async (files: FileList) => {
+    if (!createdChat?.id && !selectedSession?.chat_id) return;
+    let chatId = createdChat?.id || selectedSession?.chat_id;
+    let sessionId = createdSession?.id || selectedSession?.session_id;
+    if (!chatId || !sessionId) return;
+    setUploadingNewDocuments(true);
+    try {
+      // Upload files to chat
+      const formData = new FormData();
+      Array.from(files).forEach(file => formData.append('files', file));
+      const headers = { ...getAuthHeaders() };
+      if ('Content-Type' in headers) delete headers['Content-Type'];
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to upload documents');
+      }
+      const data = await res.json();
+      const uploadedDocs = data.uploaded_documents || [];
+      // Add each uploaded doc to session context
+      for (const doc of uploadedDocs) {
+        const putRes = await fetch(`${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/documents/${doc.id}`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+        });
+        if (!putRes.ok) {
+          const err = await putRes.json().catch(() => ({}));
+          throw new Error(err?.detail?.[0]?.msg || 'Failed to add document to session');
+        }
+      }
+      await fetchChatDocuments(chatId);
+      await fetchSessionDocuments(chatId, sessionId);
+      toast({ title: 'Documents uploaded', description: 'New documents added to chat and session context.' });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message || 'Failed to upload documents', variant: 'destructive' });
+    } finally {
+      setUploadingNewDocuments(false);
+    }
+  };
+
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1066,6 +1112,8 @@ export default function DocumentAnalysisPage() {
                       onDeleteDocument={handleDeleteDocument}
                       onAddToSession={handleAddToSession}
                       addToSessionSuccessTrigger={addToSessionSuccessTrigger}
+                      onUploadNewDocuments={handleUploadNewDocuments}
+                      uploadingNewDocuments={uploadingNewDocuments}
                     />
                   </div>
                 )}
@@ -1257,6 +1305,8 @@ export default function DocumentAnalysisPage() {
                   onDeleteDocument={handleDeleteDocument}
                   onAddToSession={handleAddToSession}
                   addToSessionSuccessTrigger={addToSessionSuccessTrigger}
+                  onUploadNewDocuments={handleUploadNewDocuments}
+                  uploadingNewDocuments={uploadingNewDocuments}
                 />
               </CardContent>
             </Card>
