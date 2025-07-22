@@ -35,6 +35,7 @@ interface DocumentHistoryItem {
 interface ChatSessionItem {
   session_id: string;
   document_id: string;
+  chat_id?: string;
   created_at: string;
   last_activity: string;
   message_count: number;
@@ -118,6 +119,12 @@ export default function DocumentAnalysisPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
 
+  // Document lists state
+  const [chatDocuments, setChatDocuments] = useState<any[]>([]);
+  const [sessionDocuments, setSessionDocuments] = useState<any[]>([]);
+  const [chatDocumentsLoading, setChatDocumentsLoading] = useState(false);
+  const [sessionDocumentsLoading, setSessionDocumentsLoading] = useState(false);
+
   const handleToggleDoc = (docId: string) => {
     setSelectedDocIds(prev =>
       prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
@@ -150,6 +157,10 @@ export default function DocumentAnalysisPage() {
       setSessionSuccess(true);
       setChatMessages([]); // Reset chat messages for new session
       setChatInput(""); // Reset chat input for new session
+      
+      // Fetch documents for the new session
+      await fetchChatDocuments(createdChat.id);
+      await fetchSessionDocuments(createdChat.id, data.id);
     } catch (err: any) {
       setSessionError(err.message || 'An error occurred while creating session.');
     } finally {
@@ -387,6 +398,12 @@ export default function DocumentAnalysisPage() {
         { sender: "system", text: msg.assistant, time: new Date(msg.timestamp) },
       ]).flat();
       setChatMessages(chatHistory);
+      
+      // Fetch documents for the selected session
+      if (session.chat_id) {
+        await fetchChatDocuments(session.chat_id);
+        await fetchSessionDocuments(session.chat_id, session.session_id);
+      }
     } catch (err: any) {
       setChatMessages([
         { sender: "system", text: "(Error) " + (err.message || "Failed to load chat session."), time: new Date() },
@@ -545,6 +562,61 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  // Fetch chat documents
+  const fetchChatDocuments = async (chatId: string) => {
+    if (!chatId) return;
+    setChatDocumentsLoading(true);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${chatId}/documents`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch chat documents');
+      }
+      const data = await res.json();
+      setChatDocuments(data.documents || []);
+    } catch (err: any) {
+      console.error('Error fetching chat documents:', err);
+    } finally {
+      setChatDocumentsLoading(false);
+    }
+  };
+
+  // Fetch session documents
+  const fetchSessionDocuments = async (chatId: string, sessionId: string) => {
+    if (!chatId || !sessionId) return;
+    setSessionDocumentsLoading(true);
+    try {
+      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents`, {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch session documents');
+      }
+      const data = await res.json();
+      
+      // Handle different response formats
+      if (Array.isArray(data)) {
+        setSessionDocuments(data);
+      } else if (typeof data === 'string') {
+        // If it's a single document ID string, we'll filter from chat documents
+        const sessionDoc = chatDocuments.find(doc => doc.id === data);
+        setSessionDocuments(sessionDoc ? [sessionDoc] : []);
+      } else if (data && typeof data === 'object' && data.documents) {
+        // If it's an object with documents array
+        setSessionDocuments(data.documents);
+      } else {
+        // Default to empty array
+        setSessionDocuments([]);
+      }
+    } catch (err: any) {
+      console.error('Error fetching session documents:', err);
+      setSessionDocuments([]);
+    } finally {
+      setSessionDocumentsLoading(false);
+    }
+  };
+
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -558,6 +630,18 @@ export default function DocumentAnalysisPage() {
       setCollapsedSteps(prev => ({ ...prev, select: true, chat: false }));
     }
   }, [sessionSuccess]);
+
+  useEffect(() => {
+    if (createdChat?.id) {
+      fetchChatDocuments(createdChat.id);
+    }
+  }, [createdChat?.id]);
+
+  useEffect(() => {
+    if (createdChat?.id && createdSession?.id) {
+      fetchSessionDocuments(createdChat.id, createdSession.id);
+    }
+  }, [createdChat?.id, createdSession?.id]);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
@@ -908,6 +992,12 @@ export default function DocumentAnalysisPage() {
                       disabled={chatLoading}
                       continuingSession={true}
                       continuingSessionId={createdSession.id}
+                      chatDocuments={chatDocuments}
+                      sessionDocuments={sessionDocuments}
+                      chatId={createdChat?.id}
+                      sessionId={createdSession?.id}
+                      onViewDocument={handleView}
+                      onDownloadDocument={handleDownload}
                     />
                   </div>
                 )}
@@ -1090,6 +1180,12 @@ export default function DocumentAnalysisPage() {
                   disabled={chatLoading || streaming}
                   continuingSession={true}
                   continuingSessionId={selectedSession.session_id}
+                  chatDocuments={chatDocuments}
+                  sessionDocuments={sessionDocuments}
+                  chatId={selectedSession?.chat_id}
+                  sessionId={selectedSession?.session_id}
+                  onViewDocument={handleView}
+                  onDownloadDocument={handleDownload}
                 />
               </CardContent>
             </Card>
