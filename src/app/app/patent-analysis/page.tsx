@@ -100,6 +100,25 @@ interface DisclosureAnalysisResponse {
   example_suggestions?: string[];
 }
 
+// Add Novelty API response type
+interface NoveltyAnalysisResponse {
+  overall_assessment: string;
+  novelty_verdict: string;
+  inventive_step_verdict: string;
+  confidence_score: number;
+  novel_features?: string[];
+  anticipated_features?: string[];
+  borderline_features?: string[];
+  most_relevant_prior_art?: Array<Record<string, any>>;
+  feature_comparison_table?: Array<Record<string, any>>;
+  obviousness_factors?: Record<string, string>;
+  person_skilled_in_art?: string;
+  motivation_to_combine?: string;
+  legal_conclusions?: string[];
+  risk_assessment?: string;
+  recommendations?: string[];
+}
+
 export default function PatentAnalysisPage() {
   const { getAuthHeaders, isAuthenticated, token } = useAuth();
   const [tab, setTab] = useState<'quick' | 'detailed' | 'history'>('quick');
@@ -118,6 +137,10 @@ export default function PatentAnalysisPage() {
   const [disclosureResult, setDisclosureResult] = useState<DisclosureAnalysisResponse | null>(null);
   const [disclosureLoading, setDisclosureLoading] = useState(false);
   const [disclosureError, setDisclosureError] = useState<string | null>(null);
+  // Novelty API State
+  const [noveltyResult, setNoveltyResult] = useState<NoveltyAnalysisResponse | null>(null);
+  const [noveltyLoading, setNoveltyLoading] = useState(false);
+  const [noveltyError, setNoveltyError] = useState<string | null>(null);
   
   // Detailed Analysis State
   const [applicantName, setApplicantName] = useState("");
@@ -316,6 +339,42 @@ export default function PatentAnalysisPage() {
     }
   };
 
+  // Novelty API handler
+  const handleNoveltyAnalysis = async () => {
+    if (!isValid) return;
+    setNoveltyLoading(true);
+    setNoveltyError(null);
+    setNoveltyResult(null);
+    try {
+      const res = await fetch(
+        `https://api.myjurist.io/api/v1/patents/analysis/novelty/detailed`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({
+            invention_description: desc,
+            prior_art_focus: true,
+            feature_by_feature: true,
+            obviousness_analysis: true,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Novelty analysis failed");
+      }
+      const data: NoveltyAnalysisResponse = await res.json();
+      setNoveltyResult(data);
+    } catch (err: any) {
+      setNoveltyError(err.message || "An error occurred during novelty analysis.");
+    } finally {
+      setNoveltyLoading(false);
+    }
+  };
+
   // Simulated streaming for comprehensive report
   const simulateStreaming = async (fullText: string) => {
     setStreamingReport(true);
@@ -504,6 +563,15 @@ export default function PatentAnalysisPage() {
                   <ShieldCheck className="w-4 h-4" /> 
                   <span className="hidden sm:inline">Disclosure</span>
                   <span className="sm:hidden">Disclosure</span>
+                </Button>
+                <Button
+                  onClick={handleNoveltyAnalysis}
+                  disabled={!isValid || noveltyLoading}
+                  className="flex items-center gap-2 text-sm col-span-1 sm:col-span-2 lg:col-span-1"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span className="hidden sm:inline">Novelty</span>
+                  <span className="sm:hidden">Novelty</span>
                 </Button>
               </div>
 
@@ -748,6 +816,135 @@ export default function PatentAnalysisPage() {
                         <strong>Example Suggestions:</strong>
                         <ul className="list-disc ml-6">
                           {disclosureResult.example_suggestions.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {noveltyLoading && (
+                <Alert>
+                  <FileText className="h-4 w-4" />
+                  <AlertDescription>Analyzing novelty...</AlertDescription>
+                </Alert>
+              )}
+              {noveltyError && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{noveltyError}</AlertDescription>
+                </Alert>
+              )}
+              {noveltyResult && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Novelty Analysis Result</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-2">
+                      <strong>Overall Assessment:</strong> {noveltyResult.overall_assessment}
+                    </div>
+                    <div className="mb-2">
+                      <strong>Novelty Verdict:</strong> {noveltyResult.novelty_verdict}
+                    </div>
+                    <div className="mb-2">
+                      <strong>Inventive Step Verdict:</strong> {noveltyResult.inventive_step_verdict}
+                    </div>
+                    <div className="mb-2">
+                      <strong>Confidence Score:</strong> {noveltyResult.confidence_score}
+                    </div>
+                    {noveltyResult.novel_features && noveltyResult.novel_features.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Novel Features:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.novel_features.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.anticipated_features && noveltyResult.anticipated_features.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Anticipated Features:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.anticipated_features.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.borderline_features && noveltyResult.borderline_features.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Borderline Features:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.borderline_features.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.most_relevant_prior_art && noveltyResult.most_relevant_prior_art.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Most Relevant Prior Art:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.most_relevant_prior_art.map((item, idx) => (
+                            <li key={idx}>{JSON.stringify(item)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.feature_comparison_table && noveltyResult.feature_comparison_table.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Feature Comparison Table:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.feature_comparison_table.map((item, idx) => (
+                            <li key={idx}>{JSON.stringify(item)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.obviousness_factors && (
+                      <div className="mb-2">
+                        <strong>Obviousness Factors:</strong>
+                        <ul className="list-disc ml-6">
+                          {Object.entries(noveltyResult.obviousness_factors).map(([k, v]) => (
+                            <li key={k}><strong>{k}:</strong> {v}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.person_skilled_in_art && (
+                      <div className="mb-2">
+                        <strong>Person Skilled in Art:</strong> {noveltyResult.person_skilled_in_art}
+                      </div>
+                    )}
+                    {noveltyResult.motivation_to_combine && (
+                      <div className="mb-2">
+                        <strong>Motivation to Combine:</strong> {noveltyResult.motivation_to_combine}
+                      </div>
+                    )}
+                    {noveltyResult.legal_conclusions && noveltyResult.legal_conclusions.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Legal Conclusions:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.legal_conclusions.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {noveltyResult.risk_assessment && (
+                      <div className="mb-2">
+                        <strong>Risk Assessment:</strong> {noveltyResult.risk_assessment}
+                      </div>
+                    )}
+                    {noveltyResult.recommendations && noveltyResult.recommendations.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Recommendations:</strong>
+                        <ul className="list-disc ml-6">
+                          {noveltyResult.recommendations.map((item, idx) => (
                             <li key={idx}>{item}</li>
                           ))}
                         </ul>
