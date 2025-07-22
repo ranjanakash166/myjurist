@@ -53,6 +53,33 @@ interface ReportHistoryResponse {
   offset: number;
 }
 
+// Add Exclusions API response type
+interface ExclusionsAnalysisResponse {
+  overall_verdict: string;
+  confidence_score: number;
+  section_3a_frivolous?: Record<string, string>;
+  section_3b_morality?: Record<string, string>;
+  section_3c_scientific_principles?: Record<string, string>;
+  section_3d_business_methods?: Record<string, string>;
+  section_3e_literary_works?: Record<string, string>;
+  section_3f_mental_acts?: Record<string, string>;
+  section_3g_information_presentation?: Record<string, string>;
+  section_3h_topography?: Record<string, string>;
+  section_3i_traditional_knowledge?: Record<string, string>;
+  section_3j_known_substances?: Record<string, string>;
+  section_3k_admixture?: Record<string, string>;
+  section_3l_arrangement?: Record<string, string>;
+  section_3m_agriculture?: Record<string, string>;
+  section_3n_treatment_methods?: Record<string, string>;
+  section_3o_plants_animals?: Record<string, string>;
+  section_3p_atomic_energy?: Record<string, string>;
+  high_risk_exclusions?: string[];
+  medium_risk_exclusions?: string[];
+  low_risk_exclusions?: string[];
+  mitigation_strategies?: string[];
+  claim_drafting_suggestions?: string[];
+}
+
 export default function PatentAnalysisPage() {
   const { getAuthHeaders, isAuthenticated, token } = useAuth();
   const [tab, setTab] = useState<'quick' | 'detailed' | 'history'>('quick');
@@ -63,6 +90,10 @@ export default function PatentAnalysisPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<any[] | null>(null);
+  // Exclusions API State
+  const [exclusionsResult, setExclusionsResult] = useState<ExclusionsAnalysisResponse | null>(null);
+  const [exclusionsLoading, setExclusionsLoading] = useState(false);
+  const [exclusionsError, setExclusionsError] = useState<string | null>(null);
   
   // Detailed Analysis State
   const [applicantName, setApplicantName] = useState("");
@@ -186,6 +217,42 @@ export default function PatentAnalysisPage() {
   const handleAnalysis = (type: keyof typeof dummyResults) => {
     if (!isValid) return;
     setResult(dummyResults[type]);
+  };
+
+  // Exclusions API handler
+  const handleExclusionsAnalysis = async () => {
+    if (!isValid) return;
+    setExclusionsLoading(true);
+    setExclusionsError(null);
+    setExclusionsResult(null);
+    try {
+      const res = await fetch(
+        `https://api.myjurist.io/api/v1/patents/analysis/exclusions/detailed`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({
+            invention_description: desc,
+            section_by_section: true,
+            include_case_law: false,
+            borderline_analysis: true,
+          }),
+        }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || "Exclusions analysis failed");
+      }
+      const data: ExclusionsAnalysisResponse = await res.json();
+      setExclusionsResult(data);
+    } catch (err: any) {
+      setExclusionsError(err.message || "An error occurred during exclusions analysis.");
+    } finally {
+      setExclusionsLoading(false);
+    }
   };
 
   // Simulated streaming for comprehensive report
@@ -360,8 +427,8 @@ export default function PatentAnalysisPage() {
                   <span className="sm:hidden">Prior Art</span>
                 </Button>
                 <Button
-                  onClick={() => handleAnalysis('exclusions')}
-                  disabled={!isValid}
+                  onClick={handleExclusionsAnalysis}
+                  disabled={!isValid || exclusionsLoading}
                   className="flex items-center gap-2 text-sm"
                 >
                   <Gavel className="w-4 h-4" /> 
@@ -410,6 +477,79 @@ export default function PatentAnalysisPage() {
                             <div className="text-xs text-muted-foreground">Application No: {item.application_no} | Year: {item.year} | Score: {item.similarity_score?.toFixed(2)}</div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {exclusionsLoading && (
+                <Alert>
+                  <Gavel className="h-4 w-4" />
+                  <AlertDescription>Analyzing exclusions...</AlertDescription>
+                </Alert>
+              )}
+              {exclusionsError && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>{exclusionsError}</AlertDescription>
+                </Alert>
+              )}
+              {exclusionsResult && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Exclusions Analysis Result</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-2">
+                      <strong>Overall Verdict:</strong> {exclusionsResult.overall_verdict}
+                    </div>
+                    <div className="mb-2">
+                      <strong>Confidence Score:</strong> {exclusionsResult.confidence_score}
+                    </div>
+                    {Object.entries(exclusionsResult)
+                      .filter(([key]) => key.startsWith('section_3'))
+                      .map(([key, value]) => (
+                        <div key={key} className="mb-2">
+                          <strong>{key.replace(/_/g, ' ').replace('section 3', 'Section 3')}:</strong>
+                          <ul className="list-disc ml-6">
+                            {value && typeof value === 'object' &&
+                              Object.entries(value as Record<string, string>).map(([k, v]) => (
+                                <li key={k}><strong>{k}:</strong> {v}</li>
+                              ))}
+                          </ul>
+                        </div>
+                      ))}
+                    {['high_risk_exclusions', 'medium_risk_exclusions', 'low_risk_exclusions'].map((risk) =>
+                      exclusionsResult[risk as keyof ExclusionsAnalysisResponse] && (
+                        <div key={risk} className="mb-2">
+                          <strong>{risk.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
+                          <ul className="list-disc ml-6">
+                            {(exclusionsResult[risk as keyof ExclusionsAnalysisResponse] as string[]).map((item, idx) => (
+                              <li key={idx}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    )}
+                    {exclusionsResult.mitigation_strategies && exclusionsResult.mitigation_strategies.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Mitigation Strategies:</strong>
+                        <ul className="list-disc ml-6">
+                          {exclusionsResult.mitigation_strategies.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {exclusionsResult.claim_drafting_suggestions && exclusionsResult.claim_drafting_suggestions.length > 0 && (
+                      <div className="mb-2">
+                        <strong>Claim Drafting Suggestions:</strong>
+                        <ul className="list-disc ml-6">
+                          {exclusionsResult.claim_drafting_suggestions.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                   </CardContent>
