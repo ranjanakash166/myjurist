@@ -118,49 +118,53 @@ export default function ChatInterface({
               <p>No documents in chat</p>
             </div>
           ) : (
-            (chatDocuments as any[]).map((doc) => (
-              <div
-                key={doc.id}
-                className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800 hover:bg-neutral-900 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
-                    {doc.filename}
-                  </h4>
+            (chatDocuments as any[]).map((doc) => {
+              const inSession = Array.isArray(sessionDocuments) && sessionDocuments.some(sdoc => sdoc.id === doc.id);
+              return (
+                <div
+                  key={doc.id}
+                  className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800 hover:bg-neutral-900 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
+                      {doc.filename}
+                    </h4>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    {onViewDocument && (
+                      <button
+                        onClick={() => onViewDocument(doc.id, doc.filename)}
+                        className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+                        title="View document"
+                      >
+                        <EyeIcon className="w-4 h-4" />
+                      </button>
+                    )}
+                    {onDownloadDocument && (
+                      <button
+                        onClick={() => onDownloadDocument(doc.id, doc.filename)}
+                        className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+                        title="Download document"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                    )}
+                    {onDeleteDocument && (
+                      <button
+                        onClick={() => !inSession && onDeleteDocument(doc.id, 'chat')}
+                        className={`p-1 ${inSession ? 'text-gray-500 cursor-not-allowed' : 'text-red-400 hover:text-red-600'} transition-colors`}
+                        title={inSession ? 'Cannot delete: document is in session context' : 'Delete document'}
+                        disabled={inSession}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 mt-2">
-                  {onViewDocument && (
-                    <button
-                      onClick={() => onViewDocument(doc.id, doc.filename)}
-                      className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
-                      title="View document"
-                    >
-                      <EyeIcon className="w-4 h-4" />
-                    </button>
-                  )}
-                  {onDownloadDocument && (
-                    <button
-                      onClick={() => onDownloadDocument(doc.id, doc.filename)}
-                      className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
-                      title="Download document"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                  )}
-                  {onDeleteDocument && (
-                    <button
-                      onClick={() => onDeleteDocument(doc.id, 'chat')}
-                      className="p-1 text-red-400 hover:text-red-600 transition-colors"
-                      title="Delete document"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
