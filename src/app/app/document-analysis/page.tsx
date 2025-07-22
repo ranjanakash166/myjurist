@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Eye, Download, MessageCircle, FileText, Check } from "lucide-react";
+import { toast } from '@/hooks/use-toast';
 
 interface ApiResponse {
   document_id: string;
@@ -124,6 +125,8 @@ export default function DocumentAnalysisPage() {
   const [sessionDocuments, setSessionDocuments] = useState<any[]>([]);
   const [chatDocumentsLoading, setChatDocumentsLoading] = useState(false);
   const [sessionDocumentsLoading, setSessionDocumentsLoading] = useState(false);
+
+  const [addToSessionSuccessTrigger, setAddToSessionSuccessTrigger] = useState(0);
 
   const handleToggleDoc = (docId: string) => {
     setSelectedDocIds(prev =>
@@ -671,6 +674,8 @@ export default function DocumentAnalysisPage() {
       }
       // Refresh session documents after adding
       await fetchSessionDocuments(chatId, sessionId);
+      setAddToSessionSuccessTrigger(t => t + 1);
+      toast({ title: 'Added to session', description: 'Document(s) added to session context.' });
     } catch (err: any) {
       alert(err.message || 'Failed to add document to session');
     }
@@ -1060,6 +1065,7 @@ export default function DocumentAnalysisPage() {
                       onDownloadDocument={handleDownload}
                       onDeleteDocument={handleDeleteDocument}
                       onAddToSession={handleAddToSession}
+                      addToSessionSuccessTrigger={addToSessionSuccessTrigger}
                     />
                   </div>
                 )}
@@ -1250,6 +1256,7 @@ export default function DocumentAnalysisPage() {
                   onDownloadDocument={handleDownload}
                   onDeleteDocument={handleDeleteDocument}
                   onAddToSession={handleAddToSession}
+                  addToSessionSuccessTrigger={addToSessionSuccessTrigger}
                 />
               </CardContent>
             </Card>

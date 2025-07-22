@@ -57,6 +57,7 @@ interface ChatInterfaceProps {
   onDownloadDocument?: (documentId: string, filename: string) => void;
   onDeleteDocument?: (documentId: string, context: 'chat' | 'session') => void;
   onAddToSession?: (documentIds: string[]) => void;
+  addToSessionSuccessTrigger?: number;
 }
 
 export default function ChatInterface({ 
@@ -78,11 +79,16 @@ export default function ChatInterface({
   onViewDocument,
   onDownloadDocument,
   onDeleteDocument,
-  onAddToSession
+  onAddToSession,
+  addToSessionSuccessTrigger
 }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedForSession, setSelectedForSession] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    setSelectedForSession([]);
+  }, [addToSessionSuccessTrigger]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
