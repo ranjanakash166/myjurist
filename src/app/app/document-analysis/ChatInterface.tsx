@@ -55,6 +55,7 @@ interface ChatInterfaceProps {
   sessionId?: string;
   onViewDocument?: (documentId: string, filename: string) => void;
   onDownloadDocument?: (documentId: string, filename: string) => void;
+  onDeleteDocument?: (documentId: string, context: 'chat' | 'session') => void;
 }
 
 export default function ChatInterface({ 
@@ -74,7 +75,8 @@ export default function ChatInterface({
   chatId,
   sessionId,
   onViewDocument,
-  onDownloadDocument
+  onDownloadDocument,
+  onDeleteDocument
 }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -116,7 +118,7 @@ export default function ChatInterface({
               <p>No documents in chat</p>
             </div>
           ) : (
-            chatDocuments.map((doc) => (
+            (chatDocuments as any[]).map((doc) => (
               <div
                 key={doc.id}
                 className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800 hover:bg-neutral-900 transition-colors"
@@ -125,50 +127,37 @@ export default function ChatInterface({
                   <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
                     {doc.filename}
                   </h4>
-                  <div className="flex items-center gap-1 ml-2">
-                    {onViewDocument && (
-                      <button
-                        onClick={() => onViewDocument(doc.id, doc.filename)}
-                        className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
-                        title="View document"
-                      >
-                        <EyeIcon className="w-3 h-3" />
-                      </button>
-                    )}
-                    {onDownloadDocument && (
-                      <button
-                        onClick={() => onDownloadDocument(doc.id, doc.filename)}
-                        className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
-                        title="Download document"
-                      >
-                        <Download className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
                 </div>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div className="flex justify-between">
-                    <span>Size:</span>
-                    <span>{formatFileSize(doc.file_size)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Pages:</span>
-                    <span>{doc.total_pages}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tokens:</span>
-                    <span>{doc.total_tokens.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Status:</span>
-                    <span className={`px-1 rounded text-xs ${
-                      doc.processing_status === 'completed' 
-                        ? 'bg-green-900/50 text-green-400' 
-                        : 'bg-yellow-900/50 text-yellow-400'
-                    }`}>
-                      {doc.processing_status}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-3 mt-2">
+                  {onViewDocument && (
+                    <button
+                      onClick={() => onViewDocument(doc.id, doc.filename)}
+                      className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+                      title="View document"
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                    </button>
+                  )}
+                  {onDownloadDocument && (
+                    <button
+                      onClick={() => onDownloadDocument(doc.id, doc.filename)}
+                      className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+                      title="Download document"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  )}
+                  {onDeleteDocument && (
+                    <button
+                      onClick={() => onDeleteDocument(doc.id, 'chat')}
+                      className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                      title="Delete document"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             ))
@@ -361,7 +350,7 @@ export default function ChatInterface({
               <p>No documents in context</p>
             </div>
           ) : (
-            sessionDocuments.map((doc) => (
+            (sessionDocuments as any[]).map((doc) => (
               <div
                 key={doc.id}
                 className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800 hover:bg-neutral-900 transition-colors"
@@ -370,50 +359,37 @@ export default function ChatInterface({
                   <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
                     {doc.filename}
                   </h4>
-                  <div className="flex items-center gap-1 ml-2">
-                    {onViewDocument && (
-                      <button
-                        onClick={() => onViewDocument(doc.id, doc.filename)}
-                        className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
-                        title="View document"
-                      >
-                        <EyeIcon className="w-3 h-3" />
-                      </button>
-                    )}
-                    {onDownloadDocument && (
-                      <button
-                        onClick={() => onDownloadDocument(doc.id, doc.filename)}
-                        className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
-                        title="Download document"
-                      >
-                        <Download className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
                 </div>
-                <div className="text-xs text-neutral-500 space-y-1">
-                  <div className="flex justify-between">
-                    <span>Size:</span>
-                    <span>{formatFileSize(doc.file_size)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Pages:</span>
-                    <span>{doc.total_pages}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tokens:</span>
-                    <span>{doc.total_tokens.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Status:</span>
-                    <span className={`px-1 rounded text-xs ${
-                      doc.processing_status === 'completed' 
-                        ? 'bg-green-900/50 text-green-400' 
-                        : 'bg-yellow-900/50 text-yellow-400'
-                    }`}>
-                      {doc.processing_status}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-3 mt-2">
+                  {onViewDocument && (
+                    <button
+                      onClick={() => onViewDocument(doc.id, doc.filename)}
+                      className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+                      title="View document"
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                    </button>
+                  )}
+                  {onDownloadDocument && (
+                    <button
+                      onClick={() => onDownloadDocument(doc.id, doc.filename)}
+                      className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+                      title="Download document"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  )}
+                  {onDeleteDocument && (
+                    <button
+                      onClick={() => onDeleteDocument(doc.id, 'session')}
+                      className="p-1 text-red-400 hover:text-red-600 transition-colors"
+                      title="Delete document"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             ))

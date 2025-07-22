@@ -617,6 +617,41 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  const handleDeleteDocument = async (documentId: string, context: 'chat' | 'session') => {
+    if (!createdChat?.id && !selectedSession?.chat_id) return;
+    let chatId = createdChat?.id || selectedSession?.chat_id;
+    let sessionId = createdSession?.id || selectedSession?.session_id;
+
+    if (!chatId) return;
+
+    const confirmDelete = window.confirm('Are you sure you want to delete this document?');
+    if (!confirmDelete) return;
+
+    try {
+      let url = '';
+      if (context === 'chat') {
+        url = `https://api.myjurist.io/api/v1/chats/${chatId}/documents/${documentId}`;
+      } else if (context === 'session' && sessionId) {
+        url = `https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents/${documentId}`;
+      } else {
+        return;
+      }
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to delete document');
+      }
+      // Refresh document lists after delete
+      await fetchChatDocuments(chatId);
+      if (sessionId) await fetchSessionDocuments(chatId, sessionId);
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete document');
+    }
+  };
+
   const chatSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -721,6 +756,7 @@ export default function DocumentAnalysisPage() {
                   error={chatError}
                   disabled={chatLoading || streaming}
                   continuingSession={false}
+                  onDeleteDocument={handleDeleteDocument}
                 />
               </CardContent>
             </Card>
@@ -998,6 +1034,7 @@ export default function DocumentAnalysisPage() {
                       sessionId={createdSession?.id}
                       onViewDocument={handleView}
                       onDownloadDocument={handleDownload}
+                      onDeleteDocument={handleDeleteDocument}
                     />
                   </div>
                 )}
@@ -1186,6 +1223,7 @@ export default function DocumentAnalysisPage() {
                   sessionId={selectedSession?.session_id}
                   onViewDocument={handleView}
                   onDownloadDocument={handleDownload}
+                  onDeleteDocument={handleDeleteDocument}
                 />
               </CardContent>
             </Card>
