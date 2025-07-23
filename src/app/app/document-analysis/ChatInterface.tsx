@@ -101,7 +101,12 @@ export default function ChatInterface({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || disabled) return;
+    console.log('ChatInterface handleSubmit called:', { input: input.trim(), disabled });
+    if (!input.trim() || disabled) {
+      console.log('Early return from handleSubmit:', { hasInput: !!input.trim(), disabled });
+      return;
+    }
+    console.log('Calling onSend...');
     onSend(e);
   };
 
