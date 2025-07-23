@@ -316,7 +316,7 @@ export default function DocumentAnalysisPage() {
       // Only include Authorization header, never Content-Type
       const headers = { ...getAuthHeaders() };
       if ('Content-Type' in headers) delete headers['Content-Type'];
-      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/documents`, {
+      const res = await fetch(`${API_BASE_URL}/chats/${createdChat.id}/documents`, {
         method: 'POST',
         headers,
         body: formData,
@@ -326,9 +326,20 @@ export default function DocumentAnalysisPage() {
         throw new Error(err?.detail?.[0]?.msg || 'Failed to upload documents');
       }
       const data = await res.json();
-      setUploadedDocs(data.uploaded_documents || []);
-      setUploadSuccess(true);
-      setUploadFiles([]);
+      
+      // Check if upload was successful
+      if (data.total_uploaded > 0) {
+        setUploadedDocs(data.uploaded_documents || []);
+        setUploadSuccess(true);
+        setUploadFiles([]);
+      } else {
+        // Handle upload failure
+        const failedDocs = data.failed_documents || [];
+        const errorMessage = failedDocs.length > 0 
+          ? `Failed to upload: ${failedDocs.join(', ')}`
+          : 'Failed to upload documents';
+        throw new Error(errorMessage);
+      }
     } catch (err: any) {
       setUploadError(err.message || 'An error occurred while uploading documents.');
     } finally {
@@ -534,7 +545,7 @@ export default function DocumentAnalysisPage() {
     setNewChatSuccess(false);
     setNewChatLoading(true);
     try {
-      const res = await fetch("https://api.myjurist.io/api/v1/chats", {
+      const res = await fetch(`${API_BASE_URL}/chats`, {
         method: "POST",
         headers: {
           ...getAuthHeaders(),
@@ -845,11 +856,8 @@ export default function DocumentAnalysisPage() {
     }
   }, [sessionSuccess]);
 
-  useEffect(() => {
-    if (createdChat?.id) {
-      fetchChatDocuments(createdChat.id);
-    }
-  }, [createdChat?.id]);
+  // Removed unnecessary fetchChatDocuments call for new analysis flow
+  // We only need to fetch documents after session creation
 
   useEffect(() => {
     if (createdChat?.id && createdSession?.id) {
@@ -1129,6 +1137,7 @@ export default function DocumentAnalysisPage() {
                 onToggle={() => handleToggleStep('select')}
                 className="w-full"
               >
+
                 {newAnalysisStep === 'upload' && createdChat && uploadedDocs.length > 0 && (
                   <div className="w-full max-w-2xl mx-auto mt-8">
                     <Card className="w-full">
