@@ -57,16 +57,21 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="h-8 bg-gray-200 dark:bg-neutral-700 rounded w-1/4 mb-6"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+                <div key={i} className="h-32 bg-gray-200 dark:bg-neutral-700 rounded"></div>
               ))}
             </div>
-            <div className="h-96 bg-gray-200 rounded"></div>
+            {/* Chart Skeletons */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <div className="h-80 bg-gray-200 dark:bg-neutral-700 rounded"></div>
+              <div className="h-80 bg-gray-200 dark:bg-neutral-700 rounded"></div>
+            </div>
+            <div className="h-96 bg-gray-200 dark:bg-neutral-700 rounded"></div>
           </div>
         </div>
       </div>
@@ -188,7 +193,7 @@ export default function DashboardPage() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Pie Chart */}
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 transition-opacity duration-700" style={{ opacity: loading ? 0 : 1 }}>
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Activity Type Distribution
@@ -238,7 +243,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Bar Chart */}
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 transition-opacity duration-700" style={{ opacity: loading ? 0 : 1 }}>
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Activity Over Time (Last 7 Days)
