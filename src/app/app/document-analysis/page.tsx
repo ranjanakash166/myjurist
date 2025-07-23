@@ -588,7 +588,27 @@ export default function DocumentAnalysisPage() {
 
   const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createdChat?.id || !createdSession?.id || !chatInput.trim()) return;
+    console.log('=== handleSendChatMessage START ===');
+    
+    // Determine which chat and session to use based on current flow
+    const chatId = createdChat?.id || selectedChat?.id;
+    const sessionId = createdSession?.id || selectedSession?.id;
+    
+    console.log('handleSendChatMessage called:', { 
+      chatId, 
+      sessionId, 
+      chatInput: chatInput.trim(),
+      createdChat: createdChat?.id,
+      selectedChat: selectedChat?.id,
+      createdSession: createdSession?.id,
+      selectedSession: selectedSession?.id
+    });
+    
+    if (!chatId || !sessionId || !chatInput.trim()) {
+      console.log('Early return:', { chatId, sessionId, hasInput: !!chatInput.trim() });
+      return;
+    }
+    
     setChatError(null);
     setChatLoading(true);
     const userMsg = chatInput;
@@ -597,8 +617,12 @@ export default function DocumentAnalysisPage() {
       ...prev,
       { sender: "user", text: userMsg, time: new Date() },
     ]);
+    
     try {
-      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/sessions/${createdSession.id}/messages`, {
+      console.log('Sending request to:', `${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/messages`);
+      console.log('Request body:', { message: userMsg });
+      
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/messages`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -606,17 +630,42 @@ export default function DocumentAnalysisPage() {
         },
         body: JSON.stringify({ message: userMsg }),
       });
+      
+      console.log('Response status:', res.status);
+      
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
+        console.log('Error response:', err);
         throw new Error(err?.detail?.[0]?.msg || 'Failed to send message');
       }
+      
       const data = await res.json();
+      console.log('Success response:', data);
+      
+      // Handle different response formats
+      const assistantResponse = data.assistant_response || data.response || data.message || 'No response received';
+      const timestamp = data.timestamp || new Date().toISOString();
+      
       setChatMessages(prev => [
         ...prev,
-        { sender: "system", text: data.assistant_response, time: new Date(data.timestamp) },
+        { sender: "system", text: assistantResponse, time: new Date(timestamp) },
       ]);
+      
+      // Update session message count if we're in history flow
+      if (selectedSession) {
+        setSelectedSession(prev => prev ? {
+          ...prev,
+          message_count: prev.message_count + 1,
+          last_activity: new Date().toISOString()
+        } : null);
+      }
     } catch (err: any) {
+      console.log('Error in handleSendChatMessage:', err);
       setChatError(err.message || 'An error occurred while sending message.');
+      setChatMessages(prev => [
+        ...prev,
+        { sender: "system", text: "(Error) " + (err.message || "An error occurred during chat."), time: new Date() },
+      ]);
     } finally {
       setChatLoading(false);
     }
