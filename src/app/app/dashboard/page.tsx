@@ -1,227 +1,358 @@
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import React from "react";
+'use client';
 
-const dummyStats = {
-  patents: 42,
-  documents: 87,
-};
-
-const lineChartData = [
-  { month: "Jan", patents: 5, documents: 10 },
-  { month: "Feb", patents: 7, documents: 12 },
-  { month: "Mar", patents: 6, documents: 15 },
-  { month: "Apr", patents: 8, documents: 13 },
-  { month: "May", patents: 9, documents: 18 },
-  { month: "Jun", patents: 7, documents: 19 },
-];
-
-const pieData = [
-  { label: "Patents", value: 42, color: "hsl(var(--primary))" },
-  { label: "Documents", value: 87, color: "hsl(var(--accent))" },
-];
-
-const recentActivity = [
-  { type: "Patent", desc: "Patent #123 analyzed", time: "2 hours ago" },
-  { type: "Document", desc: "Document XYZ uploaded", time: "4 hours ago" },
-  { type: "Patent", desc: "Patent #456 analyzed", time: "1 day ago" },
-  { type: "Document", desc: "Document ABC analyzed", time: "2 days ago" },
-];
-
-const topTypes = [
-  { label: "NDA Documents", value: 30, color: "bg-primary" },
-  { label: "Utility Patents", value: 25, color: "bg-accent" },
-  { label: "Design Patents", value: 18, color: "bg-muted" },
-];
-
-function LineChart() {
-  const width = 320;
-  const height = 100;
-  const max = Math.max(...lineChartData.map(d => d.patents + d.documents));
-  const xStep = width / (lineChartData.length - 1);
-  const y = v => height - (v / max) * (height - 20);
-  const patentPoints = lineChartData.map((d, i) => `${i * xStep},${y(d.patents)}`).join(" ");
-  const docPoints = lineChartData.map((d, i) => `${i * xStep},${y(d.documents)}`).join(" ");
-  return (
-    <svg width={width} height={height} className="w-full h-28 md:h-32">
-      <line x1="0" y1={height-1} x2={width} y2={height-1} stroke="hsl(var(--border))" strokeWidth="2" />
-      <polyline fill="none" stroke="hsl(var(--primary))" strokeWidth="3" points={patentPoints} />
-      <polyline fill="none" stroke="hsl(var(--accent))" strokeWidth="3" points={docPoints} />
-      {lineChartData.map((d, i) => (
-        <React.Fragment key={i}>
-          <circle cx={i * xStep} cy={y(d.patents)} r="4" fill="hsl(var(--primary))" />
-          <circle cx={i * xStep} cy={y(d.documents)} r="4" fill="hsl(var(--accent))" />
-        </React.Fragment>
-      ))}
-    </svg>
-  );
-}
-
-function PieChart() {
-  const total = pieData.reduce((sum, d) => sum + d.value, 0);
-  let acc = 0;
-  return (
-    <svg width="100" height="100" viewBox="0 0 32 32" className="w-20 h-20 md:w-24 md:h-24">
-      {pieData.map((slice, i) => {
-        const start = (acc / total) * 2 * Math.PI;
-        acc += slice.value;
-        const end = (acc / total) * 2 * Math.PI;
-        const x1 = 16 + 16 * Math.sin(start);
-        const y1 = 16 - 16 * Math.cos(start);
-        const x2 = 16 + 16 * Math.sin(end);
-        const y2 = 16 - 16 * Math.cos(end);
-        const large = end - start > Math.PI ? 1 : 0;
-        return (
-          <path
-            key={slice.label}
-            d={`M16,16 L${x1},${y1} A16,16 0 ${large} 1 ${x2},${y2} Z`}
-            fill={slice.color}
-            opacity={0.9}
-          />
-        );
-      })}
-    </svg>
-  );
-}
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/components/AuthProvider';
+import { 
+  fetchDashboardStats, 
+  formatDate, 
+  getActivityIcon, 
+  getStatusColor,
+  type DashboardStats 
+} from '@/lib/dashboardApi';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from 'recharts';
 
 export default function DashboardPage() {
+  const { getAuthHeaders, isAuthenticated, token } = useAuth();
+  const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!isAuthenticated || !token) {
+        setError("Please log in to view your dashboard.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await fetchDashboardStats(getAuthHeaders());
+        setDashboardData(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [isAuthenticated, token, getAuthHeaders]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+            <div className="h-96 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-red-800 font-semibold mb-2">Error Loading Dashboard</h2>
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dashboardData) {
+    return null;
+  }
+
+  function getActivityTypeData(recent_activity: DashboardStats['recent_activity']) {
+    const counts = { document: 0, patent: 0, chat: 0 };
+    recent_activity.forEach((item) => {
+      if (item.type in counts) counts[item.type as keyof typeof counts]++;
+    });
+    return [
+      { name: 'Documents', value: counts.document, color: '#2563eb' },
+      { name: 'Patents', value: counts.patent, color: '#16a34a' },
+      { name: 'Chats', value: counts.chat, color: '#a21caf' },
+    ];
+  }
+
+  function getActivityOverTimeData(recent_activity: DashboardStats['recent_activity']) {
+  // Group by date (YYYY-MM-DD) and format for display
+  const map: Record<string, { date: string; displayDate: string; Documents: number; Patents: number; Chats: number }> = {};
+  recent_activity.forEach((item) => {
+    const date = item.timestamp.slice(0, 10);
+    const displayDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (!map[date]) map[date] = { date, displayDate, Documents: 0, Patents: 0, Chats: 0 };
+    if (item.type === 'document') map[date].Documents++;
+    if (item.type === 'patent') map[date].Patents++;
+    if (item.type === 'chat') map[date].Chats++;
+  });
+  // Sort by date ascending and take last 7 entries
+  const sorted = Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
+  return sorted.slice(-7); // Show last 7 days
+}
+
+  const pieData = getActivityTypeData(dashboardData.recent_activity);
+  const barData = getActivityOverTimeData(dashboardData.recent_activity);
+
   return (
-    <div className="w-full max-w-5xl flex flex-col gap-8 px-2 sm:px-4 md:px-8">
-      <Card className="document-card">
-        <CardHeader>
-          <CardTitle className="text-legal-title text-foreground">Dashboard</CardTitle>
-          <p className="text-muted-foreground">Welcome to your dashboard! Here you can access patent and document analysis features.</p>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            {/* Patent Stats */}
-            <Card className="document-card">
-              <CardContent className="p-4 sm:p-6 flex flex-col items-center">
-                <span className="text-base sm:text-lg text-muted-foreground mb-2">Total Patents Analyzed</span>
-                <span className="text-2xl sm:text-3xl font-bold text-primary mb-4">{dummyStats.patents}</span>
-                <div className="w-full h-16 sm:h-24 flex items-end">
-                  <div className="bg-gradient-to-t from-primary to-accent rounded w-full" style={{height: `${dummyStats.patents * 2}px`, maxHeight: '100%'}}></div>
-                </div>
-              </CardContent>
-            </Card>
-            {/* Document Stats */}
-            <Card className="document-card">
-              <CardContent className="p-4 sm:p-6 flex flex-col items-center">
-                <span className="text-base sm:text-lg text-muted-foreground mb-2">Total Documents Analyzed</span>
-                <span className="text-2xl sm:text-3xl font-bold text-accent mb-4">{dummyStats.documents}</span>
-                <div className="w-full h-16 sm:h-24 flex items-end">
-                  <div className="bg-gradient-to-t from-accent to-primary rounded w-full" style={{height: `${dummyStats.documents * 2}px`, maxHeight: '100%'}}></div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Welcome back, {dashboardData.user_info.name}! 👋
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Member since {formatDate(dashboardData.user_info.member_since)}
+          </p>
+        </div>
 
-          {/* Analytics Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            {/* Line Chart */}
-            <Card className="document-card">
-              <CardContent className="p-4 sm:p-6 flex flex-col items-center">
-                <span className="text-base sm:text-lg text-muted-foreground mb-2">Analysis Over Last 6 Months</span>
-                <LineChart />
-                <div className="flex gap-4 mt-2">
-                  <span className="flex items-center text-primary text-xs sm:text-sm">
-                    <span className="w-3 h-3 rounded-full bg-primary mr-1"></span>Patents
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                Total Documents Analyzed
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {dashboardData.total_documents_analyzed.toLocaleString()}
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Documents processed successfully
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                Total Patents Analyzed
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {dashboardData.total_patents_analyzed.toLocaleString()}
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Patent analyses completed
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                Recent Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {dashboardData.recent_activity.length}
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Activities in the last 30 days
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Pie Chart */}
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Activity Type Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      innerRadius={40}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip
+                      contentStyle={{ 
+                        background: 'rgba(30,41,59,0.95)', 
+                        color: '#fff', 
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 12px'
+                      }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex justify-center gap-6 mt-6 flex-wrap">
+                {pieData.map((entry) => (
+                  <span key={entry.name} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="inline-block w-3 h-3 rounded-full" style={{ background: entry.color }}></span>
+                    {entry.name} ({entry.value})
                   </span>
-                  <span className="flex items-center text-accent text-xs sm:text-sm">
-                    <span className="w-3 h-3 rounded-full bg-accent mr-1"></span>Documents
-                  </span>
-                </div>
-                <div className="flex gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
-                  {lineChartData.map(d => <span key={d.month}>{d.month}</span>)}
-                </div>
-              </CardContent>
-            </Card>
-            {/* Pie Chart */}
-            <Card className="document-card">
-              <CardContent className="p-4 sm:p-6 flex flex-col items-center">
-                <span className="text-base sm:text-lg text-muted-foreground mb-2">Proportion of Analyses</span>
-                <PieChart />
-                <div className="flex gap-4 mt-2 flex-wrap">
-                  {pieData.map(slice => (
-                    <span key={slice.label} className="flex items-center text-xs sm:text-sm" style={{color: slice.color}}>
-                      <span className="w-3 h-3 rounded-full mr-1" style={{background: slice.color}}></span>{slice.label}
-                    </span>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Recent Activity & Top Types */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            {/* Recent Activity */}
-            <Card className="document-card">
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {recentActivity.map((item, i) => (
-                    <li key={i} className="flex flex-col">
-                      <span className="font-medium text-foreground text-xs sm:text-base">{item.desc}</span>
-                      <span className="text-xs text-muted-foreground">{item.time}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            {/* Top Types */}
-            <Card className="document-card">
-              <CardHeader>
-                <CardTitle className="text-base sm:text-lg">Top 3 Most Analyzed Types</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="flex flex-col gap-4">
-                  {topTypes.map((type, i) => (
-                    <li key={type.label} className="flex items-center gap-2">
-                      <span className={`block h-3 sm:h-4 rounded ${type.color}`} style={{width: `${type.value * 4}px`}}></span>
-                      <span className="text-foreground text-xs sm:text-sm w-24 sm:w-32">{type.label}</span>
-                      <span className="text-muted-foreground text-xs">{type.value}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
+          {/* Bar Chart */}
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Activity Over Time (Last 7 Days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart 
+                    data={barData} 
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid 
+                      strokeDasharray="3 3" 
+                      stroke={document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'} 
+                    />
+                    <XAxis 
+                      dataKey="displayDate" 
+                      stroke={document.documentElement.classList.contains('dark') ? '#9ca3af' : '#64748b'}
+                      tick={{ fill: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#64748b' }}
+                      fontSize={12}
+                    />
+                    <YAxis 
+                      stroke={document.documentElement.classList.contains('dark') ? '#9ca3af' : '#64748b'}
+                      tick={{ fill: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#64748b' }}
+                      fontSize={12}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ 
+                        background: 'rgba(30,41,59,0.95)', 
+                        color: '#fff', 
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 12px'
+                      }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Legend 
+                      wrapperStyle={{
+                        color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#64748b'
+                      }}
+                    />
+                    <Bar dataKey="Documents" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Patents" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Chats" fill="#a21caf" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              {barData.length === 0 && (
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  No activity data available for the selected time period.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-        {/* Patent Analysis Feature */}
-        <Card className="document-card">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">Patent Analysis</CardTitle>
-            <p className="text-muted-foreground text-xs sm:text-base">Analyze patents, get insights, and manage your intellectual property efficiently. (Dummy feature for now)</p>
-          </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full">
-              <Link href="/app/patent-analysis">
-                Go to Patent Analysis
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-        {/* Document Analysis Feature */}
-        <Card className="document-card">
-          <CardHeader>
-            <CardTitle className="text-lg sm:text-xl font-semibold text-foreground">Document Analysis</CardTitle>
-            <p className="text-muted-foreground text-xs sm:text-base">Upload and analyze legal documents for key information and compliance. (Dummy feature for now)</p>
-          </CardHeader>
-          <CardContent>
-            <Button asChild className="w-full">
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Button asChild className="h-16 text-lg">
               <Link href="/app/document-analysis">
-                Go to Document Analysis
+                📄 Upload & Analyze Document
               </Link>
             </Button>
+            <Button asChild variant="outline" className="h-16 text-lg">
+              <Link href="/app/patent-analysis">
+                📋 Patent Analysis
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="h-16 text-lg">
+              <Link href="/app/document-analysis?tab=history">
+                💬 View Chat History
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {dashboardData.recent_activity.slice(0, 10).map((activity, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="text-2xl">
+                      {getActivityIcon(activity.type)}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                        {activity.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(activity.timestamp)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge className={getStatusColor(activity.status)}>
+                      {activity.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
