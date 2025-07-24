@@ -33,6 +33,45 @@ export interface UserInfo {
   member_since: string;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  preferred_ai_provider?: string;
+  preferred_model?: string;
+}
+
+export interface AvailableModel {
+  provider: string;
+  model_name: string;
+  display_name: string;
+  context_length: number;
+  is_configured: boolean;
+}
+
+export interface AvailableModelsResponse {
+  available_models: AvailableModel[];
+  current_provider: string;
+  current_model: string;
+}
+
+export interface UpdatePreferencesRequest {
+  preferred_ai_provider: string;
+  preferred_model: string;
+}
+
+export interface UpdatePreferencesResponse {
+  success: boolean;
+  message: string;
+  updated_preferences: {
+    preferred_ai_provider: string;
+    preferred_model: string;
+  };
+}
+
 // API configuration
 const API_BASE_URL = 'https://api.myjurist.io/api/v1';
 
@@ -57,6 +96,58 @@ export async function fetchDashboardStats(authHeaders: Record<string, string>): 
     console.error('Error fetching dashboard stats:', error);
     throw error;
   }
+}
+
+export async function fetchUserProfile(authHeaders: Record<string, string>): Promise<UserProfile> {
+  const API_BASE_URL = 'https://api.myjurist.io/api/v1';
+  const response = await fetch(`${API_BASE_URL}/auth/me`, {
+    method: 'GET',
+    headers: {
+      'accept': 'application/json',
+      ...authHeaders,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function fetchAvailableModels(authHeaders: Record<string, string>): Promise<AvailableModelsResponse> {
+  const API_BASE_URL = 'https://api.myjurist.io/api/v1';
+  const response = await fetch(`${API_BASE_URL}/models/available`, {
+    method: 'GET',
+    headers: {
+      'accept': 'application/json',
+      ...authHeaders,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function updatePreferences(
+  authHeaders: Record<string, string>,
+  body: UpdatePreferencesRequest
+): Promise<UpdatePreferencesResponse> {
+  const API_BASE_URL = 'https://api.myjurist.io/api/v1';
+  const response = await fetch(`${API_BASE_URL}/models/preferences`, {
+    method: 'PUT',
+    headers: {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMsg = errorData?.detail?.[0]?.msg || `HTTP error! status: ${response.status}`;
+    throw new Error(errorMsg);
+  }
+  return response.json();
 }
 
 // Helper function to format date

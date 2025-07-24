@@ -11,6 +11,7 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import ProfileModal from '../../components/ProfileModal';
 
 const navItems = [
   { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
@@ -20,6 +21,7 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const { theme } = useTheme();
   const { user, isAuthenticated, isInitialized, logout } = useAuth();
   const pathname = usePathname();
@@ -110,7 +112,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                 <div className="p-4 border-t">
                   {user && (
-                    <div className="flex items-center px-4 py-2 mb-4">
+                    <button
+                      type="button"
+                      className="flex items-center px-4 py-2 mb-4 w-full text-left hover:bg-accent rounded-lg transition-colors"
+                      onClick={() => setProfileOpen(true)}
+                    >
                       <Avatar className="w-8 h-8 mr-3">
                         <AvatarFallback>
                           <User className="w-4 h-4" />
@@ -124,7 +130,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                           {user.email}
                         </p>
                       </div>
-                    </div>
+                    </button>
                   )}
                   
                   <div className="space-y-2">
@@ -194,7 +200,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* User Info, Theme Switch, and Logout - Desktop */}
         <div className="border-t border-border pt-4 mt-4 space-y-2">
           {user && (
-            <div className="flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 min-w-max">
+            <button
+              type="button"
+              className="flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 min-w-max w-full text-left hover:bg-accent rounded-lg transition-colors"
+              onClick={() => setProfileOpen(true)}
+              title="View Profile"
+            >
               <Avatar className="w-8 h-8 flex-shrink-0">
                 <AvatarFallback>
                   <User className="w-4 h-4" />
@@ -208,7 +219,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   {user.email}
                 </p>
               </div>
-            </div>
+            </button>
           )}
           
           <ThemeToggle />
@@ -236,6 +247,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 md:ml-16 pt-16 md:pt-0">
         {children}
       </main>
+      <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
     </div>
   );
 } 
