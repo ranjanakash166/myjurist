@@ -10,7 +10,8 @@ import {
   AvailableModelsResponse,
   updatePreferences,
 } from '@/lib/dashboardApi';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User as UserIcon, Mail, CheckCircle2, XCircle, Bot, Settings2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ProfileModalProps {
   open: boolean;
@@ -112,94 +113,112 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
     }
   };
 
+  // Avatar initials
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-full">
-        <DialogHeader>
-          <DialogTitle>User Profile</DialogTitle>
-          <DialogDescription>View and edit your account details</DialogDescription>
-        </DialogHeader>
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground animate-pulse">Loading profile...</div>
-        ) : error ? (
-          <div className="py-8 text-center text-red-500">{error}</div>
-        ) : profile ? (
-          <div className="space-y-4">
-            <div>
-              <span className="block text-xs text-muted-foreground">Full Name</span>
-              <span className="block font-medium text-lg">{profile.full_name}</span>
-            </div>
-            <div>
-              <span className="block text-xs text-muted-foreground">Email</span>
-              <span className="block font-mono text-base">{profile.email}</span>
-            </div>
-            <div className="flex gap-4">
-              <div>
-                <span className="block text-xs text-muted-foreground">Active</span>
-                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${profile.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{profile.is_active ? 'Yes' : 'No'}</span>
-              </div>
-              <div>
-                <span className="block text-xs text-muted-foreground">Verified</span>
-                <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${profile.is_verified ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{profile.is_verified ? 'Yes' : 'No'}</span>
-              </div>
-            </div>
-            <div>
-              <span className="block text-xs text-muted-foreground">Account Created</span>
-              <span className="block text-sm">{formatDate(profile.created_at)}</span>
-            </div>
-            {/* Editable Preferred AI Provider & Model */}
-            <div>
-              <span className="block text-xs text-muted-foreground">Preferred AI Provider & Model</span>
-              {editing && available ? (
-                <div className="flex flex-col gap-2 mt-1">
-                  <div className="flex gap-2 items-center">
-                    <select
-                      className="border rounded px-2 py-1 text-sm"
-                      value={editProvider}
-                      onChange={e => setEditProvider(e.target.value)}
-                    >
-                      <option value="" disabled>Select provider</option>
-                      {providerOptions.map((provider) => (
-                        <option key={provider} value={provider}>{provider}</option>
-                      ))}
-                    </select>
-                    <select
-                      className="border rounded px-2 py-1 text-sm"
-                      value={editModel}
-                      onChange={e => setEditModel(e.target.value)}
-                      disabled={!editProvider}
-                    >
-                      <option value="" disabled>Select model</option>
-                      {modelOptions.map((model) => (
-                        <option key={model.model_name} value={model.model_name}>{model.display_name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={updateLoading}>Cancel</Button>
-                    {canSave && (
-                      <Button size="sm" onClick={handleSave} disabled={updateLoading || !editProvider || !editModel}>
-                        {updateLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}Save
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="block text-sm">{profile.preferred_ai_provider || '-'} / {profile.preferred_model || '-'}</span>
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>Edit</Button>
-                </div>
-              )}
-            </div>
-            {updateError && <div className="text-red-500 text-sm">{updateError}</div>}
-            {updateSuccess && <div className="text-green-600 text-sm">{updateSuccess}</div>}
-            <div className="pt-2 text-right">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Close
-              </Button>
-            </div>
+      <DialogContent className="max-w-md w-full animate-fade-in rounded-2xl p-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-neutral-900 to-neutral-700 dark:from-black dark:to-neutral-900 p-6 flex flex-col items-center">
+          <div className="w-20 h-20 rounded-full bg-neutral-800 flex items-center justify-center mb-2 border-4 border-neutral-700 shadow-lg">
+            <UserIcon className="w-10 h-10 text-neutral-300" />
           </div>
-        ) : null}
+          <div className="text-neutral-100 text-xl font-bold mb-1">{profile?.full_name || ''}</div>
+          <div className="text-neutral-400 text-sm flex items-center gap-1">
+            <Mail className="w-4 h-4 inline-block mr-1 text-neutral-500" />
+            {profile?.email}
+          </div>
+        </div>
+        <div className="bg-white dark:bg-black p-6">
+          {loading ? (
+            <div className="py-8 text-center text-muted-foreground animate-pulse">Loading profile...</div>
+          ) : error ? (
+            <div className="py-8 text-center text-red-500">{error}</div>
+          ) : profile ? (
+            <div className="space-y-6">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold border ${profile.is_active ? 'border-neutral-400 bg-neutral-100 text-neutral-700 dark:bg-neutral-900 dark:text-neutral-200' : 'border-neutral-400 bg-neutral-50 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-500'}`}>{profile.is_active ? 'Active' : 'Inactive'}</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold border ${profile.is_verified ? 'border-neutral-400 bg-neutral-100 text-neutral-700 dark:bg-neutral-900 dark:text-neutral-200' : 'border-neutral-400 bg-neutral-50 text-neutral-400 dark:bg-neutral-900 dark:text-neutral-500'}`}>{profile.is_verified ? 'Verified' : 'Not Verified'}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  Account Created: {formatDate(profile.created_at)}
+                </div>
+              </div>
+              <div className="border-t border-dashed border-neutral-300 dark:border-neutral-700 my-4" />
+              {/* Editable Preferred AI Provider & Model */}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Bot className="w-4 h-4 text-neutral-500" />
+                  <span className="block text-xs text-muted-foreground">Preferred AI Provider & Model</span>
+                </div>
+                {editing && available ? (
+                  <div className="flex flex-col gap-2 mt-2 bg-neutral-50 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                    <div className="flex gap-2 items-center">
+                      <select
+                        className="border rounded px-2 py-1 text-sm bg-white dark:bg-black text-neutral-900 dark:text-neutral-100"
+                        value={editProvider}
+                        onChange={e => setEditProvider(e.target.value)}
+                      >
+                        <option value="" disabled>Select provider</option>
+                        {providerOptions.map((provider) => (
+                          <option key={provider} value={provider}>{provider}</option>
+                        ))}
+                      </select>
+                      <select
+                        className="border rounded px-2 py-1 text-sm bg-white dark:bg-black text-neutral-900 dark:text-neutral-100"
+                        value={editModel}
+                        onChange={e => setEditModel(e.target.value)}
+                        disabled={!editProvider}
+                      >
+                        <option value="" disabled>Select model</option>
+                        {modelOptions.map((model) => (
+                          <option key={model.model_name} value={model.model_name}>{model.display_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex gap-2 justify-end mt-2">
+                      <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={updateLoading}>Cancel</Button>
+                      {canSave && (
+                        <Button size="sm" onClick={handleSave} disabled={updateLoading || !editProvider || !editModel}>
+                          {updateLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}Save
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="block text-sm font-medium">
+                      <span className="inline-flex items-center gap-1">
+                        <Settings2 className="w-4 h-4 text-neutral-500" />
+                        {profile.preferred_ai_provider || '-'}
+                      </span>
+                      <span className="mx-2 text-neutral-400">/</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Bot className="w-4 h-4 text-neutral-500" />
+                        {profile.preferred_model || '-'}
+                      </span>
+                    </span>
+                    <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>Edit</Button>
+                  </div>
+                )}
+              </div>
+              {updateError && <div className="text-red-500 text-sm mt-2">{updateError}</div>}
+              {updateSuccess && <div className="text-green-600 text-sm mt-2 flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />{updateSuccess}</div>}
+              <div className="pt-4 text-right">
+                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </DialogContent>
     </Dialog>
   );
