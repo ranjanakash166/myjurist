@@ -1117,10 +1117,13 @@ export default function PatentAnalysisPage() {
         <TabsContent value="history" className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <CardTitle>Patent Analysis History</CardTitle>
-                <div className="text-muted-foreground text-sm">
-                  Total Reports: {totalCount.toLocaleString()}
+                <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+                  <Badge variant="secondary">Total Reports: {totalCount.toLocaleString()}</Badge>
+                  {reportHistory.length > 0 && (
+                    <Badge variant="outline">Most Recent: {new Date(Math.max(...reportHistory.map(r => new Date(r.generated_at).getTime()))).toLocaleDateString()}</Badge>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -1142,19 +1145,25 @@ export default function PatentAnalysisPage() {
               {!historyLoading && !historyError && (
                 <>
                   {reportHistory.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileBarChart className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold mb-2">No Reports Found</h3>
-                      <p className="text-sm text-muted-foreground">You haven't generated any patent analysis reports yet.</p>
-                      <p className="text-sm mt-2 text-muted-foreground">Go to the "Detailed Patent Analysis" tab to create your first report.</p>
+                    <div className="flex flex-col items-center justify-center py-12 gap-4">
+                      <FileBarChart className="w-20 h-20 text-muted-foreground mb-2" />
+                      <h3 className="text-xl font-semibold mb-1">No Reports Found</h3>
+                      <p className="text-base text-muted-foreground text-center">You haven't generated any patent analysis reports yet.</p>
+                      <Button size="lg" className="mt-2" onClick={() => setTab('detailed')}>
+                        <FileText className="w-4 h-4 mr-2" /> Create First Report
+                      </Button>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                       {reportHistory.map((report) => (
-                        <Card 
-                          key={report.report_id} 
-                          className="cursor-pointer hover:bg-muted/50 transition-colors w-full max-w-full"
+                        <Card
+                          key={report.report_id}
+                          className="cursor-pointer border-2 border-border shadow-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 w-full max-w-full group"
                           onClick={() => handleReportClick(report.report_id)}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`View details for report ${report.invention_title}`}
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleReportClick(report.report_id); }}
                         >
                           <CardContent className="px-2 py-4 sm:p-6 w-full max-w-full">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 w-full max-w-full">
@@ -1183,9 +1192,12 @@ export default function PatentAnalysisPage() {
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex flex-row sm:flex-col items-center gap-2 flex-shrink-0 mt-2 sm:mt-0">
+                              <div className="flex flex-col items-end gap-2 flex-shrink-0 mt-2 sm:mt-0">
                                 <Badge variant="outline" className="text-xs break-all w-full max-w-[120px] text-center">ID: {report.report_id.slice(0, 8)}...</Badge>
-                                <div className="text-muted-foreground text-xs sm:text-sm text-center w-full max-w-[120px]">Click to view details</div>
+                                <Button size="sm" variant="secondary" className="mt-1 group-hover:bg-primary/10" onClick={e => { e.stopPropagation(); handleReportClick(report.report_id); }}>
+                                  <FileText className="w-4 h-4 mr-1" /> View Details
+                                </Button>
+                                <div className="text-muted-foreground text-xs sm:text-sm text-center w-full max-w-[120px]">Click or press Enter/Space</div>
                               </div>
                             </div>
                           </CardContent>
@@ -1196,19 +1208,21 @@ export default function PatentAnalysisPage() {
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-4 mt-6">
+                    <div className="flex justify-center items-center gap-4 mt-8">
                       <Button
                         variant="outline"
+                        className="rounded-full px-5 py-2"
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 0}
                       >
                         Previous
                       </Button>
-                      <span className="text-foreground">
+                      <span className="text-foreground text-base font-medium">
                         Page {currentPage + 1} of {totalPages}
                       </span>
                       <Button
                         variant="outline"
+                        className="rounded-full px-5 py-2"
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage + 1 >= totalPages}
                       >
@@ -1227,9 +1241,9 @@ export default function PatentAnalysisPage() {
       <Dialog open={showReportModal} onOpenChange={setShowReportModal}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-4">
               <DialogTitle>Patent Analysis Report</DialogTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mr-8 sm:mr-12">
                 {selectedReport && (
                   <Button
                     onClick={() => handleDownloadReport(selectedReport.report_id, selectedReport.title)}
