@@ -122,6 +122,8 @@ interface NoveltyAnalysisResponse {
 export default function PatentAnalysisPage() {
   const { getAuthHeaders, isAuthenticated, token } = useAuth();
   const [tab, setTab] = useState<'quick' | 'detailed' | 'history'>('quick');
+  // Add new state for quick analysis tab
+  const [quickTab, setQuickTab] = useState("priorart");
   
   // Quick Analysis State
   const [desc, setDesc] = useState("");
@@ -536,423 +538,406 @@ export default function PatentAnalysisPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {/* Replace the analysis button grid with a flex row */}
+              <div className="flex flex-wrap gap-3 justify-between items-center mb-2">
                 <Button
                   onClick={handlePriorArtAnalysis}
                   disabled={!isValid || loading}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Search className="w-4 h-4" /> 
-                  <span className="hidden sm:inline">Prior Art</span>
-                  <span className="sm:hidden">Prior Art</span>
+                  <Search className="w-4 h-4" /> Prior Art
                 </Button>
                 <Button
                   onClick={handleExclusionsAnalysis}
                   disabled={!isValid || exclusionsLoading}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Gavel className="w-4 h-4" /> 
-                  <span className="hidden sm:inline">Exclusions</span>
-                  <span className="sm:hidden">Exclusions</span>
+                  <Gavel className="w-4 h-4" /> Exclusions
                 </Button>
                 <Button
                   onClick={handleDisclosureAnalysis}
                   disabled={!isValid || disclosureLoading}
-                  className="flex items-center gap-2 text-sm col-span-1 sm:col-span-2 lg:col-span-1"
+                  className="flex items-center gap-2 text-sm"
                 >
-                  <ShieldCheck className="w-4 h-4" /> 
-                  <span className="hidden sm:inline">Disclosure</span>
-                  <span className="sm:hidden">Disclosure</span>
+                  <ShieldCheck className="w-4 h-4" /> Disclosure
                 </Button>
                 <Button
                   onClick={handleNoveltyAnalysis}
                   disabled={!isValid || noveltyLoading}
-                  className="flex items-center gap-2 text-sm col-span-1 sm:col-span-2 lg:col-span-1"
+                  className="flex items-center gap-2 text-sm"
                 >
-                  <FileText className="w-4 h-4" />
-                  <span className="hidden sm:inline">Novelty</span>
-                  <span className="sm:hidden">Novelty</span>
+                  <FileText className="w-4 h-4" /> Novelty
                 </Button>
               </div>
 
-              {loading && (
-                <Alert>
-                  <Search className="h-4 w-4" />
-                  <AlertDescription>Searching patents...</AlertDescription>
-                </Alert>
-              )}
+              {/* Summary row of badges */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Badge variant={loading ? "secondary" : error ? "destructive" : searchResults ? "default" : "outline"}>
+                  <Search className="w-3 h-3 mr-1" /> Prior Art: {loading ? "Loading" : error ? "Error" : searchResults ? "Ready" : "Idle"}
+                </Badge>
+                <Badge variant={exclusionsLoading ? "secondary" : exclusionsError ? "destructive" : exclusionsResult ? "default" : "outline"}>
+                  <Gavel className="w-3 h-3 mr-1" /> Exclusions: {exclusionsLoading ? "Loading" : exclusionsError ? "Error" : exclusionsResult ? exclusionsResult.overall_verdict : "Idle"}
+                </Badge>
+                <Badge variant={disclosureLoading ? "secondary" : disclosureError ? "destructive" : disclosureResult ? "default" : "outline"}>
+                  <ShieldCheck className="w-3 h-3 mr-1" /> Disclosure: {disclosureLoading ? "Loading" : disclosureError ? "Error" : disclosureResult ? disclosureResult.overall_assessment : "Idle"}
+                </Badge>
+                <Badge variant={noveltyLoading ? "secondary" : noveltyError ? "destructive" : noveltyResult ? "default" : "outline"}>
+                  <FileText className="w-3 h-3 mr-1" /> Novelty: {noveltyLoading ? "Loading" : noveltyError ? "Error" : noveltyResult ? noveltyResult.novelty_verdict : "Idle"}
+                </Badge>
+              </div>
 
-              {error && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              {searchResults && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Prior Art Results</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {searchResults.length === 0 ? (
-                      <p className="text-muted-foreground">No relevant prior art found.</p>
-                    ) : (
-                      <div className="space-y-4">
-                        {searchResults.map((item, idx) => (
-                          <div key={idx} className="border-b border-border pb-4 last:border-b-0">
-                            <div className="font-semibold text-primary mb-1">{item.title}</div>
-                            <div className="text-muted-foreground text-sm mb-1">{item.abstract}</div>
-                            <div className="text-xs text-muted-foreground">Application No: {item.application_no} | Year: {item.year} | Score: {item.similarity_score?.toFixed(2)}</div>
+              {/* Tabs for result details */}
+              <Tabs value={quickTab} onValueChange={setQuickTab} className="w-full">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="priorart">Prior Art</TabsTrigger>
+                  <TabsTrigger value="exclusions">Exclusions</TabsTrigger>
+                  <TabsTrigger value="disclosure">Disclosure</TabsTrigger>
+                  <TabsTrigger value="novelty">Novelty</TabsTrigger>
+                </TabsList>
+                <TabsContent value="priorart">
+                  {loading && (
+                    <Alert><Search className="h-4 w-4" /><AlertDescription>Searching patents...</AlertDescription></Alert>
+                  )}
+                  {error && (
+                    <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>
+                  )}
+                  {searchResults && (
+                    <Card>
+                      <CardHeader><CardTitle>Prior Art Results</CardTitle></CardHeader>
+                      <CardContent>
+                        {searchResults.length === 0 ? (
+                          <p className="text-muted-foreground">No relevant prior art found.</p>
+                        ) : (
+                          <div className="space-y-4">
+                            {searchResults.map((item, idx) => (
+                              <div key={idx} className="border-b border-border pb-4 last:border-b-0">
+                                <div className="font-semibold text-primary mb-1">{item.title}</div>
+                                <div className="text-muted-foreground text-sm mb-1">{item.abstract}</div>
+                                <div className="text-xs text-muted-foreground">Application No: {item.application_no} | Year: {item.year} | Score: {item.similarity_score?.toFixed(2)}</div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {exclusionsLoading && (
-                <Alert>
-                  <Gavel className="h-4 w-4" />
-                  <AlertDescription>Analyzing exclusions...</AlertDescription>
-                </Alert>
-              )}
-              {exclusionsError && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>{exclusionsError}</AlertDescription>
-                </Alert>
-              )}
-              {exclusionsResult && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Exclusions Analysis Result</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-2">
-                      <strong>Overall Verdict:</strong> {exclusionsResult.overall_verdict}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Confidence Score:</strong> {exclusionsResult.confidence_score}
-                    </div>
-                    {Object.entries(exclusionsResult)
-                      .filter(([key]) => key.startsWith('section_3'))
-                      .map(([key, value]) => (
-                        <div key={key} className="mb-2">
-                          <strong>{key.replace(/_/g, ' ').replace('section 3', 'Section 3')}:</strong>
-                          <ul className="list-disc ml-6">
-                            {value && typeof value === 'object' &&
-                              Object.entries(value as Record<string, string>).map(([k, v]) => (
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+                <TabsContent value="exclusions">
+                  {exclusionsLoading && (
+                    <Alert><Gavel className="h-4 w-4" /><AlertDescription>Analyzing exclusions...</AlertDescription></Alert>
+                  )}
+                  {exclusionsError && (
+                    <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{exclusionsError}</AlertDescription></Alert>
+                  )}
+                  {exclusionsResult && (
+                    <Card>
+                      <CardHeader><CardTitle>Exclusions Analysis Result</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="mb-2 flex items-center gap-2">
+                          <strong>Overall Verdict:</strong>
+                          <Badge variant={exclusionsResult.overall_verdict === "Pass" ? "default" : exclusionsResult.overall_verdict === "Fail" ? "destructive" : "secondary"}>{exclusionsResult.overall_verdict}</Badge>
+                        </div>
+                        <div className="mb-2"><strong>Confidence Score:</strong> {exclusionsResult.confidence_score}</div>
+                        {Object.entries(exclusionsResult)
+                          .filter(([key]) => key.startsWith('section_3'))
+                          .map(([key, value]) => (
+                            <div key={key} className="mb-2">
+                              <strong>{key.replace(/_/g, ' ').replace('section 3', 'Section 3')}:</strong>
+                              <ul className="list-disc ml-6">
+                                {value && typeof value === 'object' &&
+                                  Object.entries(value as Record<string, string>).map(([k, v]) => (
+                                    <li key={k}><strong>{k}:</strong> {v}</li>
+                                  ))}
+                              </ul>
+                            </div>
+                          ))}
+                        {['high_risk_exclusions', 'medium_risk_exclusions', 'low_risk_exclusions'].map((risk) =>
+                          exclusionsResult[risk as keyof ExclusionsAnalysisResponse] && (
+                            <div key={risk} className="mb-2">
+                              <strong>{risk.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
+                              <ul className="list-disc ml-6">
+                                {(exclusionsResult[risk as keyof ExclusionsAnalysisResponse] as string[]).map((item, idx) => (
+                                  <li key={idx}>{item}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )
+                        )}
+                        {exclusionsResult.mitigation_strategies && exclusionsResult.mitigation_strategies.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Mitigation Strategies:</strong>
+                            <ul className="list-disc ml-6">
+                              {exclusionsResult.mitigation_strategies.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {exclusionsResult.claim_drafting_suggestions && exclusionsResult.claim_drafting_suggestions.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Claim Drafting Suggestions:</strong>
+                            <ul className="list-disc ml-6">
+                              {exclusionsResult.claim_drafting_suggestions.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+                <TabsContent value="disclosure">
+                  {disclosureLoading && (
+                    <Alert><ShieldCheck className="h-4 w-4" /><AlertDescription>Analyzing disclosure...</AlertDescription></Alert>
+                  )}
+                  {disclosureError && (
+                    <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{disclosureError}</AlertDescription></Alert>
+                  )}
+                  {disclosureResult && (
+                    <Card>
+                      <CardHeader><CardTitle>Disclosure Analysis Result</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="mb-2 flex items-center gap-2">
+                          <strong>Overall Assessment:</strong>
+                          <Badge variant={disclosureResult.overall_assessment === "Sufficient" ? "default" : disclosureResult.overall_assessment === "Insufficient" ? "destructive" : "secondary"}>{disclosureResult.overall_assessment}</Badge>
+                        </div>
+                        <div className="mb-2"><strong>Confidence Score:</strong> {disclosureResult.confidence_score}</div>
+                        <div className="mb-2">
+                          <strong>Enablement Verdict:</strong> {disclosureResult.enablement_verdict}
+                        </div>
+                        {disclosureResult.missing_technical_details && disclosureResult.missing_technical_details.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Missing Technical Details:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.missing_technical_details.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {disclosureResult.unclear_aspects && disclosureResult.unclear_aspects.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Unclear Aspects:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.unclear_aspects.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        <div className="mb-2">
+                          <strong>Best Mode Disclosed:</strong> {disclosureResult.best_mode_disclosed}
+                        </div>
+                        {disclosureResult.best_mode_suggestions && disclosureResult.best_mode_suggestions.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Best Mode Suggestions:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.best_mode_suggestions.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        <div className="mb-2">
+                          <strong>Claim Clarity Score:</strong> {disclosureResult.claim_clarity_score}
+                        </div>
+                        {disclosureResult.vague_terms && disclosureResult.vague_terms.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Vague Terms:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.vague_terms.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {disclosureResult.overly_broad_aspects && disclosureResult.overly_broad_aspects.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Overly Broad Aspects:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.overly_broad_aspects.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {disclosureResult.applicable_industries && disclosureResult.applicable_industries.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Applicable Industries:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.applicable_industries.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        <div className="mb-2">
+                          <strong>Utility Assessment:</strong> {disclosureResult.utility_assessment}
+                        </div>
+                        {disclosureResult.practical_applications && disclosureResult.practical_applications.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Practical Applications:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.practical_applications.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {disclosureResult.technical_improvements && disclosureResult.technical_improvements.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Technical Improvements:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.technical_improvements.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {disclosureResult.structural_improvements && disclosureResult.structural_improvements.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Structural Improvements:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.structural_improvements.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {disclosureResult.example_suggestions && disclosureResult.example_suggestions.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Example Suggestions:</strong>
+                            <ul className="list-disc ml-6">
+                              {disclosureResult.example_suggestions.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+                <TabsContent value="novelty">
+                  {noveltyLoading && (
+                    <Alert><FileText className="h-4 w-4" /><AlertDescription>Analyzing novelty...</AlertDescription></Alert>
+                  )}
+                  {noveltyError && (
+                    <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertDescription>{noveltyError}</AlertDescription></Alert>
+                  )}
+                  {noveltyResult && (
+                    <Card>
+                      <CardHeader><CardTitle>Novelty Analysis Result</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="mb-2 flex items-center gap-2">
+                          <strong>Novelty Verdict:</strong>
+                          <Badge variant={noveltyResult.novelty_verdict === "Novel" ? "default" : noveltyResult.novelty_verdict === "Not Novel" ? "destructive" : "secondary"}>{noveltyResult.novelty_verdict}</Badge>
+                        </div>
+                        <div className="mb-2"><strong>Confidence Score:</strong> {noveltyResult.confidence_score}</div>
+                        <div className="mb-2">
+                          <strong>Inventive Step Verdict:</strong> {noveltyResult.inventive_step_verdict}
+                        </div>
+                        {noveltyResult.novel_features && noveltyResult.novel_features.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Novel Features:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.novel_features.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.anticipated_features && noveltyResult.anticipated_features.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Anticipated Features:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.anticipated_features.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.borderline_features && noveltyResult.borderline_features.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Borderline Features:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.borderline_features.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.most_relevant_prior_art && noveltyResult.most_relevant_prior_art.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Most Relevant Prior Art:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.most_relevant_prior_art.map((item, idx) => (
+                                <li key={idx}>{JSON.stringify(item)}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.feature_comparison_table && noveltyResult.feature_comparison_table.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Feature Comparison Table:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.feature_comparison_table.map((item, idx) => (
+                                <li key={idx}>{JSON.stringify(item)}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.obviousness_factors && (
+                          <div className="mb-2">
+                            <strong>Obviousness Factors:</strong>
+                            <ul className="list-disc ml-6">
+                              {Object.entries(noveltyResult.obviousness_factors).map(([k, v]) => (
                                 <li key={k}><strong>{k}:</strong> {v}</li>
                               ))}
-                          </ul>
-                        </div>
-                      ))}
-                    {['high_risk_exclusions', 'medium_risk_exclusions', 'low_risk_exclusions'].map((risk) =>
-                      exclusionsResult[risk as keyof ExclusionsAnalysisResponse] && (
-                        <div key={risk} className="mb-2">
-                          <strong>{risk.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong>
-                          <ul className="list-disc ml-6">
-                            {(exclusionsResult[risk as keyof ExclusionsAnalysisResponse] as string[]).map((item, idx) => (
-                              <li key={idx}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )
-                    )}
-                    {exclusionsResult.mitigation_strategies && exclusionsResult.mitigation_strategies.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Mitigation Strategies:</strong>
-                        <ul className="list-disc ml-6">
-                          {exclusionsResult.mitigation_strategies.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {exclusionsResult.claim_drafting_suggestions && exclusionsResult.claim_drafting_suggestions.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Claim Drafting Suggestions:</strong>
-                        <ul className="list-disc ml-6">
-                          {exclusionsResult.claim_drafting_suggestions.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {disclosureLoading && (
-                <Alert>
-                  <ShieldCheck className="h-4 w-4" />
-                  <AlertDescription>Analyzing disclosure...</AlertDescription>
-                </Alert>
-              )}
-              {disclosureError && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>{disclosureError}</AlertDescription>
-                </Alert>
-              )}
-              {disclosureResult && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Disclosure Analysis Result</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-2">
-                      <strong>Overall Assessment:</strong> {disclosureResult.overall_assessment}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Confidence Score:</strong> {disclosureResult.confidence_score}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Enablement Verdict:</strong> {disclosureResult.enablement_verdict}
-                    </div>
-                    {disclosureResult.missing_technical_details && disclosureResult.missing_technical_details.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Missing Technical Details:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.missing_technical_details.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {disclosureResult.unclear_aspects && disclosureResult.unclear_aspects.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Unclear Aspects:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.unclear_aspects.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="mb-2">
-                      <strong>Best Mode Disclosed:</strong> {disclosureResult.best_mode_disclosed}
-                    </div>
-                    {disclosureResult.best_mode_suggestions && disclosureResult.best_mode_suggestions.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Best Mode Suggestions:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.best_mode_suggestions.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="mb-2">
-                      <strong>Claim Clarity Score:</strong> {disclosureResult.claim_clarity_score}
-                    </div>
-                    {disclosureResult.vague_terms && disclosureResult.vague_terms.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Vague Terms:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.vague_terms.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {disclosureResult.overly_broad_aspects && disclosureResult.overly_broad_aspects.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Overly Broad Aspects:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.overly_broad_aspects.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {disclosureResult.applicable_industries && disclosureResult.applicable_industries.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Applicable Industries:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.applicable_industries.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="mb-2">
-                      <strong>Utility Assessment:</strong> {disclosureResult.utility_assessment}
-                    </div>
-                    {disclosureResult.practical_applications && disclosureResult.practical_applications.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Practical Applications:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.practical_applications.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {disclosureResult.technical_improvements && disclosureResult.technical_improvements.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Technical Improvements:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.technical_improvements.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {disclosureResult.structural_improvements && disclosureResult.structural_improvements.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Structural Improvements:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.structural_improvements.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {disclosureResult.example_suggestions && disclosureResult.example_suggestions.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Example Suggestions:</strong>
-                        <ul className="list-disc ml-6">
-                          {disclosureResult.example_suggestions.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {noveltyLoading && (
-                <Alert>
-                  <FileText className="h-4 w-4" />
-                  <AlertDescription>Analyzing novelty...</AlertDescription>
-                </Alert>
-              )}
-              {noveltyError && (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>{noveltyError}</AlertDescription>
-                </Alert>
-              )}
-              {noveltyResult && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Novelty Analysis Result</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-2">
-                      <strong>Overall Assessment:</strong> {noveltyResult.overall_assessment}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Novelty Verdict:</strong> {noveltyResult.novelty_verdict}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Inventive Step Verdict:</strong> {noveltyResult.inventive_step_verdict}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Confidence Score:</strong> {noveltyResult.confidence_score}
-                    </div>
-                    {noveltyResult.novel_features && noveltyResult.novel_features.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Novel Features:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.novel_features.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.anticipated_features && noveltyResult.anticipated_features.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Anticipated Features:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.anticipated_features.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.borderline_features && noveltyResult.borderline_features.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Borderline Features:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.borderline_features.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.most_relevant_prior_art && noveltyResult.most_relevant_prior_art.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Most Relevant Prior Art:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.most_relevant_prior_art.map((item, idx) => (
-                            <li key={idx}>{JSON.stringify(item)}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.feature_comparison_table && noveltyResult.feature_comparison_table.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Feature Comparison Table:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.feature_comparison_table.map((item, idx) => (
-                            <li key={idx}>{JSON.stringify(item)}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.obviousness_factors && (
-                      <div className="mb-2">
-                        <strong>Obviousness Factors:</strong>
-                        <ul className="list-disc ml-6">
-                          {Object.entries(noveltyResult.obviousness_factors).map(([k, v]) => (
-                            <li key={k}><strong>{k}:</strong> {v}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.person_skilled_in_art && (
-                      <div className="mb-2">
-                        <strong>Person Skilled in Art:</strong> {noveltyResult.person_skilled_in_art}
-                      </div>
-                    )}
-                    {noveltyResult.motivation_to_combine && (
-                      <div className="mb-2">
-                        <strong>Motivation to Combine:</strong> {noveltyResult.motivation_to_combine}
-                      </div>
-                    )}
-                    {noveltyResult.legal_conclusions && noveltyResult.legal_conclusions.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Legal Conclusions:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.legal_conclusions.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {noveltyResult.risk_assessment && (
-                      <div className="mb-2">
-                        <strong>Risk Assessment:</strong> {noveltyResult.risk_assessment}
-                      </div>
-                    )}
-                    {noveltyResult.recommendations && noveltyResult.recommendations.length > 0 && (
-                      <div className="mb-2">
-                        <strong>Recommendations:</strong>
-                        <ul className="list-disc ml-6">
-                          {noveltyResult.recommendations.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.person_skilled_in_art && (
+                          <div className="mb-2">
+                            <strong>Person Skilled in Art:</strong> {noveltyResult.person_skilled_in_art}
+                          </div>
+                        )}
+                        {noveltyResult.motivation_to_combine && (
+                          <div className="mb-2">
+                            <strong>Motivation to Combine:</strong> {noveltyResult.motivation_to_combine}
+                          </div>
+                        )}
+                        {noveltyResult.legal_conclusions && noveltyResult.legal_conclusions.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Legal Conclusions:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.legal_conclusions.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {noveltyResult.risk_assessment && (
+                          <div className="mb-2">
+                            <strong>Risk Assessment:</strong> {noveltyResult.risk_assessment}
+                          </div>
+                        )}
+                        {noveltyResult.recommendations && noveltyResult.recommendations.length > 0 && (
+                          <div className="mb-2">
+                            <strong>Recommendations:</strong>
+                            <ul className="list-disc ml-6">
+                              {noveltyResult.recommendations.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+              </Tabs>
 
               {result && (
                 <Card>
