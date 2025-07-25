@@ -141,7 +141,7 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 cursor-pointer">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 Total Documents Analyzed
@@ -157,7 +157,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 cursor-pointer">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 Total Patents Analyzed
@@ -173,7 +173,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0">
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 cursor-pointer">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 Recent Activity
@@ -193,7 +193,7 @@ export default function DashboardPage() {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Pie Chart */}
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 transition-opacity duration-700" style={{ opacity: loading ? 0 : 1 }}>
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 transition-opacity duration-700 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200" style={{ opacity: loading ? 0 : 1 }}>
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Activity Type Distribution
@@ -243,7 +243,7 @@ export default function DashboardPage() {
           </Card>
 
           {/* Bar Chart */}
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 transition-opacity duration-700" style={{ opacity: loading ? 0 : 1 }}>
+          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 transition-opacity duration-700 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200" style={{ opacity: loading ? 0 : 1 }}>
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Activity Over Time (Last 7 Days)
@@ -305,17 +305,17 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Button asChild className="h-16 text-lg">
+            <Button asChild className="h-16 text-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
               <Link href="/app/document-analysis">
                 📄 Upload & Analyze Document
               </Link>
             </Button>
-            <Button asChild variant="outline" className="h-16 text-lg">
+            <Button asChild variant="outline" className="h-16 text-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
               <Link href="/app/patent-analysis">
                 📋 Patent Analysis
               </Link>
             </Button>
-            <Button asChild variant="outline" className="h-16 text-lg">
+            <Button asChild variant="outline" className="h-16 text-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
               <Link href="/app/document-analysis?tab=history">
                 💬 View Chat History
               </Link>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
               {dashboardData.recent_activity.slice(0, 10).map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors"
+                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-[1.02] hover:shadow-xl transition-all duration-200 cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="text-2xl">
