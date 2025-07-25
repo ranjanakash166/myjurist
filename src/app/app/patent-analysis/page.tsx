@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs as ReportTabs, TabsList as ReportTabsList, TabsTrigger as ReportTabsTrigger, TabsContent as ReportTabsContent } from "@/components/ui/tabs";
 
 const dummyResults = {
   prior: "No exact prior art found. Your invention appears novel based on the provided description.",
@@ -959,57 +960,77 @@ export default function PatentAnalysisPage() {
               <CardTitle>Detailed Patent Analysis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="applicant">Applicant Name:</Label>
-                    <Input
-                      id="applicant"
-                      type="text"
-                      placeholder="Enter applicant name"
-                      value={applicantName}
-                      onChange={e => setApplicantName(e.target.value)}
-                    />
+              {/* Input Section */}
+              <Card className="bg-muted/50">
+                <CardContent className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="applicant">Applicant Name</Label>
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="applicant"
+                            type="text"
+                            placeholder="Enter applicant name"
+                            value={applicantName}
+                            onChange={e => setApplicantName(e.target.value)}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground">Who is applying for the patent?</span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="title">Invention Title</Label>
+                        <div className="flex items-center gap-2">
+                          <FileBarChart className="w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="title"
+                            type="text"
+                            placeholder="Enter invention title"
+                            value={inventionTitle}
+                            onChange={e => setInventionTitle(e.target.value)}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground">A concise title for your invention.</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Invention Description</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Provide a detailed description of your invention including key features, technical components, functionality, and intended use... (minimum 50 characters)"
+                        value={inventionDescription}
+                        onChange={e => setInventionDescription(e.target.value)}
+                        className="min-h-[120px]"
+                      />
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Minimum 50 characters required.</span>
+                        <span>{inventionDescription.trim().length} / 50</span>
+                      </div>
+                      {inventionDescription.trim().length < minChars && (
+                        <Alert>
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            Minimum 50 characters required. Current: {inventionDescription.trim().length}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Invention Title:</Label>
-                    <Input
-                      id="title"
-                      type="text"
-                      placeholder="Enter invention title"
-                      value={inventionTitle}
-                      onChange={e => setInventionTitle(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Invention Description:</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Provide a detailed description of your invention including key features, technical components, functionality, and intended use... (minimum 50 characters)"
-                    value={inventionDescription}
-                    onChange={e => setInventionDescription(e.target.value)}
-                    className="min-h-[120px]"
-                  />
-                  {inventionDescription.trim().length < minChars && (
-                    <Alert>
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        Minimum 50 characters required. Current: {inventionDescription.trim().length}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <Button
-                onClick={handleComprehensiveReport}
-                disabled={!isDetailedValid || reportLoading}
-                className="flex items-center gap-2 w-full md:w-auto"
-              >
-                <FileText className="w-5 h-5" />
-                {reportLoading ? "Generating Comprehensive Report..." : "Generate Comprehensive Report"}
-              </Button>
+              {/* Sticky Action Bar */}
+              <div className="sticky bottom-4 z-10 flex justify-end w-full">
+                <Button
+                  onClick={handleComprehensiveReport}
+                  disabled={!isDetailedValid || reportLoading}
+                  className="flex items-center gap-2 px-6 py-3 text-base shadow-lg"
+                >
+                  <FileText className="w-5 h-5" />
+                  {reportLoading ? "Generating Comprehensive Report..." : "Generate Comprehensive Report"}
+                </Button>
+              </div>
 
               {reportLoading && (
                 <Alert>
@@ -1026,59 +1047,66 @@ export default function PatentAnalysisPage() {
               )}
 
               {comprehensiveReport && (
-                <Card>
+                <Card className="relative">
+                  {/* Floating Download Button */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <Button
+                      onClick={() => handleDownloadReport(comprehensiveReport.report_id, comprehensiveReport.title)}
+                      className="flex items-center gap-2 shadow-lg"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download Report
+                    </Button>
+                  </div>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Comprehensive Patent Analysis Report</CardTitle>
-                      <Button
-                        onClick={() => handleDownloadReport(comprehensiveReport.report_id, comprehensiveReport.title)}
-                        className="flex items-center gap-2"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download Report
-                      </Button>
-                    </div>
+                    <CardTitle>Comprehensive Patent Analysis Report</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Report Header */}
-                    <Card className="bg-muted/50">
-                      <CardContent className="p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <h3 className="text-lg font-semibold text-foreground mb-2">{comprehensiveReport.title}</h3>
-                            <p className="text-muted-foreground text-sm">Applicant: {comprehensiveReport.applicant}</p>
-                            <p className="text-muted-foreground text-sm">Generated: {new Date(comprehensiveReport.generated_at).toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground text-sm">Word Count: {comprehensiveReport.word_count.toLocaleString()}</p>
-                            <p className="text-muted-foreground text-sm">Character Count: {comprehensiveReport.character_count.toLocaleString()}</p>
-                            <p className="text-muted-foreground text-sm">Report ID: {comprehensiveReport.report_id}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Report Content */}
-                    <div className="prose prose-invert max-w-none">
-                      {streamingReport ? (
-                        <div className="space-y-4">
-                          {formatReportText(streamedReportText)}
-                          <div className="inline-block w-2 h-4 bg-primary animate-pulse"></div>
-                        </div>
-                      ) : (
-                        <div className="space-y-4">
-                          {formatReportText(comprehensiveReport.full_report)}
-                        </div>
-                      )}
+                    {/* Summary Badges */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <Badge variant="secondary"><User className="w-3 h-3 mr-1" /> {comprehensiveReport.applicant}</Badge>
+                      <Badge variant="secondary"><FileBarChart className="w-3 h-3 mr-1" /> {comprehensiveReport.title}</Badge>
+                      <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" /> {new Date(comprehensiveReport.generated_at).toLocaleString()}</Badge>
+                      <Badge variant="secondary">Words: {comprehensiveReport.word_count.toLocaleString()}</Badge>
+                      <Badge variant="secondary">Chars: {comprehensiveReport.character_count.toLocaleString()}</Badge>
+                      <Badge variant="outline">ID: {comprehensiveReport.report_id}</Badge>
                     </div>
-
-                    {/* Disclaimer */}
-                    <Card className="bg-muted/50">
-                      <CardContent className="p-4">
-                        <h4 className="text-sm font-semibold text-foreground mb-2">Disclaimer:</h4>
-                        <p className="text-xs text-muted-foreground">{comprehensiveReport.disclaimer}</p>
-                      </CardContent>
-                    </Card>
+                    {/* Report Tabs */}
+                    <ReportTabs defaultValue="summary" className="w-full">
+                      <ReportTabsList className="mb-2">
+                        <ReportTabsTrigger value="summary">Summary</ReportTabsTrigger>
+                        <ReportTabsTrigger value="full">Full Report</ReportTabsTrigger>
+                        <ReportTabsTrigger value="disclaimer">Disclaimer</ReportTabsTrigger>
+                      </ReportTabsList>
+                      <ReportTabsContent value="summary">
+                        <div className="prose prose-invert max-w-none">
+                          <h3 className="text-lg font-semibold mb-2">Invention Summary</h3>
+                          <p>{comprehensiveReport.invention_summary}</p>
+                        </div>
+                      </ReportTabsContent>
+                      <ReportTabsContent value="full">
+                        <div className="prose prose-invert max-w-none">
+                          {streamingReport ? (
+                            <div className="space-y-4">
+                              {formatReportText(streamedReportText)}
+                              <div className="inline-block w-2 h-4 bg-primary animate-pulse"></div>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {formatReportText(comprehensiveReport.full_report)}
+                            </div>
+                          )}
+                        </div>
+                      </ReportTabsContent>
+                      <ReportTabsContent value="disclaimer">
+                        <Card className="bg-muted/50">
+                          <CardContent className="p-4">
+                            <h4 className="text-sm font-semibold text-foreground mb-2">Disclaimer</h4>
+                            <p className="text-xs text-muted-foreground">{comprehensiveReport.disclaimer}</p>
+                          </CardContent>
+                        </Card>
+                      </ReportTabsContent>
+                    </ReportTabs>
                   </CardContent>
                 </Card>
               )}
