@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -17,6 +17,7 @@ const navItems = [
   { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
   { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
   { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
+  { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

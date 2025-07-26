@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Download, MessageCircle, FileText, Check } from "lucide-react";
+import { Eye, Download, MessageCircle, FileText, Check, Plus, Upload, Users, Settings, AlertTriangle, FileUp, X, Clock, CheckCircle } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 
 interface ApiResponse {
@@ -1008,54 +1008,116 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {newAnalysisStep === 'create' && !createdChat && (
-                  <div className="max-w-lg w-full mx-auto">
-                    <div className="mb-6">
-                      <h2 className="text-xl font-bold mb-2 text-foreground">Start a New Analysis</h2>
-                      <p className="text-muted-foreground text-sm">Create a new chat to begin your document analysis workflow.</p>
-                    </div>
-                    <form onSubmit={handleCreateChat} className="space-y-4">
-                      <div>
-                        <label htmlFor="chat-name" className="block text-sm font-medium mb-1">Chat Name</label>
-                        <input
-                          id="chat-name"
-                          type="text"
-                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="Enter a name for this chat"
-                          value={newChatName}
-                          onChange={e => setNewChatName(e.target.value)}
-                          required
-                          maxLength={64}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="chat-desc" className="block text-sm font-medium mb-1">Description</label>
-                        <textarea
-                          id="chat-desc"
-                          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary min-h-[80px] resize-y"
-                          placeholder="Describe the purpose of this analysis (optional)"
-                          value={newChatDescription}
-                          onChange={e => setNewChatDescription(e.target.value)}
-                          maxLength={256}
-                        />
-                      </div>
-                      {newChatError && (
-                        <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">
-                          {newChatError}
+                  <div className="max-w-2xl w-full mx-auto">
+                    <Card className="w-full hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
+                      <CardHeader className="text-center pb-6">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                          <MessageCircle className="w-8 h-8 text-white" />
                         </div>
-                      )}
-                      {newChatSuccess && (
-                        <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">
-                          Chat created successfully!
+                        <CardTitle className="text-2xl font-bold mb-2">Start a New Analysis</CardTitle>
+                        <p className="text-muted-foreground">Create a new chat to begin your document analysis workflow</p>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <form onSubmit={handleCreateChat} className="space-y-6">
+                          <div className="space-y-2">
+                            <label htmlFor="chat-name" className="block text-sm font-semibold text-foreground">
+                              <MessageCircle className="w-4 h-4 inline mr-2" />
+                              Chat Name
+                            </label>
+                            <input
+                              id="chat-name"
+                              type="text"
+                              className="w-full rounded-lg border-2 border-input bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200"
+                              placeholder="Enter a descriptive name for this analysis"
+                              value={newChatName}
+                              onChange={e => setNewChatName(e.target.value)}
+                              required
+                              maxLength={64}
+                            />
+                            <p className="text-xs text-muted-foreground">Choose a clear, descriptive name to help you identify this analysis later</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label htmlFor="chat-desc" className="block text-sm font-semibold text-foreground">
+                              <FileText className="w-4 h-4 inline mr-2" />
+                              Description
+                            </label>
+                            <textarea
+                              id="chat-desc"
+                              className="w-full rounded-lg border-2 border-input bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[100px] resize-y transition-all duration-200"
+                              placeholder="Describe the purpose, scope, or specific questions you want to analyze..."
+                              value={newChatDescription}
+                              onChange={e => setNewChatDescription(e.target.value)}
+                              maxLength={256}
+                            />
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs text-muted-foreground">Optional: Provide context about your analysis goals</p>
+                              <span className="text-xs text-muted-foreground">{newChatDescription.length}/256</span>
+                            </div>
+                          </div>
+
+                          {/* Status Messages */}
+                          {newChatError && (
+                            <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4" />
+                              {newChatError}
+                            </div>
+                          )}
+                          
+                          {newChatSuccess && (
+                            <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                              <Check className="w-4 h-4" />
+                              Chat created successfully! Ready to upload documents.
+                            </div>
+                          )}
+
+                          {/* Action Button */}
+                          <Button
+                            type="submit"
+                            className="w-full py-3 text-base font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
+                            disabled={newChatLoading || !newChatName.trim()}
+                          >
+                            {newChatLoading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Creating Chat...
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <Plus className="w-4 h-4" />
+                                Create Chat
+                              </div>
+                            )}
+                          </Button>
+                        </form>
+
+                        {/* Quick Tips */}
+                        <div className="mt-6 pt-6 border-t border-border">
+                          <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                            <Settings className="w-4 h-4" />
+                            Quick Tips
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>Use descriptive names like "Contract Review Q1 2024"</span>
+                            </div>
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>Add context about your analysis goals</span>
+                            </div>
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>You can upload multiple documents per chat</span>
+                            </div>
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>Create multiple sessions for different analysis topics</span>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                      <button
-                        type="submit"
-                        className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
-                        disabled={newChatLoading || !newChatName.trim()}
-                      >
-                        {newChatLoading ? "Creating..." : "Create Chat"}
-                      </button>
-                    </form>
+                      </CardContent>
+                    </Card>
                   </div>
                 )}
               </CollapsibleSection>
@@ -1068,62 +1130,177 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {newAnalysisStep === 'upload' && createdChat && (
-                  <div className="w-full max-w-2xl mx-auto">
-                    <Card className="w-full">
-                      <CardHeader>
-                        <CardTitle>Upload Documents</CardTitle>
-                        <p className="text-muted-foreground text-sm">Upload one or more documents to add to this chat.</p>
+                  <div className="w-full max-w-3xl mx-auto">
+                    <Card className="w-full hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
+                      <CardHeader className="text-center pb-6">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <FileUp className="w-8 h-8 text-white" />
+                        </div>
+                        <CardTitle className="text-2xl font-bold mb-2">Upload Documents</CardTitle>
+                        <p className="text-muted-foreground">Add one or more documents to your analysis chat</p>
                       </CardHeader>
-                      <CardContent>
-                        <form onSubmit={handleUploadDocuments} className="space-y-4">
-                          <div>
-                            <label htmlFor="doc-upload" className="block text-sm font-medium mb-1">Select Documents</label>
-                            <input
-                              id="doc-upload"
-                              type="file"
-                              multiple
-                              className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-border file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100"
-                              onChange={handleFileChange}
-                              disabled={uploading}
-                            />
+                      <CardContent className="space-y-6">
+                        <form onSubmit={handleUploadDocuments} className="space-y-6">
+                          {/* File Upload Area */}
+                          <div className="space-y-4">
+                            <label htmlFor="doc-upload" className="block text-sm font-semibold text-foreground">
+                              <Upload className="w-4 h-4 inline mr-2" />
+                              Select Documents
+                            </label>
+                            
+                            {/* Modern File Upload Area */}
+                            <div className="relative">
+                              <input
+                                id="doc-upload"
+                                type="file"
+                                multiple
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                onChange={handleFileChange}
+                                disabled={uploading}
+                                accept=".pdf,.doc,.docx,.txt,.rtf"
+                              />
+                              <div className="border-2 border-dashed border-input rounded-lg p-8 text-center hover:border-primary transition-colors duration-200 bg-muted/30">
+                                <FileUp className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                                <p className="text-lg font-medium mb-2">Drop files here or click to browse</p>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                  Supports PDF, DOC, DOCX, TXT, RTF files
+                                </p>
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium">
+                                  <Upload className="w-4 h-4" />
+                                  Choose Files
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Selected Files Preview */}
                             {uploadFiles.length > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                {uploadFiles.map((file, idx) => (
-                                  <span key={idx} className="inline-block bg-muted px-3 py-1 rounded text-xs text-foreground/80 max-w-[160px] truncate border border-border" title={file.name}>{file.name}</span>
-                                ))}
+                              <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                  <FileText className="w-4 h-4" />
+                                  Selected Files ({uploadFiles.length})
+                                </h4>
+                                <div className="grid gap-2">
+                                  {uploadFiles.map((file, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-muted rounded-lg border border-border hover:bg-muted/80 transition-colors">
+                                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                                        <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-sm font-medium truncate" title={file.name}>{file.name}</p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {(file.size / 1024).toFixed(1)} KB
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setUploadFiles(prev => prev.filter((_, i) => i !== idx));
+                                        }}
+                                        className="p-1 hover:bg-destructive/10 rounded-full transition-colors"
+                                      >
+                                        <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             )}
                           </div>
+
+                          {/* Status Messages */}
                           {uploadError && (
-                            <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{uploadError}</div>
+                            <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                              <AlertTriangle className="w-4 h-4" />
+                              {uploadError}
+                            </div>
                           )}
+                          
                           {uploadSuccess && (
-                            <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Documents uploaded successfully!</div>
+                            <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" />
+                              Documents uploaded successfully! Ready to create session.
+                            </div>
                           )}
-                          <button
+
+                          {/* Upload Button */}
+                          <Button
                             type="submit"
-                            className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
+                            className="w-full py-3 text-base font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
                             disabled={uploading || uploadFiles.length === 0}
                           >
-                            {uploading ? 'Uploading...' : 'Upload Documents'}
-                          </button>
+                            {uploading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Uploading Documents...
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <Upload className="w-4 h-4" />
+                                Upload Documents
+                              </div>
+                            )}
+                          </Button>
                         </form>
+
                         {/* Uploaded Documents List */}
                         {uploadedDocs.length > 0 && (
-                          <div className="mt-6">
-                            <h3 className="text-base font-semibold mb-2 text-foreground">Uploaded Documents</h3>
-                            <ul className="space-y-2">
+                          <div className="mt-8 pt-6 border-t border-border">
+                            <h3 className="text-lg font-semibold mb-4 text-foreground flex items-center gap-2">
+                              <CheckCircle className="w-5 h-5 text-green-500" />
+                              Uploaded Documents ({uploadedDocs.length})
+                            </h3>
+                            <div className="grid gap-3">
                               {uploadedDocs.map((doc, idx) => (
-                                <li key={doc.id || idx} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm border border-border">
-                                  <span className="flex-shrink-0 w-4 h-4 inline-block"><FileText className="w-4 h-4 text-primary" /></span>
-                                  <span className="break-all flex-1">{doc.filename}</span>
-                                  <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
-                                  <span className="text-xs text-muted-foreground">{doc.processing_status}</span>
-                                </li>
+                                <div key={doc.id || idx} className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors">
+                                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <FileText className="w-5 h-5 text-white" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm truncate" title={doc.filename}>{doc.filename}</p>
+                                    <div className="flex items-center gap-4 mt-1">
+                                      <span className="text-xs text-muted-foreground">
+                                        {doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size'}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        {doc.processing_status || 'Processing...'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <Badge variant="secondary" className="flex-shrink-0">
+                                    Ready
+                                  </Badge>
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         )}
+
+                        {/* Upload Tips */}
+                        <div className="mt-6 pt-6 border-t border-border">
+                          <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                            <Settings className="w-4 h-4" />
+                            Upload Tips
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>Maximum file size: 10MB per document</span>
+                            </div>
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>Supported formats: PDF, DOC, DOCX, TXT, RTF</span>
+                            </div>
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>You can upload multiple files at once</span>
+                            </div>
+                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <span>Documents are processed automatically after upload</span>
+                            </div>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
