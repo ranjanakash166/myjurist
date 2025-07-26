@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Loader2, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
 import { fetchRegulatorySuggestions, submitRegulatoryQuery, RegulatoryQueryResponse } from "@/lib/regulatoryComplianceApi";
 import { useToast } from "@/hooks/use-toast";
+import SimpleMarkdownRenderer from "@/components/SimpleMarkdownRenderer";
 
 export default function RegulatoryCompliancePage() {
   const { user, getAuthHeaders } = useAuth();
@@ -94,9 +95,12 @@ export default function RegulatoryCompliancePage() {
       });
     } catch (error) {
       console.error("Error submitting query:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Failed to submit query. Please try again.";
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit query. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -206,7 +210,10 @@ export default function RegulatoryCompliancePage() {
         <Card className="max-w-4xl mx-auto">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Analysis Results</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                Analysis Results
+              </CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant="outline">
                   Confidence: <span className={getConfidenceColor(result.confidence_score)}>
@@ -223,12 +230,7 @@ export default function RegulatoryCompliancePage() {
             {/* Answer */}
             <div>
               <h3 className="text-lg font-semibold mb-3">Answer</h3>
-              <div className="prose prose-sm max-w-none">
-                <div 
-                  className="whitespace-pre-wrap text-foreground"
-                  dangerouslySetInnerHTML={{ __html: result.answer.replace(/\n/g, '<br/>') }}
-                />
-              </div>
+              <SimpleMarkdownRenderer content={result.answer} />
             </div>
 
             <Separator />
