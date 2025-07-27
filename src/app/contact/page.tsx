@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { submitContactForm, ContactFormData } from '@/lib/contactApi';
 
 interface FormData {
   firstName: string;
@@ -29,6 +30,8 @@ const ContactPage: React.FC = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -45,24 +48,43 @@ const ContactPage: React.FC = () => {
     const isFormValid = Object.values(formData).every(value => value.trim() !== '');
     
     if (!isFormValid) {
-      alert('Please fill in all fields');
+      setError('Please fill in all fields');
       return;
     }
 
     setIsSubmitting(true);
+    setError(null);
     
-    // Simulate form submission (replace with actual API call later)
-    setTimeout(() => {
-      setIsSubmitted(true);
+    try {
+      // Transform form data to match API format
+      const apiFormData: ContactFormData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        company: formData.company,
+        message: formData.message
+      };
+
+      const response = await submitContactForm(apiFormData);
+      
+      if (response.success) {
+        setIsSubmitted(true);
+        setSuccessMessage(response.message);
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          company: '',
+          message: ''
+        });
+      } else {
+        setError('Failed to submit form. Please try again.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');
+    } finally {
       setIsSubmitting(false);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        company: '',
-        message: ''
-      });
-    }, 1500);
+    }
   };
 
   return (
@@ -248,13 +270,17 @@ const ContactPage: React.FC = () => {
                       Thank You!
                     </h3>
                     <p className="text-xl text-muted-foreground mb-6">
-                      Your query has been submitted successfully.
+                      {successMessage || 'Your query has been submitted successfully.'}
                     </p>
                     <p className="text-lg text-primary">
                       Our team will get back to you soon.
                     </p>
                     <Button
-                      onClick={() => setIsSubmitted(false)}
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        setSuccessMessage('');
+                        setError(null);
+                      }}
                       className="mt-8"
                     >
                       Send Another Message
@@ -262,6 +288,11 @@ const ContactPage: React.FC = () => {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-600 text-sm">{error}</p>
+                      </div>
+                    )}
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
