@@ -25,6 +25,7 @@ export default function LegalResearchPage() {
   const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
   const [isLoadingDocument, setIsLoadingDocument] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [loadingViewSource, setLoadingViewSource] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,10 +84,43 @@ export default function LegalResearchPage() {
     }
   };
 
-  const handleViewSource = (documentId: string) => {
-    // Extract the document ID from the search result and redirect to Indian Kanoon
-    const indianKanoonUrl = `http://indiankanoon.org/doc/${documentId}`;
-    window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
+  const handleViewSource = async (documentId: string) => {
+    setLoadingViewSource(documentId);
+    
+    try {
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+      
+      // First fetch the full document to get the Indian Kanoon URL
+      const document = await getLegalDocument(documentId, authToken);
+      
+      // Extract Indian Kanoon URL from the full content
+      const indianKanoonMatch = document.full_content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
+      
+      if (indianKanoonMatch && indianKanoonMatch[1]) {
+        const indianKanoonUrl = indianKanoonMatch[1];
+        window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
+        
+        toast({
+          title: "Opening Indian Kanoon",
+          description: "Redirecting to the original source",
+        });
+      } else {
+        toast({
+          title: "Source not found",
+          description: "Indian Kanoon URL not available for this document",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Failed to open source",
+        description: err.message || "Failed to retrieve document source",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingViewSource(null);
+    }
   };
 
   const handleViewFullDocument = async (documentId: string) => {
@@ -456,8 +490,13 @@ export default function LegalResearchPage() {
                         size="sm"
                         className="h-8 text-xs"
                         onClick={() => handleViewSource(result.document_id)}
+                        disabled={loadingViewSource === result.document_id}
                       >
-                        <ExternalLink className="w-3 h-3 mr-1" />
+                        {loadingViewSource === result.document_id ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                        )}
                         View Source
                       </Button>
                       <Button
