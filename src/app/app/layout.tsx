@@ -17,6 +17,7 @@ const navItems = [
   { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
   { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
   { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
+  { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
   { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
 ];
 

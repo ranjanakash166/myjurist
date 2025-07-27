@@ -1,0 +1,68 @@
+export interface LegalResearchRequest {
+  query: string;
+  top_k: number;
+  search_type: "general" | "specific";
+}
+
+export interface SearchResult {
+  content: string;
+  source_file: string;
+  title: string;
+  section_header: string;
+  similarity_score: number;
+  chunk_index: number;
+  document_id: string;
+}
+
+export interface IndexStats {
+  total_chunks: number;
+  files_indexed: number;
+  model_name: string;
+  embedding_dimension: number;
+  index_size: number;
+  chunks_per_file: Record<string, number>;
+}
+
+export interface LegalResearchResponse {
+  query: string;
+  results: SearchResult[];
+  total_results: number;
+  search_time_ms: number;
+  index_stats: IndexStats;
+}
+
+export interface ValidationError {
+  detail: Array<{
+    loc: string[];
+    msg: string;
+    type: string;
+  }>;
+}
+
+export const searchLegalResearch = async (
+  request: LegalResearchRequest,
+  authToken: string
+): Promise<LegalResearchResponse> => {
+  const response = await fetch('https://api.myjurist.io/api/v1/legal-research/search', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    if (response.status === 422) {
+      const errorData: ValidationError = await response.json();
+      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication failed. Please log in again.');
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}; 
