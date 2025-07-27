@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, LegalResearchRequest, LegalResearchResponse, SearchResult } from "@/lib/legalResearchApi";
+import { searchLegalResearch, getLegalDocument, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
 
@@ -22,6 +22,9 @@ export default function LegalResearchPage() {
   const [searchResults, setSearchResults] = useState<LegalResearchResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
+  const [isLoadingDocument, setIsLoadingDocument] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +81,140 @@ export default function LegalResearchPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleViewSource = (documentId: string) => {
+    // Extract the document ID from the search result and redirect to Indian Kanoon
+    const indianKanoonUrl = `http://indiankanoon.org/doc/${documentId}`;
+    window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleViewFullDocument = async (documentId: string) => {
+    setIsLoadingDocument(true);
+    setError(null);
+    
+    try {
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+      
+      const document = await getLegalDocument(documentId, authToken);
+      setSelectedDocument(document);
+      
+      toast({
+        title: "Document loaded",
+        description: `Retrieved ${document.title}`,
+      });
+    } catch (err: any) {
+      setError(err.message || "Failed to load document");
+      toast({
+        title: "Failed to load document",
+        description: err.message || "Failed to load document",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDocument(false);
+    }
+  };
+
+  const handleDownloadPDF = async (documentData: DocumentResponse) => {
+    setIsGeneratingPDF(true);
+    
+    try {
+      // Dynamically import the PDF libraries
+      const jsPDF = (await import('jspdf')).default;
+      const html2canvas = (await import('html2canvas')).default;
+      
+      // Create a temporary div to render the markdown content
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '800px';
+      tempDiv.style.padding = '40px';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.fontSize = '12px';
+      tempDiv.style.lineHeight = '1.6';
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.color = 'black';
+      
+      // Convert markdown to HTML (simple conversion for basic elements)
+      const htmlContent = convertMarkdownToHTML(documentData.full_content);
+      tempDiv.innerHTML = htmlContent;
+      
+      document.body.appendChild(tempDiv);
+      
+      // Convert to canvas
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      // Remove temporary div
+      document.body.removeChild(tempDiv);
+      
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      // Download PDF
+      const filename = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      pdf.save(filename);
+      
+      toast({
+        title: "PDF downloaded",
+        description: "Document has been downloaded as PDF",
+      });
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      toast({
+        title: "PDF generation failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  const convertMarkdownToHTML = (markdown: string): string => {
+    // Simple markdown to HTML conversion for basic elements
+    let html = markdown
+      // Headers
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      // Bold
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // Italic
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      // Lists
+      .replace(/^\* (.*$)/gim, '<li>$1</li>')
+      .replace(/^\- (.*$)/gim, '<li>$1</li>')
+      // Paragraphs
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/^(.+)$/gm, '<p>$1</p>');
+    
+    // Wrap lists
+    html = html.replace(/<li>.*<\/li>/g, (match) => `<ul>${match}</ul>`);
+    
+    return html;
   };
 
   const handleQuickSearch = (quickQuery: string) => {
@@ -248,30 +385,6 @@ export default function LegalResearchPage() {
       {/* Search Results */}
       {searchResults && (
         <div className="space-y-6">
-          {/* Results Header */}
-          <Card className="max-w-4xl mx-auto">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground">
-                    Search Results for "{searchResults.query}"
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Found {searchResults.total_results} results in {searchResults.search_time_ms}ms
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {searchResults.index_stats.files_indexed} files indexed
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {searchResults.index_stats.total_chunks} chunks
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Results List */}
           <div className="space-y-4 max-w-4xl mx-auto">
             {searchResults.results.map((result, index) => (
@@ -342,9 +455,24 @@ export default function LegalResearchPage() {
                         variant="outline"
                         size="sm"
                         className="h-8 text-xs"
+                        onClick={() => handleViewSource(result.document_id)}
                       >
                         <ExternalLink className="w-3 h-3 mr-1" />
                         View Source
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={() => handleViewFullDocument(result.document_id)}
+                        disabled={isLoadingDocument}
+                      >
+                        {isLoadingDocument ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <FileTextIcon className="w-3 h-3 mr-1" />
+                        )}
+                        Full Document
                       </Button>
                     </div>
                   </div>
@@ -395,6 +523,57 @@ export default function LegalResearchPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-semibold text-foreground truncate">
+                  {selectedDocument.title}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {selectedDocument.source_file} • {selectedDocument.content_length} characters
+                </p>
+              </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDownloadPDF(selectedDocument)}
+                  disabled={isGeneratingPDF}
+                >
+                  {isGeneratingPDF ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  {isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedDocument(null)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div className="bg-muted/50 rounded-lg p-6 border">
+                <SimpleMarkdownRenderer 
+                  content={selectedDocument.full_content} 
+                  className="text-sm leading-relaxed max-w-none"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

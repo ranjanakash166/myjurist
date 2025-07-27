@@ -65,4 +65,40 @@ export const searchLegalResearch = async (
   }
 
   return response.json();
+};
+
+export interface DocumentResponse {
+  source_file: string;
+  title: string;
+  full_content: string;
+  content_length: number;
+  retrieval_time_ms: number;
+}
+
+export const getLegalDocument = async (
+  documentId: string,
+  authToken: string
+): Promise<DocumentResponse> => {
+  const response = await fetch('https://api.myjurist.io/api/v1/legal-research/document', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ document_id: documentId }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 422) {
+      const errorData: ValidationError = await response.json();
+      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication failed. Please log in again.');
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }; 
