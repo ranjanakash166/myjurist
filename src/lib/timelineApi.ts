@@ -25,6 +25,24 @@ export interface TimelineResponse {
   created_at: string;
 }
 
+export interface TimelineListItem {
+  timeline_id: string;
+  title: string;
+  total_events: number;
+  created_at: string;
+  updated_at: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface TimelineListResponse {
+  timelines: TimelineListItem[];
+  total_count: number;
+  page: number;
+  page_size: number;
+}
+
 export interface TimelineUploadRequest {
   files: File[];
   timeline_title: string;
@@ -91,12 +109,9 @@ export class TimelineApi {
     return response.json();
   }
 
-  async listTimelines(skip: number = 0, limit: number = 10): Promise<{
-    timelines: TimelineResponse[];
-    total: number;
-  }> {
+  async listTimelines(page: number = 1, pageSize: number = 10): Promise<TimelineListResponse> {
     const response = await fetch(
-      `${this.baseUrl}/timeline?skip=${skip}&limit=${limit}`,
+      `${this.baseUrl}/timeline/list?page=${page}&page_size=${pageSize}`,
       {
         headers: this.getAuthHeaders(),
       }
