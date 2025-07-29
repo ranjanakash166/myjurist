@@ -5,6 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   FileText, 
   Download, 
@@ -16,7 +26,8 @@ import {
   Clock,
   Check,
   FileDown,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 
 interface ContractPreviewProps {
@@ -24,16 +35,21 @@ interface ContractPreviewProps {
   onBack: () => void;
   onDownload: () => void;
   onCopy: () => void;
+  onDelete?: () => void;
+  showDeleteButton?: boolean;
 }
 
 export default function ContractPreview({
   contract,
   onBack,
   onDownload,
-  onCopy
+  onCopy,
+  onDelete,
+  showDeleteButton = false
 }: ContractPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleCopy = async () => {
     await onCopy();
@@ -57,6 +73,19 @@ export default function ContractPreview({
     } finally {
       setGeneratingPDF(false);
     }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowDeleteDialog(false);
+    onDelete?.();
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteDialog(false);
   };
 
   const formatContent = (content: string) => {
@@ -93,6 +122,17 @@ export default function ContractPreview({
             <ArrowLeft className="w-4 h-4" />
             Back to Form
           </Button>
+          
+          {showDeleteButton && onDelete && (
+            <Button
+              variant="destructive"
+              onClick={handleDeleteClick}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Contract
+            </Button>
+          )}
         </div>
       </div>
 
@@ -288,6 +328,27 @@ export default function ContractPreview({
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contract</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{contract.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete Contract
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 } 

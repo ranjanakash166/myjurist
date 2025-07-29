@@ -28,6 +28,24 @@ export interface ContractTemplateListResponse {
   templates: ContractTemplate[];
 }
 
+// Contract History Interfaces
+export interface ContractHistoryItem {
+  contract_id: string;
+  template_type: string;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContractHistoryResponse {
+  contracts: ContractHistoryItem[];
+  total_count: number;
+  page: number;
+  page_size: number;
+}
+
 // Contract Draft Interfaces
 export interface ContractDraftRequest {
   template_type: string;
@@ -155,15 +173,10 @@ export class ContractApi {
     }
   }
 
-  // List contract drafts (for future use)
-  async listContractDrafts(page: number = 1, pageSize: number = 10): Promise<{
-    contracts: ContractDraftResponse[];
-    total_count: number;
-    page: number;
-    page_size: number;
-  }> {
+  // Get contract history
+  async getContractHistory(page: number = 1, pageSize: number = 10): Promise<ContractHistoryResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/contracts/draft?page=${page}&page_size=${pageSize}`, {
+      const response = await fetch(`${this.baseUrl}/contracts/?page=${page}&page_size=${pageSize}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -172,13 +185,59 @@ export class ContractApi {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch contract drafts: ${response.statusText}`);
+        throw new Error(`Failed to fetch contract history: ${response.statusText}`);
       }
 
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error('Error fetching contract drafts:', error);
+      console.error('Error fetching contract history:', error);
+      throw error;
+    }
+  }
+
+  // Get specific contract by ID
+  async getContractById(contractId: string): Promise<ContractDraftResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/contracts/${contractId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch contract: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching contract:', error);
+      throw error;
+    }
+  }
+
+  // Delete contract by ID
+  async deleteContract(contractId: string): Promise<{ message: string }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/contracts/${contractId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete contract: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error deleting contract:', error);
       throw error;
     }
   }

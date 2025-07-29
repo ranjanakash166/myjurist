@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../components/AuthProvider";
-import { createContractApi, ContractTemplate, ContractDraftRequest, ContractDraftResponse } from "../../../lib/contractApi";
+import { createContractApi, ContractTemplate, ContractDraftRequest, ContractDraftResponse, ContractHistoryItem, ContractHistoryResponse } from "../../../lib/contractApi";
 import { createPDFGenerator } from "../../../lib/pdfGenerator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,14 @@ import {
   Edit3,
   Plus,
   ArrowLeft,
-  Save
+  Save,
+  Clock
 } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 import ContractTemplateSelector from "./components/ContractTemplateSelector";
 import ContractForm from "./components/ContractForm";
 import ContractPreview from "./components/ContractPreview";
+import ContractHistoryList from "./components/ContractHistoryList";
 
 export default function ContractDraftingPage() {
   const { getAuthHeaders } = useAuth();
@@ -37,7 +39,13 @@ export default function ContractDraftingPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [generatedContract, setGeneratedContract] = useState<ContractDraftResponse | null>(null);
-  const [currentStep, setCurrentStep] = useState<'templates' | 'form' | 'preview'>('templates');
+  const [currentStep, setCurrentStep] = useState<'templates' | 'form' | 'preview' | 'history'>('templates');
+  
+  // History state
+  const [contractHistory, setContractHistory] = useState<ContractHistoryResponse | null>(null);
+  const [selectedHistoryContract, setSelectedHistoryContract] = useState<ContractDraftResponse | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   
   // Loading states
   const [templatesLoading, setTemplatesLoading] = useState(false);
@@ -48,6 +56,49 @@ export default function ContractDraftingPage() {
   useEffect(() => {
     fetchTemplates();
   }, []);
+
+  // Fetch contract history
+  const fetchContractHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    
+    try {
+      const historyData = await contractApi.getContractHistory();
+      setContractHistory(historyData);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch contract history';
+      setHistoryError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // Fetch specific contract details
+  const fetchContractDetails = async (contractId: string) => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    
+    try {
+      const contractData = await contractApi.getContractById(contractId);
+      setSelectedHistoryContract(contractData);
+      setCurrentStep('preview');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch contract details';
+      setHistoryError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const fetchTemplates = async () => {
     setTemplatesLoading(true);
@@ -118,11 +169,62 @@ export default function ContractDraftingPage() {
     setSelectedTemplate(null);
     setFormData({});
     setGeneratedContract(null);
+    setSelectedHistoryContract(null);
     setCurrentStep('templates');
   };
 
   const handleBackToForm = () => {
+    setGeneratedContract(null);
+    setSelectedHistoryContract(null);
     setCurrentStep('form');
+  };
+
+  const handleShowHistory = () => {
+    fetchContractHistory();
+    setCurrentStep('history');
+  };
+
+  const handleHistoryContractSelect = (contract: ContractHistoryItem) => {
+    fetchContractDetails(contract.contract_id);
+  };
+
+  const handleDeleteContract = async (contractId: string) => {
+    try {
+      await contractApi.deleteContract(contractId);
+      
+      // Remove the deleted contract from the history
+      if (contractHistory) {
+        setContractHistory({
+          ...contractHistory,
+          contracts: contractHistory.contracts.filter(contract => contract.contract_id !== contractId),
+          total_count: contractHistory.total_count - 1
+        });
+      }
+
+      // If the deleted contract was the currently selected one, clear it
+      if (selectedHistoryContract?.contract_id === contractId) {
+        setSelectedHistoryContract(null);
+        setCurrentStep('history');
+      }
+
+      toast({
+        title: "Contract Deleted",
+        description: "Contract has been deleted successfully.",
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete contract';
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      throw err; // Re-throw to let the component handle the loading state
+    }
+  };
+
+  const handleBackToHistory = () => {
+    setSelectedHistoryContract(null);
+    setCurrentStep('history');
   };
 
   const handleDownloadContract = () => {
@@ -203,16 +305,40 @@ export default function ContractDraftingPage() {
           </div>
         </div>
         
-        {currentStep !== 'templates' && (
-          <Button
-            variant="outline"
-            onClick={handleBackToTemplates}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Templates
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {currentStep === 'templates' && (
+            <Button
+              variant="outline"
+              onClick={handleShowHistory}
+              className="flex items-center gap-2"
+            >
+              <Clock className="w-4 h-4" />
+              View History
+            </Button>
+          )}
+          
+          {currentStep !== 'templates' && currentStep !== 'history' && (
+            <Button
+              variant="outline"
+              onClick={handleBackToTemplates}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Templates
+            </Button>
+          )}
+
+          {currentStep === 'history' && (
+            <Button
+              variant="outline"
+              onClick={handleBackToTemplates}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Templates
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Error Alert */}
@@ -243,12 +369,25 @@ export default function ContractDraftingPage() {
             />
           )}
 
-          {currentStep === 'preview' && generatedContract && (
+          {currentStep === 'preview' && (generatedContract || selectedHistoryContract) && (
             <ContractPreview
-              contract={generatedContract}
-              onBack={handleBackToForm}
+              contract={generatedContract || selectedHistoryContract!}
+              onBack={generatedContract ? handleBackToForm : handleBackToHistory}
               onDownload={handleDownloadContract}
               onCopy={handleCopyToClipboard}
+              onDelete={selectedHistoryContract ? () => handleDeleteContract(selectedHistoryContract.contract_id) : undefined}
+              showDeleteButton={!!selectedHistoryContract}
+            />
+          )}
+
+          {currentStep === 'history' && (
+            <ContractHistoryList
+              onContractSelect={handleHistoryContractSelect}
+              onDeleteContract={handleDeleteContract}
+              onRefresh={fetchContractHistory}
+              loading={historyLoading}
+              history={contractHistory}
+              error={historyError}
             />
           )}
         </div>
@@ -256,48 +395,76 @@ export default function ContractDraftingPage() {
         {/* Right Panel - Progress/Info */}
         <div className="space-y-6">
           {/* Progress Indicator */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  currentStep === 'templates' ? 'bg-primary text-primary-foreground' : 'bg-primary/20 text-primary'
-                }`}>
-                  {currentStep === 'templates' ? '1' : <CheckCircle className="w-4 h-4" />}
+          {currentStep !== 'history' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Progress</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    currentStep === 'templates' ? 'bg-primary text-primary-foreground' : 'bg-primary/20 text-primary'
+                  }`}>
+                    {currentStep === 'templates' ? '1' : <CheckCircle className="w-4 h-4" />}
+                  </div>
+                  <span className={currentStep === 'templates' ? 'font-medium' : 'text-muted-foreground'}>
+                    Select Template
+                  </span>
                 </div>
-                <span className={currentStep === 'templates' ? 'font-medium' : 'text-muted-foreground'}>
-                  Select Template
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  currentStep === 'form' ? 'bg-primary text-primary-foreground' : 
-                  currentStep === 'preview' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                }`}>
-                  {currentStep === 'form' ? '2' : 
-                   currentStep === 'preview' ? <CheckCircle className="w-4 h-4" /> : '2'}
+                
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    currentStep === 'form' ? 'bg-primary text-primary-foreground' : 
+                    currentStep === 'preview' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {currentStep === 'form' ? '2' : 
+                     currentStep === 'preview' ? <CheckCircle className="w-4 h-4" /> : '2'}
+                  </div>
+                  <span className={currentStep === 'form' ? 'font-medium' : 
+                                 currentStep === 'preview' ? 'text-primary' : 'text-muted-foreground'}>
+                    Fill Details
+                  </span>
                 </div>
-                <span className={currentStep === 'form' ? 'font-medium' : 
-                               currentStep === 'preview' ? 'text-primary' : 'text-muted-foreground'}>
-                  Fill Details
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  currentStep === 'preview' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
-                  {currentStep === 'preview' ? '3' : '3'}
+                
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    currentStep === 'preview' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {currentStep === 'preview' ? '3' : '3'}
+                  </div>
+                  <span className={currentStep === 'preview' ? 'font-medium' : 'text-muted-foreground'}>
+                    Review & Download
+                  </span>
                 </div>
-                <span className={currentStep === 'preview' ? 'font-medium' : 'text-muted-foreground'}>
-                  Review & Download
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* History Info */}
+          {currentStep === 'history' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Contract History</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <span className="text-muted-foreground">
+                    View and manage your previously generated contracts
+                  </span>
+                </div>
+                
+                {contractHistory && (
+                  <div className="text-sm text-muted-foreground">
+                    <p>Total contracts: {contractHistory.total_count}</p>
+                    <p>Showing: {contractHistory.contracts.length} contracts</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Selected Template Info */}
           {selectedTemplate && (
@@ -323,25 +490,25 @@ export default function ContractDraftingPage() {
           )}
 
           {/* Generated Contract Info */}
-          {generatedContract && (
+          {(generatedContract || selectedHistoryContract) && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Generated Contract</CardTitle>
+                <CardTitle className="text-lg">Contract Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <h4 className="font-medium">{generatedContract.title}</h4>
-                  <p className="text-sm text-muted-foreground">{generatedContract.description}</p>
+                  <h4 className="font-medium">{(generatedContract || selectedHistoryContract)!.title}</h4>
+                  <p className="text-sm text-muted-foreground">{(generatedContract || selectedHistoryContract)!.description}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Badge variant="secondary">{generatedContract.template_type}</Badge>
-                  <Badge variant="outline">{generatedContract.status}</Badge>
+                  <Badge variant="secondary">{(generatedContract || selectedHistoryContract)!.template_type}</Badge>
+                  <Badge variant="outline">{(generatedContract || selectedHistoryContract)!.status}</Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  <p>Generated: {new Date(generatedContract.created_at).toLocaleString()}</p>
-                  <p>Processing time: {generatedContract.processing_time_ms}ms</p>
-                  {generatedContract.ai_provider_used && (
-                    <p>AI Provider: {generatedContract.ai_provider_used}</p>
+                  <p>Generated: {new Date((generatedContract || selectedHistoryContract)!.created_at).toLocaleString()}</p>
+                  <p>Processing time: {(generatedContract || selectedHistoryContract)!.processing_time_ms}ms</p>
+                  {(generatedContract || selectedHistoryContract)!.ai_provider_used && (
+                    <p>AI Provider: {(generatedContract || selectedHistoryContract)!.ai_provider_used}</p>
                   )}
                 </div>
               </CardContent>
