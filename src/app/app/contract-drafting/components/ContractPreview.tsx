@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ContractDraftResponse } from "../../../../lib/contractApi";
+import { createPDFGenerator } from "../../../../lib/pdfGenerator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +14,9 @@ import {
   ArrowLeft,
   Eye,
   Clock,
-  Check
+  Check,
+  FileDown,
+  Loader2
 } from "lucide-react";
 
 interface ContractPreviewProps {
@@ -30,11 +33,30 @@ export default function ContractPreview({
   onCopy
 }: ContractPreviewProps) {
   const [copied, setCopied] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   const handleCopy = async () => {
     await onCopy();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadPDF = () => {
+    setGeneratingPDF(true);
+    try {
+      const pdfGenerator = createPDFGenerator({
+        title: contract.title,
+        author: 'My Jurist',
+        subject: `${contract.template_type.replace('_', ' ')} Contract`,
+        keywords: ['legal', 'contract', contract.template_type, 'myjurist']
+      });
+      
+      pdfGenerator.downloadPDF(contract);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setGeneratingPDF(false);
+    }
   };
 
   const formatContent = (content: string) => {
@@ -122,11 +144,30 @@ export default function ContractPreview({
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button
+          onClick={handleDownloadPDF}
+          disabled={generatingPDF}
+          className="flex items-center gap-2"
+        >
+          {generatingPDF ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Generating PDF...
+            </>
+          ) : (
+            <>
+              <FileDown className="w-4 h-4" />
+              Download PDF
+            </>
+          )}
+        </Button>
+        
+        <Button
+          variant="outline"
           onClick={onDownload}
           className="flex items-center gap-2"
         >
           <Download className="w-4 h-4" />
-          Download Contract
+          Download Text
         </Button>
         
         <Button

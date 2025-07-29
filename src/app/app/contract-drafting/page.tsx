@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../components/AuthProvider";
 import { createContractApi, ContractTemplate, ContractDraftRequest, ContractDraftResponse } from "../../../lib/contractApi";
+import { createPDFGenerator } from "../../../lib/pdfGenerator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -141,6 +142,33 @@ export default function ContractDraftingPage() {
       title: "Downloaded",
       description: "Contract downloaded successfully!",
     });
+  };
+
+  const handleDownloadPDF = () => {
+    if (!generatedContract) return;
+
+    try {
+      const pdfGenerator = createPDFGenerator({
+        title: generatedContract.title,
+        author: 'My Jurist',
+        subject: `${generatedContract.template_type.replace('_', ' ')} Contract`,
+        keywords: ['legal', 'contract', generatedContract.template_type, 'myjurist']
+      });
+      
+      pdfGenerator.downloadPDF(generatedContract);
+
+      toast({
+        title: "PDF Downloaded",
+        description: "Contract PDF downloaded successfully!",
+      });
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCopyToClipboard = async () => {
