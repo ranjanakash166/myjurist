@@ -25,6 +25,63 @@ export interface TimelineResponse {
   created_at: string;
 }
 
+// Enhanced Timeline Interfaces
+export interface EnhancedTimelineEvent {
+  id: string;
+  date: string;
+  formatted_date: string;
+  event_title: string;
+  event_description: string;
+  event_type: string;
+  event_type_label: string;
+  confidence_score: number;
+  confidence_label: string;
+  document_source: string;
+  paragraph_reference: string;
+  raw_text: string;
+  ui_metadata: {
+    [key: string]: any;
+  };
+}
+
+export interface TimelineMetadata {
+  total_events: number;
+  date_range: {
+    [key: string]: string;
+  };
+  document_sources: string[];
+  processing_time_ms: number;
+  created_at: string;
+  status: string;
+}
+
+export interface TimelineSummary {
+  short: string;
+  detailed: string;
+  key_insights: string[];
+  legal_matter: string;
+}
+
+export interface TimelineStatistics {
+  event_type_distribution: {
+    [key: string]: number;
+  };
+  document_distribution: {
+    [key: string]: number;
+  };
+  average_confidence: number;
+  timeline_duration_days: number;
+}
+
+export interface EnhancedTimelineResponse {
+  timeline_id: string;
+  timeline_title: string;
+  metadata: TimelineMetadata;
+  events: EnhancedTimelineEvent[];
+  summary: TimelineSummary;
+  statistics: TimelineStatistics;
+}
+
 export interface TimelineListItem {
   timeline_id: string;
   title: string;
@@ -104,6 +161,19 @@ export class TimelineApi {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch timeline');
+    }
+
+    return response.json();
+  }
+
+  async getEnhancedTimeline(timelineId: string): Promise<EnhancedTimelineResponse> {
+    const response = await fetch(`${this.baseUrl}/timeline/enhanced/${timelineId}`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch enhanced timeline');
     }
 
     return response.json();

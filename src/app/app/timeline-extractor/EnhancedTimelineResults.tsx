@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Download, FileText, Calendar, Filter, Search, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from "lucide-react";
+import { Download, FileText, Calendar, Filter, Search, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, BarChart3, Lightbulb, Clock, Target, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -7,35 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { EnhancedTimelineResponse, EnhancedTimelineEvent } from "../../../lib/timelineApi";
 
-
-interface TimelineEvent {
-  date: string;
-  event_title: string;
-  event_description: string;
-  document_source: string;
-  paragraph_reference: string;
-  event_type: string;
-  confidence_score: number;
-  raw_text: string;
-}
-
-interface TimelineResponse {
-  timeline_id: string;
-  timeline_title: string;
-  events: TimelineEvent[];
-  total_events: number;
-  date_range: {
-    [key: string]: string;
-  };
-  document_sources: string[];
-  processing_time_ms: number;
-  summary: string;
-  created_at: string;
-}
-
-interface TimelineResultsProps {
-  timeline: TimelineResponse;
+interface EnhancedTimelineResultsProps {
+  timeline: EnhancedTimelineResponse;
   onDownload: () => void;
   onExportCSV: () => void;
 }
@@ -43,17 +19,12 @@ interface TimelineResultsProps {
 type SortField = 'date' | 'event_title' | 'event_type' | 'confidence_score';
 type SortDirection = 'asc' | 'desc';
 
-export default function TimelineResults({ timeline, onDownload, onExportCSV }: TimelineResultsProps) {
+export default function EnhancedTimelineResults({ timeline, onDownload, onExportCSV }: EnhancedTimelineResultsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
-
-  // Debug logging
-  console.log('TimelineResults received timeline:', timeline);
-  console.log('Timeline events:', timeline.events);
-  console.log('Sample event:', timeline.events?.[0]);
 
   // Get unique event types for filter (filter out empty strings)
   const eventTypes = Array.from(new Set(timeline.events.map(event => event.event_type)))
@@ -114,23 +85,7 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
     setExpandedEvents(newExpanded);
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
-  };
-
   const getEventTypeColor = (eventType: string) => {
-    if (!eventType || eventType.trim() === '') {
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-    }
-    
     const colors: { [key: string]: string } = {
       'filing': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
       'hearing': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
@@ -148,34 +103,78 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
     return 'text-red-600 dark:text-red-400';
   };
 
+  const getConfidenceLabelColor = (label: string) => {
+    switch (label.toLowerCase()) {
+      case 'high':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case 'low':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Section */}
       {timeline.summary && (
-        <Card className="bg-muted/30">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Timeline Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {timeline.summary}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Timeline Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-sm mb-2">Short Summary</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {timeline.summary.short}
+                </p>
+              </div>
+              <Separator />
+              <div>
+                <h4 className="font-semibold text-sm mb-2">Legal Matter</h4>
+                <p className="text-sm text-muted-foreground">
+                  {timeline.summary.legal_matter}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Lightbulb className="w-5 h-5" />
+                Key Insights
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {timeline.summary.key_insights.map((insight, index) => (
+                  <div key={index} className="flex items-start gap-2 text-sm">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-muted-foreground">{insight}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Statistics Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-blue-500" />
               <span className="text-sm font-medium">Total Events</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{timeline.total_events}</p>
+            <p className="text-2xl font-bold mt-1">{timeline.metadata.total_events}</p>
           </CardContent>
         </Card>
         <Card>
@@ -184,28 +183,54 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
               <FileText className="w-4 h-4 text-green-500" />
               <span className="text-sm font-medium">Documents</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{timeline.document_sources.length}</p>
+            <p className="text-2xl font-bold mt-1">{timeline.metadata.document_sources.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-medium">Event Types</span>
+              <Target className="w-4 h-4 text-purple-500" />
+              <span className="text-sm font-medium">Avg Confidence</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{eventTypes.length}</p>
+            <p className="text-2xl font-bold mt-1">{(timeline.statistics.average_confidence * 100).toFixed(0)}%</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-medium">Processing Time</span>
+              <Clock className="w-4 h-4 text-orange-500" />
+              <span className="text-sm font-medium">Duration</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{timeline.processing_time_ms}ms</p>
+            <p className="text-2xl font-bold mt-1">{timeline.statistics.timeline_duration_days} days</p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Event Type Distribution */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <BarChart3 className="w-5 h-5" />
+            Event Type Distribution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(timeline.statistics.event_type_distribution).map(([type, count]) => (
+              <div key={type} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium capitalize">{type}</span>
+                  <span className="text-sm text-muted-foreground">{count}</span>
+                </div>
+                <Progress 
+                  value={(count / timeline.metadata.total_events) * 100} 
+                  className="h-2"
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -252,7 +277,7 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
 
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
-        Showing {filteredAndSortedEvents.length} of {timeline.total_events} events
+        Showing {filteredAndSortedEvents.length} of {timeline.metadata.total_events} events
       </div>
 
       {/* Timeline Table */}
@@ -325,10 +350,13 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
               </TableHeader>
               <TableBody>
                 {filteredAndSortedEvents.map((event, index) => (
-                  <React.Fragment key={index}>
+                  <React.Fragment key={event.id}>
                     <TableRow>
                       <TableCell className="font-medium">
-                        {formatDate(event.date)}
+                        <div className="space-y-1">
+                          <div>{event.formatted_date}</div>
+                          <div className="text-xs text-muted-foreground">{event.date}</div>
+                        </div>
                       </TableCell>
                       <TableCell className="font-medium max-w-[200px]">
                         <div className="truncate" title={event.event_title}>
@@ -346,14 +374,24 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getEventTypeColor(event.event_type)}>
-                          {event.event_type || 'Unknown'}
-                        </Badge>
+                        <div className="space-y-1">
+                          <Badge className={getEventTypeColor(event.event_type)}>
+                            {event.event_type}
+                          </Badge>
+                          <div className="text-xs text-muted-foreground">
+                            {event.event_type_label}
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        <span className={`font-medium ${getConfidenceColor(event.confidence_score)}`}>
-                          {event.confidence_score ? (event.confidence_score * 100).toFixed(0) : '0'}%
-                        </span>
+                        <div className="space-y-1">
+                          <span className={`font-medium ${getConfidenceColor(event.confidence_score)}`}>
+                            {(event.confidence_score * 100).toFixed(0)}%
+                          </span>
+                          <Badge className={getConfidenceLabelColor(event.confidence_label)}>
+                            {event.confidence_label}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Button

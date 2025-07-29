@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
-import { createTimelineApi, TimelineListItem } from "../../../lib/timelineApi";
+import { createTimelineApi, TimelineListItem, EnhancedTimelineResponse } from "../../../lib/timelineApi";
 import TimelineUploader from "./TimelineUploader";
 import TimelineResults from "./TimelineResults";
+import EnhancedTimelineResults from "./EnhancedTimelineResults";
 import TimelineHistoryList from "./TimelineHistoryList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export default function TimelineExtractorPage() {
   const [tab, setTab] = useState<'new' | 'history'>('new');
   const [processing, setProcessing] = useState(false);
   const [timelineResult, setTimelineResult] = useState<TimelineResponse | null>(null);
+  const [enhancedTimelineResult, setEnhancedTimelineResult] = useState<EnhancedTimelineResponse | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [timelineTitle, setTimelineTitle] = useState("");
@@ -106,20 +108,21 @@ export default function TimelineExtractorPage() {
   };
 
   const handleDownloadTimeline = async () => {
-    if (!timelineResult) return;
+    const timelineData = enhancedTimelineResult || timelineResult;
+    if (!timelineData) return;
     
     try {
-      const timelineData = {
-        ...timelineResult,
+      const exportData = {
+        ...timelineData,
         export_date: new Date().toISOString(),
         export_format: 'json'
       };
       
-      const blob = new Blob([JSON.stringify(timelineData, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${timelineResult.timeline_title}_timeline.json`;
+      a.download = `${timelineData.timeline_title}_timeline.json`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -136,15 +139,54 @@ export default function TimelineExtractorPage() {
   };
 
   const handleExportCSV = async () => {
-    if (!timelineResult) return;
+    const timelineData = enhancedTimelineResult || timelineResult;
+    if (!timelineData) return;
     
     try {
-      const csvContent = await timelineApi.exportTimelineAsCSV(timelineResult);
+      let csvContent: string;
+      if (enhancedTimelineResult) {
+        // Enhanced timeline CSV export
+        const csvHeaders = [
+          'Date',
+          'Formatted Date',
+          'Event Title',
+          'Event Description',
+          'Event Type',
+          'Event Type Label',
+          'Confidence Score',
+          'Confidence Label',
+          'Document Source',
+          'Paragraph Reference',
+          'Raw Text'
+        ];
+        
+        const csvRows = enhancedTimelineResult.events.map(event => [
+          event.date,
+          `"${event.formatted_date}"`,
+          `"${event.event_title.replace(/"/g, '""')}"`,
+          `"${event.event_description.replace(/"/g, '""')}"`,
+          `"${event.event_type.replace(/"/g, '""')}"`,
+          `"${event.event_type_label.replace(/"/g, '""')}"`,
+          event.confidence_score,
+          `"${event.confidence_label.replace(/"/g, '""')}"`,
+          `"${event.document_source.replace(/"/g, '""')}"`,
+          `"${event.paragraph_reference.replace(/"/g, '""')}"`,
+          `"${event.raw_text.replace(/"/g, '""')}"`
+        ]);
+        
+        csvContent = [csvHeaders.join(','), ...csvRows.map(row => row.join(','))].join('\n');
+             } else if (timelineResult) {
+         // Regular timeline CSV export
+         csvContent = await timelineApi.exportTimelineAsCSV(timelineResult);
+       } else {
+         throw new Error('No timeline data available for export');
+       }
+      
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${timelineResult.timeline_title}_timeline.csv`;
+      a.download = `${timelineData.timeline_title}_timeline.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -184,10 +226,25 @@ export default function TimelineExtractorPage() {
     setTimelinesError(null);
     
     try {
+      console.log('Fetching timeline with ID:', timeline.timeline_id);
       const data = await timelineApi.getTimeline(timeline.timeline_id);
+      console.log('Timeline data received:', data);
+      console.log('Events count:', data.events?.length);
+      console.log('Sample event:', data.events?.[0]);
+      console.log('Timeline title:', data.timeline_title);
+      console.log('Total events:', data.total_events);
+      
+      // Validate data structure
+      if (!data.events || !Array.isArray(data.events)) {
+        console.error('Invalid events data:', data.events);
+        throw new Error('Invalid timeline data structure');
+      }
+      
       setTimelineResult(data);
+      setEnhancedTimelineResult(null); // Clear enhanced timeline result
       setTab('new'); // Switch to new tab to show the timeline
     } catch (err: any) {
+      console.error('Error fetching timeline:', err);
       setTimelinesError(err.message || 'Failed to load timeline');
       toast({ 
         title: 'Load Failed', 
@@ -214,6 +271,7 @@ export default function TimelineExtractorPage() {
       if (selectedTimeline?.timeline_id === timelineId) {
         setSelectedTimeline(null);
         setTimelineResult(null);
+        setEnhancedTimelineResult(null);
       }
     } catch (err: any) {
       toast({ 
@@ -241,7 +299,7 @@ export default function TimelineExtractorPage() {
           setApiError(null);
           setUploadFiles([]);
           setTimelineTitle("");
-          // Don't clear timelineResult here as it might be loaded from history
+          // Don't clear timeline results here as they might be loaded from history
         } else if (newTab === 'history') {
           setSelectedTimeline(null);
           setTimelinesError(null);
@@ -259,13 +317,14 @@ export default function TimelineExtractorPage() {
             <p className="text-muted-foreground">
               Generate legal timelines from uploaded documents using AI-powered analysis
             </p>
-            {timelineResult && (
+            {(timelineResult || enhancedTimelineResult) && (
               <div className="flex justify-center mt-4">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     setTimelineResult(null);
+                    setEnhancedTimelineResult(null);
                     setUploadFiles([]);
                     setTimelineTitle("");
                     setApiError(null);
@@ -323,7 +382,7 @@ export default function TimelineExtractorPage() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge variant="secondary" className="text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Timeline Generated
+                      {selectedTimeline ? 'Timeline from History' : 'Timeline Generated'}
                     </Badge>
                   </div>
                 </div>
@@ -331,6 +390,38 @@ export default function TimelineExtractorPage() {
               <CardContent>
                 <TimelineResults 
                   timeline={timelineResult}
+                  onDownload={handleDownloadTimeline}
+                  onExportCSV={handleExportCSV}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Enhanced Results Section */}
+          {enhancedTimelineResult && (
+            <Card className="w-full">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg break-words truncate">
+                      {enhancedTimelineResult.timeline_title}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {enhancedTimelineResult.metadata.total_events} events extracted • {enhancedTimelineResult.metadata.document_sources.length} documents • 
+                      Processing time: {enhancedTimelineResult.metadata.processing_time_ms}ms • Status: {enhancedTimelineResult.metadata.status}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge variant="secondary" className="text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Enhanced Timeline
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <EnhancedTimelineResults 
+                  timeline={enhancedTimelineResult}
                   onDownload={handleDownloadTimeline}
                   onExportCSV={handleExportCSV}
                 />
