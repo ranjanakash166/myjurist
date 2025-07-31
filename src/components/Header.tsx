@@ -65,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
         : 'bg-transparent'
     }`}>
       <div className="container-legal">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <div className="flex items-center space-x-3 group cursor-pointer">
             <div className="relative">
@@ -78,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
               />
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:bg-accent/20 transition-all duration-300"></div>
             </div>
-            <span className="font-bold text-foreground">
+            <span className="font-bold text-foreground text-lg md:text-xl">
               My Jurist
             </span>
           </div>
@@ -116,38 +116,61 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
           </div>
 
           {/* Mobile Menu */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-3">
             <ThemeToggle />
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
+                <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-lg hover:bg-accent/50 transition-colors">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
-                <SheetHeader>
-                  <SheetTitle>Navigation</SheetTitle>
-                  <SheetDescription>
-                    Navigate through the sections of My Jurist
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  {navigation.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant={activeSection === item.id ? "default" : "ghost"}
-                      onClick={() => handleNavClick(item)}
-                      className="w-full justify-start"
-                    >
-                      {item.label}
+              <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0">
+                <div className="flex flex-col h-full">
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-6 border-b border-border">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+                        <Image 
+                          src="/images/myjurist-logo.png" 
+                          alt="My Jurist" 
+                          width={32} 
+                          height={32}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                      <span className="text-lg font-bold text-foreground">My Jurist</span>
+                    </div>
+                  </div>
+                  
+                  {/* Navigation Items */}
+                  <nav className="flex-1 p-4 space-y-2">
+                    {navigation.map((item) => (
+                      <Button
+                        key={item.id}
+                        variant={activeSection === item.id ? "default" : "ghost"}
+                        onClick={() => handleNavClick(item)}
+                        className={`w-full justify-start h-12 text-base font-medium transition-all duration-200 ${
+                          activeSection === item.id 
+                            ? 'bg-primary text-primary-foreground shadow-md' 
+                            : 'hover:bg-accent hover:text-foreground'
+                        }`}
+                      >
+                        {item.label}
+                      </Button>
+                    ))}
+                  </nav>
+                  
+                  {/* Auth Section */}
+                  <div className="p-4 border-t border-border space-y-3">
+                    <div className="text-sm font-medium text-muted-foreground mb-3 px-2">
+                      Get Started
+                    </div>
+                    <Button asChild className="w-full h-12 text-base font-medium">
+                      <Link href="/login">Sign In</Link>
                     </Button>
-                  ))}
-                  <div className="pt-4 border-t">
-                    <Button variant="ghost" asChild className="w-full justify-start">
-                      <Link href="/login">Login</Link>
-                    </Button>
-                    <Button asChild className="w-full justify-start mt-2">
-                      <Link href="/register">Register</Link>
+                    <Button asChild variant="outline" className="w-full h-12 text-base font-medium">
+                      <Link href="/register">Create Account</Link>
                     </Button>
                   </div>
                 </div>
