@@ -1114,20 +1114,20 @@ export default function PatentAnalysisPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-6">
+        <TabsContent value="history" className="space-y-4 sm:space-y-6">
           <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <CardTitle>Patent Analysis History</CardTitle>
-                <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-                  <Badge variant="secondary">Total Reports: {totalCount.toLocaleString()}</Badge>
+            <CardHeader className="pb-4">
+              <div className="flex flex-col gap-3">
+                <CardTitle className="text-xl sm:text-2xl">Patent Analysis History</CardTitle>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="text-xs sm:text-sm">Total Reports: {totalCount.toLocaleString()}</Badge>
                   {reportHistory.length > 0 && (
-                    <Badge variant="outline">Most Recent: {new Date(Math.max(...reportHistory.map(r => new Date(r.generated_at).getTime()))).toLocaleDateString()}</Badge>
+                    <Badge variant="outline" className="text-xs sm:text-sm">Most Recent: {new Date(Math.max(...reportHistory.map(r => new Date(r.generated_at).getTime()))).toLocaleDateString()}</Badge>
                   )}
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {historyLoading && (
                 <Alert>
                   <FileBarChart className="h-4 w-4" />
@@ -1145,59 +1145,101 @@ export default function PatentAnalysisPage() {
               {!historyLoading && !historyError && (
                 <>
                   {reportHistory.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 gap-4">
-                      <FileBarChart className="w-20 h-20 text-muted-foreground mb-2" />
-                      <h3 className="text-xl font-semibold mb-1">No Reports Found</h3>
-                      <p className="text-base text-muted-foreground text-center">You haven't generated any patent analysis reports yet.</p>
+                    <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
+                      <FileBarChart className="w-16 h-16 sm:w-20 sm:h-20 text-muted-foreground" />
+                      <h3 className="text-lg sm:text-xl font-semibold text-center">No Reports Found</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground text-center px-4">You haven't generated any patent analysis reports yet.</p>
                       <Button size="lg" className="mt-2" onClick={() => setTab('detailed')}>
                         <FileText className="w-4 h-4 mr-2" /> Create First Report
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                       {reportHistory.map((report) => (
                         <Card
                           key={report.report_id}
-                          className="cursor-pointer border-2 border-border shadow-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 w-full max-w-full group"
+                          className="cursor-pointer border border-border shadow-sm hover:shadow-md transition-all duration-200 group"
                           onClick={() => handleReportClick(report.report_id)}
                           tabIndex={0}
                           role="button"
                           aria-label={`View details for report ${report.invention_title}`}
                           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleReportClick(report.report_id); }}
                         >
-                          <CardContent className="px-2 py-4 sm:p-6 w-full max-w-full">
-                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 w-full max-w-full">
-                              <div className="flex-1 min-w-0 w-full max-w-full">
-                                <div className="flex flex-wrap items-center gap-2 mb-2 w-full max-w-full">
-                                  <FileBarChart className="w-5 h-5 text-primary flex-shrink-0" />
-                                  <h3 className="text-lg font-semibold text-foreground break-words w-full max-w-full">{report.invention_title}</h3>
-                                  <Badge variant="secondary" className="whitespace-nowrap">{report.report_type}</Badge>
+                          <CardContent className="p-4 sm:p-6">
+                            {/* Mobile Layout */}
+                            <div className="block sm:hidden">
+                              <div className="space-y-3">
+                                {/* Header */}
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <FileBarChart className="w-4 h-4 text-primary flex-shrink-0" />
+                                      <Badge variant="secondary" className="text-xs">{report.report_type}</Badge>
+                                    </div>
+                                    <h3 className="text-base font-semibold text-foreground line-clamp-2">{report.invention_title}</h3>
+                                  </div>
+                                  <Badge variant="outline" className="text-xs flex-shrink-0">ID: {report.report_id.slice(0, 8)}...</Badge>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm w-full max-w-full">
-                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
-                                    <User className="w-4 h-4" />
-                                    <span className="break-words w-full max-w-full">Applicant: {report.applicant_name}</span>
+                                
+                                {/* Details */}
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                    <User className="w-3 h-3" />
+                                    <span className="truncate">Applicant: {report.applicant_name}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
-                                    <Clock className="w-4 h-4" />
-                                    <span className="break-words w-full max-w-full">Generated: {new Date(report.generated_at).toLocaleString()}</span>
+                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                    <Clock className="w-3 h-3" />
+                                    <span className="truncate">Generated: {new Date(report.generated_at).toLocaleDateString()}</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
-                                    <FileText className="w-4 h-4" />
-                                    <span className="break-words w-full max-w-full">Words: {report.word_count.toLocaleString()}</span>
+                                  <div className="flex items-center gap-2 text-muted-foreground">
+                                    <FileText className="w-3 h-3" />
+                                    <span>{report.word_count.toLocaleString()} words</span>
                                   </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground break-words w-full max-w-full">
-                                    <FileText className="w-4 h-4" />
-                                    <span className="break-words w-full max-w-full">Characters: {report.character_count.toLocaleString()}</span>
-                                  </div>
+                                </div>
+                                
+                                {/* Action */}
+                                <div className="pt-2">
+                                  <Button size="sm" variant="secondary" className="w-full group-hover:bg-primary/10" onClick={e => { e.stopPropagation(); handleReportClick(report.report_id); }}>
+                                    <FileText className="w-4 h-4 mr-2" /> View Details
+                                  </Button>
                                 </div>
                               </div>
-                              <div className="flex flex-col items-end gap-2 flex-shrink-0 mt-2 sm:mt-0">
-                                <Badge variant="outline" className="text-xs break-all w-full max-w-[120px] text-center">ID: {report.report_id.slice(0, 8)}...</Badge>
-                                <Button size="sm" variant="secondary" className="mt-1 group-hover:bg-primary/10" onClick={e => { e.stopPropagation(); handleReportClick(report.report_id); }}>
-                                  <FileText className="w-4 h-4 mr-1" /> View Details
-                                </Button>
-                                <div className="text-muted-foreground text-xs sm:text-sm text-center w-full max-w-[120px]">Click or press Enter/Space</div>
+                            </div>
+
+                            {/* Desktop Layout */}
+                            <div className="hidden sm:block">
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <FileBarChart className="w-5 h-5 text-primary flex-shrink-0" />
+                                    <h3 className="text-lg font-semibold text-foreground">{report.invention_title}</h3>
+                                    <Badge variant="secondary">{report.report_type}</Badge>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <User className="w-4 h-4" />
+                                      <span>Applicant: {report.applicant_name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <Clock className="w-4 h-4" />
+                                      <span>Generated: {new Date(report.generated_at).toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <FileText className="w-4 h-4" />
+                                      <span>Words: {report.word_count.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <FileText className="w-4 h-4" />
+                                      <span>Characters: {report.character_count.toLocaleString()}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                  <Badge variant="outline" className="text-xs">ID: {report.report_id.slice(0, 8)}...</Badge>
+                                  <Button size="sm" variant="secondary" className="group-hover:bg-primary/10" onClick={e => { e.stopPropagation(); handleReportClick(report.report_id); }}>
+                                    <FileText className="w-4 h-4 mr-1" /> View Details
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </CardContent>
@@ -1208,26 +1250,30 @@ export default function PatentAnalysisPage() {
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-4 mt-8">
-                      <Button
-                        variant="outline"
-                        className="rounded-full px-5 py-2"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 0}
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-foreground text-base font-medium">
+                    <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mt-6 sm:mt-8">
+                      <div className="flex items-center gap-2 sm:gap-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full px-3 sm:px-5 py-2"
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={currentPage === 0}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full px-3 sm:px-5 py-2"
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={currentPage + 1 >= totalPages}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                      <span className="text-foreground text-sm sm:text-base font-medium">
                         Page {currentPage + 1} of {totalPages}
                       </span>
-                      <Button
-                        variant="outline"
-                        className="rounded-full px-5 py-2"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage + 1 >= totalPages}
-                      >
-                        Next
-                      </Button>
                     </div>
                   )}
                 </>
