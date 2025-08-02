@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import { ThemeProvider } from '../components/ThemeProvider';
 import { AuthProvider } from '../components/AuthProvider';
 import { Toaster } from '../components/ui/toaster';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
   title: 'My Jurist - Next Gen AI Law Firm',
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {children}
           </AuthProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
