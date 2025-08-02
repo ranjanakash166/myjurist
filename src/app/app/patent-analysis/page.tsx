@@ -539,33 +539,33 @@ export default function PatentAnalysisPage() {
                 )}
               </div>
 
-              {/* Replace the analysis button grid with a flex row */}
-              <div className="flex flex-wrap gap-3 justify-between items-center mb-2">
+              {/* Quick analysis buttons with equal width on mobile */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
                 <Button
                   onClick={handlePriorArtAnalysis}
                   disabled={!isValid || loading}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm w-full"
                 >
                   <Search className="w-4 h-4" /> Prior Art
                 </Button>
                 <Button
                   onClick={handleExclusionsAnalysis}
                   disabled={!isValid || exclusionsLoading}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm w-full"
                 >
                   <Gavel className="w-4 h-4" /> Exclusions
                 </Button>
                 <Button
                   onClick={handleDisclosureAnalysis}
                   disabled={!isValid || disclosureLoading}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm w-full"
                 >
                   <ShieldCheck className="w-4 h-4" /> Disclosure
                 </Button>
                 <Button
                   onClick={handleNoveltyAnalysis}
                   disabled={!isValid || noveltyLoading}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-2 text-sm w-full"
                 >
                   <FileText className="w-4 h-4" /> Novelty
                 </Button>
