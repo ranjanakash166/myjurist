@@ -118,18 +118,18 @@ const ContactPage: React.FC = () => {
               <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* Shashank */}
               <Card className="document-card text-center">
-                <CardContent className="p-8">
+                <CardContent className="p-6">
                   {/* Profile image */}
-                  <div className="mb-6">
-                    <div className="w-32 h-32 bg-primary rounded-full mx-auto flex items-center justify-center overflow-hidden">
+                  <div className="mb-4">
+                    <div className="w-24 h-24 bg-primary rounded-full mx-auto flex items-center justify-center overflow-hidden">
                       <Image 
                         src="/images/shashank.jpeg" 
                         alt="Shashank" 
-                        width={128} 
-                        height={128} 
+                        width={96} 
+                        height={96} 
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           // Fallback to icon if image fails to load
@@ -138,31 +138,31 @@ const ContactPage: React.FC = () => {
                           target.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
-                      <Users className="h-16 w-16 text-primary-foreground hidden" />
+                      <Users className="h-12 w-12 text-primary-foreground hidden" />
                     </div>
                   </div>
                   
-                  <h3 className="text-legal-heading text-foreground mb-2">Shashank</h3>
-                  <p className="text-lg text-primary font-semibold mb-4">Co-Founder & CEO</p>
-                  <p className="text-legal-body text-muted-foreground mb-6 leading-relaxed">
+                  <h3 className="text-lg font-bold text-foreground mb-1">Shashank</h3>
+                  <p className="text-sm text-primary font-semibold mb-3">Co-Founder & CEO</p>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                     Shashank holds degrees in Law and Business Administration and is dedicated to developing 
                     innovative legal AI solutions that enable teams to perform at their highest potential.
                   </p>
                   
-                  <p className="text-sm text-primary font-semibold mb-6">
+                  <p className="text-xs text-primary font-semibold mb-4">
                     Reach out to him for partnership and business inquiries.
                   </p>
                   
                   {/* Social links */}
-                  <div className="flex justify-center space-x-4">
-                    <a href="mailto:support@myjurist.io" className="p-3 bg-primary/20 rounded-xl border border-primary/30 hover:border-primary/50 transition-all duration-300">
-                      <Mail className="h-5 w-5 text-primary" />
+                  <div className="flex justify-center space-x-3">
+                    <a href="mailto:support@myjurist.io" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Mail className="h-4 w-4 text-primary" />
                     </a>
-                    <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-accent/20 rounded-xl border border-accent/30 hover:border-accent/50 transition-all duration-300">
-                      <Linkedin className="h-5 w-5 text-accent" />
+                    <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Linkedin className="h-4 w-4 text-primary" />
                     </a>
-                    <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-primary/20 rounded-xl border border-primary/30 hover:border-primary/50 transition-all duration-300">
-                      <Twitter className="h-5 w-5 text-primary" />
+                    <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Twitter className="h-4 w-4 text-primary" />
                     </a>
                   </div>
                 </CardContent>
@@ -170,15 +170,15 @@ const ContactPage: React.FC = () => {
 
               {/* Gaurav */}
               <Card className="document-card text-center">
-                <CardContent className="p-8">
+                <CardContent className="p-6">
                   {/* Profile image */}
-                  <div className="mb-6">
-                    <div className="w-32 h-32 bg-accent rounded-full mx-auto flex items-center justify-center overflow-hidden">
+                  <div className="mb-4">
+                    <div className="w-24 h-24 bg-accent rounded-full mx-auto flex items-center justify-center overflow-hidden">
                       <Image 
                         src="/images/gaurav.jpeg" 
                         alt="Gaurav Suman" 
-                        width={128} 
-                        height={128} 
+                        width={96} 
+                        height={96} 
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           // Fallback to icon if image fails to load
@@ -187,30 +187,79 @@ const ContactPage: React.FC = () => {
                           target.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
-                      <Users className="h-16 w-16 text-accent-foreground hidden" />
+                      <Users className="h-12 w-12 text-accent-foreground hidden" />
                     </div>
                   </div>
                   
-                  <h3 className="text-legal-heading text-foreground mb-2">Gaurav Suman</h3>
-                  <p className="text-lg text-accent font-semibold mb-4">Co-Founder & CTO</p>
-                  <p className="text-legal-body text-muted-foreground mb-6 leading-relaxed">
+                  <h3 className="text-lg font-bold text-foreground mb-1">Gaurav Suman</h3>
+                  <p className="text-sm text-foreground font-semibold mb-3">Co-Founder & CTO</p>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                     Gaurav leads our technology and product development. Contact him for technical questions, integrations, or support.
                   </p>
                   
-                  <p className="text-sm text-accent font-semibold mb-6">
+                  <p className="text-xs text-foreground font-semibold mb-4">
                     Reach out to him for technical inquiries and support.
                   </p>
                   
                   {/* Social links */}
-                  <div className="flex justify-center space-x-4">
-                    <a href="mailto:support@myjurist.io" className="p-3 bg-accent/20 rounded-xl border border-accent/30 hover:border-accent/50 transition-all duration-300">
-                      <Mail className="h-5 w-5 text-accent" />
+                  <div className="flex justify-center space-x-3">
+                    <a href="mailto:support@myjurist.io" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Mail className="h-4 w-4 text-primary" />
                     </a>
-                    <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-primary/20 rounded-xl border border-primary/30 hover:border-primary/50 transition-all duration-300">
-                      <Linkedin className="h-5 w-5 text-primary" />
+                    <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Linkedin className="h-4 w-4 text-primary" />
                     </a>
-                    <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-3 bg-primary/20 rounded-xl border border-primary/30 hover:border-primary/50 transition-all duration-300">
-                      <Twitter className="h-5 w-5 text-primary" />
+                    <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Twitter className="h-4 w-4 text-primary" />
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Akash Ranjan */}
+              <Card className="document-card text-center">
+                <CardContent className="p-6">
+                  {/* Profile image */}
+                  <div className="mb-4">
+                    <div className="w-24 h-24 bg-primary rounded-full mx-auto flex items-center justify-center overflow-hidden">
+                      <Image 
+                        src="/images/akash-ranjan.jpeg" 
+                        alt="Akash Ranjan" 
+                        width={96} 
+                        height={96} 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to icon if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <Users className="h-12 w-12 text-primary-foreground hidden" />
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-lg font-bold text-foreground mb-1">Akash Ranjan</h3>
+                  <p className="text-sm text-primary font-semibold mb-3">Co-Founder & CPO</p>
+                  <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                    Akash drives product strategy and user experience design. He focuses on creating intuitive 
+                    and powerful legal AI solutions that transform how legal professionals work.
+                  </p>
+                  
+                  <p className="text-xs text-primary font-semibold mb-4">
+                    Reach out to him for product feedback and feature requests.
+                  </p>
+                  
+                  {/* Social links */}
+                  <div className="flex justify-center space-x-3">
+                    <a href="mailto:support@myjurist.io" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Mail className="h-4 w-4 text-primary" />
+                    </a>
+                    <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Linkedin className="h-4 w-4 text-primary" />
+                    </a>
+                    <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/20 rounded-lg border border-primary/30 hover:border-primary/50 transition-all duration-300">
+                      <Twitter className="h-4 w-4 text-primary" />
                     </a>
                   </div>
                 </CardContent>
