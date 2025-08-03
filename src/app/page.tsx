@@ -28,7 +28,9 @@ const MyJuristApp = () => {
     { id: 'advantage', label: 'Advantage' },
     { id: 'pricing', label: 'Pricing' },
     { id: 'strategy', label: 'Strategy' },
-    { id: 'contact', label: 'Contact', href: '/contact' }
+    { id: 'contact', label: 'Contact', href: '/contact' },
+    { id: 'login', label: 'Login', href: '/login' },
+    { id: 'register', label: 'Register', href: '/register' }
   ];
 
   const sectionIds = navigation.filter(item => !item.href).map(item => item.id);

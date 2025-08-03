@@ -87,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
           <div className="hidden md:flex items-center gap-4">
             <NavigationMenu>
               <NavigationMenuList>
-                {navigation.map((item) => (
+                {navigation.filter(item => !item.href || item.href === '/contact').map((item) => (
                   <NavigationMenuItem key={item.id}>
                     <Button
                       variant={activeSection === item.id ? "default" : "ghost"}
@@ -145,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                   
                   {/* Navigation Items */}
                   <nav className="flex-1 p-4 space-y-2">
-                    {navigation.map((item) => (
+                    {navigation.filter(item => !item.href || item.href === '/contact').map((item) => (
                       <Button
                         key={item.id}
                         variant={activeSection === item.id ? "default" : "ghost"}
@@ -166,12 +166,18 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                     <div className="text-sm font-medium text-muted-foreground mb-3 px-2">
                       Get Started
                     </div>
-                    <Button asChild className="w-full h-12 text-base font-medium">
-                      <Link href="/login">Sign In</Link>
-                    </Button>
-                    <Button asChild variant="outline" className="w-full h-12 text-base font-medium">
-                      <Link href="/register">Create Account</Link>
-                    </Button>
+                    {navigation.filter(item => item.href === '/login' || item.href === '/register').map((item) => (
+                      <Button 
+                        key={item.id}
+                        asChild 
+                        variant={item.href === '/register' ? 'outline' : 'default'}
+                        className="w-full h-12 text-base font-medium"
+                      >
+                        <Link href={item.href!}>
+                          {item.href === '/login' ? 'Sign In' : 'Create Account'}
+                        </Link>
+                      </Button>
+                    ))}
                   </div>
                 </div>
               </SheetContent>
