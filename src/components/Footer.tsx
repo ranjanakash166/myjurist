@@ -27,20 +27,22 @@ const Footer: React.FC = () => {
         
         <p className="text-muted-foreground mb-8 text-lg">Next Gen AI Law Firm</p>
         
-        <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-8 mb-8">
+        <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-6 mb-8">
           <Button 
             onClick={handleRequestDemo}
-            className="group flex items-center"
+            size="lg"
+            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
-            <Mail className="mr-2 h-4 w-4 group-hover:animate-bounce" />
+            <Mail className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Request Demo
           </Button>
           <Button 
             variant="outline"
+            size="lg"
             onClick={handleContactUs}
-            className="group flex items-center"
+            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 transform hover:scale-105"
           >
-            <Phone className="mr-2 h-4 w-4 group-hover:animate-bounce" />
+            <Phone className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Contact Us
           </Button>
         </div>

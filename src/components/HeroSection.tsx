@@ -69,7 +69,7 @@ const HeroSection: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="group px-8 py-4 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center w-full md:w-auto min-w-[200px] bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl"
+            className="group px-8 py-6 md:py-4 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center w-full md:w-auto min-w-[200px] bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl h-16 md:h-12"
           >
             <span>Request a Demo</span>
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -77,7 +77,7 @@ const HeroSection: React.FC = () => {
           <Button 
             variant="outline"
             size="lg"
-            className="group px-8 py-4 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center w-full md:w-auto min-w-[200px] border-2 hover:border-primary/50 hover:bg-primary/5"
+            className="group px-8 py-6 md:py-4 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center w-full md:w-auto min-w-[200px] border-2 hover:border-primary/50 hover:bg-primary/5 h-16 md:h-12"
           >
             <span>Learn More</span>
             <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
