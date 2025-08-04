@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../app/constants";
+
 export interface LegalResearchRequest {
   query: string;
   top_k: number;
@@ -43,7 +45,7 @@ export const searchLegalResearch = async (
   request: LegalResearchRequest,
   authToken: string
 ): Promise<LegalResearchResponse> => {
-  const response = await fetch('https://api.myjurist.io/api/v1/legal-research/search', {
+  const response = await fetch(`${API_BASE_URL}/legal-research/search`, {
     method: 'POST',
     headers: {
       'accept': 'application/json',
@@ -79,7 +81,7 @@ export const getLegalDocument = async (
   documentId: string,
   authToken: string
 ): Promise<DocumentResponse> => {
-  const response = await fetch('https://api.myjurist.io/api/v1/legal-research/document', {
+  const response = await fetch(`${API_BASE_URL}/legal-research/document`, {
     method: 'POST',
     headers: {
       'accept': 'application/json',

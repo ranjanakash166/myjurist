@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../app/constants";
+
 export interface ContactFormData {
   first_name: string;
   last_name: string;
@@ -22,7 +24,7 @@ export interface ValidationError {
 }
 
 export const submitContactForm = async (formData: ContactFormData): Promise<ContactResponse> => {
-  const response = await fetch('https://api.myjurist.io/api/v1/contact/submit', {
+  const response = await fetch(`${API_BASE_URL}/contact/submit`, {
     method: 'POST',
     headers: {
       'accept': 'application/json',

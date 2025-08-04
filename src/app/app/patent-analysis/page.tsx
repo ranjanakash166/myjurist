@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs as ReportTabs, TabsList as ReportTabsList, TabsTrigger as ReportTabsTrigger, TabsContent as ReportTabsContent } from "@/components/ui/tabs";
 
@@ -271,7 +270,7 @@ export default function PatentAnalysisPage() {
     setExclusionsResult(null);
     try {
       const res = await fetch(
-        `https://api.myjurist.io/api/v1/patents/analysis/exclusions/detailed`,
+        `${API_BASE_URL}/patents/analysis/exclusions/detailed`,
         {
           method: "POST",
           headers: {
@@ -307,7 +306,7 @@ export default function PatentAnalysisPage() {
     setDisclosureResult(null);
     try {
       const res = await fetch(
-        `https://api.myjurist.io/api/v1/patents/analysis/disclosure/detailed`,
+        `${API_BASE_URL}/patents/analysis/disclosure/detailed`,
         {
           method: "POST",
           headers: {
@@ -344,7 +343,7 @@ export default function PatentAnalysisPage() {
     setNoveltyResult(null);
     try {
       const res = await fetch(
-        `https://api.myjurist.io/api/v1/patents/analysis/novelty/detailed`,
+        `${API_BASE_URL}/patents/analysis/novelty/detailed`,
         {
           method: "POST",
           headers: {

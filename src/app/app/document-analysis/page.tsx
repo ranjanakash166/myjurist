@@ -2,21 +2,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
-import DocumentUploader from "./DocumentUploader";
-import DocumentHistoryList from "./DocumentHistoryList";
 import ChatList from "./ChatList";
 import SessionList from "./SessionList";
 import ChatInterface from "./ChatInterface";
 import PdfViewerModal from "../../../components/PdfViewerModal";
-import TimelineIndicator from "../../../components/TimelineIndicator";
 import CollapsibleSection from "../../../components/CollapsibleSection";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Eye, Download, MessageCircle, FileText, Check, Plus, Upload, Users, Settings, AlertTriangle, FileUp, X, Clock, CheckCircle } from "lucide-react";
+import { MessageCircle, FileText, Check, Plus, Upload, Settings, AlertTriangle, FileUp, X, Clock, CheckCircle } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 
 interface ApiResponse {
@@ -206,7 +202,7 @@ export default function DocumentAnalysisPage() {
     setSessionSuccess(false);
     setSessionLoading(true);
     try {
-      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${createdChat.id}/sessions/`, {
+      const res = await fetch(`${API_BASE_URL}/chats/${createdChat.id}/sessions/`, {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -664,7 +660,7 @@ export default function DocumentAnalysisPage() {
     if (!chatId) return;
     setChatDocumentsLoading(true);
     try {
-      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${chatId}/documents`, {
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents`, {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
@@ -684,7 +680,7 @@ export default function DocumentAnalysisPage() {
     if (!chatId || !sessionId) return;
     setSessionDocumentsLoading(true);
     try {
-      const res = await fetch(`https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents`, {
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/documents`, {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
@@ -727,9 +723,9 @@ export default function DocumentAnalysisPage() {
     try {
       let url = '';
       if (context === 'chat') {
-        url = `https://api.myjurist.io/api/v1/chats/${chatId}/documents/${documentId}`;
+        url = `${API_BASE_URL}/chats/${chatId}/documents/${documentId}`;
       } else if (context === 'session' && sessionId) {
-        url = `https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents/${documentId}`;
+        url = `${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/documents/${documentId}`;
       } else {
         return;
       }
@@ -756,7 +752,7 @@ export default function DocumentAnalysisPage() {
     if (!chatId || !sessionId) return;
     try {
       for (const docId of documentIds) {
-        const url = `https://api.myjurist.io/api/v1/chats/${chatId}/sessions/${sessionId}/documents/${docId}`;
+        const url = `${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/documents/${docId}`;
         const res = await fetch(url, {
           method: 'PUT',
           headers: getAuthHeaders(),

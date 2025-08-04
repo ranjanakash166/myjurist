@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../app/constants";
+
 // Types for dashboard data
 export interface DashboardStats {
   total_documents_analyzed: number;
@@ -70,10 +72,7 @@ export interface UpdatePreferencesResponse {
     preferred_ai_provider: string;
     preferred_model: string;
   };
-}
-
-// API configuration
-const API_BASE_URL = 'https://api.myjurist.io/api/v1';
+  }
 
 // Fetch dashboard stats
 export async function fetchDashboardStats(authHeaders: Record<string, string>): Promise<DashboardStats> {
@@ -99,7 +98,6 @@ export async function fetchDashboardStats(authHeaders: Record<string, string>): 
 }
 
 export async function fetchUserProfile(authHeaders: Record<string, string>): Promise<UserProfile> {
-  const API_BASE_URL = 'https://api.myjurist.io/api/v1';
   const response = await fetch(`${API_BASE_URL}/auth/me`, {
     method: 'GET',
     headers: {
@@ -114,7 +112,6 @@ export async function fetchUserProfile(authHeaders: Record<string, string>): Pro
 }
 
 export async function fetchAvailableModels(authHeaders: Record<string, string>): Promise<AvailableModelsResponse> {
-  const API_BASE_URL = 'https://api.myjurist.io/api/v1';
   const response = await fetch(`${API_BASE_URL}/models/available`, {
     method: 'GET',
     headers: {
@@ -132,7 +129,6 @@ export async function updatePreferences(
   authHeaders: Record<string, string>,
   body: UpdatePreferencesRequest
 ): Promise<UpdatePreferencesResponse> {
-  const API_BASE_URL = 'https://api.myjurist.io/api/v1';
   const response = await fetch(`${API_BASE_URL}/models/preferences`, {
     method: 'PUT',
     headers: {

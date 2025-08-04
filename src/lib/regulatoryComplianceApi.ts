@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../app/constants";
+
 // Types for regulatory compliance
 export interface RegulatorySuggestionRequest {
   partial_query: string;
@@ -28,10 +30,7 @@ export interface RegulatoryQueryResponse {
   amendments_found: string[];
   processing_time_ms: number;
   search_provider: string;
-}
-
-// API configuration
-const API_BASE_URL = 'https://api.myjurist.io/api/v1';
+  }
 
 // Fetch regulatory compliance suggestions
 export async function fetchRegulatorySuggestions(
