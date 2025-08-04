@@ -193,21 +193,16 @@ export default function PatentAnalysisPage() {
     try {
       const offset = currentPage * limit;
       const url = `${API_BASE_URL}/reports/patent/my-reports?limit=${limit}&offset=${offset}`;
-      console.log('Fetching report history from:', url);
       
       const headers = {
         ...getAuthHeaders(),
         'accept': 'application/json',
       };
-      console.log('Request headers:', headers);
       
       const res = await fetch(url, {
         method: 'GET',
         headers: headers,
       });
-      
-      console.log('Response status:', res.status);
-      console.log('Response headers:', res.headers);
       
       if (!res.ok) {
         const errorText = await res.text();
@@ -222,7 +217,6 @@ export default function PatentAnalysisPage() {
       }
       
       const data: ReportHistoryResponse = await res.json();
-      console.log('Success response:', data);
       setReportHistory(data.reports || []);
       setTotalCount(data.total_count || 0);
     } catch (err: any) {

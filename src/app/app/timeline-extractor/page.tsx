@@ -226,13 +226,7 @@ export default function TimelineExtractorPage() {
     setTimelinesError(null);
     
     try {
-      console.log('Fetching timeline with ID:', timeline.timeline_id);
       const data = await timelineApi.getTimeline(timeline.timeline_id);
-      console.log('Timeline data received:', data);
-      console.log('Events count:', data.events?.length);
-      console.log('Sample event:', data.events?.[0]);
-      console.log('Timeline title:', data.timeline_title);
-      console.log('Total events:', data.total_events);
       
       // Validate data structure
       if (!data.events || !Array.isArray(data.events)) {

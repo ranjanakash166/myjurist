@@ -309,10 +309,7 @@ export default function DocumentAnalysisPage() {
     try {
       const formData = new FormData();
       uploadFiles.forEach(file => formData.append('files', file));
-      // Debug: log FormData keys and values
-      Array.from(formData.entries()).forEach(pair => {
-        console.log(pair[0], pair[1]);
-      });
+
       // Only include Authorization header, never Content-Type
       const headers = { ...getAuthHeaders() };
       if ('Content-Type' in headers) delete headers['Content-Type'];
@@ -599,24 +596,12 @@ export default function DocumentAnalysisPage() {
 
   const handleSendChatMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('=== handleSendChatMessage START ===');
     
     // Determine which chat and session to use based on current flow
     const chatId = createdChat?.id || selectedChat?.id;
     const sessionId = createdSession?.id || selectedSession?.id;
     
-    console.log('handleSendChatMessage called:', { 
-      chatId, 
-      sessionId, 
-      chatInput: chatInput.trim(),
-      createdChat: createdChat?.id,
-      selectedChat: selectedChat?.id,
-      createdSession: createdSession?.id,
-      selectedSession: selectedSession?.id
-    });
-    
     if (!chatId || !sessionId || !chatInput.trim()) {
-      console.log('Early return:', { chatId, sessionId, hasInput: !!chatInput.trim() });
       return;
     }
     
@@ -630,9 +615,6 @@ export default function DocumentAnalysisPage() {
     ]);
     
     try {
-      console.log('Sending request to:', `${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/messages`);
-      console.log('Request body:', { message: userMsg });
-      
       const res = await fetch(`${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/messages`, {
         method: 'POST',
         headers: {
@@ -642,16 +624,12 @@ export default function DocumentAnalysisPage() {
         body: JSON.stringify({ message: userMsg }),
       });
       
-      console.log('Response status:', res.status);
-      
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        console.log('Error response:', err);
         throw new Error(err?.detail?.[0]?.msg || 'Failed to send message');
       }
       
       const data = await res.json();
-      console.log('Success response:', data);
       
       // Handle different response formats
       const assistantResponse = data.assistant_response || data.response || data.message || 'No response received';
@@ -671,7 +649,6 @@ export default function DocumentAnalysisPage() {
         } : null);
       }
     } catch (err: any) {
-      console.log('Error in handleSendChatMessage:', err);
       setChatError(err.message || 'An error occurred while sending message.');
       setChatMessages(prev => [
         ...prev,

@@ -50,10 +50,7 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
 
-  // Debug logging
-  console.log('TimelineResults received timeline:', timeline);
-  console.log('Timeline events:', timeline.events);
-  console.log('Sample event:', timeline.events?.[0]);
+
 
   // Get unique event types for filter (filter out empty strings)
   const eventTypes = Array.from(new Set(timeline.events.map(event => event.event_type)))
