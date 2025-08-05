@@ -480,8 +480,14 @@ export default function DocumentAnalysisPage() {
 
   // Handle document download
   const handleDownload = async (documentId: string, filename: string) => {
+    // Get chatId from createdChat or selectedSession
+    const chatId = createdChat?.id || selectedSession?.chat_id;
+    if (!chatId) {
+      alert('Chat ID not found for download.');
+      return;
+    }
     try {
-      const res = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents/${documentId}/download`, {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
@@ -504,8 +510,14 @@ export default function DocumentAnalysisPage() {
 
   // Handle document view
   const handleView = async (documentId: string, filename: string) => {
+    // Get chatId from createdChat or selectedSession
+    const chatId = createdChat?.id || selectedSession?.chat_id;
+    if (!chatId) {
+      alert('Chat ID not found for view.');
+      return;
+    }
     try {
-      const res = await fetch(`${API_BASE_URL}/documents/${documentId}/download`, {
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents/${documentId}/download`, {
         headers: getAuthHeaders(),
       });
       if (!res.ok) {
