@@ -558,9 +558,6 @@ export default function LegalResearchPage() {
                       <Badge className={`${getConfidenceColor(getParsedAISummaryData().confidence_score)}`}>
                         {(getParsedAISummaryData().confidence_score * 100).toFixed(0)}% Confidence
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        Generated in {aiSummary.processing_time_ms}ms
-                      </span>
                     </div>
                     <Button
                       variant="outline"
@@ -668,25 +665,7 @@ export default function LegalResearchPage() {
                     </div>
                   )}
 
-                  {/* Debug Section - Remove this after fixing */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="bg-red-50 dark:bg-red-950/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                        <h4 className="font-semibold text-sm text-red-700 dark:text-red-300">Debug Info</h4>
-                      </div>
-                      <div className="text-xs text-red-600 dark:text-red-400 space-y-1">
-                        <div><strong>Raw AI Summary:</strong></div>
-                        <pre className="bg-white dark:bg-gray-800 p-2 rounded border overflow-auto max-h-32">
-                          {aiSummary.ai_summary}
-                        </pre>
-                        <div><strong>Parsed Data:</strong></div>
-                        <pre className="bg-white dark:bg-gray-800 p-2 rounded border overflow-auto max-h-32">
-                          {JSON.stringify(getParsedAISummaryData(), null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
+
                 </div>
               ) : (
                 <div className="text-center py-8">

@@ -13,14 +13,13 @@ import { formatDateSafely, getNormalizedDate } from "../../../lib/utils";
 
 interface EnhancedTimelineResultsProps {
   timeline: EnhancedTimelineResponse;
-  onDownload: () => void;
   onExportCSV: () => void;
 }
 
 type SortField = 'date' | 'event_title' | 'event_type' | 'confidence_score';
 type SortDirection = 'asc' | 'desc';
 
-export default function EnhancedTimelineResults({ timeline, onDownload, onExportCSV }: EnhancedTimelineResultsProps) {
+export default function EnhancedTimelineResults({ timeline, onExportCSV }: EnhancedTimelineResultsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>('date');
@@ -211,15 +210,7 @@ export default function EnhancedTimelineResults({ timeline, onDownload, onExport
             <p className="text-2xl font-bold mt-1">{(timeline.statistics.average_confidence * 100).toFixed(0)}%</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-medium">Duration</span>
-            </div>
-            <p className="text-2xl font-bold mt-1">{timeline.statistics.timeline_duration_days} days</p>
-          </CardContent>
-        </Card>
+
       </div>
 
       {/* Event Type Distribution */}
@@ -283,10 +274,6 @@ export default function EnhancedTimelineResults({ timeline, onDownload, onExport
           <Button variant="outline" onClick={onExportCSV} className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export CSV
-          </Button>
-          <Button onClick={onDownload} className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Download JSON
           </Button>
         </div>
       </div>

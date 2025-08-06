@@ -108,36 +108,7 @@ export default function TimelineExtractorPage() {
     }
   };
 
-  const handleDownloadTimeline = async () => {
-    const timelineData = enhancedTimelineResult || timelineResult;
-    if (!timelineData) return;
-    
-    try {
-      const exportData = {
-        ...timelineData,
-        export_date: new Date().toISOString(),
-        export_format: 'json'
-      };
-      
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${timelineData.timeline_title}_timeline.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      toast({ title: 'Timeline Downloaded', description: 'Timeline data saved as JSON file.' });
-    } catch (err: any) {
-      toast({ 
-        title: 'Download Failed', 
-        description: 'Failed to download timeline', 
-        variant: 'destructive' 
-      });
-    }
-  };
+
 
   const handleExportCSV = async () => {
     const timelineData = enhancedTimelineResult || timelineResult;
@@ -377,8 +348,7 @@ export default function TimelineExtractorPage() {
                       {timelineResult.timeline_title}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {timelineResult.total_events} events extracted • {timelineResult.document_sources.length} documents • 
-                      Processing time: {timelineResult.processing_time_ms}ms
+                      {timelineResult.total_events} events extracted • {timelineResult.document_sources.length} documents
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -392,7 +362,6 @@ export default function TimelineExtractorPage() {
               <CardContent>
                 <TimelineResults 
                   timeline={timelineResult}
-                  onDownload={handleDownloadTimeline}
                   onExportCSV={handleExportCSV}
                 />
               </CardContent>
@@ -410,7 +379,7 @@ export default function TimelineExtractorPage() {
                     </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       {enhancedTimelineResult.metadata.total_events} events extracted • {enhancedTimelineResult.metadata.document_sources.length} documents • 
-                      Processing time: {enhancedTimelineResult.metadata.processing_time_ms}ms • Status: {enhancedTimelineResult.metadata.status}
+                      Status: {enhancedTimelineResult.metadata.status}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -424,7 +393,6 @@ export default function TimelineExtractorPage() {
               <CardContent>
                 <EnhancedTimelineResults 
                   timeline={enhancedTimelineResult}
-                  onDownload={handleDownloadTimeline}
                   onExportCSV={handleExportCSV}
                 />
               </CardContent>

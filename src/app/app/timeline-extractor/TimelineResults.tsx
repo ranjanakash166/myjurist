@@ -37,14 +37,13 @@ interface TimelineResponse {
 
 interface TimelineResultsProps {
   timeline: TimelineResponse;
-  onDownload: () => void;
   onExportCSV: () => void;
 }
 
 type SortField = 'date' | 'event_title' | 'event_type' | 'confidence_score';
 type SortDirection = 'asc' | 'desc';
 
-export default function TimelineResults({ timeline, onDownload, onExportCSV }: TimelineResultsProps) {
+export default function TimelineResults({ timeline, onExportCSV }: TimelineResultsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>('date');
@@ -201,15 +200,7 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
             <p className="text-2xl font-bold mt-1">{eventTypes.length}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <ExternalLink className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-medium">Processing Time</span>
-            </div>
-            <p className="text-2xl font-bold mt-1">{timeline.processing_time_ms}ms</p>
-          </CardContent>
-        </Card>
+
       </div>
 
       {/* Controls */}
@@ -247,10 +238,6 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
           <Button variant="outline" onClick={onExportCSV} className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export CSV
-          </Button>
-          <Button onClick={onDownload} className="flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Download JSON
           </Button>
         </div>
       </div>
