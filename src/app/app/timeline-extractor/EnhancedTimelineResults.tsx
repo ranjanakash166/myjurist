@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { EnhancedTimelineResponse, EnhancedTimelineEvent } from "../../../lib/timelineApi";
+import { formatDateSafely, getNormalizedDate } from "../../../lib/utils";
 
 interface EnhancedTimelineResultsProps {
   timeline: EnhancedTimelineResponse;
@@ -49,8 +50,23 @@ export default function EnhancedTimelineResults({ timeline, onDownload, onExport
       let bValue: any = b[sortField];
       
       if (sortField === 'date') {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
+        const normalizedA = getNormalizedDate(aValue);
+        const normalizedB = getNormalizedDate(bValue);
+        
+        // Handle invalid dates by placing them at the end
+        if (!normalizedA && !normalizedB) {
+          aValue = 0;
+          bValue = 0;
+        } else if (!normalizedA) {
+          aValue = 1;
+          bValue = 0;
+        } else if (!normalizedB) {
+          aValue = 0;
+          bValue = 1;
+        } else {
+          aValue = new Date(normalizedA).getTime();
+          bValue = new Date(normalizedB).getTime();
+        }
       } else if (sortField === 'confidence_score') {
         aValue = Number(aValue);
         bValue = Number(bValue);
@@ -354,8 +370,8 @@ export default function EnhancedTimelineResults({ timeline, onDownload, onExport
                     <TableRow>
                       <TableCell className="font-medium">
                         <div className="space-y-1">
-                          <div>{event.formatted_date}</div>
-                          <div className="text-xs text-muted-foreground">{event.date}</div>
+                          <div>{event.formatted_date || formatDateSafely(event.date)}</div>
+                          <div className="text-xs text-muted-foreground">{formatDateSafely(event.date, 'Raw: ' + event.date)}</div>
                         </div>
                       </TableCell>
                       <TableCell className="font-medium max-w-[200px]">

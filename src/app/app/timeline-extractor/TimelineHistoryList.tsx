@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TimelineListItem } from "../../../lib/timelineApi";
+import { formatDateSafely, getNormalizedDate } from "../../../lib/utils";
 
 interface TimelineHistoryListProps {
   timelines: TimelineListItem[];
@@ -31,26 +32,24 @@ export default function TimelineHistoryList({
   const endItem = Math.min(page * pageSize, totalCount);
 
   const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateString;
-    }
+    return formatDateSafely(dateString, 'Invalid date');
   };
 
   const formatDateRange = (startDate: string, endDate: string) => {
+    const normalizedStart = getNormalizedDate(startDate);
+    const normalizedEnd = getNormalizedDate(endDate);
+    
+    if (!normalizedStart || !normalizedEnd) {
+      return 'Invalid date range';
+    }
+    
     try {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+      const start = new Date(normalizedStart);
+      const end = new Date(normalizedEnd);
+      
       return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     } catch {
-      return `${startDate} - ${endDate}`;
+      return 'Invalid date range';
     }
   };
 

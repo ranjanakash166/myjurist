@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { formatDateSafely, getNormalizedDate } from "../../../lib/utils";
 
 
 interface TimelineEvent {
@@ -75,8 +76,23 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
       let bValue: any = b[sortField];
       
       if (sortField === 'date') {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
+        const normalizedA = getNormalizedDate(aValue);
+        const normalizedB = getNormalizedDate(bValue);
+        
+        // Handle invalid dates by placing them at the end
+        if (!normalizedA && !normalizedB) {
+          aValue = 0;
+          bValue = 0;
+        } else if (!normalizedA) {
+          aValue = 1;
+          bValue = 0;
+        } else if (!normalizedB) {
+          aValue = 0;
+          bValue = 1;
+        } else {
+          aValue = new Date(normalizedA).getTime();
+          bValue = new Date(normalizedB).getTime();
+        }
       } else if (sortField === 'confidence_score') {
         aValue = Number(aValue);
         bValue = Number(bValue);
@@ -112,15 +128,7 @@ export default function TimelineResults({ timeline, onDownload, onExportCSV }: T
   };
 
   const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
-      return dateString;
-    }
+    return formatDateSafely(dateString);
   };
 
   const getEventTypeColor = (eventType: string) => {

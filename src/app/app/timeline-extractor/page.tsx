@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
 import { createTimelineApi, TimelineListItem, EnhancedTimelineResponse } from "../../../lib/timelineApi";
+import { validateAndLogDate } from "../../../lib/utils";
 import TimelineUploader from "./TimelineUploader";
 import TimelineResults from "./TimelineResults";
 import EnhancedTimelineResults from "./EnhancedTimelineResults";
@@ -233,6 +234,13 @@ export default function TimelineExtractorPage() {
         console.error('Invalid events data:', data.events);
         throw new Error('Invalid timeline data structure');
       }
+      
+      // Validate and log any invalid dates in the events
+      data.events.forEach((event, index) => {
+        if (event.date) {
+          validateAndLogDate(event.date, `event ${index}`);
+        }
+      });
       
       setTimelineResult(data);
       setEnhancedTimelineResult(null); // Clear enhanced timeline result
