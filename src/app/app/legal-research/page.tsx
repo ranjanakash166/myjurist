@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon } from "lucide-react";
+import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, getLegalDocument, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse } from "@/lib/legalResearchApi";
+import { searchLegalResearch, getLegalDocument, generateAISummary, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryRequest, AISummaryResponse } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
 
@@ -26,6 +27,14 @@ export default function LegalResearchPage() {
   const [isLoadingDocument, setIsLoadingDocument] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [loadingViewSource, setLoadingViewSource] = useState<string | null>(null);
+  
+  // New state variables for AI Summary
+  const [aiSummary, setAiSummary] = useState<AISummaryResponse | null>(null);
+  const [summaryType, setSummaryType] = useState<"comprehensive" | "brief" | "detailed">("comprehensive");
+  const [includeLegalInsights, setIncludeLegalInsights] = useState(true);
+  const [includePrecedents, setIncludePrecedents] = useState(true);
+  const [maxLength, setMaxLength] = useState(1500);
+  const [focusAreas, setFocusAreas] = useState<string[]>([]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,19 +42,37 @@ export default function LegalResearchPage() {
 
     setIsSearching(true);
     setError(null);
+    setAiSummary(null); // Clear previous summary
     
     try {
       const authHeaders = getAuthHeaders();
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      const request: LegalResearchRequest = {
+      // First API call: Search legal research
+      const searchRequest: LegalResearchRequest = {
         query: query.trim(),
         top_k: topK,
         search_type: searchType,
       };
 
-      const response = await searchLegalResearch(request, authToken);
-      setSearchResults(response);
+      const searchResponse = await searchLegalResearch(searchRequest, authToken);
+      setSearchResults(searchResponse);
+      
+      // Second API call: Generate AI Summary (only if we have results)
+      if (searchResponse.results.length > 0) {
+        const summaryRequest: AISummaryRequest = {
+          user_query: searchResponse.query,
+          search_results: searchResponse.results,
+          summary_type: summaryType,
+          include_legal_insights: includeLegalInsights,
+          include_precedents: includePrecedents,
+          max_length: maxLength,
+          focus_areas: focusAreas.length > 0 ? focusAreas : undefined,
+        };
+
+        const summaryResponse = await generateAISummary(summaryRequest, authToken);
+        setAiSummary(summaryResponse);
+      }
       
       // Add to search history
       if (!searchHistory.includes(query.trim())) {
@@ -54,7 +81,7 @@ export default function LegalResearchPage() {
       
       toast({
         title: "Search completed",
-        description: `Found ${response.total_results} results in ${response.search_time_ms}ms`,
+        description: `Found ${searchResponse.total_results} results and generated AI summary`,
       });
     } catch (err: any) {
       setError(err.message || "An error occurred during search");
@@ -67,6 +94,8 @@ export default function LegalResearchPage() {
       setIsSearching(false);
     }
   };
+
+
 
   const handleCopyContent = async (content: string) => {
     try {
@@ -302,6 +331,51 @@ export default function LegalResearchPage() {
     return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
   };
 
+  const getConfidenceColor = (score: number) => {
+    if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+    if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
+    return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
+  };
+
+  // Helper function to get parsed AI summary data
+  const getParsedAISummaryData = () => {
+    try {
+      console.log('Raw AI summary:', aiSummary.ai_summary);
+      
+      // Check if the content starts with ```json and ends with ```
+      let jsonContent = aiSummary.ai_summary;
+      if (jsonContent.includes('```json')) {
+        jsonContent = jsonContent.replace(/```json\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      // Clean the JSON string by removing extra spaces and newlines
+      const cleanJson = jsonContent.replace(/\s+/g, ' ').trim();
+      console.log('Cleaned JSON:', cleanJson);
+      
+      const parsedSummary = JSON.parse(cleanJson);
+      console.log('Parsed summary:', parsedSummary);
+      
+      return {
+        ai_summary: parsedSummary.ai_summary || aiSummary.ai_summary,
+        key_legal_insights: parsedSummary.key_legal_insights || aiSummary.key_legal_insights,
+        relevant_precedents: parsedSummary.relevant_precedents || aiSummary.relevant_precedents,
+        legal_areas_covered: parsedSummary.legal_areas_covered || aiSummary.legal_areas_covered,
+        confidence_score: parsedSummary.confidence_score || aiSummary.confidence_score,
+      };
+    } catch (error) {
+      console.error('Failed to parse AI summary JSON:', error);
+      console.error('Raw content:', aiSummary.ai_summary);
+      // Return original data if parsing fails
+      return {
+        ai_summary: aiSummary.ai_summary,
+        key_legal_insights: aiSummary.key_legal_insights,
+        relevant_precedents: aiSummary.relevant_precedents,
+        legal_areas_covered: aiSummary.legal_areas_covered,
+        confidence_score: aiSummary.confidence_score,
+      };
+    }
+  };
+
   const quickSearchQueries = [
     "financial irregularities",
     "fraudulent trading",
@@ -312,6 +386,8 @@ export default function LegalResearchPage() {
     "regulatory compliance",
     "employment law",
   ];
+
+
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -452,11 +528,188 @@ export default function LegalResearchPage() {
         </Alert>
       )}
 
-      {/* Search Results */}
+      {/* Search Results and AI Summary */}
       {searchResults && (
         <div className="space-y-6">
-          {/* Results List */}
+          {/* AI Summary Section */}
+          <Card className="max-w-4xl mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-500" />
+                AI Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isSearching ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">Generating AI Summary...</h3>
+                  <p className="text-muted-foreground">
+                    Analyzing search results and creating intelligent summary
+                  </p>
+                </div>
+              ) : aiSummary ? (
+                <div className="space-y-6">
+                  {/* Summary Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Badge className={`${getConfidenceColor(getParsedAISummaryData().confidence_score)}`}>
+                        {(getParsedAISummaryData().confidence_score * 100).toFixed(0)}% Confidence
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        Generated in {aiSummary.processing_time_ms}ms
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyContent(getParsedAISummaryData().ai_summary)}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Summary
+                    </Button>
+                  </div>
+
+                  {/* AI Summary Content */}
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Sparkles className="w-5 h-5 text-purple-500" />
+                      <h3 className="font-semibold text-lg">AI Summary</h3>
+                    </div>
+                    <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                      {(() => {
+                        const parsedData = getParsedAISummaryData();
+                        // Check if we got the raw JSON back (parsing failed)
+                        if (parsedData.ai_summary === aiSummary.ai_summary && aiSummary.ai_summary.includes('"ai_summary"')) {
+                          // Try to extract just the summary text from the JSON string
+                          try {
+                            const match = aiSummary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
+                            if (match) {
+                              return match[1];
+                            }
+                          } catch (e) {
+                            console.error('Failed to extract summary text:', e);
+                          }
+                        }
+                        return parsedData.ai_summary;
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Key Legal Insights */}
+                  {getParsedAISummaryData().key_legal_insights && getParsedAISummaryData().key_legal_insights.length > 0 && (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Lightbulb className="w-5 h-5 text-green-500" />
+                        <h3 className="font-semibold text-lg">Key Legal Insights</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {getParsedAISummaryData().key_legal_insights.map((insight: string, index: number) => (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{insight}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Relevant Precedents */}
+                  {getParsedAISummaryData().relevant_precedents && getParsedAISummaryData().relevant_precedents.length > 0 && (
+                    <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Award className="w-5 h-5 text-orange-500" />
+                        <h3 className="font-semibold text-lg">Relevant Precedents</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {getParsedAISummaryData().relevant_precedents.map((precedent: string, index: number) => (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{precedent}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Legal Areas Covered */}
+                  {getParsedAISummaryData().legal_areas_covered && getParsedAISummaryData().legal_areas_covered.length > 0 && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Target className="w-5 h-5 text-blue-500" />
+                        <h3 className="font-semibold text-lg">Legal Areas Covered</h3>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {getParsedAISummaryData().legal_areas_covered.map((area: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1">
+                            {area}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Sources Analyzed */}
+                  {aiSummary.sources_analyzed && aiSummary.sources_analyzed.length > 0 && (
+                    <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FileText className="w-5 h-5 text-gray-500" />
+                        <h3 className="font-semibold text-lg">Sources Analyzed</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {aiSummary.sources_analyzed.map((source, index) => (
+                          <div key={index} className="text-sm text-muted-foreground bg-white dark:bg-gray-800 rounded px-3 py-2 border">
+                            {formatFileName(source)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Debug Section - Remove this after fixing */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="bg-red-50 dark:bg-red-950/20 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle className="w-4 h-4 text-red-500" />
+                        <h4 className="font-semibold text-sm text-red-700 dark:text-red-300">Debug Info</h4>
+                      </div>
+                      <div className="text-xs text-red-600 dark:text-red-400 space-y-1">
+                        <div><strong>Raw AI Summary:</strong></div>
+                        <pre className="bg-white dark:bg-gray-800 p-2 rounded border overflow-auto max-h-32">
+                          {aiSummary.ai_summary}
+                        </pre>
+                        <div><strong>Parsed Data:</strong></div>
+                        <pre className="bg-white dark:bg-gray-800 p-2 rounded border overflow-auto max-h-32">
+                          {JSON.stringify(getParsedAISummaryData(), null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center">
+                    <Brain className="w-8 h-8 text-purple-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No AI Summary Available</h3>
+                  <p className="text-muted-foreground">
+                    AI summary will be generated automatically when search results are found
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Search Results */}
           <div className="space-y-4 max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-semibold">Search Results ({searchResults.total_results})</h2>
+            </div>
+            
+            {/* Results List */}
             {searchResults.results.map((result, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
                 <CardHeader className="pb-3">
@@ -554,22 +807,22 @@ export default function LegalResearchPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
 
-          {/* No Results */}
-          {searchResults.results.length === 0 && (
-            <Card className="max-w-4xl mx-auto">
-              <CardContent className="pt-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-                  <Search className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">No results found</h3>
-                <p className="text-muted-foreground">
-                  Try adjusting your search terms or using different keywords
-                </p>
-              </CardContent>
-            </Card>
-          )}
+            {/* No Results */}
+            {searchResults.results.length === 0 && (
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+                    <Search className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No results found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your search terms or using different keywords
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       )}
 
