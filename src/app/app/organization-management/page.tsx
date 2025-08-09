@@ -82,35 +82,6 @@ export default function OrganizationManagementPage() {
     }
   }, [user, router]);
 
-  // Show loading if user is not loaded yet
-  if (!user) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-center items-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!["super_admin", "org_admin"].includes(user?.role || "")) {
-    return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              You don't have permission to access this page.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const fetchOrganizations = async () => {
     try {
       setLoading(true);
@@ -137,6 +108,36 @@ export default function OrganizationManagementPage() {
       fetchOrganizations();
     }
   }, [user, currentPage]);
+
+  // Show loading if user is not loaded yet
+  if (!user) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Check permissions after user is loaded
+  if (!["super_admin", "org_admin"].includes(user?.role || "")) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              You don't have permission to access this page.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleCreateOrganization = async () => {
     try {
