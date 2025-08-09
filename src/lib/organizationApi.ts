@@ -38,6 +38,26 @@ export interface OrganizationsResponse {
   per_page: number;
 }
 
+export interface OrganizationUser {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'super_admin' | 'org_admin' | 'org_user';
+  organization_id: string;
+  organization_name: string;
+  is_active: boolean;
+  is_verified: boolean;
+  last_login_at?: string;
+  created_at: string;
+}
+
+export interface OrganizationUsersResponse {
+  users: OrganizationUser[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
 // Create a new organization (Super Admin only)
 export async function createOrganization(
   authHeaders: Record<string, string>,
@@ -151,6 +171,65 @@ export async function updateOrganization(
     return data;
   } catch (error) {
     console.error('Error updating organization:', error);
+    throw error;
+  }
+}
+
+// Delete organization (Super Admin only) - WARNING: This deletes all associated data
+export async function deleteOrganization(
+  authHeaders: Record<string, string>,
+  organizationId: string
+): Promise<string> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/organizations/${organizationId}`, {
+      method: 'DELETE',
+      headers: {
+        'accept': 'application/json',
+        ...authHeaders,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail?.[0]?.msg || 'Failed to delete organization');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error deleting organization:', error);
+    throw error;
+  }
+}
+
+// List users in specific organization
+export async function listOrganizationUsers(
+  authHeaders: Record<string, string>,
+  organizationId: string,
+  page: number = 1,
+  per_page: number = 20
+): Promise<OrganizationUsersResponse> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/organizations/${organizationId}/users?page=${page}&per_page=${per_page}`,
+      {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          ...authHeaders,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail?.[0]?.msg || 'Failed to fetch organization users');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching organization users:', error);
     throw error;
   }
 }

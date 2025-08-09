@@ -11,15 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Eye } from "lucide-react";
+import { Plus, Search, Edit, Eye, Trash2, Users } from "lucide-react";
 import { 
   listOrganizations, 
   createOrganization, 
   getOrganization,
   updateOrganization,
+  deleteOrganization,
+  listOrganizationUsers,
   type Organization,
   type CreateOrganizationRequest,
-  type UpdateOrganizationRequest
+  type UpdateOrganizationRequest,
+  type OrganizationUser,
+  type OrganizationUsersResponse
 } from "@/lib/organizationApi";
 
 export default function OrganizationManagementPage() {
@@ -34,7 +38,12 @@ export default function OrganizationManagementPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
+  const [organizationUsers, setOrganizationUsers] = useState<OrganizationUser[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
   const [formData, setFormData] = useState<CreateOrganizationRequest>({
     name: "",
     domain: "",
@@ -161,6 +170,42 @@ export default function OrganizationManagementPage() {
       setIsViewDialogOpen(true);
     } catch (error: any) {
       setError(error.message || "Failed to fetch organization details");
+    }
+  };
+
+  const handleDelete = (organization: Organization) => {
+    setSelectedOrganization(organization);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedOrganization) return;
+    
+    try {
+      setLoading(true);
+      await deleteOrganization(getAuthHeaders(), selectedOrganization.id);
+      setIsDeleteDialogOpen(false);
+      setSelectedOrganization(null);
+      fetchOrganizations();
+    } catch (error: any) {
+      setError(error.message || "Failed to delete organization");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewUsers = async (organization: Organization) => {
+    try {
+      setUsersLoading(true);
+      setUsersError("");
+      const response = await listOrganizationUsers(getAuthHeaders(), organization.id, 1, 50);
+      setOrganizationUsers(response.users);
+      setSelectedOrganization(organization);
+      setIsUsersDialogOpen(true);
+    } catch (error: any) {
+      setUsersError(error.message || "Failed to fetch organization users");
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -327,15 +372,34 @@ export default function OrganizationManagementPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleView(organization)}
+                          title="View Details"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleViewUsers(organization)}
+                          title="View Users"
+                        >
+                          <Users className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => handleEdit(organization)}
+                          title="Edit Organization"
                         >
                           <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(organization)}
+                          title="Delete Organization"
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -478,6 +542,114 @@ export default function OrganizationManagementPage() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Organization</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive font-medium">Warning: This action cannot be undone!</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Deleting this organization will permanently remove all associated data, including:
+              </p>
+              <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
+                <li>All organization users</li>
+                <li>All organization data</li>
+                <li>All associated documents and files</li>
+                <li>All organization settings</li>
+              </ul>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete <strong>{selectedOrganization?.name}</strong>?
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDelete} 
+              disabled={loading}
+            >
+              {loading ? "Deleting..." : "Delete Organization"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Users Dialog */}
+      <Dialog open={isUsersDialogOpen} onOpenChange={setIsUsersDialogOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[600px] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Users in {selectedOrganization?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {usersError && (
+              <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-destructive">{usersError}</p>
+              </div>
+            )}
+            
+            {usersLoading ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Login</TableHead>
+                    <TableHead>Created</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {organizationUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.full_name}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{user.role}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={user.is_active ? "default" : "secondary"}
+                        >
+                          {user.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.last_login_at 
+                          ? new Date(user.last_login_at).toLocaleDateString()
+                          : "Never"
+                        }
+                      </TableCell>
+                      <TableCell>
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+            
+            {!usersLoading && organizationUsers.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No users found in this organization.</p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
