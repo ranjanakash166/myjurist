@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -13,15 +13,28 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import ProfileModal from '../../components/ProfileModal';
 
-const navItems = [
-  { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
-  { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
-  { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
-  { label: "Contract Drafting", icon: <FileCheck className="w-6 h-6" />, href: "/app/contract-drafting" },
-  { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
-  { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
-  { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
-];
+const getNavItems = (userRole?: string) => {
+  const baseItems = [
+    { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
+    { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
+    { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
+    { label: "Contract Drafting", icon: <FileCheck className="w-6 h-6" />, href: "/app/contract-drafting" },
+    { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
+    { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
+    { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
+  ];
+
+  // Add organization management for super admins
+  if (userRole === "super_admin") {
+    baseItems.push({
+      label: "Organization Management",
+      icon: <Building2 className="w-6 h-6" />,
+      href: "/app/organization-management"
+    });
+  }
+
+  return baseItems;
+};
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -90,7 +103,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
                 
                 <nav className="flex-1 p-4 space-y-2">
-                  {navItems.map((item) => {
+                  {getNavItems(user?.role).map((item) => {
                     const isActive = pathname === item.href;
                     return (
                       <Link
@@ -175,7 +188,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         
         <nav className="flex flex-col gap-2 flex-1">
-          {navItems.map((item) => {
+          {getNavItems(user?.role).map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link

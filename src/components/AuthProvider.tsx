@@ -9,6 +9,11 @@ interface User {
   is_active: boolean;
   is_verified: boolean;
   created_at: string;
+  preferred_ai_provider?: string | null;
+  preferred_model?: string | null;
+  role: 'super_admin' | 'org_admin' | 'org_user';
+  organization_id: string;
+  organization_name?: string | null;
 }
 
 interface AuthResponse {
