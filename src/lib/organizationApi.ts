@@ -233,3 +233,118 @@ export async function listOrganizationUsers(
     throw error;
   }
 }
+
+// User management types
+export interface CreateUserRequest {
+  email: string;
+  full_name: string;
+  password: string;
+  role: 'super_admin' | 'org_admin' | 'org_user';
+  organization_id: string;
+}
+
+export interface UpdateUserRequest {
+  full_name?: string;
+  role?: 'super_admin' | 'org_admin' | 'org_user';
+  is_active?: boolean;
+  organization_id?: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'super_admin' | 'org_admin' | 'org_user';
+  organization_id: string;
+  organization_name: string;
+  is_active: boolean;
+  is_verified: boolean;
+  last_login_at?: string;
+  created_at: string;
+}
+
+// Create a new user and assign to organization (Super Admin only)
+export async function createUser(
+  authHeaders: Record<string, string>,
+  userData: CreateUserRequest
+): Promise<User> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...authHeaders,
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail?.[0]?.msg || 'Failed to create user');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
+}
+
+// Update any user (Super Admin only)
+export async function updateUser(
+  authHeaders: Record<string, string>,
+  userId: string,
+  userData: UpdateUserRequest
+): Promise<User> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        ...authHeaders,
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail?.[0]?.msg || 'Failed to update user');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
+}
+
+// Delete any user and their data (Super Admin only)
+export async function deleteUser(
+  authHeaders: Record<string, string>,
+  userId: string
+): Promise<string> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'accept': 'application/json',
+        ...authHeaders,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail?.[0]?.msg || 'Failed to delete user');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw error;
+  }
+}

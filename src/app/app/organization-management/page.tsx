@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Edit, Eye, Trash2, Users } from "lucide-react";
+import { Plus, Search, Edit, Eye, Trash2, Users, UserPlus } from "lucide-react";
 import { 
   listOrganizations, 
   createOrganization, 
@@ -19,11 +19,17 @@ import {
   updateOrganization,
   deleteOrganization,
   listOrganizationUsers,
+  createUser,
+  updateUser,
+  deleteUser,
   type Organization,
   type CreateOrganizationRequest,
   type UpdateOrganizationRequest,
   type OrganizationUser,
-  type OrganizationUsersResponse
+  type OrganizationUsersResponse,
+  type CreateUserRequest,
+  type UpdateUserRequest,
+  type User
 } from "@/lib/organizationApi";
 
 export default function OrganizationManagementPage() {
@@ -40,7 +46,11 @@ export default function OrganizationManagementPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUsersDialogOpen, setIsUsersDialogOpen] = useState(false);
+  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false);
+  const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
+  const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [organizationUsers, setOrganizationUsers] = useState<OrganizationUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState("");
@@ -50,6 +60,19 @@ export default function OrganizationManagementPage() {
     logo_url: "",
     subscription_plan: "basic",
     max_users: 50,
+  });
+  const [userFormData, setUserFormData] = useState<CreateUserRequest>({
+    email: "",
+    full_name: "",
+    password: "",
+    role: "org_user",
+    organization_id: "",
+  });
+  const [userUpdateData, setUserUpdateData] = useState<UpdateUserRequest>({
+    full_name: "",
+    role: "org_user",
+    is_active: true,
+    organization_id: "",
   });
 
   // Check if user is super admin
@@ -206,6 +229,86 @@ export default function OrganizationManagementPage() {
       setUsersError(error.message || "Failed to fetch organization users");
     } finally {
       setUsersLoading(false);
+    }
+  };
+
+  const handleCreateUser = async () => {
+    try {
+      setLoading(true);
+      await createUser(getAuthHeaders(), userFormData);
+      setIsCreateUserDialogOpen(false);
+      setUserFormData({
+        email: "",
+        full_name: "",
+        password: "",
+        role: "org_user",
+        organization_id: "",
+      });
+      // Refresh the users list if we're viewing users
+      if (selectedOrganization) {
+        const response = await listOrganizationUsers(getAuthHeaders(), selectedOrganization.id, 1, 50);
+        setOrganizationUsers(response.users);
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to create user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setUserUpdateData({
+      full_name: user.full_name,
+      role: user.role,
+      is_active: user.is_active,
+      organization_id: user.organization_id,
+    });
+    setIsEditUserDialogOpen(true);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      setLoading(true);
+      await updateUser(getAuthHeaders(), selectedUser.id, userUpdateData);
+      setIsEditUserDialogOpen(false);
+      setSelectedUser(null);
+      // Refresh the users list if we're viewing users
+      if (selectedOrganization) {
+        const response = await listOrganizationUsers(getAuthHeaders(), selectedOrganization.id, 1, 50);
+        setOrganizationUsers(response.users);
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to update user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = (user: User) => {
+    setSelectedUser(user);
+    setIsDeleteUserDialogOpen(true);
+  };
+
+  const handleConfirmDeleteUser = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      setLoading(true);
+      await deleteUser(getAuthHeaders(), selectedUser.id);
+      setIsDeleteUserDialogOpen(false);
+      setSelectedUser(null);
+      // Refresh the users list if we're viewing users
+      if (selectedOrganization) {
+        const response = await listOrganizationUsers(getAuthHeaders(), selectedOrganization.id, 1, 50);
+        setOrganizationUsers(response.users);
+      }
+    } catch (error: any) {
+      setError(error.message || "Failed to delete user");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -587,9 +690,26 @@ export default function OrganizationManagementPage() {
       <Dialog open={isUsersDialogOpen} onOpenChange={setIsUsersDialogOpen}>
         <DialogContent className="sm:max-w-[800px] max-h-[600px] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Users in {selectedOrganization?.name}
-            </DialogTitle>
+            <div className="flex justify-between items-center">
+              <DialogTitle>
+                Users in {selectedOrganization?.name}
+              </DialogTitle>
+              <Button
+                onClick={() => {
+                  setUserFormData({
+                    email: "",
+                    full_name: "",
+                    password: "",
+                    role: "org_user",
+                    organization_id: selectedOrganization?.id || "",
+                  });
+                  setIsCreateUserDialogOpen(true);
+                }}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add User
+              </Button>
+            </div>
           </DialogHeader>
           <div className="py-4">
             {usersError && (
@@ -612,6 +732,7 @@ export default function OrganizationManagementPage() {
                     <TableHead>Status</TableHead>
                     <TableHead>Last Login</TableHead>
                     <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -638,6 +759,27 @@ export default function OrganizationManagementPage() {
                       <TableCell>
                         {new Date(user.created_at).toLocaleDateString()}
                       </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditUser(user)}
+                            title="Edit User"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user)}
+                            title="Delete User"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -649,6 +791,213 @@ export default function OrganizationManagementPage() {
                 <p className="text-muted-foreground">No users found in this organization.</p>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create User Dialog */}
+      <Dialog open={isCreateUserDialogOpen} onOpenChange={setIsCreateUserDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="user-email">Email</Label>
+              <Input
+                id="user-email"
+                type="email"
+                value={userFormData.email}
+                onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                placeholder="Enter user email"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="user-full-name">Full Name</Label>
+              <Input
+                id="user-full-name"
+                value={userFormData.full_name}
+                onChange={(e) => setUserFormData({ ...userFormData, full_name: e.target.value })}
+                placeholder="Enter full name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="user-password">Password</Label>
+              <Input
+                id="user-password"
+                type="password"
+                value={userFormData.password}
+                onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                placeholder="Enter password"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="user-role">Role</Label>
+              <Select
+                value={userFormData.role}
+                onValueChange={(value: 'super_admin' | 'org_admin' | 'org_user') =>
+                  setUserFormData({ ...userFormData, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="org_user">Organization User</SelectItem>
+                  <SelectItem value="org_admin">Organization Admin</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="user-organization">Organization</Label>
+              <Select
+                value={userFormData.organization_id}
+                onValueChange={(value) =>
+                  setUserFormData({ ...userFormData, organization_id: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsCreateUserDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateUser} disabled={loading}>
+              {loading ? "Creating..." : "Create User"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-user-full-name">Full Name</Label>
+              <Input
+                id="edit-user-full-name"
+                value={userUpdateData.full_name}
+                onChange={(e) => setUserUpdateData({ ...userUpdateData, full_name: e.target.value })}
+                placeholder="Enter full name"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-user-role">Role</Label>
+              <Select
+                value={userUpdateData.role}
+                onValueChange={(value: 'super_admin' | 'org_admin' | 'org_user') =>
+                  setUserUpdateData({ ...userUpdateData, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="org_user">Organization User</SelectItem>
+                  <SelectItem value="org_admin">Organization Admin</SelectItem>
+                  <SelectItem value="super_admin">Super Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-user-organization">Organization</Label>
+              <Select
+                value={userUpdateData.organization_id}
+                onValueChange={(value) =>
+                  setUserUpdateData({ ...userUpdateData, organization_id: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-user-status">Status</Label>
+              <Select
+                value={userUpdateData.is_active ? "true" : "false"}
+                onValueChange={(value) =>
+                  setUserUpdateData({ ...userUpdateData, is_active: value === "true" })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Active</SelectItem>
+                  <SelectItem value="false">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsEditUserDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateUser} disabled={loading}>
+              {loading ? "Updating..." : "Update User"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={isDeleteUserDialogOpen} onOpenChange={setIsDeleteUserDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete User</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive font-medium">Warning: This action cannot be undone!</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Deleting this user will permanently remove all associated data, including:
+              </p>
+              <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
+                <li>All user data</li>
+                <li>All user documents and files</li>
+                <li>All user settings and preferences</li>
+                <li>All user activity history</li>
+              </ul>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete <strong>{selectedUser?.full_name}</strong> ({selectedUser?.email})?
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsDeleteUserDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleConfirmDeleteUser} 
+              disabled={loading}
+            >
+              {loading ? "Deleting..." : "Delete User"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
