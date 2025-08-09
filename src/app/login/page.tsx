@@ -123,6 +123,14 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   required
                 />
+                <div className="text-right">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
               </div>
 
               {error && (
@@ -146,10 +154,10 @@ export default function LoginPage() {
               <p className="text-muted-foreground">
                 Don't have an account?{" "}
                 <Link
-                  href="/register"
+                  href="/contact"
                   className="text-primary hover:text-primary/80 font-medium transition-colors"
                 >
-                  Create one here
+                  Contact us
                 </Link>
               </p>
             </div>

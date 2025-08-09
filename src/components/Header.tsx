@@ -103,11 +103,8 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
 
             {/* Auth Buttons */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
               <Button asChild>
-                <Link href="/register">Register</Link>
+                <Link href="/login">Login</Link>
               </Button>
             </div>
 
@@ -166,18 +163,14 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                     <div className="text-sm font-medium text-muted-foreground mb-3 px-2">
                       Get Started
                     </div>
-                    {navigation.filter(item => item.href === '/login' || item.href === '/register').map((item) => (
-                      <Button 
-                        key={item.id}
-                        asChild 
-                        variant={item.href === '/register' ? 'outline' : 'default'}
-                        className="w-full h-12 text-base font-medium"
-                      >
-                        <Link href={item.href!}>
-                          {item.href === '/login' ? 'Sign In' : 'Create Account'}
-                        </Link>
-                      </Button>
-                    ))}
+                    <Button 
+                      asChild 
+                      className="w-full h-12 text-base font-medium"
+                    >
+                      <Link href="/login">
+                        Sign In
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               </SheetContent>
