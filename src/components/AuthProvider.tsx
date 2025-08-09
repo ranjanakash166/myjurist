@@ -32,6 +32,8 @@ interface AuthContextType {
   register: (email: string, password: string, full_name: string) => Promise<{ success: boolean; error?: string }>;
   sendOtp: (email: string, full_name: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   verifyOtp: (email: string, otp_code: string, password: string, full_name: string) => Promise<{ success: boolean; error?: string }>;
+  requestPasswordReset: (email: string) => Promise<{ success: boolean; error?: string; data?: any }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   logout: () => Promise<void>;
   getAuthHeaders: () => Record<string, string>;
 }
@@ -45,6 +47,8 @@ const AuthContext = createContext<AuthContextType>({
   register: async () => ({ success: false }),
   sendOtp: async () => ({ success: false }),
   verifyOtp: async () => ({ success: false }),
+  requestPasswordReset: async () => ({ success: false }),
+  resetPassword: async () => ({ success: false }),
   logout: async () => {},
   getAuthHeaders: () => ({}),
 });
@@ -201,6 +205,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const requestPasswordReset = async (email: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/password-reset`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.detail?.[0]?.msg || "Failed to request password reset";
+        return { success: false, error: errorMessage };
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || "An error occurred while requesting password reset" };
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/password-reset/confirm`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, new_password: newPassword }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.detail?.[0]?.msg || "Password reset failed";
+        return { success: false, error: errorMessage };
+      }
+
+      const data = await response.json();
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message || "An error occurred during password reset" };
+    }
+  };
+
   const logout = async () => {
     try {
       // Call logout API to invalidate session on server
@@ -241,6 +291,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       sendOtp,
       verifyOtp,
+      requestPasswordReset,
+      resetPassword,
       logout,
       getAuthHeaders,
     }}>
