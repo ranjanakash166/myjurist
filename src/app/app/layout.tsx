@@ -24,10 +24,10 @@ const getNavItems = (userRole?: string) => {
     { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
   ];
 
-  // Add organization management for super admins
-  if (userRole === "super_admin") {
+  // Add organization management for super admins and org admins
+  if (userRole === "super_admin" || userRole === "org_admin") {
     baseItems.push({
-      label: "Organization Management",
+      label: "Manage Org",
       icon: <Building2 className="w-6 h-6" />,
       href: "/app/organization-management"
     });

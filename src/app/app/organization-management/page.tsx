@@ -75,9 +75,9 @@ export default function OrganizationManagementPage() {
     organization_id: "",
   });
 
-  // Check if user is super admin
+  // Check if user has appropriate permissions
   useEffect(() => {
-    if (user && user.role !== "super_admin") {
+    if (user && !["super_admin", "org_admin"].includes(user.role)) {
       router.push("/app/dashboard");
     }
   }, [user, router]);
@@ -97,7 +97,7 @@ export default function OrganizationManagementPage() {
     );
   }
 
-  if (user?.role !== "super_admin") {
+  if (!["super_admin", "org_admin"].includes(user?.role || "")) {
     return (
       <div className="p-6">
         <Card>
@@ -114,9 +114,17 @@ export default function OrganizationManagementPage() {
   const fetchOrganizations = async () => {
     try {
       setLoading(true);
-      const response = await listOrganizations(getAuthHeaders(), currentPage, 20);
-      setOrganizations(response.organizations);
-      setTotalPages(Math.ceil(response.total / 20));
+      if (user?.role === "super_admin") {
+        // Super admin can see all organizations
+        const response = await listOrganizations(getAuthHeaders(), currentPage, 20);
+        setOrganizations(response.organizations);
+        setTotalPages(Math.ceil(response.total / 20));
+      } else if (user?.role === "org_admin" && user?.organization_id) {
+        // Org admin can only see their own organization
+        const response = await getOrganization(getAuthHeaders(), user.organization_id);
+        setOrganizations([response]);
+        setTotalPages(1);
+      }
     } catch (error: any) {
       setError(error.message || "Failed to fetch organizations");
     } finally {
@@ -125,7 +133,7 @@ export default function OrganizationManagementPage() {
   };
 
   useEffect(() => {
-    if (user?.role === "super_admin") {
+    if (user?.role === "super_admin" || user?.role === "org_admin") {
       fetchOrganizations();
     }
   }, [user, currentPage]);
@@ -235,7 +243,12 @@ export default function OrganizationManagementPage() {
   const handleCreateUser = async () => {
     try {
       setLoading(true);
-      await createUser(getAuthHeaders(), userFormData);
+      // For org_admin users, automatically set the organization_id to their organization
+      const userDataToCreate = {
+        ...userFormData,
+        organization_id: user?.role === "org_admin" ? user.organization_id : userFormData.organization_id
+      };
+      await createUser(getAuthHeaders(), userDataToCreate);
       setIsCreateUserDialogOpen(false);
       setUserFormData({
         email: "",
@@ -272,7 +285,12 @@ export default function OrganizationManagementPage() {
     
     try {
       setLoading(true);
-      await updateUser(getAuthHeaders(), selectedUser.id, userUpdateData);
+      // For org_admin users, automatically set the organization_id to their organization
+      const userDataToUpdate = {
+        ...userUpdateData,
+        organization_id: user?.role === "org_admin" ? user.organization_id : userUpdateData.organization_id
+      };
+      await updateUser(getAuthHeaders(), selectedUser.id, userDataToUpdate);
       setIsEditUserDialogOpen(false);
       setSelectedUser(null);
       // Refresh the users list if we're viewing users
@@ -317,99 +335,114 @@ export default function OrganizationManagementPage() {
     org.domain.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Check if user can perform certain actions
+  const canCreateOrganization = user?.role === "super_admin";
+  const canEditOrganization = user?.role === "super_admin" || (user?.role === "org_admin" && user?.organization_id);
+  const canDeleteOrganization = user?.role === "super_admin";
+  const canManageUsers = user?.role === "super_admin" || user?.role === "org_admin";
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Organization Management</h1>
+          <h1 className="text-3xl font-bold">
+            {user?.role === "org_admin" ? "Organization Management" : "Organization Management"}
+          </h1>
           <p className="text-muted-foreground">
-            Manage organizations and their settings
+            {user?.role === "org_admin" 
+              ? "Manage users in your organization" 
+              : "Manage organizations and their settings"
+            }
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Organization
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Organization</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Organization Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter organization name"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="domain">Domain</Label>
-                <Input
-                  id="domain"
-                  value={formData.domain}
-                  onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
-                  placeholder="Enter domain (e.g., example.com)"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="logo_url">Logo URL (Optional)</Label>
-                <Input
-                  id="logo_url"
-                  value={formData.logo_url}
-                  onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                  placeholder="Enter logo URL"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="subscription_plan">Subscription Plan</Label>
-                <Select
-                  value={formData.subscription_plan}
-                  onValueChange={(value: 'basic' | 'premium' | 'enterprise') =>
-                    setFormData({ ...formData, subscription_plan: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="max_users">Max Users</Label>
-                <Input
-                  id="max_users"
-                  type="number"
-                  value={formData.max_users}
-                  onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
-                  placeholder="Enter maximum number of users"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
+        {canCreateOrganization && (
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Organization
               </Button>
-              <Button onClick={handleCreateOrganization} disabled={loading}>
-                {loading ? "Creating..." : "Create Organization"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Create New Organization</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Organization Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Enter organization name"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="domain">Domain</Label>
+                  <Input
+                    id="domain"
+                    value={formData.domain}
+                    onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                    placeholder="Enter domain (e.g., example.com)"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="logo_url">Logo URL (Optional)</Label>
+                  <Input
+                    id="logo_url"
+                    value={formData.logo_url}
+                    onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+                    placeholder="Enter logo URL"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="subscription_plan">Subscription Plan</Label>
+                  <Select
+                    value={formData.subscription_plan}
+                    onValueChange={(value: 'basic' | 'premium' | 'enterprise') =>
+                      setFormData({ ...formData, subscription_plan: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="basic">Basic</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="max_users">Max Users</Label>
+                  <Input
+                    id="max_users"
+                    type="number"
+                    value={formData.max_users}
+                    onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
+                    placeholder="Enter maximum number of users"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateOrganization} disabled={loading}>
+                  {loading ? "Creating..." : "Create Organization"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Organizations</CardTitle>
+            <CardTitle>
+              {user?.role === "org_admin" ? "Your Organization" : "Organizations"}
+            </CardTitle>
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -479,31 +512,37 @@ export default function OrganizationManagementPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewUsers(organization)}
-                          title="View Users"
-                        >
-                          <Users className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(organization)}
-                          title="Edit Organization"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(organization)}
-                          title="Delete Organization"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        {canManageUsers && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewUsers(organization)}
+                            title="View Users"
+                          >
+                            <Users className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {canEditOrganization && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(organization)}
+                            title="Edit Organization"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {canDeleteOrganization && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(organization)}
+                            title="Delete Organization"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -515,78 +554,80 @@ export default function OrganizationManagementPage() {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Organization</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-name">Organization Name</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Enter organization name"
-              />
+      {canEditOrganization && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Organization</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-name">Organization Name</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Enter organization name"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-domain">Domain</Label>
+                <Input
+                  id="edit-domain"
+                  value={formData.domain}
+                  onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                  placeholder="Enter domain (e.g., example.com)"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-logo_url">Logo URL (Optional)</Label>
+                <Input
+                  id="edit-logo_url"
+                  value={formData.logo_url}
+                  onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+                  placeholder="Enter logo URL"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-subscription_plan">Subscription Plan</Label>
+                <Select
+                  value={formData.subscription_plan}
+                  onValueChange={(value: 'basic' | 'premium' | 'enterprise') =>
+                    setFormData({ ...formData, subscription_plan: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-max_users">Max Users</Label>
+                <Input
+                  id="edit-max_users"
+                  type="number"
+                  value={formData.max_users}
+                  onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
+                  placeholder="Enter maximum number of users"
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-domain">Domain</Label>
-              <Input
-                id="edit-domain"
-                value={formData.domain}
-                onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
-                placeholder="Enter domain (e.g., example.com)"
-              />
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateOrganization} disabled={loading}>
+                {loading ? "Updating..." : "Update Organization"}
+              </Button>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-logo_url">Logo URL (Optional)</Label>
-              <Input
-                id="edit-logo_url"
-                value={formData.logo_url}
-                onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                placeholder="Enter logo URL"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-subscription_plan">Subscription Plan</Label>
-              <Select
-                value={formData.subscription_plan}
-                onValueChange={(value: 'basic' | 'premium' | 'enterprise') =>
-                  setFormData({ ...formData, subscription_plan: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="basic">Basic</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="enterprise">Enterprise</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-max_users">Max Users</Label>
-              <Input
-                id="edit-max_users"
-                type="number"
-                value={formData.max_users}
-                onChange={(e) => setFormData({ ...formData, max_users: parseInt(e.target.value) })}
-                placeholder="Enter maximum number of users"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateOrganization} disabled={loading}>
-              {loading ? "Updating..." : "Update Organization"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
@@ -649,358 +690,376 @@ export default function OrganizationManagementPage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Delete Organization</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive font-medium">Warning: This action cannot be undone!</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Deleting this organization will permanently remove all associated data, including:
+      {canDeleteOrganization && (
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Delete Organization</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-destructive font-medium">Warning: This action cannot be undone!</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Deleting this organization will permanently remove all associated data, including:
+                </p>
+                <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
+                  <li>All organization users</li>
+                  <li>All organization data</li>
+                  <li>All associated documents and files</li>
+                  <li>All organization settings</li>
+                </ul>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete <strong>{selectedOrganization?.name}</strong>?
               </p>
-              <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
-                <li>All organization users</li>
-                <li>All organization data</li>
-                <li>All associated documents and files</li>
-                <li>All organization settings</li>
-              </ul>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete <strong>{selectedOrganization?.name}</strong>?
-            </p>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleConfirmDelete} 
-              disabled={loading}
-            >
-              {loading ? "Deleting..." : "Delete Organization"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Users Dialog */}
-      <Dialog open={isUsersDialogOpen} onOpenChange={setIsUsersDialogOpen}>
-        <DialogContent className="sm:max-w-[800px] max-h-[600px] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex justify-between items-center">
-              <DialogTitle>
-                Users in {selectedOrganization?.name}
-              </DialogTitle>
-              <Button
-                onClick={() => {
-                  setUserFormData({
-                    email: "",
-                    full_name: "",
-                    password: "",
-                    role: "org_user",
-                    organization_id: selectedOrganization?.id || "",
-                  });
-                  setIsCreateUserDialogOpen(true);
-                }}
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleConfirmDelete} 
+                disabled={loading}
               >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add User
+                {loading ? "Deleting..." : "Delete Organization"}
               </Button>
             </div>
-          </DialogHeader>
-          <div className="py-4">
-            {usersError && (
-              <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <p className="text-destructive">{usersError}</p>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Users Dialog */}
+      {canManageUsers && (
+        <Dialog open={isUsersDialogOpen} onOpenChange={setIsUsersDialogOpen}>
+          <DialogContent className="sm:max-w-[800px] max-h-[600px] overflow-y-auto">
+            <DialogHeader>
+              <div className="flex justify-between items-center">
+                <DialogTitle>
+                  Users in {selectedOrganization?.name}
+                </DialogTitle>
+                <Button
+                  onClick={() => {
+                    setUserFormData({
+                      email: "",
+                      full_name: "",
+                      password: "",
+                      role: "org_user",
+                      organization_id: selectedOrganization?.id || "",
+                    });
+                    setIsCreateUserDialogOpen(true);
+                  }}
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Add User
+                </Button>
               </div>
-            )}
-            
-            {usersLoading ? (
-              <div className="flex justify-center items-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {organizationUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.full_name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{user.role}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={user.is_active ? "default" : "secondary"}
-                        >
-                          {user.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {user.last_login_at 
-                          ? new Date(user.last_login_at).toLocaleDateString()
-                          : "Never"
-                        }
-                      </TableCell>
-                      <TableCell>
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditUser(user)}
-                            title="Edit User"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteUser(user)}
-                            title="Delete User"
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            </DialogHeader>
+            <div className="py-4">
+              {usersError && (
+                <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-destructive">{usersError}</p>
+                </div>
+              )}
+              
+              {usersLoading ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Login</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-            
-            {!usersLoading && organizationUsers.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No users found in this organization.</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                  </TableHeader>
+                  <TableBody>
+                    {organizationUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.full_name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{user.role}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={user.is_active ? "default" : "secondary"}
+                          >
+                            {user.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {user.last_login_at 
+                            ? new Date(user.last_login_at).toLocaleDateString()
+                            : "Never"
+                          }
+                        </TableCell>
+                        <TableCell>
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              title="Edit User"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user)}
+                              title="Delete User"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+              
+              {!usersLoading && organizationUsers.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No users found in this organization.</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Create User Dialog */}
-      <Dialog open={isCreateUserDialogOpen} onOpenChange={setIsCreateUserDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="user-email">Email</Label>
-              <Input
-                id="user-email"
-                type="email"
-                value={userFormData.email}
-                onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
-                placeholder="Enter user email"
-              />
+      {canManageUsers && (
+        <Dialog open={isCreateUserDialogOpen} onOpenChange={setIsCreateUserDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Create New User</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="user-email">Email</Label>
+                <Input
+                  id="user-email"
+                  type="email"
+                  value={userFormData.email}
+                  onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
+                  placeholder="Enter user email"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="user-full-name">Full Name</Label>
+                <Input
+                  id="user-full-name"
+                  value={userFormData.full_name}
+                  onChange={(e) => setUserFormData({ ...userFormData, full_name: e.target.value })}
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="user-password">Password</Label>
+                <Input
+                  id="user-password"
+                  type="password"
+                  value={userFormData.password}
+                  onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
+                  placeholder="Enter password"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="user-role">Role</Label>
+                <Select
+                  value={userFormData.role}
+                  onValueChange={(value: 'super_admin' | 'org_admin' | 'org_user') =>
+                    setUserFormData({ ...userFormData, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="org_user">Organization User</SelectItem>
+                    <SelectItem value="org_admin">Organization Admin</SelectItem>
+                    {user?.role === "super_admin" && (
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              {user?.role === "super_admin" && (
+                <div className="grid gap-2">
+                  <Label htmlFor="user-organization">Organization</Label>
+                  <Select
+                    value={userFormData.organization_id}
+                    onValueChange={(value) =>
+                      setUserFormData({ ...userFormData, organization_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select organization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {organizations.map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="user-full-name">Full Name</Label>
-              <Input
-                id="user-full-name"
-                value={userFormData.full_name}
-                onChange={(e) => setUserFormData({ ...userFormData, full_name: e.target.value })}
-                placeholder="Enter full name"
-              />
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsCreateUserDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateUser} disabled={loading}>
+                {loading ? "Creating..." : "Create User"}
+              </Button>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="user-password">Password</Label>
-              <Input
-                id="user-password"
-                type="password"
-                value={userFormData.password}
-                onChange={(e) => setUserFormData({ ...userFormData, password: e.target.value })}
-                placeholder="Enter password"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="user-role">Role</Label>
-              <Select
-                value={userFormData.role}
-                onValueChange={(value: 'super_admin' | 'org_admin' | 'org_user') =>
-                  setUserFormData({ ...userFormData, role: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="org_user">Organization User</SelectItem>
-                  <SelectItem value="org_admin">Organization Admin</SelectItem>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="user-organization">Organization</Label>
-              <Select
-                value={userFormData.organization_id}
-                onValueChange={(value) =>
-                  setUserFormData({ ...userFormData, organization_id: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select organization" />
-                </SelectTrigger>
-                <SelectContent>
-                  {organizations.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>
-                      {org.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsCreateUserDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateUser} disabled={loading}>
-              {loading ? "Creating..." : "Create User"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Edit User Dialog */}
-      <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-user-full-name">Full Name</Label>
-              <Input
-                id="edit-user-full-name"
-                value={userUpdateData.full_name}
-                onChange={(e) => setUserUpdateData({ ...userUpdateData, full_name: e.target.value })}
-                placeholder="Enter full name"
-              />
+      {canManageUsers && (
+        <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-user-full-name">Full Name</Label>
+                <Input
+                  id="edit-user-full-name"
+                  value={userUpdateData.full_name}
+                  onChange={(e) => setUserUpdateData({ ...userUpdateData, full_name: e.target.value })}
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-user-role">Role</Label>
+                <Select
+                  value={userUpdateData.role}
+                  onValueChange={(value: 'super_admin' | 'org_admin' | 'org_user') =>
+                    setUserUpdateData({ ...userUpdateData, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="org_user">Organization User</SelectItem>
+                    <SelectItem value="org_admin">Organization Admin</SelectItem>
+                    {user?.role === "super_admin" && (
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              {user?.role === "super_admin" && (
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-user-organization">Organization</Label>
+                  <Select
+                    value={userUpdateData.organization_id}
+                    onValueChange={(value) =>
+                      setUserUpdateData({ ...userUpdateData, organization_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select organization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {organizations.map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-user-status">Status</Label>
+                <Select
+                  value={userUpdateData.is_active ? "true" : "false"}
+                  onValueChange={(value) =>
+                    setUserUpdateData({ ...userUpdateData, is_active: value === "true" })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-user-role">Role</Label>
-              <Select
-                value={userUpdateData.role}
-                onValueChange={(value: 'super_admin' | 'org_admin' | 'org_user') =>
-                  setUserUpdateData({ ...userUpdateData, role: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="org_user">Organization User</SelectItem>
-                  <SelectItem value="org_admin">Organization Admin</SelectItem>
-                  <SelectItem value="super_admin">Super Admin</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditUserDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateUser} disabled={loading}>
+                {loading ? "Updating..." : "Update User"}
+              </Button>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-user-organization">Organization</Label>
-              <Select
-                value={userUpdateData.organization_id}
-                onValueChange={(value) =>
-                  setUserUpdateData({ ...userUpdateData, organization_id: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select organization" />
-                </SelectTrigger>
-                <SelectContent>
-                  {organizations.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>
-                      {org.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-user-status">Status</Label>
-              <Select
-                value={userUpdateData.is_active ? "true" : "false"}
-                onValueChange={(value) =>
-                  setUserUpdateData({ ...userUpdateData, is_active: value === "true" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Active</SelectItem>
-                  <SelectItem value="false">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsEditUserDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateUser} disabled={loading}>
-              {loading ? "Updating..." : "Update User"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete User Confirmation Dialog */}
-      <Dialog open={isDeleteUserDialogOpen} onOpenChange={setIsDeleteUserDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive font-medium">Warning: This action cannot be undone!</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Deleting this user will permanently remove all associated data, including:
+      {canManageUsers && (
+        <Dialog open={isDeleteUserDialogOpen} onOpenChange={setIsDeleteUserDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Delete User</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                <p className="text-destructive font-medium">Warning: This action cannot be undone!</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Deleting this user will permanently remove all associated data, including:
+                </p>
+                <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
+                  <li>All user data</li>
+                  <li>All user documents and files</li>
+                  <li>All user settings and preferences</li>
+                  <li>All user activity history</li>
+                </ul>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete <strong>{selectedUser?.full_name}</strong> ({selectedUser?.email})?
               </p>
-              <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
-                <li>All user data</li>
-                <li>All user documents and files</li>
-                <li>All user settings and preferences</li>
-                <li>All user activity history</li>
-              </ul>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Are you sure you want to delete <strong>{selectedUser?.full_name}</strong> ({selectedUser?.email})?
-            </p>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsDeleteUserDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleConfirmDeleteUser} 
-              disabled={loading}
-            >
-              {loading ? "Deleting..." : "Delete User"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsDeleteUserDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleConfirmDeleteUser} 
+                disabled={loading}
+              >
+                {loading ? "Deleting..." : "Delete User"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
