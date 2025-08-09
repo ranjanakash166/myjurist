@@ -103,7 +103,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
 
             {/* Auth Buttons */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild>
+              <Button asChild>
                 <Link href="/login">Login</Link>
               </Button>
             </div>
