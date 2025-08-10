@@ -785,10 +785,10 @@ export default function OrganizationManagementPage() {
   );
 
   // Check if user can perform certain actions
-  const canCreateOrganization = user?.role === "super_admin";
-  const canEditOrganization = user?.role === "super_admin" || (user?.role === "org_admin" && user?.organization_id);
-  const canDeleteOrganization = user?.role === "super_admin";
-  const canManageUsers = user?.role === "super_admin" || user?.role === "org_admin";
+  const canCreateOrganization = Boolean(user?.role === "super_admin");
+  const canEditOrganization = Boolean(user?.role === "super_admin" || (user?.role === "org_admin" && Boolean(user?.organization_id)));
+  const canDeleteOrganization = Boolean(user?.role === "super_admin");
+  const canManageUsers = Boolean(user?.role === "super_admin" || user?.role === "org_admin");
 
   // Determine if we should show mobile view
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
