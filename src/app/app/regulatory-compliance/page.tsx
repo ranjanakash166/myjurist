@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Loader2, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
-import { fetchRegulatorySuggestions, submitRegulatoryQuery, RegulatoryQueryResponse } from "@/lib/regulatoryComplianceApi";
+import { fetchRegulatorySuggestions, submitRegulatoryQuery, RegulatoryQueryResponse, RegulatoryAmendment } from "@/lib/regulatoryComplianceApi";
 import { useToast } from "@/hooks/use-toast";
 import SimpleMarkdownRenderer from "@/components/SimpleMarkdownRenderer";
 
@@ -220,9 +220,6 @@ export default function RegulatoryCompliancePage() {
                     {formatConfidenceScore(result.confidence_score)}
                   </span>
                 </Badge>
-                <Badge variant="outline">
-                  {result.processing_time_ms}ms
-                </Badge>
               </div>
             </div>
           </CardHeader>
@@ -253,11 +250,24 @@ export default function RegulatoryCompliancePage() {
             {result.amendments_found.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold mb-3">Amendments Found</h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-3">
                   {result.amendments_found.map((amendment, index) => (
-                    <Badge key={index} variant="outline">
-                      {amendment}
-                    </Badge>
+                    <div key={index} className="p-3 border rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{amendment.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{amendment.snippet}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(amendment.source, '_blank')}
+                          className="ml-2 flex-shrink-0"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

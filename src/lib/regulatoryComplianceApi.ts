@@ -21,13 +21,19 @@ export interface RegulatorySource {
   relevance: string;
 }
 
+export interface RegulatoryAmendment {
+  source: string;
+  title: string;
+  snippet: string;
+}
+
 export interface RegulatoryQueryResponse {
   query_id: string;
   answer: string;
   confidence_score: number;
   sources: RegulatorySource[];
   related_sections: string[];
-  amendments_found: string[];
+  amendments_found: RegulatoryAmendment[];
   processing_time_ms: number;
   search_provider: string;
   }
