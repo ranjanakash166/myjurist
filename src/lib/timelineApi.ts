@@ -23,6 +23,19 @@ export interface TimelineResponse {
   processing_time_ms: number;
   summary: string;
   created_at: string;
+  documents?: TimelineDocument[];
+}
+
+export interface TimelineDocument {
+  id: string | null;
+  filename: string;
+  file_size: number | null;
+  content_type: string | null;
+  upload_timestamp: string | null;
+  total_chunks: number | null;
+  total_tokens: number | null;
+  processing_status: string;
+  source_type: string;
 }
 
 // Enhanced Timeline Interfaces
@@ -80,6 +93,7 @@ export interface EnhancedTimelineResponse {
   events: EnhancedTimelineEvent[];
   summary: TimelineSummary;
   statistics: TimelineStatistics;
+  documents?: TimelineDocument[];
 }
 
 export interface TimelineListItem {
@@ -241,6 +255,71 @@ export class TimelineApi {
     };
     
     return JSON.stringify(exportData, null, 2);
+  }
+
+  async getTimelineDocuments(timelineId: string): Promise<TimelineDocument[]> {
+    const response = await fetch(`${this.baseUrl}/timeline/${timelineId}/documents`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch timeline documents');
+    }
+
+    const data = await response.json();
+    
+    // Handle the new response structure where documents are nested
+    if (data.documents && Array.isArray(data.documents)) {
+      return data.documents;
+    }
+    
+    // Fallback: if the response is directly an array of documents
+    if (Array.isArray(data)) {
+      return data;
+    }
+    
+    // If no documents found, return empty array
+    return [];
+  }
+
+  async downloadDocument(documentId: string): Promise<Blob> {
+    const response = await fetch(`${this.baseUrl}/documents/${documentId}/download`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.detail?.[0]?.msg || 'Failed to download document');
+    }
+
+    return response.blob();
+  }
+
+  async getDocumentUrl(documentId: string): Promise<string> {
+    const response = await fetch(`${this.baseUrl}/documents/${documentId}/url`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.detail?.[0]?.msg || 'Failed to get document URL');
+    }
+
+    const data = await response.json();
+    return data.url;
+  }
+
+  async deleteDocument(documentId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/documents/${documentId}`, {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.detail?.[0]?.msg || 'Failed to delete document');
+    }
   }
 }
 
