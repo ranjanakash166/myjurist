@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
-import { createTimelineApi, TimelineListItem, EnhancedTimelineResponse } from "../../../lib/timelineApi";
+import { createTimelineApi, TimelineListItem, EnhancedTimelineResponse, TimelineDocument } from "../../../lib/timelineApi";
 import { validateAndLogDate } from "../../../lib/utils";
 import TimelineUploader from "./TimelineUploader";
 import TimelineResults from "./TimelineResults";
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Eye, Download, FileText, Check, Plus, Upload, Clock, CheckCircle, AlertTriangle, Calendar, List, Trash2 } from "lucide-react";
+import { Eye, Download, FileText, Check, Plus, Upload, Clock, CheckCircle, AlertTriangle, Calendar, List, Trash2, X } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 
 interface TimelineEvent {
@@ -40,6 +40,7 @@ interface TimelineResponse {
   processing_time_ms: number;
   summary: string;
   created_at: string;
+  documents?: TimelineDocument[];
 }
 
 export default function TimelineExtractorPage() {
@@ -213,9 +214,25 @@ export default function TimelineExtractorPage() {
         }
       });
       
+      // Fetch documents for this timeline
+      try {
+        const documents = await timelineApi.getTimelineDocuments(timeline.timeline_id);
+        // Add documents to the timeline data
+        data.documents = documents;
+      } catch (docErr: any) {
+        console.warn('Failed to fetch documents:', docErr);
+        // Don't fail the entire operation if documents can't be fetched
+        data.documents = [];
+      }
+      
       setTimelineResult(data);
       setEnhancedTimelineResult(null); // Clear enhanced timeline result
       setTab('new'); // Switch to new tab to show the timeline
+      
+      // Update URL to include timeline ID for persistence
+      const url = new URL(window.location.href);
+      url.searchParams.set('timeline', timeline.timeline_id);
+      window.history.replaceState({}, '', url.toString());
     } catch (err: any) {
       console.error('Error fetching timeline:', err);
       setTimelinesError(err.message || 'Failed to load timeline');
@@ -227,6 +244,16 @@ export default function TimelineExtractorPage() {
     } finally {
       setTimelinesLoading(false);
     }
+  };
+
+  const clearTimelineResult = () => {
+    setSelectedTimeline(null);
+    setTimelineResult(null);
+    setEnhancedTimelineResult(null);
+    // Clear timeline from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('timeline');
+    window.history.replaceState({}, '', url.toString());
   };
 
   const handleDeleteTimeline = async (timelineId: string) => {
@@ -242,9 +269,7 @@ export default function TimelineExtractorPage() {
       
       // If the deleted timeline was selected, clear the selection
       if (selectedTimeline?.timeline_id === timelineId) {
-        setSelectedTimeline(null);
-        setTimelineResult(null);
-        setEnhancedTimelineResult(null);
+        clearTimelineResult();
       }
     } catch (err: any) {
       toast({ 
@@ -262,6 +287,33 @@ export default function TimelineExtractorPage() {
     }
   }, [tab, historyPage, historyPageSize]);
 
+  // Restore timeline result after page refresh if there's a selected timeline
+  useEffect(() => {
+    const restoreTimelineFromHistory = async () => {
+      // Check if we have a timeline ID in localStorage or URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const timelineId = urlParams.get('timeline');
+      
+      if (timelineId && !timelineResult) {
+        try {
+          // Find the timeline in our list
+          const timeline = timelines.find(t => t.timeline_id === timelineId);
+          if (timeline) {
+            setSelectedTimeline(timeline);
+            await handleSelectTimeline(timeline);
+          }
+        } catch (err) {
+          console.warn('Failed to restore timeline from URL:', err);
+        }
+      }
+    };
+
+    // Only run this effect after timelines have been fetched
+    if (timelines.length > 0) {
+      restoreTimelineFromHistory();
+    }
+  }, [timelines, timelineResult]);
+
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
       <Tabs value={tab} onValueChange={(value) => {
@@ -274,8 +326,9 @@ export default function TimelineExtractorPage() {
           setTimelineTitle("");
           // Don't clear timeline results here as they might be loaded from history
         } else if (newTab === 'history') {
-          setSelectedTimeline(null);
           setTimelinesError(null);
+          // Clear timeline result and URL when switching to history tab
+          clearTimelineResult();
         }
       }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-auto">
@@ -356,6 +409,17 @@ export default function TimelineExtractorPage() {
                       <CheckCircle className="w-3 h-3 mr-1" />
                       {selectedTimeline ? 'Timeline from History' : 'Timeline Generated'}
                     </Badge>
+                    {selectedTimeline && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearTimelineResult}
+                        className="h-8 px-3 text-xs"
+                      >
+                        <X className="w-3 h-3 mr-1" />
+                        Clear
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -387,6 +451,15 @@ export default function TimelineExtractorPage() {
                       <CheckCircle className="w-3 h-3 mr-1" />
                       Enhanced Timeline
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearTimelineResult}
+                      className="h-8 px-3 text-xs"
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      Clear
+                    </Button>
                   </div>
                 </div>
               </CardHeader>

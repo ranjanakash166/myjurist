@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { Paperclip, Upload, FileText, Calendar, Settings, Filter, X } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Paperclip, Upload, FileText, Calendar, Settings, Filter, X, Eye, Download, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import DocumentViewerModal from "../../../components/DocumentViewerModal";
 
 interface TimelineUploaderProps {
   files: File[];
@@ -41,6 +42,8 @@ export default function TimelineUploader({
   error
 }: TimelineUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleRemoveFile = (index: number) => {
     const newFiles = files.filter((_, i) => i !== index);
@@ -51,6 +54,28 @@ export default function TimelineUploader({
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
     onFileChange(syntheticEvent);
+  };
+
+  const handleViewFile = (file: File) => {
+    setSelectedFile(file);
+    setIsModalOpen(true);
+  };
+
+  const handleDownloadFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleOpenFileInNewTab = (file: File) => {
+    const url = URL.createObjectURL(file);
+    window.open(url, '_blank');
+    // Note: URL will be revoked when the page is closed
   };
 
   return (
@@ -120,19 +145,55 @@ export default function TimelineUploader({
                     <FileText className="w-5 h-5 text-primary flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" title={file.name}>{file.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(file.size / 1024).toFixed(1)} KB
-                      </p>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{(file.size / 1024).toFixed(1)} KB</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {file.type || 'Unknown'}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFile(idx)}
-                    className="p-1 hover:bg-destructive/10 rounded-full transition-colors"
-                    disabled={processing}
-                  >
-                    <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleViewFile(file)}
+                      className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-full transition-colors"
+                      disabled={processing}
+                      title="View File"
+                    >
+                      <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleOpenFileInNewTab(file)}
+                      className="p-1 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-full transition-colors"
+                      disabled={processing}
+                      title="Open in New Tab"
+                    >
+                      <ExternalLink className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadFile(file)}
+                      className="p-1 hover:bg-purple-100 dark:hover:bg-purple-900/20 rounded-full transition-colors"
+                      disabled={processing}
+                      title="Download File"
+                    >
+                      <Download className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(idx)}
+                      className="p-1 hover:bg-destructive/10 rounded-full transition-colors"
+                      disabled={processing}
+                      title="Remove File"
+                    >
+                      <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -259,6 +320,21 @@ export default function TimelineUploader({
           </div>
         </div>
       </div>
+
+      {/* Document Viewer Modal */}
+      {selectedFile && (
+        <DocumentViewerModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedFile(null);
+          }}
+          documentUrl={URL.createObjectURL(selectedFile)}
+          filename={selectedFile.name}
+          fileType={selectedFile.type}
+          fileSize={selectedFile.size}
+        />
+      )}
     </div>
   );
 } 
