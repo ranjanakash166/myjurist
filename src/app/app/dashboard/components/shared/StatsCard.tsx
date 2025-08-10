@@ -49,21 +49,21 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         className={`bg-white dark:bg-neutral-800 shadow-sm border ${colors.border} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
         onClick={onClick}
       >
-        <CardContent className="p-6">
+        <CardContent className="p-3">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+            <div className="flex-1 min-w-0 pr-2">
+              <h3 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 leading-tight">
                 {title}
               </h3>
-              <div className={`text-2xl font-bold ${colors.value} mb-1`}>
+              <div className={`text-lg font-bold ${colors.value} mb-0.5 leading-tight`}>
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
                 {description}
               </p>
             </div>
-            <div className={`w-12 h-12 rounded-full ${colors.bg} flex items-center justify-center`}>
-              <div className={`w-6 h-6 rounded-full ${colors.value.replace('text-', 'bg-')} opacity-20`}></div>
+            <div className={`w-8 h-8 rounded-full ${colors.bg} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-4 h-4 rounded-full ${colors.value.replace('text-', 'bg-')} opacity-20`}></div>
             </div>
           </div>
         </CardContent>
