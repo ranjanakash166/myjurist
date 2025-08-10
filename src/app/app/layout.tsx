@@ -261,7 +261,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-16 pt-16 md:pt-0">
+      <main className="flex-1 md:ml-16 pt-16 md:pt-0 overflow-x-hidden">
         {children}
       </main>
       <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />

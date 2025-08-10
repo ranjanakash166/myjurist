@@ -16,24 +16,24 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({
   if (isMobile) {
     return (
       <div
-        className={`flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-[1.01] hover:shadow-md transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+        className={`flex items-center justify-between p-2.5 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-[1.01] hover:shadow-md transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
         onClick={onClick}
       >
-        <div className="flex items-center space-x-3 flex-1 min-w-0">
-          <div className="text-xl flex-shrink-0">
+        <div className="flex items-center space-x-2 flex-1 min-w-0">
+          <div className="text-base flex-shrink-0">
             {getActivityIcon(activity.type)}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm truncate">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-xs truncate leading-tight">
               {activity.title}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
               {formatDate(activity.timestamp)}
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2 flex-shrink-0">
-          <Badge className={`text-xs px-2 py-1 ${getStatusColor(activity.status)}`}>
+        <div className="flex items-center space-x-1 flex-shrink-0 ml-1.5">
+          <Badge className={`text-xs px-1.5 py-0.5 ${getStatusColor(activity.status)}`}>
             {activity.status}
           </Badge>
         </div>
