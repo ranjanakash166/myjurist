@@ -85,7 +85,7 @@ const RequestDemoPage: React.FC = () => {
 
       {/* Right Side - Demo Request Form */}
       <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
-        <div className="w-full max-w-lg">
+        <div className="w-full">
           {/* Mobile Header */}
           <div className="lg:hidden text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
