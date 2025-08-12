@@ -8,7 +8,7 @@ const HeroSection: React.FC = () => {
   const heroRef = useScrollAnimation();
 
   const handleRequestDemo = () => {
-    window.location.href = '/contact';
+    window.location.href = '/request-demo';
   };
 
   return (
@@ -77,6 +77,7 @@ const HeroSection: React.FC = () => {
           <Button 
             variant="outline"
             size="lg"
+            onClick={() => window.location.href = '/contact'}
             className="group px-8 py-6 md:py-4 text-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center w-full md:w-auto min-w-[200px] border-2 hover:border-primary/50 hover:bg-primary/5 h-16 md:h-12"
           >
             <span>Learn More</span>

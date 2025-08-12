@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, MessageCircle, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
@@ -58,6 +58,12 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
     }
   };
 
+  // Separate navigation items
+  const internalNavItems = navigation.filter(item => !item.href);
+  const contactItem = navigation.find(item => item.href === '/contact');
+  const requestDemoItem = navigation.find(item => item.href === '/request-demo');
+  const loginItem = navigation.find(item => item.href === '/login');
+
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
       isScrolled 
@@ -66,47 +72,59 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
     }`}>
       <div className="container-legal">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <div className="flex items-center space-x-3 group cursor-pointer">
-            <div className="relative">
-              <Image 
-                src="/images/myjurist-logo.png" 
-                alt="My Jurist Logo" 
-                width={50} 
-                height={50} 
-                className="group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:bg-accent/20 transition-all duration-300"></div>
-            </div>
-            <span className="font-bold text-foreground text-lg md:text-xl">
-              My Jurist
-            </span>
+          {/* Left Section - Logo */}
+          <div className="flex items-center pr-8">
+            <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
+              <div className="relative w-12 h-12 md:w-14 md:h-14">
+                <Image 
+                  src="/images/myjurist-logo.png" 
+                  alt="My Jurist Logo" 
+                  width={56} 
+                  height={56} 
+                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:bg-accent/20 transition-all duration-300"></div>
+              </div>
+              <span className="font-bold text-foreground text-lg md:text-xl whitespace-nowrap">
+                My Jurist
+              </span>
+            </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
-            <NavigationMenu>
-              <NavigationMenuList>
-                {navigation.filter(item => !item.href || item.href === '/contact').map((item) => (
-                  <NavigationMenuItem key={item.id}>
-                    <Button
-                      variant={activeSection === item.id ? "default" : "ghost"}
-                      onClick={() => handleNavClick(item)}
-                      className="transition-all duration-300"
-                    >
-                      {item.label}
-                    </Button>
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
-
-            {/* Auth Buttons */}
-            <div className="flex items-center gap-2">
-              <Button asChild>
-                <Link href="/login">Login</Link>
+          {/* Center Section - Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {internalNavItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeSection === item.id ? "default" : "ghost"}
+                onClick={() => handleNavClick(item)}
+                className="transition-all duration-300 whitespace-nowrap"
+              >
+                {item.label}
               </Button>
-            </div>
+            ))}
+          </div>
+
+          {/* Right Section - Action Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Contact Us Button */}
+            {contactItem && (
+              <Button
+                variant="outline"
+                onClick={() => handleNavClick(contactItem)}
+                className="group relative overflow-hidden border-primary hover:border-primary/80 transition-all duration-300 bg-primary/5 hover:bg-primary/10 shadow-md hover:shadow-lg transform hover:scale-105"
+              >
+                <span className="text-primary font-semibold group-hover:text-primary/90 transition-colors duration-300">
+                  Contact Us
+                </span>
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
+              </Button>
+            )}
+
+            {/* Login Button */}
+            <Button asChild>
+              <Link href="/login">Login</Link>
+            </Button>
 
             {/* Theme Toggle */}
             <ThemeToggle />
@@ -142,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                   
                   {/* Navigation Items */}
                   <nav className="flex-1 p-4 space-y-2">
-                    {navigation.filter(item => !item.href || item.href === '/contact').map((item) => (
+                    {internalNavItems.map((item) => (
                       <Button
                         key={item.id}
                         variant={activeSection === item.id ? "default" : "ghost"}
@@ -156,6 +174,19 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                         {item.label}
                       </Button>
                     ))}
+                    
+                    {/* Contact Us Mobile */}
+                    {contactItem && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleNavClick(contactItem)}
+                        className="w-full justify-start h-12 text-base font-medium border-primary bg-primary/5 hover:bg-primary/10 shadow-md"
+                      >
+                        <span className="text-primary font-semibold">
+                          Contact Us
+                        </span>
+                      </Button>
+                    )}
                   </nav>
                   
                   {/* Auth Section */}

@@ -28,7 +28,8 @@ const MyJuristApp = () => {
     { id: 'advantage', label: 'Advantage' },
     { id: 'pricing', label: 'Pricing' },
     { id: 'strategy', label: 'Strategy' },
-    { id: 'contact', label: 'Contact', href: '/contact' },
+    { id: 'contact', label: 'Contact Us', href: '/contact' },
+    { id: 'request-demo', label: 'Request Demo', href: '/request-demo' },
     { id: 'login', label: 'Login', href: '/login' }
   ];
 
