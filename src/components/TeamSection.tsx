@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Mail, Linkedin, Twitter } from 'lucide-react';
+import { Users, Mail, Linkedin, Twitter, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -174,7 +174,7 @@ const TeamSection: React.FC = () => {
           
           <div className="text-center">
             <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Users className="h-8 w-8 text-accent-foreground" />
+              <Sparkles className="h-8 w-8 text-accent-foreground" />
             </div>
             <h4 className="text-xl font-bold text-accent mb-2">Innovation</h4>
             <p className="text-muted-foreground">Pioneering AI solutions for legal industry</p>

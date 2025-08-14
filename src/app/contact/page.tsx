@@ -112,7 +112,7 @@ const ContactPage: React.FC = () => {
 
                   {/* Gaurav */}
                   <div className="text-center">
-                    <div className="w-32 h-32 bg-accent rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
+                    <div className="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
                       <Image 
                         src="/images/gaurav.jpeg" 
                         alt="Gaurav Suman" 
@@ -125,7 +125,7 @@ const ContactPage: React.FC = () => {
                           target.nextElementSibling?.classList.remove('hidden');
                         }}
                       />
-                      <Users className="h-16 w-16 text-accent-foreground hidden" />
+                      <Users className="h-16 w-16 text-primary-foreground hidden" />
                     </div>
                     <h3 className="text-xl font-bold text-foreground mb-2">Gaurav Suman</h3>
                     <p className="text-foreground font-semibold mb-2">Co-Founder & CTO</p>
@@ -136,14 +136,14 @@ const ContactPage: React.FC = () => {
                       Reach out for technical inquiries and support.
                     </p>
                     <div className="flex justify-center space-x-3">
-                      <a href="mailto:support@myjurist.io" className="p-2 bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors">
-                        <Mail className="h-4 w-4 text-accent" />
+                      <a href="mailto:support@myjurist.io" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
+                        <Mail className="h-4 w-4 text-primary" />
                       </a>
-                      <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors">
-                        <Linkedin className="h-4 w-4 text-accent" />
+                      <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
+                        <Linkedin className="h-4 w-4 text-primary" />
                       </a>
-                      <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-accent/10 rounded-lg hover:bg-accent/20 transition-colors">
-                        <Twitter className="h-4 w-4 text-accent" />
+                      <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
+                        <Twitter className="h-4 w-4 text-primary" />
                       </a>
                     </div>
                   </div>
@@ -199,10 +199,10 @@ const ContactPage: React.FC = () => {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="h-8 w-8 text-accent-foreground" />
+                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="h-8 w-8 text-primary-foreground" />
                   </div>
-                  <h4 className="text-xl font-bold text-accent mb-2">Innovation</h4>
+                  <h4 className="text-xl font-bold text-primary mb-2">Innovation</h4>
                   <p className="text-muted-foreground">Pioneering AI solutions for legal industry</p>
                 </div>
                 
