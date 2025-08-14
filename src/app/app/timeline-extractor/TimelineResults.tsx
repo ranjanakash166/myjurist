@@ -126,10 +126,6 @@ export default function TimelineResults({ timeline, onExportCSV }: TimelineResul
     setExpandedEvents(newExpanded);
   };
 
-  const formatDate = (dateString: string) => {
-    return formatDateSafely(dateString);
-  };
-
   const getEventTypeColor = (eventType: string) => {
     if (!eventType || eventType.trim() === '') {
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
@@ -320,7 +316,7 @@ export default function TimelineResults({ timeline, onExportCSV }: TimelineResul
                   <React.Fragment key={index}>
                     <TableRow>
                       <TableCell className="font-medium">
-                        {formatDate(event.date)}
+                        {event.date}
                       </TableCell>
                       <TableCell className="font-medium max-w-[200px]">
                         <div className="truncate" title={event.event_title}>

@@ -356,10 +356,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
                   <React.Fragment key={event.id}>
                     <TableRow>
                       <TableCell className="font-medium">
-                        <div className="space-y-1">
-                          <div>{event.formatted_date || formatDateSafely(event.date)}</div>
-                          <div className="text-xs text-muted-foreground">{formatDateSafely(event.date, 'Raw: ' + event.date)}</div>
-                        </div>
+                        {event.date}
                       </TableCell>
                       <TableCell className="font-medium max-w-[200px]">
                         <div className="truncate" title={event.event_title}>
