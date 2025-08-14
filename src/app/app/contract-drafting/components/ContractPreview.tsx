@@ -156,20 +156,12 @@ export default function ContractPreview({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Generated</p>
               <p className="font-medium">
                 {new Date(contract.created_at).toLocaleDateString()}
               </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Processing Time</p>
-              <p className="font-medium">{contract.processing_time_ms}ms</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">AI Provider</p>
-              <p className="font-medium">{contract.ai_provider_used || 'N/A'}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Contract ID</p>

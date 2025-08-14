@@ -506,10 +506,6 @@ export default function ContractDraftingPage() {
                 </div>
                 <div className="text-sm text-muted-foreground">
                   <p>Generated: {new Date((generatedContract || selectedHistoryContract)!.created_at).toLocaleString()}</p>
-                  <p>Processing time: {(generatedContract || selectedHistoryContract)!.processing_time_ms}ms</p>
-                  {(generatedContract || selectedHistoryContract)!.ai_provider_used && (
-                    <p>AI Provider: {(generatedContract || selectedHistoryContract)!.ai_provider_used}</p>
-                  )}
                 </div>
               </CardContent>
             </Card>
