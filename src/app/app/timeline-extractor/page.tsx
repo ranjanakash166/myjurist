@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
-import { createTimelineApi, TimelineListItem, EnhancedTimelineResponse, TimelineDocument } from "../../../lib/timelineApi";
+import { createTimelineApi, TimelineListItem, EnhancedTimelineResponse, TimelineDocument, TimelineResponse } from "../../../lib/timelineApi";
 import { validateAndLogDate } from "../../../lib/utils";
 import TimelineUploader from "./TimelineUploader";
 import TimelineResults from "./TimelineResults";
@@ -28,24 +28,7 @@ interface TimelineEvent {
   raw_text: string;
 }
 
-interface TimelineResponse {
-  timeline_id: string;
-  timeline_title: string;
-  description?: string;
-  events: TimelineEvent[];
-  total_events: number;
-  date_range: {
-    [key: string]: string;
-  };
-  document_sources: string[];
-  processing_time_ms: number;
-  summary: string;
-  status: string;
-  ai_provider_used?: string;
-  created_at: string;
-  updated_at: string;
-  documents?: TimelineDocument[];
-}
+
 
 export default function TimelineExtractorPage() {
   const { getAuthHeaders } = useAuth();
