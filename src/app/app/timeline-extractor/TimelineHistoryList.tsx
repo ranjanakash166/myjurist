@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { TimelineListItem, TimelineDocument, TimelineDocumentsResponse, createTimelineApi } from "../../../lib/timelineApi";
 import { formatDateSafely, getNormalizedDate } from "../../../lib/utils";
 import DocumentList from "../../../components/DocumentList";
+import DocumentViewerModal from "../../../components/DocumentViewerModal";
 import { useAuth } from "../../../components/AuthProvider";
 import { toast } from '@/hooks/use-toast';
 
@@ -37,6 +38,11 @@ export default function TimelineHistoryList({
   const [timelineDocumentsMap, setTimelineDocumentsMap] = useState<Map<string, TimelineDocument[]>>(new Map());
   const [documentsLoadingMap, setDocumentsLoadingMap] = useState<Map<string, boolean>>(new Map());
   const [documentsErrorMap, setDocumentsErrorMap] = useState<Map<string, string | null>>(new Map());
+  
+  // Modal state
+  const [selectedDocument, setSelectedDocument] = useState<TimelineDocument | null>(null);
+  const [documentUrl, setDocumentUrl] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const totalPages = Math.ceil(totalCount / pageSize);
   const startItem = (page - 1) * pageSize + 1;
@@ -303,6 +309,37 @@ export default function TimelineHistoryList({
                                   // Download using the new timeline-specific endpoint
                                   const blob = await timelineApi.downloadTimelineDocument(timeline.timeline_id, doc.document_id);
                                   const url = window.URL.createObjectURL(blob);
+                                  
+                                  // Set modal state
+                                  setSelectedDocument(doc);
+                                  setDocumentUrl(url);
+                                  setIsModalOpen(true);
+                                  
+                                  toast({
+                                    title: 'Document Loaded',
+                                    description: `${doc.filename} is ready for viewing.`,
+                                  });
+                                } catch (err: any) {
+                                  toast({
+                                    title: 'View Failed',
+                                    description: 'Failed to load document. Please try again.',
+                                    variant: 'destructive',
+                                  });
+                                }
+                              }}
+                              className="h-6 w-6 p-0"
+                              title="View Document"
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  // Download using the new timeline-specific endpoint
+                                  const blob = await timelineApi.downloadTimelineDocument(timeline.timeline_id, doc.document_id);
+                                  const url = window.URL.createObjectURL(blob);
                                   const link = document.createElement('a');
                                   link.href = url;
                                   link.download = doc.filename;
@@ -394,6 +431,26 @@ export default function TimelineHistoryList({
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <DocumentViewerModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedDocument(null);
+            // Clean up the blob URL when closing
+            if (documentUrl) {
+              window.URL.revokeObjectURL(documentUrl);
+              setDocumentUrl('');
+            }
+          }}
+          documentUrl={documentUrl}
+          filename={selectedDocument.filename}
+          fileType={selectedDocument.content_type}
+          fileSize={selectedDocument.file_size}
+        />
       )}
     </div>
   );
