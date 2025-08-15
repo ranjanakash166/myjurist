@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, getLegalDocument, generateAISummary, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryRequest, AISummaryResponse } from "@/lib/legalResearchApi";
+import { searchLegalResearch, getLegalDocument, generateAISummary, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryRequest, AISummaryResponse, DownloadPDFRequest } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
 
@@ -27,6 +27,7 @@ export default function LegalResearchPage() {
   const [isLoadingDocument, setIsLoadingDocument] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [loadingViewSource, setLoadingViewSource] = useState<string | null>(null);
+  const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   
   // New state variables for AI Summary
   const [aiSummary, setAiSummary] = useState<AISummaryResponse | null>(null);
@@ -162,6 +163,7 @@ export default function LegalResearchPage() {
       
       const document = await getLegalDocument(documentId, authToken);
       setSelectedDocument(document);
+      setCurrentDocumentId(documentId); // Store the document ID
       
       toast({
         title: "Document loaded",
@@ -180,111 +182,48 @@ export default function LegalResearchPage() {
   };
 
   const handleDownloadPDF = async (documentData: DocumentResponse) => {
+    if (!currentDocumentId) {
+      toast({
+        title: "Error",
+        description: "Document ID not found. Please try viewing the document again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGeneratingPDF(true);
     
     try {
-      // Dynamically import jsPDF
-      const jsPDF = (await import('jspdf')).default;
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      // Create a new PDF document
-      const doc = new jsPDF('p', 'mm', 'a4');
+      const downloadRequest: DownloadPDFRequest = {
+        document_id: currentDocumentId,
+        include_header: true,
+        font_size: 12
+      };
+
+      const blob = await downloadLegalDocumentPDF(downloadRequest, authToken);
       
-      // Set document properties
-      doc.setProperties({
-        title: documentData.title,
-        author: 'My Jurist',
-        subject: 'Legal Research Document',
-        keywords: 'legal, research, document, myjurist'
-      });
-
-      let yPosition = 30; // Start position
-
-      // Add header
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(44, 62, 80);
-      
-      const companyText = 'My Jurist';
-      const companyWidth = doc.getTextWidth(companyText);
-      const companyX = (doc.internal.pageSize.getWidth() - companyWidth) / 2;
-      doc.text(companyText, companyX, yPosition);
-      yPosition += 10;
-
-      // Add title
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(52, 73, 94);
-      
-      const titleWidth = doc.getTextWidth(documentData.title);
-      const titleX = (doc.internal.pageSize.getWidth() - titleWidth) / 2;
-      doc.text(documentData.title, titleX, yPosition);
-      yPosition += 15;
-
-      // Add metadata
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(44, 62, 80);
-      doc.text('Document Information', 30, yPosition);
-      yPosition += 8;
-
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(52, 73, 94);
-      doc.text('Source File:', 30, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(44, 62, 80);
-      doc.text(documentData.source_file, 65, yPosition);
-      yPosition += 5;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(52, 73, 94);
-      doc.text('Content Length:', 30, yPosition);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(44, 62, 80);
-      doc.text(`${documentData.content_length} characters`, 65, yPosition);
-      yPosition += 15;
-
-      // Add content with proper text wrapping
-      const contentWidth = doc.internal.pageSize.getWidth() - 60; // 30mm margins on each side
-      const lines = doc.splitTextToSize(documentData.full_content, contentWidth);
-      
-      lines.forEach((line) => {
-        // Check if we need a new page
-        if (yPosition > doc.internal.pageSize.getHeight() - 30) {
-          doc.addPage();
-          yPosition = 30;
-        }
-        
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(44, 62, 80);
-        doc.text(line, 30, yPosition);
-        yPosition += 6;
-      });
-
-      // Add footer
-      const footerText = 'Generated by My Jurist - Legal Research Platform';
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(127, 140, 141);
-      
-      const footerWidth = doc.getTextWidth(footerText);
-      const footerX = (doc.internal.pageSize.getWidth() - footerWidth) / 2;
-      doc.text(footerText, footerX, doc.internal.pageSize.getHeight() - 15);
-
-      // Download PDF
-      const filename = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
-      doc.save(filename);
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
       toast({
         title: "PDF downloaded",
         description: "Document has been downloaded as PDF",
       });
-    } catch (err) {
-      console.error('PDF generation error:', err);
+    } catch (err: any) {
+      console.error('PDF download error:', err);
       toast({
-        title: "PDF generation failed",
-        description: "Failed to generate PDF. Please try again.",
+        title: "PDF download failed",
+        description: err.message || "Failed to download PDF. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -863,7 +802,10 @@ export default function LegalResearchPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setSelectedDocument(null)}
+                  onClick={() => {
+                    setSelectedDocument(null);
+                    setCurrentDocumentId(null);
+                  }}
                 >
                   <X className="w-4 h-4" />
                 </Button>

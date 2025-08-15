@@ -130,6 +130,12 @@ export interface DocumentResponse {
   retrieval_time_ms: number;
 }
 
+export interface DownloadPDFRequest {
+  document_id: string;
+  include_header?: boolean;
+  font_size?: number;
+}
+
 export const getLegalDocument = async (
   documentId: string,
   authToken: string
@@ -156,4 +162,32 @@ export const getLegalDocument = async (
   }
 
   return response.json();
+};
+
+export const downloadLegalDocumentPDF = async (
+  request: DownloadPDFRequest,
+  authToken: string
+): Promise<Blob> => {
+  const response = await fetch(`${API_BASE_URL}/legal-research/document/pdf`, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    if (response.status === 422) {
+      const errorData: ValidationError = await response.json();
+      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication failed. Please log in again.');
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.blob();
 }; 
