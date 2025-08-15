@@ -31,6 +31,7 @@ interface TimelineEvent {
 interface TimelineResponse {
   timeline_id: string;
   timeline_title: string;
+  description?: string;
   events: TimelineEvent[];
   total_events: number;
   date_range: {
@@ -39,7 +40,10 @@ interface TimelineResponse {
   document_sources: string[];
   processing_time_ms: number;
   summary: string;
+  status: string;
+  ai_provider_used?: string;
   created_at: string;
+  updated_at: string;
   documents?: TimelineDocument[];
 }
 
@@ -216,9 +220,9 @@ export default function TimelineExtractorPage() {
       
       // Fetch documents for this timeline
       try {
-        const documents = await timelineApi.getTimelineDocuments(timeline.timeline_id);
+        const documentsResponse = await timelineApi.getTimelineDocuments(timeline.timeline_id);
         // Add documents to the timeline data
-        data.documents = documents;
+        data.documents = documentsResponse.documents;
       } catch (docErr: any) {
         console.warn('Failed to fetch documents:', docErr);
         // Don't fail the entire operation if documents can't be fetched

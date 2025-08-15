@@ -12,8 +12,10 @@ export interface TimelineEvent {
 }
 
 export interface TimelineResponse {
+  documents: TimelineDocument[];
   timeline_id: string;
   timeline_title: string;
+  description?: string;
   events: TimelineEvent[];
   total_events: number;
   date_range: {
@@ -22,20 +24,30 @@ export interface TimelineResponse {
   document_sources: string[];
   processing_time_ms: number;
   summary: string;
+  status: string;
+  ai_provider_used?: string;
   created_at: string;
-  documents?: TimelineDocument[];
+  updated_at: string;
 }
 
 export interface TimelineDocument {
-  id: string | null;
+  document_id: string;
   filename: string;
-  file_size: number | null;
-  content_type: string | null;
-  upload_timestamp: string | null;
-  total_chunks: number | null;
-  total_tokens: number | null;
-  processing_status: string;
-  source_type: string;
+  file_size: number;
+  content_type: string;
+  added_at: string;
+  processing_order: number;
+  blob_raw_path: string;
+  blob_processed_path: string;
+  has_blob_storage: boolean;
+}
+
+export interface TimelineDocumentsResponse {
+  timeline_id: string;
+  timeline_title: string;
+  total_documents: number;
+  documents: TimelineDocument[];
+  legacy_timeline: boolean;
 }
 
 // Enhanced Timeline Interfaces
@@ -105,6 +117,7 @@ export interface TimelineListItem {
   status: string;
   start_date: string;
   end_date: string;
+  document_count: number;
 }
 
 export interface TimelineListResponse {
@@ -257,7 +270,7 @@ export class TimelineApi {
     return JSON.stringify(exportData, null, 2);
   }
 
-  async getTimelineDocuments(timelineId: string): Promise<TimelineDocument[]> {
+  async getTimelineDocuments(timelineId: string): Promise<TimelineDocumentsResponse> {
     const response = await fetch(`${this.baseUrl}/timeline/${timelineId}/documents`, {
       headers: this.getAuthHeaders(),
     });
@@ -267,22 +280,23 @@ export class TimelineApi {
       throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch timeline documents');
     }
 
-    const data = await response.json();
-    
-    // Handle the new response structure where documents are nested
-    if (data.documents && Array.isArray(data.documents)) {
-      return data.documents;
-    }
-    
-    // Fallback: if the response is directly an array of documents
-    if (Array.isArray(data)) {
-      return data;
-    }
-    
-    // If no documents found, return empty array
-    return [];
+    return response.json();
   }
 
+  async downloadTimelineDocument(timelineId: string, documentId: string): Promise<Blob> {
+    const response = await fetch(`${this.baseUrl}/timeline/${timelineId}/documents/${documentId}/download`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error?.detail?.[0]?.msg || 'Failed to download document');
+    }
+
+    return response.blob();
+  }
+
+  // Legacy methods for backward compatibility
   async downloadDocument(documentId: string): Promise<Blob> {
     const response = await fetch(`${this.baseUrl}/documents/${documentId}/download`, {
       headers: this.getAuthHeaders(),

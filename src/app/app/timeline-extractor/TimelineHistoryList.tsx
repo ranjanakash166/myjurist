@@ -3,7 +3,7 @@ import { Calendar, FileText, Clock, Download, Trash2, Eye, ExternalLink, FolderO
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TimelineListItem, TimelineDocument, createTimelineApi } from "../../../lib/timelineApi";
+import { TimelineListItem, TimelineDocument, TimelineDocumentsResponse, createTimelineApi } from "../../../lib/timelineApi";
 import { formatDateSafely, getNormalizedDate } from "../../../lib/utils";
 import DocumentList from "../../../components/DocumentList";
 import { useAuth } from "../../../components/AuthProvider";
@@ -97,9 +97,9 @@ export default function TimelineHistoryList({
       setDocumentsErrorMap(prev => new Map(prev).set(timelineId, null));
       
       try {
-        const documents = await timelineApi.getTimelineDocuments(timelineId);
-        console.log('Fetched documents for timeline:', timelineId, documents);
-        setTimelineDocumentsMap(prev => new Map(prev).set(timelineId, documents));
+        const documentsResponse = await timelineApi.getTimelineDocuments(timelineId);
+        console.log('Fetched documents for timeline:', timelineId, documentsResponse);
+        setTimelineDocumentsMap(prev => new Map(prev).set(timelineId, documentsResponse.documents));
       } catch (err: any) {
         console.warn('Failed to fetch documents:', err);
         setDocumentsErrorMap(prev => new Map(prev).set(timelineId, err.message || 'Failed to fetch documents'));
@@ -179,12 +179,10 @@ export default function TimelineHistoryList({
                           <ExternalLink className="w-4 h-4" />
                           <span>{formatDateRange(timeline.start_date, timeline.end_date)}</span>
                         </div>
-                        {timelineDocumentsMap.has(timeline.timeline_id) && (
-                          <div className="flex items-center gap-1">
-                            <FolderOpen className="w-4 h-4" />
-                            <span>{Array.isArray(timelineDocumentsMap.get(timeline.timeline_id)) ? timelineDocumentsMap.get(timeline.timeline_id)?.length || 0 : 0} documents</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1">
+                          <FolderOpen className="w-4 h-4" />
+                          <span>{timeline.document_count} documents</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -249,15 +247,6 @@ export default function TimelineHistoryList({
                     </Button>
                   </div>
                   
-                  {/* Info about document actions */}
-                  {timelineDocumentsMap.get(timeline.timeline_id)?.some(doc => !doc.id) && (
-                    <div className="mb-3 p-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md">
-                      <p className="text-xs text-amber-700 dark:text-amber-300">
-                        ⚠️ Some documents may not have IDs assigned yet. View, download, and delete actions will be available once IDs are assigned.
-                      </p>
-                    </div>
-                  )}
-                  
                   {documentsLoadingMap.get(timeline.timeline_id) ? (
                     <div className="flex items-center justify-center py-4">
                       <div className="flex items-center gap-2">
@@ -284,7 +273,7 @@ export default function TimelineHistoryList({
                          console.log('Rendering document:', doc);
                          return (
                         <div
-                          key={doc.id || `doc-${index}`}
+                          key={doc.document_id || `doc-${index}`}
                           className="flex items-center justify-between p-3 bg-background rounded-lg border border-border hover:bg-muted/30 transition-colors"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -300,51 +289,19 @@ export default function TimelineHistoryList({
                                   {doc.content_type || 'Unknown type'}
                                 </Badge>
                                 <span>{doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(1)} MB` : 'Unknown size'}</span>
-                                <span>{doc.upload_timestamp ? new Date(doc.upload_timestamp).toLocaleDateString() : 'Unknown date'}</span>
+                                <span>{doc.added_at ? new Date(doc.added_at).toLocaleDateString() : 'Unknown date'}</span>
                               </div>
                             </div>
                           </div>
                           
                           <div className="flex items-center gap-1 flex-shrink-0">
-                            {!doc.id && (
-                              <Badge variant="outline" className="text-xs text-muted-foreground">
-                                No ID
-                              </Badge>
-                            )}
                             <Button
                               variant="ghost"
                               size="sm"
-                              disabled={!doc.id}
                               onClick={async () => {
-                                if (doc.id) {
-                                  try {
-                                    // Get the document URL first
-                                    const documentUrl = await timelineApi.getDocumentUrl(doc.id);
-                                    window.open(documentUrl, '_blank');
-                                  } catch (err: any) {
-                                    toast({
-                                      title: 'View Failed',
-                                      description: 'Failed to get document URL. Please try again.',
-                                      variant: 'destructive',
-                                    });
-                                  }
-                                }
-                              }}
-                              className={`h-6 w-6 p-0 ${!doc.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              title={doc.id ? "View Document" : "Document ID not available"}
-                            >
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={!doc.id}
-                              onClick={async () => {
-                                if (!doc.id) return;
-
                                 try {
-                                  // Try to download using the API first for better error handling
-                                  const blob = await timelineApi.downloadDocument(doc.id);
+                                  // Download using the new timeline-specific endpoint
+                                  const blob = await timelineApi.downloadTimelineDocument(timeline.timeline_id, doc.document_id);
                                   const url = window.URL.createObjectURL(blob);
                                   const link = document.createElement('a');
                                   link.href = url;
@@ -365,42 +322,10 @@ export default function TimelineHistoryList({
                                   });
                                 }
                               }}
-                              className={`h-6 w-6 p-0 ${!doc.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              title={doc.id ? "Download Document" : "Document ID not available"}
+                              className="h-6 w-6 p-0"
+                              title="Download Document"
                             >
                               <Download className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              disabled={!doc.id}
-                              onClick={async () => {
-                                if (!doc.id) return;
-
-                                if (confirm(`Are you sure you want to delete "${doc.filename}"?`)) {
-                                  try {
-                                    await timelineApi.deleteDocument(doc.id);
-                                    // Remove the document from the local state
-                                    const currentDocs = timelineDocumentsMap.get(timeline.timeline_id) || [];
-                                    const updatedDocs = currentDocs.filter(d => d.id !== doc.id);
-                                    setTimelineDocumentsMap(prev => new Map(prev).set(timeline.timeline_id, updatedDocs));
-                                    toast({
-                                      title: 'Document Deleted',
-                                      description: `${doc.filename} has been successfully deleted.`,
-                                    });
-                                  } catch (err: any) {
-                                    toast({
-                                      title: 'Delete Failed',
-                                      description: err.message || 'Failed to delete document',
-                                      variant: 'destructive',
-                                    });
-                                  }
-                                }
-                              }}
-                              className={`h-6 w-6 p-0 text-destructive hover:text-destructive ${!doc.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              title={doc.id ? "Delete Document" : "Document ID not available"}
-                            >
-                              <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>
                         </div>
