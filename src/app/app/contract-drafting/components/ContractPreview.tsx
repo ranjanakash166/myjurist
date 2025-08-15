@@ -16,6 +16,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { 
   FileText, 
   Download, 
   Copy, 
@@ -27,7 +34,8 @@ import {
   Check,
   FileDown,
   Loader2,
-  Trash2
+  Trash2,
+  ChevronDown
 } from "lucide-react";
 
 interface ContractPreviewProps {
@@ -37,6 +45,7 @@ interface ContractPreviewProps {
   onCopy: () => void;
   onDelete?: () => void;
   showDeleteButton?: boolean;
+  onDownloadContract?: (contractId: string, format: 'pdf' | 'docx') => Promise<void>;
 }
 
 export default function ContractPreview({
@@ -45,7 +54,8 @@ export default function ContractPreview({
   onDownload,
   onCopy,
   onDelete,
-  showDeleteButton = false
+  showDeleteButton = false,
+  onDownloadContract
 }: ContractPreviewProps) {
   const [copied, setCopied] = useState(false);
   const [generatingPDF, setGeneratingPDF] = useState(false);
@@ -58,20 +68,34 @@ export default function ContractPreview({
   };
 
   const handleDownloadPDF = () => {
-    setGeneratingPDF(true);
-    try {
-      const pdfGenerator = createPDFGenerator({
-        title: contract.title,
-        author: 'My Jurist',
-        subject: `${contract.template_type.replace('_', ' ')} Contract`,
-        keywords: ['legal', 'contract', contract.template_type, 'myjurist']
-      });
-      
-      pdfGenerator.downloadPDF(contract);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    } finally {
-      setGeneratingPDF(false);
+    if (onDownloadContract) {
+      // Use the new API endpoint
+      setGeneratingPDF(true);
+      onDownloadContract(contract.contract_id, 'pdf')
+        .finally(() => setGeneratingPDF(false));
+    } else {
+      // Fallback to local PDF generation
+      setGeneratingPDF(true);
+      try {
+        const pdfGenerator = createPDFGenerator({
+          title: contract.title,
+          author: 'My Jurist',
+          subject: `${contract.template_type.replace('_', ' ')} Contract`,
+          keywords: ['legal', 'contract', contract.template_type, 'myjurist']
+        });
+        
+        pdfGenerator.downloadPDF(contract);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+      } finally {
+        setGeneratingPDF(false);
+      }
+    }
+  };
+
+  const handleDownloadDOCX = () => {
+    if (onDownloadContract) {
+      onDownloadContract(contract.contract_id, 'docx');
     }
   };
 
@@ -174,24 +198,58 @@ export default function ContractPreview({
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button
-          onClick={handleDownloadPDF}
-          disabled={generatingPDF}
-          className="flex items-center gap-2"
-        >
-          {generatingPDF ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Generating PDF...
-            </>
-          ) : (
-            <>
-              <FileDown className="w-4 h-4" />
-              Download PDF
-            </>
-          )}
-        </Button>
+      <div className="flex gap-3 flex-wrap">
+        {onDownloadContract ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                disabled={generatingPDF}
+                className="flex items-center gap-2"
+              >
+                {generatingPDF ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <FileDown className="w-4 h-4" />
+                    Download
+                  </>
+                )}
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={handleDownloadPDF}>
+                <FileDown className="w-4 h-4 mr-2" />
+                Download as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownloadDOCX}>
+                <FileDown className="w-4 h-4 mr-2" />
+                Download as DOCX
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            onClick={handleDownloadPDF}
+            disabled={generatingPDF}
+            className="flex items-center gap-2"
+          >
+            {generatingPDF ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <FileDown className="w-4 h-4" />
+                Download PDF
+              </>
+            )}
+          </Button>
+        )}
         
         <Button
           variant="outline"

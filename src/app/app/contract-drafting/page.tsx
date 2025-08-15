@@ -291,6 +291,31 @@ export default function ContractDraftingPage() {
     }
   };
 
+  const handleDownloadContractFromHistory = async (contractId: string, format: 'pdf' | 'docx') => {
+    try {
+      const blob = await contractApi.downloadContract(contractId, format);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contract_${contractId}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download Started",
+        description: `Contract ${format.toUpperCase()} is being downloaded.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Download Failed",
+        description: err.message || 'Failed to download contract. Please try again.',
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -377,6 +402,7 @@ export default function ContractDraftingPage() {
               onCopy={handleCopyToClipboard}
               onDelete={selectedHistoryContract ? () => handleDeleteContract(selectedHistoryContract.contract_id) : undefined}
               showDeleteButton={!!selectedHistoryContract}
+              onDownloadContract={handleDownloadContractFromHistory}
             />
           )}
 

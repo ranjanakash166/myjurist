@@ -35,7 +35,8 @@ import {
   RefreshCw,
   Trash2,
   MoreVertical,
-  Loader2
+  Loader2,
+  FileDown
 } from "lucide-react";
 
 interface ContractHistoryListProps {

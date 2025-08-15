@@ -241,6 +241,29 @@ export class ContractApi {
       throw error;
     }
   }
+
+  // Download contract as PDF or DOCX
+  async downloadContract(contractId: string, format: 'pdf' | 'docx' = 'pdf'): Promise<Blob> {
+    try {
+      const response = await fetch(`${this.baseUrl}/contracts/${contractId}/download?format=${format}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          ...this.getAuthHeaders(),
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error?.detail?.[0]?.msg || `Failed to download contract: ${response.statusText}`);
+      }
+
+      return response.blob();
+    } catch (error) {
+      console.error('Error downloading contract:', error);
+      throw error;
+    }
+  }
 }
 
 // Factory function to create ContractApi instance
