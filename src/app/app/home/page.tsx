@@ -18,7 +18,9 @@ import {
   FolderOpen,
   PenTool,
   Zap,
-  BarChart3
+  BarChart3,
+  FileSearch,
+  Scale
 } from "lucide-react";
 import { useAuth } from "../../../components/AuthProvider";
 
@@ -96,9 +98,9 @@ export default function HomePage() {
 
   const features: FeatureCardProps[] = [
     {
-      title: "Intelligence",
-      description: "AI-Powered Document Analysis & Chat. Search, analyze, and understand legal documents with intelligent AI assistance. Ask follow-up questions and get instant insights.",
-      icon: <Brain className="w-6 h-6" />,
+      title: "Document Analysis",
+      description: "AI-Powered Document Analysis & Chat. Upload, analyze, and understand legal documents with intelligent AI assistance. Ask follow-up questions and get instant insights.",
+      icon: <FileText className="w-6 h-6" />,
       subFeatures: [
         {
           title: "Document Intelligence",
@@ -106,9 +108,9 @@ export default function HomePage() {
           icon: <MessageSquare className="w-4 h-4" />
         },
         {
-          title: "Legal Research",
-          description: "AI-enhanced case law and precedent search",
-          icon: <Search className="w-4 h-4" />
+          title: "AI Analysis",
+          description: "Get instant insights and understanding",
+          icon: <Brain className="w-4 h-4" />
         }
       ],
       ctaText: "Start Analysis",
@@ -116,69 +118,104 @@ export default function HomePage() {
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Repository",
-      description: "Secure Document Storage & Management. Upload, store, and organize thousands of legal documents with advanced search and metadata management.",
-      icon: <Database className="w-6 h-6" />,
+      title: "Patent Analysis",
+      description: "Comprehensive patent evaluation and reporting. Analyze patent documents, identify key claims, and generate detailed reports with AI-powered insights.",
+      icon: <Shield className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Document Management",
-          description: "Organize and search your legal library",
-          icon: <FolderOpen className="w-4 h-4" />
+          title: "Patent Evaluation",
+          description: "Analyze patent documents and claims",
+          icon: <FileSearch className="w-4 h-4" />
         },
         {
-          title: "Timeline Extractor",
-          description: "Automated event extraction from documents",
-          icon: <Calendar className="w-4 h-4" />
+          title: "Report Generation",
+          description: "AI-powered patent analysis reports",
+          icon: <FileText className="w-4 h-4" />
         }
       ],
-      ctaText: "Manage Documents",
-      ctaHref: "/app/timeline-extractor",
+      ctaText: "Analyze Patents",
+      ctaHref: "/app/patent-analysis",
       gradient: "bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900"
     },
     {
-      title: "Forge",
+      title: "Contract Drafting",
       description: "AI-Generated Legal Content Creation. Generate and revise detailed legal documents including contracts, briefs, and contractual provisions with intelligent assistance.",
-      icon: <Leaf className="w-6 h-6" />,
+      icon: <FileCheck className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Contract Drafting",
-          description: "AI-powered contract generation and templates",
-          icon: <FileCheck className="w-4 h-4" />
+          title: "Contract Generation",
+          description: "AI-powered contract creation and templates",
+          icon: <PenTool className="w-4 h-4" />
         },
         {
-          title: "Document Generation",
-          description: "Create legal briefs and complex documents",
-          icon: <PenTool className="w-4 h-4" />
+          title: "Document Revision",
+          description: "Edit and improve legal documents",
+          icon: <FileText className="w-4 h-4" />
         }
       ],
-      ctaText: "Create Documents",
+      ctaText: "Create Contracts",
       ctaHref: "/app/contract-drafting",
       gradient: "bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900"
     },
     {
-      title: "Automation",
-      description: "Specialized AI Agents & Workflows. Leverage domain-specific AI agents for complex legal tasks and automated workflows.",
-      icon: <Settings className="w-6 h-6" />,
+      title: "Timeline Extractor",
+      description: "Automated event extraction and timeline generation. Extract key events from documents and create comprehensive timelines for legal cases and projects.",
+      icon: <Calendar className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Patent Analysis",
-          description: "Comprehensive patent evaluation and reporting",
-          icon: <Shield className="w-4 h-4" />
+          title: "Event Extraction",
+          description: "Automated extraction of key events",
+          icon: <Calendar className="w-4 h-4" />
         },
         {
-          title: "Regulatory Compliance",
-          description: "Automated compliance checking and guidance",
-          icon: <CheckCircle className="w-4 h-4" />
-        },
-        {
-          title: "Team Management",
-          description: "Organization and user access control",
-          icon: <Users className="w-4 h-4" />
+          title: "Timeline Creation",
+          description: "Generate visual timelines from documents",
+          icon: <FolderOpen className="w-4 h-4" />
         }
       ],
-      ctaText: "Explore Automation",
-      ctaHref: "/app/patent-analysis",
+      ctaText: "Extract Timeline",
+      ctaHref: "/app/timeline-extractor",
       gradient: "bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900"
+    },
+    {
+      title: "Legal Research",
+      description: "AI-Enhanced Legal Research & Analysis. Search case law, analyze precedents, and get comprehensive legal research assistance with intelligent AI support.",
+      icon: <Search className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Case Law Search",
+          description: "Find relevant cases and precedents",
+          icon: <Search className="w-4 h-4" />
+        },
+        {
+          title: "Precedent Analysis",
+          description: "AI-powered legal research insights",
+          icon: <Brain className="w-4 h-4" />
+        }
+      ],
+      ctaText: "Start Research",
+      ctaHref: "/app/legal-research",
+      gradient: "bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800"
+    },
+    {
+      title: "Regulatory Compliance",
+      description: "Automated compliance checking and guidance. Stay compliant with regulatory requirements through AI-powered monitoring and automated workflows.",
+      icon: <CheckCircle className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Compliance Monitoring",
+          description: "Automated regulatory compliance checking",
+          icon: <Scale className="w-4 h-4" />
+        },
+        {
+          title: "Guidance System",
+          description: "AI-powered compliance guidance and alerts",
+          icon: <CheckCircle className="w-4 h-4" />
+        }
+      ],
+      ctaText: "Check Compliance",
+      ctaHref: "/app/regulatory-compliance",
+      gradient: "bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800"
     }
   ];
 
@@ -205,8 +242,15 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Desktop Layout - 2x2 Grid */}
-        <div className="hidden md:grid md:grid-cols-2 gap-8">
+        {/* Desktop Layout - 3x2 Grid */}
+        <div className="hidden lg:grid lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <FeatureCard key={index} {...feature} />
+          ))}
+        </div>
+        
+        {/* Medium Desktop Layout - 2x3 Grid */}
+        <div className="hidden md:grid lg:hidden md:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
