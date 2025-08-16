@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2 } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -15,7 +15,8 @@ import ProfileModal from '../../components/ProfileModal';
 
 const getNavItems = (userRole?: string) => {
   const baseItems = [
-    { label: "Dashboard", icon: <Home className="w-6 h-6" />, href: "/app/dashboard" },
+    { label: "Home", icon: <Home className="w-6 h-6" />, href: "/app/home" },
+    { label: "Dashboard", icon: <BarChart3 className="w-6 h-6" />, href: "/app/dashboard" },
     { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
     { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
     { label: "Contract Drafting", icon: <FileCheck className="w-6 h-6" />, href: "/app/contract-drafting" },
@@ -69,7 +70,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo and Company Name */}
-          <div className="flex items-center gap-3">
+          <Link href="/app/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
               <img 
                 src="/images/myjurist-logo.png" 
@@ -78,7 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               />
             </div>
             <span className="text-lg font-bold text-foreground">My Jurist</span>
-          </div>
+          </Link>
           
           {/* Mobile Menu */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -90,7 +91,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="w-64 p-0">
               <div className="flex flex-col h-full">
                 <div className="flex items-center p-6 border-b">
-                  <div className="flex items-center gap-3">
+                  <Link href="/app/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
                       <img 
                         src="/images/myjurist-logo.png" 
@@ -99,7 +100,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       />
                     </div>
                     <span className="text-xl font-bold text-foreground">My Jurist</span>
-                  </div>
+                  </Link>
                 </div>
                 
                 <nav className="flex-1 p-4 space-y-2">
@@ -174,7 +175,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex group w-16 hover:w-64 p-4 flex-col gap-4 bg-card border-r border-border min-h-screen transition-all duration-300 ease-in-out overflow-hidden">
         {/* Company Logo/Icon */}
-        <div className="flex items-center justify-center mb-8 min-w-max">
+        <Link href="/app/home" className="flex items-center justify-center mb-8 min-w-max hover:opacity-80 transition-opacity">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
             <img 
               src="/images/myjurist-logo.png" 
@@ -185,7 +186,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <span className="text-2xl font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-3">
             My Jurist
           </span>
-        </div>
+        </Link>
         
         <nav className="flex flex-col gap-2 flex-1">
           {getNavItems(user?.role).map((item) => {

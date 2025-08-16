@@ -80,7 +80,7 @@ export default function RegisterPage() {
       const result = await verifyOtp(formData.email, formData.otp, formData.password, formData.full_name);
       
       if (result.success) {
-        router.push("/app");
+        router.push("/app/home");
       } else {
         setError(result.error || "OTP verification failed");
       }
