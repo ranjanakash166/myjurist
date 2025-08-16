@@ -526,7 +526,7 @@ export default function OrganizationManagementPage() {
   // Check if user has appropriate permissions
   useEffect(() => {
     if (user && !["super_admin", "org_admin"].includes(user.role)) {
-      router.push("/app/dashboard");
+              router.push("/app/home");
     }
   }, [user, router]);
 
