@@ -19,6 +19,7 @@ const getNavItems = (userRole?: string) => {
     { label: "Dashboard", icon: <BarChart3 className="w-6 h-6" />, href: "/app/dashboard" },
     { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
     { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
+    { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
     { label: "Contract Drafting", icon: <FileCheck className="w-6 h-6" />, href: "/app/contract-drafting" },
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
@@ -88,7 +89,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
+            <SheetContent side="left" className="w-72 p-0">
               <div className="flex flex-col h-full">
                 <div className="flex items-center p-6 border-b">
                   <Link href="/app/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -122,7 +123,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             className: `w-6 h-6 ${isActive ? 'text-primary-foreground' : ''}` 
                           })}
                         </div>
-                        {item.label}
+                        <span className="truncate">{item.label}</span>
                       </Link>
                     );
                   })}
@@ -173,7 +174,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex group w-16 hover:w-64 p-4 flex-col gap-4 bg-card border-r border-border min-h-screen transition-all duration-300 ease-in-out overflow-hidden">
+      <aside className="hidden md:flex group w-16 hover:w-72 p-4 flex-col gap-4 bg-card border-r border-border min-h-screen transition-all duration-300 ease-in-out overflow-hidden">
         {/* Company Logo/Icon */}
         <Link href="/app/home" className="flex items-center justify-center mb-8 min-w-max hover:opacity-80 transition-opacity">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
@@ -207,7 +208,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     className: `w-6 h-6 ${isActive ? 'text-primary-foreground' : ''}` 
                   })}
                 </div>
-                <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap truncate">
                   {item.label}
                 </span>
               </Link>
