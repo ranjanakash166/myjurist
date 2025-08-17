@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3 } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3, Tag } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
