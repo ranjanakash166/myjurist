@@ -46,35 +46,35 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   subFeatures,
   gradient
 }) => (
-  <div className={`relative overflow-hidden rounded-2xl p-6 ${gradient} border border-border/50 hover:border-border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] group`}>
+  <div className={`relative overflow-hidden rounded-2xl p-4 ${gradient} border border-border/50 hover:border-border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] group`}>
     <div className="relative z-10">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white">
           {icon}
         </div>
-        <h3 className="text-2xl font-bold text-white">{title}</h3>
+        <h3 className="text-xl font-bold text-white">{title}</h3>
       </div>
       
       {/* Description */}
-      <p className="text-white/90 text-lg mb-6 leading-relaxed">
+      <p className="text-white/90 text-sm mb-4 leading-relaxed">
         {description}
       </p>
       
       {/* Sub-features */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {subFeatures.map((feature, index) => (
           <Link
             key={index}
             href={feature.href}
-            className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-200 group/feature"
+            className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/10 transition-all duration-200 group/feature"
           >
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/feature:bg-white/30 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/feature:bg-white/30 transition-colors">
               {feature.icon}
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-white text-sm group-hover/feature:text-white transition-colors">{feature.title}</h4>
-              <p className="text-white/80 text-sm group-hover/feature:text-white/90 transition-colors">{feature.description}</p>
+              <p className="text-white/80 text-xs group-hover/feature:text-white/90 transition-colors">{feature.description}</p>
             </div>
             <ArrowRight className="w-4 h-4 text-white/60 group-hover/feature:text-white group-hover/feature:translate-x-1 transition-all duration-200" />
           </Link>
@@ -83,8 +83,8 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
     </div>
     
     {/* Background decoration */}
-    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
-    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+    <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -translate-y-12 translate-x-12"></div>
+    <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-8 -translate-x-8"></div>
   </div>
 );
 
@@ -182,36 +182,33 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Top Spacing */}
-      <div className="pt-8"></div>
-
       {/* Features Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
             Powerful Features at Your Fingertips
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover how our platform transforms legal workflows with cutting-edge AI technology
           </p>
         </div>
 
         {/* Mobile Layout - Single Column */}
-        <div className="grid grid-cols-1 gap-6 md:hidden">
+        <div className="grid grid-cols-1 gap-4 md:hidden">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
         </div>
 
         {/* Desktop Layout - 2x2 Grid for 4 categories */}
-        <div className="hidden lg:grid lg:grid-cols-2 gap-8">
+        <div className="hidden lg:grid lg:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
         </div>
         
         {/* Medium Desktop Layout - 2x2 Grid */}
-        <div className="hidden md:grid lg:hidden md:grid-cols-2 gap-6">
+        <div className="hidden md:grid lg:hidden md:grid-cols-2 gap-4">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
@@ -219,13 +216,13 @@ export default function HomePage() {
       </div>
 
       {/* Quick Actions Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="bg-card/50 rounded-2xl border border-border/50 p-8 backdrop-blur-sm">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="bg-card/50 rounded-2xl border border-border/50 p-6 backdrop-blur-sm">
+          <div className="text-center mb-6">
+            <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
               Quick Actions
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Get started quickly with these common tasks
             </p>
           </div>
