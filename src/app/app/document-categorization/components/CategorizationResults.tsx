@@ -218,17 +218,7 @@ export default function CategorizationResults({ result }: CategorizationResultsP
                             <strong>Reasoning:</strong> {category.reasoning}
                           </div>
                           
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => copyToClipboard(category.reasoning)}
-                              className="text-xs"
-                            >
-                              <Copy className="w-3 h-3 mr-1" />
-                              Copy Reasoning
-                            </Button>
-                          </div>
+
                         </div>
                       ))}
                   </div>
