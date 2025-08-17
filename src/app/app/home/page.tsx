@@ -20,7 +20,9 @@ import {
   Zap,
   BarChart3,
   FileSearch,
-  Scale
+  Scale,
+  Tags,
+  Clock
 } from "lucide-react";
 import { useAuth } from "../../../components/AuthProvider";
 
@@ -32,9 +34,8 @@ interface FeatureCardProps {
     title: string;
     description: string;
     icon: React.ReactNode;
+    href: string;
   }>;
-  ctaText: string;
-  ctaHref: string;
   gradient: string;
 }
 
@@ -43,8 +44,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   description,
   icon,
   subFeatures,
-  ctaText,
-  ctaHref,
   gradient
 }) => (
   <div className={`relative overflow-hidden rounded-2xl p-6 ${gradient} border border-border/50 hover:border-border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] group`}>
@@ -63,28 +62,24 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       </p>
       
       {/* Sub-features */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-3">
         {subFeatures.map((feature, index) => (
-          <div key={index} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Link
+            key={index}
+            href={feature.href}
+            className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-200 group/feature"
+          >
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/feature:bg-white/30 transition-colors">
               {feature.icon}
             </div>
-            <div>
-              <h4 className="font-semibold text-white text-sm">{feature.title}</h4>
-              <p className="text-white/80 text-sm">{feature.description}</p>
+            <div className="flex-1">
+              <h4 className="font-semibold text-white text-sm group-hover/feature:text-white transition-colors">{feature.title}</h4>
+              <p className="text-white/80 text-sm group-hover/feature:text-white/90 transition-colors">{feature.description}</p>
             </div>
-          </div>
+            <ArrowRight className="w-4 h-4 text-white/60 group-hover/feature:text-white group-hover/feature:translate-x-1 transition-all duration-200" />
+          </Link>
         ))}
       </div>
-      
-      {/* CTA Button */}
-      <Link
-        href={ctaHref}
-        className="inline-flex items-center gap-2 text-white font-semibold hover:text-white/90 transition-colors group-hover:gap-3"
-      >
-        {ctaText}
-        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-      </Link>
     </div>
     
     {/* Background decoration */}
@@ -98,124 +93,90 @@ export default function HomePage() {
 
   const features: FeatureCardProps[] = [
     {
-      title: "Document Analysis",
-      description: "AI-Powered Document Analysis & Chat. Upload, analyze, and understand legal documents with intelligent AI assistance. Ask follow-up questions and get instant insights.",
-      icon: <FileText className="w-6 h-6" />,
+      title: "Intelligence",
+      description: "AI-Powered Document Analysis & Chat. Search, analyze, and understand legal documents with intelligent AI assistance. Ask follow-up questions and get instant insights.",
+      icon: <Brain className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Document Intelligence",
+          title: "Document Analysis",
           description: "Upload and chat with your legal documents",
-          icon: <MessageSquare className="w-4 h-4" />
+          icon: <MessageSquare className="w-4 h-4" />,
+          href: "/app/document-analysis"
         },
         {
-          title: "AI Analysis",
-          description: "Get instant insights and understanding",
-          icon: <Brain className="w-4 h-4" />
+          title: "Document Categorization",
+          description: "Smart tools for understanding and sorting documents",
+          icon: <Tags className="w-4 h-4" />,
+          href: "/app/document-categorization"
         }
       ],
-      ctaText: "Start Analysis",
-      ctaHref: "/app/document-analysis",
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Patent Analysis",
-      description: "Comprehensive patent evaluation and reporting. Analyze patent documents, identify key claims, and generate detailed reports with AI-powered insights.",
-      icon: <Shield className="w-6 h-6" />,
+      title: "Repository",
+      description: "Secure Document Storage & Management. Upload, store, and organize thousands of legal documents with advanced search and metadata management.",
+      icon: <Database className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Patent Evaluation",
-          description: "Analyze patent documents and claims",
-          icon: <FileSearch className="w-4 h-4" />
+          title: "Timeline Extractor",
+          description: "Automated event extraction from documents",
+          icon: <Clock className="w-4 h-4" />,
+          href: "/app/timeline-extractor"
         },
         {
-          title: "Report Generation",
-          description: "AI-powered patent analysis reports",
-          icon: <FileText className="w-4 h-4" />
+          title: "Document Management",
+          description: "Organize and search your legal library",
+          icon: <FolderOpen className="w-4 h-4" />,
+          href: "/app/document-analysis"
         }
       ],
-      ctaText: "Analyze Patents",
-      ctaHref: "/app/patent-analysis",
-      gradient: "bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900"
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Contract Drafting",
+      title: "Forge",
       description: "AI-Generated Legal Content Creation. Generate and revise detailed legal documents including contracts, briefs, and contractual provisions with intelligent assistance.",
-      icon: <FileCheck className="w-6 h-6" />,
+      icon: <Leaf className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Contract Generation",
-          description: "AI-powered contract creation and templates",
-          icon: <PenTool className="w-4 h-4" />
+          title: "Contract Drafting",
+          description: "AI-powered contract generation and templates",
+          icon: <PenTool className="w-4 h-4" />,
+          href: "/app/contract-drafting"
         },
         {
-          title: "Document Revision",
-          description: "Edit and improve legal documents",
-          icon: <FileText className="w-4 h-4" />
+          title: "Document Generation",
+          description: "Create legal briefs and complex documents",
+          icon: <FileText className="w-4 h-4" />,
+          href: "/app/contract-drafting"
         }
       ],
-      ctaText: "Create Contracts",
-      ctaHref: "/app/contract-drafting",
-      gradient: "bg-gradient-to-br from-neutral-700 via-neutral-800 to-neutral-900"
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Timeline Extractor",
-      description: "Automated event extraction and timeline generation. Extract key events from documents and create comprehensive timelines for legal cases and projects.",
-      icon: <Calendar className="w-6 h-6" />,
+      title: "Agents & Automation",
+      description: "Specialized AI Agents & Workflows. Leverage domain-specific AI agents for complex legal tasks and automated workflows.",
+      icon: <Settings className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Event Extraction",
-          description: "Automated extraction of key events",
-          icon: <Calendar className="w-4 h-4" />
+          title: "Patent Analysis",
+          description: "Comprehensive patent evaluation and reporting",
+          icon: <Shield className="w-4 h-4" />,
+          href: "/app/patent-analysis"
         },
         {
-          title: "Timeline Creation",
-          description: "Generate visual timelines from documents",
-          icon: <FolderOpen className="w-4 h-4" />
-        }
-      ],
-      ctaText: "Extract Timeline",
-      ctaHref: "/app/timeline-extractor",
-      gradient: "bg-gradient-to-br from-zinc-700 via-zinc-800 to-zinc-900"
-    },
-    {
-      title: "Legal Research",
-      description: "AI-Enhanced Legal Research & Analysis. Search case law, analyze precedents, and get comprehensive legal research assistance with intelligent AI support.",
-      icon: <Search className="w-6 h-6" />,
-      subFeatures: [
-        {
-          title: "Case Law Search",
-          description: "Find relevant cases and precedents",
-          icon: <Search className="w-4 h-4" />
+          title: "Legal Research",
+          description: "AI-enhanced case law and precedent search",
+          icon: <Search className="w-4 h-4" />,
+          href: "/app/legal-research"
         },
         {
-          title: "Precedent Analysis",
-          description: "AI-powered legal research insights",
-          icon: <Brain className="w-4 h-4" />
+          title: "Regulatory Compliance",
+          description: "Automated compliance checking and guidance",
+          icon: <CheckCircle className="w-4 h-4" />,
+          href: "/app/regulatory-compliance"
         }
       ],
-      ctaText: "Start Research",
-      ctaHref: "/app/legal-research",
-      gradient: "bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800"
-    },
-    {
-      title: "Regulatory Compliance",
-      description: "Automated compliance checking and guidance. Stay compliant with regulatory requirements through AI-powered monitoring and automated workflows.",
-      icon: <CheckCircle className="w-6 h-6" />,
-      subFeatures: [
-        {
-          title: "Compliance Monitoring",
-          description: "Automated regulatory compliance checking",
-          icon: <Scale className="w-4 h-4" />
-        },
-        {
-          title: "Guidance System",
-          description: "AI-powered compliance guidance and alerts",
-          icon: <CheckCircle className="w-4 h-4" />
-        }
-      ],
-      ctaText: "Check Compliance",
-      ctaHref: "/app/regulatory-compliance",
-      gradient: "bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800"
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     }
   ];
 
@@ -242,14 +203,14 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Desktop Layout - 3x2 Grid */}
-        <div className="hidden lg:grid lg:grid-cols-3 gap-8">
+        {/* Desktop Layout - 2x2 Grid for 4 categories */}
+        <div className="hidden lg:grid lg:grid-cols-2 gap-8">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
         </div>
         
-        {/* Medium Desktop Layout - 2x3 Grid */}
+        {/* Medium Desktop Layout - 2x2 Grid */}
         <div className="hidden md:grid lg:hidden md:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
@@ -302,8 +263,8 @@ export default function HomePage() {
               href="/app/contract-drafting"
               className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
             >
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Leaf className="w-5 h-5 text-purple-500" />
+              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <Leaf className="w-5 h-5 text-green-500" />
               </div>
               <div>
                 <p className="font-semibold text-foreground">Draft Contract</p>
@@ -316,8 +277,8 @@ export default function HomePage() {
               href="/app/patent-analysis"
               className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
             >
-              <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-orange-500" />
+              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-purple-500" />
               </div>
               <div>
                 <p className="font-semibold text-foreground">Patent Analysis</p>
