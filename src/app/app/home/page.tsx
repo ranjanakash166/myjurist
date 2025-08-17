@@ -93,6 +93,32 @@ export default function HomePage() {
 
   const features: FeatureCardProps[] = [
     {
+      title: "Agents & Automation",
+      description: "Specialized AI Agents & Workflows. Leverage domain-specific AI agents for complex legal tasks and automated workflows.",
+      icon: <Settings className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Patent Analysis",
+          description: "Comprehensive patent evaluation and reporting",
+          icon: <Shield className="w-4 h-4" />,
+          href: "/app/patent-analysis"
+        },
+        {
+          title: "Legal Research",
+          description: "AI-enhanced case law and precedent search",
+          icon: <Search className="w-4 h-4" />,
+          href: "/app/legal-research"
+        },
+        {
+          title: "Regulatory Compliance",
+          description: "Automated compliance checking and guidance",
+          icon: <CheckCircle className="w-4 h-4" />,
+          href: "/app/regulatory-compliance"
+        }
+      ],
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
+    },
+    {
       title: "Intelligence",
       description: "AI-Powered Document Analysis & Chat. Search, analyze, and understand legal documents with intelligent AI assistance. Ask follow-up questions and get instant insights.",
       icon: <Brain className="w-6 h-6" />,
@@ -108,26 +134,6 @@ export default function HomePage() {
           description: "Smart tools for understanding and sorting documents",
           icon: <Tags className="w-4 h-4" />,
           href: "/app/document-categorization"
-        }
-      ],
-      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
-    },
-    {
-      title: "Repository",
-      description: "Secure Document Storage & Management. Upload, store, and organize thousands of legal documents with advanced search and metadata management.",
-      icon: <Database className="w-6 h-6" />,
-      subFeatures: [
-        {
-          title: "Timeline Extractor",
-          description: "Automated event extraction from documents",
-          icon: <Clock className="w-4 h-4" />,
-          href: "/app/timeline-extractor"
-        },
-        {
-          title: "Document Management",
-          description: "Organize and search your legal library",
-          icon: <FolderOpen className="w-4 h-4" />,
-          href: "/app/document-analysis"
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
@@ -153,27 +159,21 @@ export default function HomePage() {
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Agents & Automation",
-      description: "Specialized AI Agents & Workflows. Leverage domain-specific AI agents for complex legal tasks and automated workflows.",
-      icon: <Settings className="w-6 h-6" />,
+      title: "Repository",
+      description: "Secure Document Storage & Management. Upload, store, and organize thousands of legal documents with advanced search and metadata management.",
+      icon: <Database className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Patent Analysis",
-          description: "Comprehensive patent evaluation and reporting",
-          icon: <Shield className="w-4 h-4" />,
-          href: "/app/patent-analysis"
+          title: "Timeline Extractor",
+          description: "Automated event extraction from documents",
+          icon: <Clock className="w-4 h-4" />,
+          href: "/app/timeline-extractor"
         },
         {
-          title: "Legal Research",
-          description: "AI-enhanced case law and precedent search",
-          icon: <Search className="w-4 h-4" />,
-          href: "/app/legal-research"
-        },
-        {
-          title: "Regulatory Compliance",
-          description: "Automated compliance checking and guidance",
-          icon: <CheckCircle className="w-4 h-4" />,
-          href: "/app/regulatory-compliance"
+          title: "Document Management",
+          description: "Organize and search your legal library",
+          icon: <FolderOpen className="w-4 h-4" />,
+          href: "/app/document-analysis"
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
