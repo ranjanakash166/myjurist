@@ -43,7 +43,8 @@ import {
   LegalResearchHistoryParams,
   downloadLegalDocumentPDF,
   DownloadPDFRequest,
-  AISummaryResponse
+  AISummaryResponse,
+  getLegalDocument
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
@@ -258,32 +259,29 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
   const handleViewSource = async (documentId: string) => {
     try {
-      // Extract Indian Kanoon URL from the document content
-      const research = history.find(r => 
-        r.search_results.some(result => result.document_id === documentId)
-      );
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      if (research) {
-        const result = research.search_results.find(r => r.document_id === documentId);
-        if (result) {
-          const indianKanoonMatch = result.content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
-          
-          if (indianKanoonMatch && indianKanoonMatch[1]) {
-            const indianKanoonUrl = indianKanoonMatch[1];
-            window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
-            
-            toast({
-              title: "Opening Indian Kanoon",
-              description: "Redirecting to the original source",
-            });
-          } else {
-            toast({
-              title: "Source not found",
-              description: "Indian Kanoon URL not available for this document",
-              variant: "destructive",
-            });
-          }
-        }
+      // First fetch the full document to get the Indian Kanoon URL
+      const document = await getLegalDocument(documentId, authToken);
+      
+      // Extract Indian Kanoon URL from the full content
+      const indianKanoonMatch = document.full_content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
+      
+      if (indianKanoonMatch && indianKanoonMatch[1]) {
+        const indianKanoonUrl = indianKanoonMatch[1];
+        window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
+        
+        toast({
+          title: "Opening Indian Kanoon",
+          description: "Redirecting to the original source",
+        });
+      } else {
+        toast({
+          title: "Source not found",
+          description: "Indian Kanoon URL not available for this document",
+          variant: "destructive",
+        });
       }
     } catch (err: any) {
       toast({
@@ -787,16 +785,6 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                     </CardContent>
                   </Card>
                 </div>
-              </div>
-              
-              {/* Modal Footer */}
-              <div className="flex items-center justify-end p-6 pt-4 border-t bg-background flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsDetailModalOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
             </div>
           )}
