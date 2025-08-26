@@ -42,7 +42,8 @@ import {
   LegalResearchHistoryItem, 
   LegalResearchHistoryParams,
   downloadLegalDocumentPDF,
-  DownloadPDFRequest
+  DownloadPDFRequest,
+  AISummaryResponse
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
@@ -369,18 +370,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-            <History className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">Legal Research History</h1>
-        </div>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          View and manage your previous legal research queries and results
-        </p>
-      </div>
+
 
       {/* Search and Filter Controls */}
       <Card className="w-full max-w-4xl mx-auto">
@@ -464,9 +454,9 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
           </Card>
         ) : (
           <>
-            {/* History Items */}
-            {filteredHistory.map((research, index) => (
-              <Card key={research.research_id} className="hover:shadow-lg transition-shadow duration-200">
+                         {/* History Items */}
+             {filteredHistory.map((research, index) => (
+               <Card key={research.research_id} className="hover:shadow-lg transition-shadow duration-200 group">
                 <CardHeader className="pb-3">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -510,7 +500,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                            setSelectedResearch(research);
                            setIsDetailModalOpen(true);
                          }}
-                         className="h-8 text-xs"
+                         className="h-8 text-xs group-hover:scale-105 transition-transform duration-200"
                        >
                          <Eye className="w-3 h-3 mr-1" />
                          View Details
@@ -528,7 +518,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                   onClick={handleLoadMore} 
                   variant="outline"
                   disabled={loading}
-                  className="px-8"
+                  className="px-8 hover:scale-105 transition-transform duration-200"
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
