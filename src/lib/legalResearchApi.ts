@@ -4,6 +4,9 @@ export interface LegalResearchRequest {
   query: string;
   top_k: number;
   search_type: "general" | "specific";
+  include_ai_summary?: boolean;
+  summary_type?: "comprehensive" | "brief" | "detailed";
+  max_summary_length?: number;
 }
 
 export interface SearchResult {
@@ -25,25 +28,6 @@ export interface IndexStats {
   chunks_per_file: Record<string, number>;
 }
 
-export interface LegalResearchResponse {
-  query: string;
-  results: SearchResult[];
-  total_results: number;
-  search_time_ms: number;
-  index_stats: IndexStats;
-}
-
-// New interfaces for AI Summary feature
-export interface AISummaryRequest {
-  user_query: string;
-  search_results: SearchResult[];
-  summary_type: "comprehensive" | "brief" | "detailed";
-  include_legal_insights: boolean;
-  include_precedents: boolean;
-  max_length: number;
-  focus_areas?: string[];
-}
-
 export interface AISummaryResponse {
   summary_id: string;
   user_query: string;
@@ -55,6 +39,15 @@ export interface AISummaryResponse {
   sources_analyzed: string[];
   processing_time_ms: number;
   summary_type: string;
+}
+
+export interface LegalResearchResponse {
+  query: string;
+  results: SearchResult[];
+  total_results: number;
+  search_time_ms: number;
+  index_stats: IndexStats;
+  ai_summary?: AISummaryResponse;
 }
 
 export interface ValidationError {
@@ -69,36 +62,7 @@ export const searchLegalResearch = async (
   request: LegalResearchRequest,
   authToken: string
 ): Promise<LegalResearchResponse> => {
-  const response = await fetch(`${API_BASE_URL}/legal-research/search`, {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  });
-
-  if (!response.ok) {
-    if (response.status === 422) {
-      const errorData: ValidationError = await response.json();
-      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-    }
-    if (response.status === 401) {
-      throw new Error('Authentication failed. Please log in again.');
-    }
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-};
-
-// New function for AI Summary generation
-export const generateAISummary = async (
-  request: AISummaryRequest,
-  authToken: string
-): Promise<AISummaryResponse> => {
-  const response = await fetch(`${API_BASE_URL}/legal-research/ai-summary`, {
+  const response = await fetch(`${API_BASE_URL}/legal-research/enhanced-search`, {
     method: 'POST',
     headers: {
       'accept': 'application/json',
@@ -190,4 +154,56 @@ export const downloadLegalDocumentPDF = async (
   }
 
   return response.blob();
+};
+
+// Legal Research History interfaces
+export interface LegalResearchHistoryItem {
+  research_id: string;
+  query: string;
+  search_type: "general" | "specific";
+  top_k: number;
+  total_results: number;
+  search_time_ms: number | null;
+  ai_summary_id: string | null;
+  summary_type: "comprehensive" | "brief" | "detailed" | null;
+  session_id: string | null;
+  created_at: string;
+  updated_at: string;
+  search_results: SearchResult[];
+  ai_summary?: AISummaryResponse;
+}
+
+export interface LegalResearchHistoryParams {
+  limit?: number;
+  offset?: number;
+}
+
+export const getLegalResearchHistory = async (
+  params: LegalResearchHistoryParams = {},
+  authToken: string
+): Promise<LegalResearchHistoryItem[]> => {
+  const searchParams = new URLSearchParams();
+  if (params.limit) searchParams.append('limit', params.limit.toString());
+  if (params.offset) searchParams.append('offset', params.offset.toString());
+
+  const response = await fetch(`${API_BASE_URL}/legal-research/history?${searchParams.toString()}`, {
+    method: 'GET',
+    headers: {
+      'accept': 'application/json',
+      'Authorization': `Bearer ${authToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 422) {
+      const errorData: ValidationError = await response.json();
+      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+    }
+    if (response.status === 401) {
+      throw new Error('Authentication failed. Please log in again.');
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 }; 
