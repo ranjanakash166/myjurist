@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap } from "lucide-react";
+import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, getLegalDocument, generateAISummary, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryRequest, AISummaryResponse, DownloadPDFRequest } from "@/lib/legalResearchApi";
+import { searchLegalResearch, getLegalDocument, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse, DownloadPDFRequest } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
+import LegalResearchHistory from "./components/LegalResearchHistory";
 
 export default function LegalResearchPage() {
   const { getAuthHeaders } = useAuth();
@@ -29,13 +31,13 @@ export default function LegalResearchPage() {
   const [loadingViewSource, setLoadingViewSource] = useState<string | null>(null);
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   
-  // New state variables for AI Summary
+  // State variables for AI Summary
   const [aiSummary, setAiSummary] = useState<AISummaryResponse | null>(null);
   const [summaryType, setSummaryType] = useState<"comprehensive" | "brief" | "detailed">("comprehensive");
-  const [includeLegalInsights, setIncludeLegalInsights] = useState(true);
-  const [includePrecedents, setIncludePrecedents] = useState(true);
   const [maxLength, setMaxLength] = useState(1500);
-  const [focusAreas, setFocusAreas] = useState<string[]>([]);
+  
+  // State for tabs
+  const [activeTab, setActiveTab] = useState("search");
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,30 +51,22 @@ export default function LegalResearchPage() {
       const authHeaders = getAuthHeaders();
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      // First API call: Search legal research
+      // Single API call: Enhanced search with AI summary
       const searchRequest: LegalResearchRequest = {
         query: query.trim(),
         top_k: topK,
         search_type: searchType,
+        include_ai_summary: true,
+        summary_type: summaryType,
+        max_summary_length: maxLength,
       };
 
       const searchResponse = await searchLegalResearch(searchRequest, authToken);
       setSearchResults(searchResponse);
       
-      // Second API call: Generate AI Summary (only if we have results)
-      if (searchResponse.results.length > 0) {
-        const summaryRequest: AISummaryRequest = {
-          user_query: searchResponse.query,
-          search_results: searchResponse.results,
-          summary_type: summaryType,
-          include_legal_insights: includeLegalInsights,
-          include_precedents: includePrecedents,
-          max_length: maxLength,
-          focus_areas: focusAreas.length > 0 ? focusAreas : undefined,
-        };
-
-        const summaryResponse = await generateAISummary(summaryRequest, authToken);
-        setAiSummary(summaryResponse);
+      // Set AI summary from the response if available
+      if (searchResponse.ai_summary) {
+        setAiSummary(searchResponse.ai_summary);
       }
       
       // Add to search history
@@ -82,7 +76,7 @@ export default function LegalResearchPage() {
       
       toast({
         title: "Search completed",
-        description: `Found ${searchResponse.total_results} results and generated AI summary`,
+        description: `Found ${searchResponse.total_results} results${searchResponse.ai_summary ? ' and generated AI summary' : ''}`,
       });
     } catch (err: any) {
       setError(err.message || "An error occurred during search");
@@ -342,6 +336,21 @@ export default function LegalResearchPage() {
           Search through our comprehensive legal database to find relevant case law, regulations, and legal precedents
         </p>
       </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-2">
+          <TabsTrigger value="search" className="flex items-center gap-2">
+            <Search className="w-4 h-4" />
+            Search
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <History className="w-4 h-4" />
+            History
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="search" className="space-y-6">
 
       {/* Search Form */}
       <Card className="w-full max-w-4xl mx-auto">
@@ -824,6 +833,12 @@ export default function LegalResearchPage() {
           </div>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-6">
+          <LegalResearchHistory />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 } 
