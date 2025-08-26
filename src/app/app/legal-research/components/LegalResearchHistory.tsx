@@ -217,6 +217,17 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       const authHeaders = getAuthHeaders();
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
+      // If downloading a specific document, get its title for better filename
+      let documentTitle = '';
+      if (documentId) {
+        try {
+          const document = await getLegalDocument(documentId, authToken);
+          documentTitle = document.title;
+        } catch (err) {
+          console.warn('Failed to get document title, using fallback filename');
+        }
+      }
+      
       const downloadRequest: DownloadPDFRequest = {
         document_id: targetDocumentId,
         include_header: true,
@@ -230,9 +241,11 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       const link = document.createElement('a');
       link.href = url;
       
-      // Generate filename based on document or research
+      // Generate filename based on document title or fallback to ID
       const filename = documentId 
-        ? `judgment_${targetDocumentId.slice(0, 8)}.pdf`
+        ? documentTitle 
+          ? `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
+          : `judgment_${targetDocumentId.slice(0, 8)}.pdf`
         : `legal_research_${research.research_id}.pdf`;
       
       link.download = filename;
