@@ -17,7 +17,7 @@ import { toast } from '@/hooks/use-toast';
 import LegalResearchHistory from "./components/LegalResearchHistory";
 
 export default function LegalResearchPage() {
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, refreshToken } = useAuth();
   const [query, setQuery] = useState("");
   const [searchType, setSearchType] = useState<"general" | "specific">("general");
   const [topK, setTopK] = useState(5);
@@ -61,7 +61,7 @@ export default function LegalResearchPage() {
         max_summary_length: maxLength,
       };
 
-      const searchResponse = await searchLegalResearch(searchRequest, authToken);
+      const searchResponse = await searchLegalResearch(searchRequest, authToken, getAuthHeaders, refreshToken);
       setSearchResults(searchResponse);
       
       // Set AI summary from the response if available
@@ -116,7 +116,7 @@ export default function LegalResearchPage() {
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
       // First fetch the full document to get the Indian Kanoon URL
-      const document = await getLegalDocument(documentId, authToken);
+      const document = await getLegalDocument(documentId, authToken, getAuthHeaders, refreshToken);
       
       // Extract Indian Kanoon URL from the full content
       const indianKanoonMatch = document.full_content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
@@ -155,7 +155,7 @@ export default function LegalResearchPage() {
       const authHeaders = getAuthHeaders();
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      const document = await getLegalDocument(documentId, authToken);
+      const document = await getLegalDocument(documentId, authToken, getAuthHeaders, refreshToken);
       setSelectedDocument(document);
       setCurrentDocumentId(documentId); // Store the document ID
       
@@ -197,7 +197,7 @@ export default function LegalResearchPage() {
         font_size: 12
       };
 
-      const blob = await downloadLegalDocumentPDF(downloadRequest, authToken);
+      const blob = await downloadLegalDocumentPDF(downloadRequest, authToken, getAuthHeaders, refreshToken);
       
       // Create download link
       const url = window.URL.createObjectURL(blob);

@@ -54,7 +54,7 @@ interface LegalResearchHistoryProps {
 }
 
 export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, refreshToken } = useAuth();
   const [history, setHistory] = useState<LegalResearchHistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +82,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
         offset: (page - 1) * itemsPerPage,
       };
 
-      const response = await getLegalResearchHistory(params, authToken);
+      const response = await getLegalResearchHistory(params, authToken, getAuthHeaders, refreshToken);
       
       if (append) {
         setHistory(prev => [...prev, ...response]);
@@ -221,7 +221,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       let documentTitle = '';
       if (documentId) {
         try {
-          const document = await getLegalDocument(documentId, authToken);
+          const document = await getLegalDocument(documentId, authToken, getAuthHeaders, refreshToken);
           documentTitle = document.title;
         } catch (err) {
           console.warn('Failed to get document title, using fallback filename');
@@ -234,7 +234,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
         font_size: 12
       };
 
-      const blob = await downloadLegalDocumentPDF(downloadRequest, authToken);
+      const blob = await downloadLegalDocumentPDF(downloadRequest, authToken, getAuthHeaders, refreshToken);
       
       // Create download link
       const url = window.URL.createObjectURL(blob);
@@ -276,7 +276,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
       // First fetch the full document to get the Indian Kanoon URL
-      const document = await getLegalDocument(documentId, authToken);
+      const document = await getLegalDocument(documentId, authToken, getAuthHeaders, refreshToken);
       
       // Extract Indian Kanoon URL from the full content
       const indianKanoonMatch = document.full_content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);

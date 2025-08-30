@@ -109,17 +109,23 @@ export interface DownloadPDFRequest {
 
 export const getLegalDocument = async (
   documentId: string,
-  authToken: string
+  authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
 ): Promise<DocumentResponse> => {
-  const response = await fetch(`${API_BASE_URL}/legal-research/document`, {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/legal-research/document`,
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ document_id: documentId }),
     },
-    body: JSON.stringify({ document_id: documentId }),
-  });
+    getAuthHeaders,
+    refreshToken
+  );
 
   if (!response.ok) {
     if (response.status === 422) {
@@ -137,17 +143,23 @@ export const getLegalDocument = async (
 
 export const downloadLegalDocumentPDF = async (
   request: DownloadPDFRequest,
-  authToken: string
+  authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
 ): Promise<Blob> => {
-  const response = await fetch(`${API_BASE_URL}/legal-research/document/pdf`, {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/legal-research/document/pdf`,
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
     },
-    body: JSON.stringify(request),
-  });
+    getAuthHeaders,
+    refreshToken
+  );
 
   if (!response.ok) {
     if (response.status === 422) {
@@ -187,19 +199,25 @@ export interface LegalResearchHistoryParams {
 
 export const getLegalResearchHistory = async (
   params: LegalResearchHistoryParams = {},
-  authToken: string
+  authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
 ): Promise<LegalResearchHistoryItem[]> => {
   const searchParams = new URLSearchParams();
   if (params.limit) searchParams.append('limit', params.limit.toString());
   if (params.offset) searchParams.append('offset', params.offset.toString());
 
-  const response = await fetch(`${API_BASE_URL}/legal-research/history?${searchParams.toString()}`, {
-    method: 'GET',
-    headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/legal-research/history?${searchParams.toString()}`,
+    {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+      },
     },
-  });
+    getAuthHeaders,
+    refreshToken
+  );
 
   if (!response.ok) {
     if (response.status === 422) {
