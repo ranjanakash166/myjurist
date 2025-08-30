@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { apiCallWithRefresh } from "./utils";
 
 // Types for dashboard data
 export interface DashboardStats {
@@ -75,15 +76,23 @@ export interface UpdatePreferencesResponse {
   }
 
 // Fetch dashboard stats
-export async function fetchDashboardStats(authHeaders: Record<string, string>): Promise<DashboardStats> {
+export async function fetchDashboardStats(
+  authHeaders: Record<string, string>,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
+): Promise<DashboardStats> {
   try {
-    const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        ...authHeaders,
+    const response = await apiCallWithRefresh(
+      `${API_BASE_URL}/dashboard/stats`,
+      {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+        },
       },
-    });
+      getAuthHeaders,
+      refreshToken
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -97,28 +106,46 @@ export async function fetchDashboardStats(authHeaders: Record<string, string>): 
   }
 }
 
-export async function fetchUserProfile(authHeaders: Record<string, string>): Promise<UserProfile> {
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
-    method: 'GET',
-    headers: {
-      'accept': 'application/json',
-      ...authHeaders,
+export async function fetchUserProfile(
+  authHeaders: Record<string, string>,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
+): Promise<UserProfile> {
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/auth/me`,
+    {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+      },
     },
-  });
+    getAuthHeaders,
+    refreshToken
+  );
+  
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   return response.json();
 }
 
-export async function fetchAvailableModels(authHeaders: Record<string, string>): Promise<AvailableModelsResponse> {
-  const response = await fetch(`${API_BASE_URL}/models/available`, {
-    method: 'GET',
-    headers: {
-      'accept': 'application/json',
-      ...authHeaders,
+export async function fetchAvailableModels(
+  authHeaders: Record<string, string>,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
+): Promise<AvailableModelsResponse> {
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/models/available`,
+    {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+      },
     },
-  });
+    getAuthHeaders,
+    refreshToken
+  );
+  
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -127,17 +154,24 @@ export async function fetchAvailableModels(authHeaders: Record<string, string>):
 
 export async function updatePreferences(
   authHeaders: Record<string, string>,
-  body: UpdatePreferencesRequest
+  body: UpdatePreferencesRequest,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
 ): Promise<UpdatePreferencesResponse> {
-  const response = await fetch(`${API_BASE_URL}/models/preferences`, {
-    method: 'PUT',
-    headers: {
-      'accept': 'application/json',
-      'Content-Type': 'application/json',
-      ...authHeaders,
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/models/preferences`,
+    {
+      method: 'PUT',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-  });
+    getAuthHeaders,
+    refreshToken
+  );
+  
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     const errorMsg = errorData?.detail?.[0]?.msg || `HTTP error! status: ${response.status}`;

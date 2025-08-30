@@ -231,3 +231,44 @@ export function testDateNormalization() {
     console.log(`"${testCase}" -> Valid: ${isValid}, Normalized: "${normalized}", Formatted: "${formatted}"`);
   });
 }
+
+// Utility function to make API calls with automatic token refresh
+export async function apiCallWithRefresh(
+  url: string,
+  options: RequestInit,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
+): Promise<Response> {
+  // Add auth headers to the request
+  const authHeaders = getAuthHeaders();
+  const requestOptions = {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...authHeaders,
+    },
+  };
+
+  // Make the initial request
+  let response = await fetch(url, requestOptions);
+
+  // If the response is 401 (Unauthorized), try to refresh the token
+  if (response.status === 401) {
+    const refreshSuccess = await refreshToken();
+    
+    if (refreshSuccess) {
+      // Retry the request with the new token
+      const newAuthHeaders = getAuthHeaders();
+      const retryOptions = {
+        ...options,
+        headers: {
+          ...options.headers,
+          ...newAuthHeaders,
+        },
+      };
+      response = await fetch(url, retryOptions);
+    }
+  }
+
+  return response;
+}

@@ -19,7 +19,7 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) {
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, refreshToken } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,11 +39,11 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
       setLoading(true);
       setError(null);
       setUpdateSuccess(null);
-      fetchUserProfile(getAuthHeaders())
+      fetchUserProfile(getAuthHeaders(), getAuthHeaders, refreshToken)
         .then(setProfile)
         .catch((err) => setError(err.message || 'Failed to load profile'))
         .finally(() => setLoading(false));
-      fetchAvailableModels(getAuthHeaders())
+      fetchAvailableModels(getAuthHeaders(), getAuthHeaders, refreshToken)
         .then(setAvailable)
         .catch(() => {});
     } else {
@@ -100,11 +100,11 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
       const res = await updatePreferences(getAuthHeaders(), {
         preferred_ai_provider: editProvider,
         preferred_model: editModel,
-      });
+      }, getAuthHeaders, refreshToken);
       setUpdateSuccess('Preferences updated!');
       setEditing(false);
       // Refetch profile to update UI
-      const updated = await fetchUserProfile(getAuthHeaders());
+      const updated = await fetchUserProfile(getAuthHeaders(), getAuthHeaders, refreshToken);
       setProfile(updated);
     } catch (err: any) {
       setUpdateError(err.message || 'Failed to update preferences');

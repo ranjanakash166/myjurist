@@ -10,7 +10,7 @@ import { DashboardDesktop } from './components/DashboardDesktop';
 import { DashboardMobile } from './components/DashboardMobile';
 
 export default function DashboardPage() {
-  const { getAuthHeaders, isAuthenticated, token } = useAuth();
+  const { getAuthHeaders, isAuthenticated, token, refreshToken } = useAuth();
   const { isMobile } = useResponsive();
   const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
       try {
         setLoading(true);
-        const data = await fetchDashboardStats(getAuthHeaders());
+        const data = await fetchDashboardStats(getAuthHeaders(), getAuthHeaders, refreshToken);
         setDashboardData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
@@ -36,7 +36,7 @@ export default function DashboardPage() {
     };
 
     loadDashboardData();
-  }, [isAuthenticated, token, getAuthHeaders]);
+  }, [isAuthenticated, token, getAuthHeaders, refreshToken]);
 
   // Loading state
   if (loading) {

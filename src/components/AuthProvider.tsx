@@ -1,5 +1,5 @@
 "use client";
-import React, { ReactNode, useEffect, useState, createContext, useContext } from "react";
+import React, { ReactNode, useEffect, useState, createContext, useContext, useCallback } from "react";
 import { API_BASE_URL } from "../app/constants";
 
 interface User {
@@ -18,8 +18,19 @@ interface User {
 
 interface AuthResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
   expires_in: number;
+  refresh_expires_in: number;
+  user: User;
+}
+
+interface RefreshResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_expires_in: number;
   user: User;
 }
 
@@ -36,6 +47,7 @@ interface AuthContextType {
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string; data?: any }>;
   logout: () => Promise<void>;
   getAuthHeaders: () => Record<string, string>;
+  refreshToken: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -51,6 +63,7 @@ const AuthContext = createContext<AuthContextType>({
   resetPassword: async () => ({ success: false }),
   logout: async () => {},
   getAuthHeaders: () => ({}),
+  refreshToken: async () => false,
 });
 
 export function useAuth() {
@@ -60,31 +73,162 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [tokenExpiry, setTokenExpiry] = useState<number | null>(null);
+  const [refreshTokenExpiry, setRefreshTokenExpiry] = useState<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Helper function to check if token is expired
+  const isTokenExpired = useCallback((expiryTime: number | null) => {
+    if (!expiryTime) return true;
+    // Add 30 second buffer before expiry
+    return Date.now() >= (expiryTime - 30000);
+  }, []);
+
+  // Helper function to check if refresh token is expired
+  const isRefreshTokenExpired = useCallback((expiryTime: number | null) => {
+    if (!expiryTime) return true;
+    return Date.now() >= expiryTime;
+  }, []);
+
+  // Function to refresh the access token
+  const refreshAccessToken = useCallback(async (): Promise<boolean> => {
+    if (!refreshToken || isRefreshing) return false;
+    
+    // Check if refresh token is expired
+    if (isRefreshTokenExpired(refreshTokenExpiry)) {
+      console.log("Refresh token expired, logging out");
+      await logout();
+      return false;
+    }
+
+    try {
+      setIsRefreshing(true);
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      if (!response.ok) {
+        console.log("Token refresh failed, logging out");
+        await logout();
+        return false;
+      }
+
+      const data: RefreshResponse = await response.json();
+      
+      // Calculate expiry times
+      const newTokenExpiry = Date.now() + (data.expires_in * 1000);
+      const newRefreshTokenExpiry = Date.now() + (data.refresh_expires_in * 1000);
+      
+      // Store new tokens and expiry times
+      localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("token_expiry", newTokenExpiry.toString());
+      localStorage.setItem("refresh_token_expiry", newRefreshTokenExpiry.toString());
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      
+      setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+      setTokenExpiry(newTokenExpiry);
+      setRefreshTokenExpiry(newRefreshTokenExpiry);
+      setUser(data.user);
+      setIsAuthenticated(true);
+      
+      console.log("Token refreshed successfully");
+      return true;
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      await logout();
+      return false;
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refreshToken, refreshTokenExpiry, isRefreshing, isRefreshTokenExpired]);
 
   // Initialize auth state from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedToken = localStorage.getItem("auth_token");
+      const storedRefreshToken = localStorage.getItem("refresh_token");
+      const storedTokenExpiry = localStorage.getItem("token_expiry");
+      const storedRefreshTokenExpiry = localStorage.getItem("refresh_token_expiry");
       const storedUser = localStorage.getItem("auth_user");
       
-      if (storedToken && storedUser) {
+      if (storedToken && storedRefreshToken && storedUser) {
         try {
-          // Basic token validation (you could add JWT expiration check here)
           const user = JSON.parse(storedUser);
-          setToken(storedToken);
-          setUser(user);
-          setIsAuthenticated(true);
+          const tokenExpiryTime = storedTokenExpiry ? parseInt(storedTokenExpiry) : null;
+          const refreshTokenExpiryTime = storedRefreshTokenExpiry ? parseInt(storedRefreshTokenExpiry) : null;
+          
+          // Check if access token is expired but refresh token is still valid
+          if (isTokenExpired(tokenExpiryTime) && !isRefreshTokenExpired(refreshTokenExpiryTime)) {
+            // Token is expired but refresh token is valid, try to refresh
+            setToken(storedToken);
+            setRefreshToken(storedRefreshToken);
+            setTokenExpiry(tokenExpiryTime);
+            setRefreshTokenExpiry(refreshTokenExpiryTime);
+            setUser(user);
+            setIsAuthenticated(true);
+            setIsInitialized(true);
+            
+            // Attempt to refresh token
+            refreshAccessToken();
+            return;
+          }
+          
+          // If refresh token is also expired, clear everything
+          if (isRefreshTokenExpired(refreshTokenExpiryTime)) {
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("token_expiry");
+            localStorage.removeItem("refresh_token_expiry");
+            localStorage.removeItem("auth_user");
+          } else {
+            // Both tokens are valid
+            setToken(storedToken);
+            setRefreshToken(storedRefreshToken);
+            setTokenExpiry(tokenExpiryTime);
+            setRefreshTokenExpiry(refreshTokenExpiryTime);
+            setUser(user);
+            setIsAuthenticated(true);
+          }
         } catch (error) {
           // Clear invalid stored data
           localStorage.removeItem("auth_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("token_expiry");
+          localStorage.removeItem("refresh_token_expiry");
           localStorage.removeItem("auth_user");
         }
       }
       setIsInitialized(true);
     }
-  }, []);
+  }, [isTokenExpired, isRefreshTokenExpired, refreshAccessToken]);
+
+  // Set up automatic token refresh
+  useEffect(() => {
+    if (!isAuthenticated || !tokenExpiry) return;
+
+    const checkTokenExpiry = () => {
+      if (isTokenExpired(tokenExpiry)) {
+        refreshAccessToken();
+      }
+    };
+
+    // Check every minute
+    const interval = setInterval(checkTokenExpiry, 60000);
+    
+    // Also check immediately
+    checkTokenExpiry();
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, tokenExpiry, isTokenExpired, refreshAccessToken]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -104,11 +248,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data: AuthResponse = await response.json();
       
+      // Calculate expiry times
+      const tokenExpiryTime = Date.now() + (data.expires_in * 1000);
+      const refreshTokenExpiryTime = Date.now() + (data.refresh_expires_in * 1000);
+      
       // Store auth data
       localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("token_expiry", tokenExpiryTime.toString());
+      localStorage.setItem("refresh_token_expiry", refreshTokenExpiryTime.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+      setTokenExpiry(tokenExpiryTime);
+      setRefreshTokenExpiry(refreshTokenExpiryTime);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -159,11 +313,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data: AuthResponse = await response.json();
       
+      // Calculate expiry times
+      const tokenExpiryTime = Date.now() + (data.expires_in * 1000);
+      const refreshTokenExpiryTime = Date.now() + (data.refresh_expires_in * 1000);
+      
       // Store auth data
       localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("token_expiry", tokenExpiryTime.toString());
+      localStorage.setItem("refresh_token_expiry", refreshTokenExpiryTime.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+      setTokenExpiry(tokenExpiryTime);
+      setRefreshTokenExpiry(refreshTokenExpiryTime);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -191,11 +355,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data: AuthResponse = await response.json();
       
+      // Calculate expiry times
+      const tokenExpiryTime = Date.now() + (data.expires_in * 1000);
+      const refreshTokenExpiryTime = Date.now() + (data.refresh_expires_in * 1000);
+      
       // Store auth data
       localStorage.setItem("auth_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("token_expiry", tokenExpiryTime.toString());
+      localStorage.setItem("refresh_token_expiry", refreshTokenExpiryTime.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+      setTokenExpiry(tokenExpiryTime);
+      setRefreshTokenExpiry(refreshTokenExpiryTime);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -266,8 +440,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       // Clear local storage and state
       localStorage.removeItem("auth_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("token_expiry");
+      localStorage.removeItem("refresh_token_expiry");
       localStorage.removeItem("auth_user");
       setToken(null);
+      setRefreshToken(null);
+      setTokenExpiry(null);
+      setRefreshTokenExpiry(null);
       setUser(null);
       setIsAuthenticated(false);
     }
@@ -295,6 +475,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resetPassword,
       logout,
       getAuthHeaders,
+      refreshToken: refreshAccessToken,
     }}>
       {children}
     </AuthContext.Provider>

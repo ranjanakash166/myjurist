@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { apiCallWithRefresh } from "./utils";
 
 export interface LegalResearchRequest {
   query: string;
@@ -60,17 +61,23 @@ export interface ValidationError {
 
 export const searchLegalResearch = async (
   request: LegalResearchRequest,
-  authToken: string
+  authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
 ): Promise<LegalResearchResponse> => {
-  const response = await fetch(`${API_BASE_URL}/legal-research/enhanced-search`, {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json',
+  const response = await apiCallWithRefresh(
+    `${API_BASE_URL}/legal-research/enhanced-search`,
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
     },
-    body: JSON.stringify(request),
-  });
+    getAuthHeaders,
+    refreshToken
+  );
 
   if (!response.ok) {
     if (response.status === 422) {
