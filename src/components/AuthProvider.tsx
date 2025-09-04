@@ -23,6 +23,8 @@ interface AuthResponse {
   expires_in: number;
   refresh_expires_in: number;
   user: User;
+  session_id: string;
+  session_expires_at: string;
 }
 
 interface RefreshResponse {
@@ -32,6 +34,8 @@ interface RefreshResponse {
   expires_in: number;
   refresh_expires_in: number;
   user: User;
+  session_id: string;
+  session_expires_at: string;
 }
 
 interface AuthContextType {
@@ -76,9 +80,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [tokenExpiry, setTokenExpiry] = useState<number | null>(null);
   const [refreshTokenExpiry, setRefreshTokenExpiry] = useState<number | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionExpiry, setSessionExpiry] = useState<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Helper function to generate device fingerprint
+  const generateDeviceFingerprint = useCallback(() => {
+    if (typeof window === "undefined") return "server";
+    
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.textBaseline = 'top';
+      ctx.font = '14px Arial';
+      ctx.fillText('Device fingerprint', 2, 2);
+    }
+    
+    const fingerprint = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + 'x' + screen.height,
+      new Date().getTimezoneOffset(),
+      canvas.toDataURL()
+    ].join('|');
+    
+    // Create a simple hash of the fingerprint
+    let hash = 0;
+    for (let i = 0; i < fingerprint.length; i++) {
+      const char = fingerprint.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    return `device_${Math.abs(hash).toString(36)}`;
+  }, []);
 
   // Helper function to check if token is expired
   const isTokenExpired = useCallback((expiryTime: number | null) => {
@@ -125,18 +162,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Calculate expiry times
       const newTokenExpiry = Date.now() + (data.expires_in * 1000);
       const newRefreshTokenExpiry = Date.now() + (data.refresh_expires_in * 1000);
+      const newSessionExpiry = new Date(data.session_expires_at).getTime();
       
       // Store new tokens and expiry times
       localStorage.setItem("auth_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
       localStorage.setItem("token_expiry", newTokenExpiry.toString());
       localStorage.setItem("refresh_token_expiry", newRefreshTokenExpiry.toString());
+      localStorage.setItem("session_id", data.session_id);
+      localStorage.setItem("session_expiry", newSessionExpiry.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
       setRefreshToken(data.refresh_token);
       setTokenExpiry(newTokenExpiry);
       setRefreshTokenExpiry(newRefreshTokenExpiry);
+      setSessionId(data.session_id);
+      setSessionExpiry(newSessionExpiry);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -158,6 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedRefreshToken = localStorage.getItem("refresh_token");
       const storedTokenExpiry = localStorage.getItem("token_expiry");
       const storedRefreshTokenExpiry = localStorage.getItem("refresh_token_expiry");
+      const storedSessionId = localStorage.getItem("session_id");
+      const storedSessionExpiry = localStorage.getItem("session_expiry");
       const storedUser = localStorage.getItem("auth_user");
       
       if (storedToken && storedRefreshToken && storedUser) {
@@ -165,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const user = JSON.parse(storedUser);
           const tokenExpiryTime = storedTokenExpiry ? parseInt(storedTokenExpiry) : null;
           const refreshTokenExpiryTime = storedRefreshTokenExpiry ? parseInt(storedRefreshTokenExpiry) : null;
+          const sessionExpiryTime = storedSessionExpiry ? parseInt(storedSessionExpiry) : null;
           
           // Check if access token is expired but refresh token is still valid
           if (isTokenExpired(tokenExpiryTime) && !isRefreshTokenExpired(refreshTokenExpiryTime)) {
@@ -173,6 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setRefreshToken(storedRefreshToken);
             setTokenExpiry(tokenExpiryTime);
             setRefreshTokenExpiry(refreshTokenExpiryTime);
+            setSessionId(storedSessionId);
+            setSessionExpiry(sessionExpiryTime);
             setUser(user);
             setIsAuthenticated(true);
             setIsInitialized(true);
@@ -188,6 +235,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.removeItem("refresh_token");
             localStorage.removeItem("token_expiry");
             localStorage.removeItem("refresh_token_expiry");
+            localStorage.removeItem("session_id");
+            localStorage.removeItem("session_expiry");
             localStorage.removeItem("auth_user");
           } else {
             // Both tokens are valid
@@ -195,6 +244,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setRefreshToken(storedRefreshToken);
             setTokenExpiry(tokenExpiryTime);
             setRefreshTokenExpiry(refreshTokenExpiryTime);
+            setSessionId(storedSessionId);
+            setSessionExpiry(sessionExpiryTime);
             setUser(user);
             setIsAuthenticated(true);
           }
@@ -204,6 +255,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem("refresh_token");
           localStorage.removeItem("token_expiry");
           localStorage.removeItem("refresh_token_expiry");
+          localStorage.removeItem("session_id");
+          localStorage.removeItem("session_expiry");
           localStorage.removeItem("auth_user");
         }
       }
@@ -232,12 +285,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const deviceFingerprint = generateDeviceFingerprint();
+      
+      const response = await fetch(`${API_BASE_URL}/auth/enhanced/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          device_fingerprint: deviceFingerprint 
+        }),
       });
 
       if (!response.ok) {
@@ -251,18 +310,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Calculate expiry times
       const tokenExpiryTime = Date.now() + (data.expires_in * 1000);
       const refreshTokenExpiryTime = Date.now() + (data.refresh_expires_in * 1000);
+      const sessionExpiryTime = new Date(data.session_expires_at).getTime();
       
       // Store auth data
       localStorage.setItem("auth_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
       localStorage.setItem("token_expiry", tokenExpiryTime.toString());
       localStorage.setItem("refresh_token_expiry", refreshTokenExpiryTime.toString());
+      localStorage.setItem("session_id", data.session_id);
+      localStorage.setItem("session_expiry", sessionExpiryTime.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
       setRefreshToken(data.refresh_token);
       setTokenExpiry(tokenExpiryTime);
       setRefreshTokenExpiry(refreshTokenExpiryTime);
+      setSessionId(data.session_id);
+      setSessionExpiry(sessionExpiryTime);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -316,18 +380,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Calculate expiry times
       const tokenExpiryTime = Date.now() + (data.expires_in * 1000);
       const refreshTokenExpiryTime = Date.now() + (data.refresh_expires_in * 1000);
+      const sessionExpiryTime = new Date(data.session_expires_at).getTime();
       
       // Store auth data
       localStorage.setItem("auth_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
       localStorage.setItem("token_expiry", tokenExpiryTime.toString());
       localStorage.setItem("refresh_token_expiry", refreshTokenExpiryTime.toString());
+      localStorage.setItem("session_id", data.session_id);
+      localStorage.setItem("session_expiry", sessionExpiryTime.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
       setRefreshToken(data.refresh_token);
       setTokenExpiry(tokenExpiryTime);
       setRefreshTokenExpiry(refreshTokenExpiryTime);
+      setSessionId(data.session_id);
+      setSessionExpiry(sessionExpiryTime);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -358,18 +427,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Calculate expiry times
       const tokenExpiryTime = Date.now() + (data.expires_in * 1000);
       const refreshTokenExpiryTime = Date.now() + (data.refresh_expires_in * 1000);
+      const sessionExpiryTime = new Date(data.session_expires_at).getTime();
       
       // Store auth data
       localStorage.setItem("auth_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
       localStorage.setItem("token_expiry", tokenExpiryTime.toString());
       localStorage.setItem("refresh_token_expiry", refreshTokenExpiryTime.toString());
+      localStorage.setItem("session_id", data.session_id);
+      localStorage.setItem("session_expiry", sessionExpiryTime.toString());
       localStorage.setItem("auth_user", JSON.stringify(data.user));
       
       setToken(data.access_token);
       setRefreshToken(data.refresh_token);
       setTokenExpiry(tokenExpiryTime);
       setRefreshTokenExpiry(refreshTokenExpiryTime);
+      setSessionId(data.session_id);
+      setSessionExpiry(sessionExpiryTime);
       setUser(data.user);
       setIsAuthenticated(true);
       
@@ -443,11 +517,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("token_expiry");
       localStorage.removeItem("refresh_token_expiry");
+      localStorage.removeItem("session_id");
+      localStorage.removeItem("session_expiry");
       localStorage.removeItem("auth_user");
       setToken(null);
       setRefreshToken(null);
       setTokenExpiry(null);
       setRefreshTokenExpiry(null);
+      setSessionId(null);
+      setSessionExpiry(null);
       setUser(null);
       setIsAuthenticated(false);
     }
