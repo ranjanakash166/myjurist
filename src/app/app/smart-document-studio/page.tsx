@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, FileText, Sparkles, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi';
 import { useAuth } from '@/components/AuthProvider';
@@ -28,6 +29,7 @@ export default function SmartContractStudio() {
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentStep, setCurrentStep] = useState<'categories' | 'templates' | 'form' | 'preview'>('categories');
+  const [currentTab, setCurrentTab] = useState<'studio' | 'history'>('studio');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [generatedContract, setGeneratedContract] = useState<ContractDraftResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -259,7 +261,7 @@ export default function SmartContractStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -320,65 +322,73 @@ export default function SmartContractStudio() {
         )}
 
         {/* Main Content */}
-        {!isLoading && (
-          <div className="max-w-6xl mx-auto">
-            {currentStep === 'categories' && (
-              <CategorySelector
-                categories={categories}
-                onCategorySelect={handleCategorySelect}
-              />
-            )}
+        <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'studio' | 'history')} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="studio">Smart Document Studio</TabsTrigger>
+            <TabsTrigger value="history">Contract History</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="studio" className="mt-6">
+            {!isLoading && (
+              <div className="max-w-6xl mx-auto">
+                {currentStep === 'categories' && (
+                  <CategorySelector
+                    categories={categories}
+                    onCategorySelect={handleCategorySelect}
+                  />
+                )}
 
-            {currentStep === 'templates' && selectedCategory && (
-              <TemplateSelector
-                category={selectedCategory}
-                templates={templates}
-                searchQuery={searchQuery}
-                onSearch={handleSearch}
-                onTemplateSelect={handleTemplateSelect}
-                onBack={handleBack}
-              />
-            )}
+                {currentStep === 'templates' && selectedCategory && (
+                  <TemplateSelector
+                    category={selectedCategory}
+                    templates={templates}
+                    searchQuery={searchQuery}
+                    onSearch={handleSearch}
+                    onTemplateSelect={handleTemplateSelect}
+                    onBack={handleBack}
+                  />
+                )}
 
-            {currentStep === 'form' && selectedTemplate && (
-              <ContractForm
-                template={selectedTemplate}
-                onSubmit={handleFormSubmit}
-                onBack={handleBack}
-              />
-            )}
+                {currentStep === 'form' && selectedTemplate && (
+                  <ContractForm
+                    template={selectedTemplate}
+                    onSubmit={handleFormSubmit}
+                    onBack={handleBack}
+                  />
+                )}
 
-            {currentStep === 'preview' && generatedContract && (
-              <ContractPreview
-                contract={generatedContract}
-                onBack={handleBack}
-                onStartOver={handleStartOver}
-                onDownload={async (format) => {
-                  try {
-                    const blob = await api.downloadContract(generatedContract.contract_id, format);
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${generatedContract.title}.${format}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                  } catch (err) {
-                    console.error('Download error:', err);
-                    const errorMessage = err instanceof Error ? err.message : 'Failed to download contract. Please try again.';
-                    setError(errorMessage);
-                  }
-                }}
-              />
+                {currentStep === 'preview' && generatedContract && (
+                  <ContractPreview
+                    contract={generatedContract}
+                    onBack={handleBack}
+                    onStartOver={handleStartOver}
+                    onDownload={async (format) => {
+                      try {
+                        const blob = await api.downloadContract(generatedContract.contract_id, format);
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${generatedContract.title}.${format}`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                      } catch (err) {
+                        console.error('Download error:', err);
+                        const errorMessage = err instanceof Error ? err.message : 'Failed to download contract. Please try again.';
+                        setError(errorMessage);
+                      }
+                    }}
+                  />
+                )}
+              </div>
             )}
-          </div>
-        )}
-
-        {/* Contract History */}
-        <div className="mt-16">
-          <ContractHistory api={api} />
-        </div>
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-6">
+            <ContractHistory api={api} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
