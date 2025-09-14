@@ -223,12 +223,10 @@ export function testDateNormalization() {
     "2025-13-45"   // Completely invalid but has year
   ];
   
-  console.log("Testing date normalization:");
   testCases.forEach(testCase => {
     const normalized = getNormalizedDate(testCase);
     const formatted = formatDateSafely(testCase);
     const isValid = isValidDate(testCase);
-    console.log(`"${testCase}" -> Valid: ${isValid}, Normalized: "${normalized}", Formatted: "${formatted}"`);
   });
 }
 

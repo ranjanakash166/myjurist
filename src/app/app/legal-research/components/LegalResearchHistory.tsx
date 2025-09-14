@@ -336,7 +336,6 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
   // Helper function to get parsed AI summary data (same as in main search page)
   const getParsedAISummaryData = (aiSummary: AISummaryResponse) => {
     try {
-      console.log('Raw AI summary:', aiSummary.ai_summary);
       
       // Check if the content starts with ```json and ends with ```
       let jsonContent = aiSummary.ai_summary;
@@ -346,10 +345,8 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       
       // Clean the JSON string by removing extra spaces and newlines
       const cleanJson = jsonContent.replace(/\s+/g, ' ').trim();
-      console.log('Cleaned JSON:', cleanJson);
       
       const parsedSummary = JSON.parse(cleanJson);
-      console.log('Parsed summary:', parsedSummary);
       
       return {
         ai_summary: parsedSummary.ai_summary || aiSummary.ai_summary,

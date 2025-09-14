@@ -136,7 +136,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // Check if refresh token is expired
     if (isRefreshTokenExpired(refreshTokenExpiry)) {
-      console.log("Refresh token expired, logging out");
       await logout();
       return false;
     }
@@ -152,7 +151,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        console.log("Token refresh failed, logging out");
         await logout();
         return false;
       }
@@ -182,7 +180,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
       setIsAuthenticated(true);
       
-      console.log("Token refreshed successfully");
       return true;
     } catch (error) {
       console.error("Error refreshing token:", error);

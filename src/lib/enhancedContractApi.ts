@@ -87,17 +87,12 @@ export class EnhancedContractApi {
   async getCategories(): Promise<ContractCategory[]> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/categories`;
-      console.log('Fetching categories from:', url);
-      
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -106,7 +101,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Categories data received:', data);
       return data;
     } catch (error) {
       console.error('Error fetching contract categories:', error);
@@ -118,7 +112,6 @@ export class EnhancedContractApi {
   async getTemplatesByCategory(category: string): Promise<ContractTemplate[]> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/templates?category=${category}`;
-      console.log('Fetching templates for category:', category, 'from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -134,7 +127,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Templates data received:', data);
       return data;
     } catch (error) {
       console.error(`Error fetching templates for category ${category}:`, error);
@@ -146,7 +138,6 @@ export class EnhancedContractApi {
   async getAllTemplates(): Promise<ContractTemplate[]> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/templates/all`;
-      console.log('Fetching all templates from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -162,7 +153,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('All templates data received:', data);
       return data;
     } catch (error) {
       console.error('Error fetching all templates:', error);
@@ -174,7 +164,6 @@ export class EnhancedContractApi {
   async getTemplateDetails(templateId: string): Promise<ContractTemplate> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/templates/${templateId}`;
-      console.log('Fetching template details for:', templateId, 'from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -190,7 +179,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Template details received:', data);
       return data;
     } catch (error) {
       console.error(`Error fetching template details for ${templateId}:`, error);
@@ -202,7 +190,6 @@ export class EnhancedContractApi {
   async searchTemplates(query: string): Promise<ContractTemplate[]> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/search?query=${encodeURIComponent(query)}`;
-      console.log('Searching templates with query:', query, 'from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -218,7 +205,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Search results received:', data);
       return data;
     } catch (error) {
       console.error('Error searching templates:', error);
@@ -232,7 +218,6 @@ export class EnhancedContractApi {
   async validateContractInputs(request: ContractValidationRequest): Promise<ContractValidationResponse> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/validate`;
-      console.log('Validating contract inputs:', request, 'at:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'POST',
@@ -249,7 +234,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Validation response received:', data);
       return data;
     } catch (error) {
       console.error('Error validating contract inputs:', error);
@@ -261,7 +245,6 @@ export class EnhancedContractApi {
   async generateContract(request: ContractDraftRequest): Promise<ContractDraftResponse> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/draft`;
-      console.log('Generating contract draft:', request, 'at:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'POST',
@@ -278,7 +261,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Contract generated successfully:', data);
       return data;
     } catch (error) {
       console.error('Error generating contract:', error);
@@ -297,7 +279,6 @@ export class EnhancedContractApi {
   }> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/drafts?page=${page}&page_size=${pageSize}`;
-      console.log('Fetching contract drafts from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -313,7 +294,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Contract drafts received:', data);
       return data;
     } catch (error) {
       console.error('Error fetching contract drafts:', error);
@@ -325,7 +305,6 @@ export class EnhancedContractApi {
   async getContractDraft(contractId: string): Promise<ContractDraftResponse> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/drafts/${contractId}`;
-      console.log('Fetching contract draft:', contractId, 'from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -341,7 +320,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Contract draft received:', data);
       return data;
     } catch (error) {
       console.error(`Error fetching contract draft ${contractId}:`, error);
@@ -353,7 +331,6 @@ export class EnhancedContractApi {
   async deleteContractDraft(contractId: string): Promise<{ message: string }> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/drafts/${contractId}`;
-      console.log('Deleting contract draft:', contractId, 'at:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'DELETE',
@@ -369,7 +346,6 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
-      console.log('Contract draft deleted successfully:', data);
       return data;
     } catch (error) {
       console.error(`Error deleting contract draft ${contractId}:`, error);
@@ -383,7 +359,6 @@ export class EnhancedContractApi {
   async downloadContractPDF(contractId: string): Promise<Blob> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/drafts/${contractId}/download/pdf`;
-      console.log('Downloading contract as PDF:', contractId, 'from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -399,7 +374,6 @@ export class EnhancedContractApi {
       }
 
       const blob = await response.blob();
-      console.log('PDF downloaded successfully, size:', blob.size);
       return blob;
     } catch (error) {
       console.error(`Error downloading contract PDF ${contractId}:`, error);
@@ -411,7 +385,6 @@ export class EnhancedContractApi {
   async downloadContractWord(contractId: string): Promise<Blob> {
     try {
       const url = `${this.baseUrl}/enhanced-contracts/drafts/${contractId}/download/word`;
-      console.log('Downloading contract as Word:', contractId, 'from:', url);
 
       const response = await this.authenticatedFetch(url, {
         method: 'GET',
@@ -427,7 +400,6 @@ export class EnhancedContractApi {
       }
 
       const blob = await response.blob();
-      console.log('Word document downloaded successfully, size:', blob.size);
       return blob;
     } catch (error) {
       console.error(`Error downloading contract Word ${contractId}:`, error);

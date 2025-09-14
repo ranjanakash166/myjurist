@@ -25,9 +25,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('Loading contract history for page:', pageNum);
       const response = await api.getContractHistory(pageNum, 10);
-      console.log('Contract history loaded:', response);
       setContracts(response.drafts);
       setTotalCount(response.total_count);
       setPage(pageNum);
@@ -58,7 +56,6 @@ export function ContractHistory({ api }: ContractHistoryProps) {
   const handleDownload = async (contractId: string, format: 'pdf' | 'docx') => {
     setIsDownloading(`${contractId}-${format}`);
     try {
-      console.log(`Downloading contract ${contractId} as ${format}`);
       const blob = await api.downloadContract(contractId, format);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -83,7 +80,6 @@ export function ContractHistory({ api }: ContractHistoryProps) {
     }
 
     try {
-      console.log(`Deleting contract ${contractId}`);
       await api.deleteContract(contractId);
       setContracts(prev => prev.filter(c => c.contract_id !== contractId));
       setTotalCount(prev => prev - 1);
@@ -94,7 +90,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
     }
   };
 
-  const filteredContracts = contracts.filter(contract =>
+  const filteredContracts = (contracts || []).filter(contract =>
     contract.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     contract.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     contract.template_type.toLowerCase().includes(searchQuery.toLowerCase())

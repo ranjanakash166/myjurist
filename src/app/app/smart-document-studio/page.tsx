@@ -42,9 +42,7 @@ export default function SmartContractStudio() {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('Loading contract categories...');
       const data = await api.getCategories();
-      console.log('Categories loaded:', data);
       setCategories(data);
     } catch (err) {
       console.error('Error loading categories:', err);
@@ -71,9 +69,7 @@ export default function SmartContractStudio() {
       setIsLoading(true);
       setError(null);
       setSelectedCategory(category);
-      console.log('Loading templates for category:', category.id);
       const data = await api.getTemplatesByCategory(category.id);
-      console.log('Templates loaded:', data);
       setTemplates(data);
       setCurrentStep('templates');
     } catch (err) {
@@ -100,9 +96,7 @@ export default function SmartContractStudio() {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('Loading template details for:', template.id);
       const templateDetails = await api.getTemplateDetails(template.id);
-      console.log('Template details loaded:', templateDetails);
       setSelectedTemplate(templateDetails);
       setCurrentStep('form');
     } catch (err) {
@@ -131,9 +125,7 @@ export default function SmartContractStudio() {
     try {
       setIsLoading(true);
       setError(null);
-      console.log('Searching templates with query:', query);
       const data = await api.searchTemplates(query);
-      console.log('Search results:', data);
       setTemplates(data);
     } catch (err) {
       console.error('Error searching templates:', err);
@@ -171,9 +163,7 @@ export default function SmartContractStudio() {
         enhance_with_ai: true
       };
 
-      console.log('Generating contract with request:', request);
       const response = await api.generateContract(request);
-      console.log('Contract generated successfully:', response);
       setGeneratedContract(response);
       setCurrentStep('preview');
     } catch (err) {
@@ -365,7 +355,6 @@ export default function SmartContractStudio() {
                 onStartOver={handleStartOver}
                 onDownload={async (format) => {
                   try {
-                    console.log(`Downloading contract ${generatedContract.contract_id} as ${format}`);
                     const blob = await api.downloadContract(generatedContract.contract_id, format);
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');

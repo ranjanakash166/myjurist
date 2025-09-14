@@ -104,7 +104,6 @@ export default function TimelineHistoryList({
       
       try {
         const documentsResponse = await timelineApi.getTimelineDocuments(timelineId);
-        console.log('Fetched documents for timeline:', timelineId, documentsResponse);
         setTimelineDocumentsMap(prev => new Map(prev).set(timelineId, documentsResponse.documents));
       } catch (err: any) {
         console.warn('Failed to fetch documents:', err);
@@ -276,7 +275,6 @@ export default function TimelineHistoryList({
                     <div className="space-y-2">
                       {Array.isArray(timelineDocumentsMap.get(timeline.timeline_id)) && 
                        timelineDocumentsMap.get(timeline.timeline_id)?.map((doc, index) => {
-                         console.log('Rendering document:', doc);
                          return (
                         <div
                           key={doc.document_id || `doc-${index}`}
