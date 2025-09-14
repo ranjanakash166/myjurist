@@ -32,7 +32,7 @@ export function ContractPreview({ contract, onBack, onStartOver, onDownload }: C
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(contract.generated_content);
+      await navigator.clipboard.writeText(contract.generated_content || 'No content available');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
@@ -99,12 +99,6 @@ export function ContractPreview({ contract, onBack, onStartOver, onDownload }: C
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">AI Provider</p>
-              <p className="text-sm text-gray-900 dark:text-white capitalize">
-                {contract.ai_provider_used}
-              </p>
-            </div>
-            <div>
               <p className="text-sm font-medium text-gray-500">Processing Time</p>
               <p className="text-sm text-gray-900 dark:text-white">
                 {formatProcessingTime(contract.processing_time_ms)}
@@ -147,7 +141,7 @@ export function ContractPreview({ contract, onBack, onStartOver, onDownload }: C
         <CardContent>
           <div className="space-y-4">
             <Textarea
-              value={contract.generated_content}
+              value={contract.generated_content || 'No content available'}
               readOnly
               className="min-h-[500px] font-mono text-sm"
               placeholder="Contract content will appear here..."

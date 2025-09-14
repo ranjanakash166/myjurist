@@ -57,8 +57,8 @@ export interface ContractDraftResponse {
   template_type: string;
   title: string;
   description: string;
-  input_data: Record<string, any>;
-  generated_content: string;
+  input_data?: Record<string, any>;
+  generated_content?: string;
   status: string;
   ai_provider_used?: string;
   processing_time_ms?: number;
@@ -294,6 +294,17 @@ export class EnhancedContractApi {
       }
 
       const data = await response.json();
+      
+      // Handle both array response and object response formats
+      if (Array.isArray(data)) {
+        return {
+          drafts: data,
+          total_count: data.length,
+          page: page,
+          page_size: pageSize
+        };
+      }
+      
       return data;
     } catch (error) {
       console.error('Error fetching contract drafts:', error);

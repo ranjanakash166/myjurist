@@ -120,7 +120,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
           <div>
             <CardTitle className="flex items-center space-x-2">
               <FileText className="w-5 h-5 text-blue-600" />
-              <span>Contract History</span>
+              <span>Document History</span>
             </CardTitle>
             <CardDescription>
               View and manage your previously generated contracts
@@ -224,9 +224,6 @@ export function ContractHistory({ api }: ContractHistoryProps) {
                           <div className="flex items-center space-x-1">
                             <Clock className="w-4 h-4" />
                             <span>{formatDate(contract.created_at)}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <span>AI: {contract.ai_provider_used}</span>
                           </div>
                         </div>
                       </div>
