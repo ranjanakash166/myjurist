@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3, Tag } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3, Tag, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -21,6 +21,7 @@ const getNavItems = (userRole?: string) => {
     { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
     { label: "Contract Drafting", icon: <FileCheck className="w-6 h-6" />, href: "/app/contract-drafting" },
+    { label: "Smart Document Drafting", icon: <Sparkles className="w-6 h-6" />, href: "/app/smart-document-studio" },
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
     { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },

@@ -22,7 +22,8 @@ import {
   FileSearch,
   Scale,
   Tags,
-  Clock
+  Clock,
+  Sparkles
 } from "lucide-react";
 import { useAuth } from "../../../components/AuthProvider";
 
@@ -148,6 +149,12 @@ export default function HomePage() {
           description: "AI-powered contract generation and templates",
           icon: <PenTool className="w-4 h-4" />,
           href: "/app/contract-drafting"
+        },
+        {
+          title: "Smart Document Drafting",
+          description: "Advanced document creation with AI enhancement",
+          icon: <Sparkles className="w-4 h-4" />,
+          href: "/app/smart-document-studio"
         },
         {
           title: "Document Generation",
