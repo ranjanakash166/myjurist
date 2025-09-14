@@ -20,7 +20,6 @@ const getNavItems = (userRole?: string) => {
     { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
     { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
-    { label: "Contract Drafting", icon: <FileCheck className="w-6 h-6" />, href: "/app/contract-drafting" },
     { label: "Smart Document Drafting", icon: <Sparkles className="w-6 h-6" />, href: "/app/smart-document-studio" },
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },

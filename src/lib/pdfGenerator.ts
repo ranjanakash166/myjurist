@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { ContractDraftResponse } from './contractApi';
+import { ContractDraftResponse } from './enhancedContractApi';
 
 export interface PDFOptions {
   title?: string;

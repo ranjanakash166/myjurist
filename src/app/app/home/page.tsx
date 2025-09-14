@@ -135,6 +135,12 @@ export default function HomePage() {
           description: "Smart tools for understanding and sorting documents",
           icon: <Tags className="w-4 h-4" />,
           href: "/app/document-categorization"
+        },
+        {
+          title: "Smart Document Drafting",
+          description: "AI-powered document creation and generation",
+          icon: <Sparkles className="w-4 h-4" />,
+          href: "/app/smart-document-studio"
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
@@ -145,12 +151,6 @@ export default function HomePage() {
       icon: <Leaf className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Contract Drafting",
-          description: "AI-powered contract generation and templates",
-          icon: <PenTool className="w-4 h-4" />,
-          href: "/app/contract-drafting"
-        },
-        {
           title: "Smart Document Drafting",
           description: "Advanced document creation with AI enhancement",
           icon: <Sparkles className="w-4 h-4" />,
@@ -160,7 +160,7 @@ export default function HomePage() {
           title: "Document Generation",
           description: "Create legal briefs and complex documents",
           icon: <FileText className="w-4 h-4" />,
-          href: "/app/contract-drafting"
+          href: "/app/smart-document-studio"
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
@@ -264,14 +264,14 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/app/contract-drafting"
+              href="/app/smart-document-studio"
               className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
             >
               <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
                 <Leaf className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <p className="font-semibold text-foreground">Draft Contract</p>
+                <p className="font-semibold text-foreground">Draft Document</p>
                 <p className="text-sm text-muted-foreground">AI-powered creation</p>
               </div>
               <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform ml-auto" />
