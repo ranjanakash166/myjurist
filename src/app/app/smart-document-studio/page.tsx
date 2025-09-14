@@ -56,7 +56,7 @@ export default function SmartContractStudio() {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('The Smart Contract Studio API is not available. Please ensure the backend server is running on http://localhost:8000');
+        setError('The Smart Document Studio API is not available. Please ensure the backend server is running on http://localhost:8000');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load contract categories. Please try again.';
         setError(errorMessage);
@@ -266,7 +266,7 @@ export default function SmartContractStudio() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Smart Contract Studio
+            Smart Document Studio
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Create professional legal documents with AI-powered assistance. 
