@@ -1,0 +1,275 @@
+/* Word-like Document Styling */
+.word-document-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.word-document-editor {
+  font-family: 'Times New Roman', serif !important;
+  font-size: 12pt !important;
+  line-height: 1.15 !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  margin: 0 !important;
+  padding: 1in 1in 1in 1in !important;
+  min-height: 11in !important;
+  width: 8.5in !important;
+  max-width: 8.5in !important;
+  margin: 0 auto !important;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
+  border: 1px solid #d1d5db !important;
+  outline: none !important;
+}
+
+/* Word-like paragraph styling */
+.word-document-editor p {
+  margin: 0 0 6pt 0 !important;
+  text-align: left !important;
+  font-size: 12pt !important;
+  line-height: 1.15 !important;
+  font-family: 'Times New Roman', serif !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  display: block !important;
+  min-height: 14.4pt; /* 12pt * 1.15 line height */
+}
+
+/* Word-like heading styling */
+.word-document-editor h1 {
+  font-size: 16pt !important;
+  font-weight: bold !important;
+  margin: 12pt 0 6pt 0 !important;
+  font-family: 'Times New Roman', serif !important;
+  color: #000000 !important;
+}
+
+.word-document-editor h2 {
+  font-size: 14pt !important;
+  font-weight: bold !important;
+  margin: 10pt 0 6pt 0 !important;
+  font-family: 'Times New Roman', serif !important;
+  color: #000000 !important;
+}
+
+.word-document-editor h3 {
+  font-size: 13pt !important;
+  font-weight: bold !important;
+  margin: 8pt 0 6pt 0 !important;
+  font-family: 'Times New Roman', serif !important;
+  color: #000000 !important;
+}
+
+/* Word-like bold text */
+.word-document-editor strong,
+.word-document-editor b {
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+
+/* Word-like italic text */
+.word-document-editor em,
+.word-document-editor i {
+  font-style: italic !important;
+  color: #000000 !important;
+}
+
+/* Word-like underline */
+.word-document-editor u {
+  text-decoration: underline !important;
+  color: #000000 !important;
+}
+
+/* Word-like lists */
+.word-document-editor ul {
+  margin: 6pt 0 !important;
+  padding-left: 0.5in !important;
+  list-style-type: disc !important;
+}
+
+.word-document-editor ol {
+  margin: 6pt 0 !important;
+  padding-left: 0.5in !important;
+  list-style-type: decimal !important;
+}
+
+.word-document-editor li {
+  margin: 0 0 3pt 0 !important;
+  font-size: 12pt !important;
+  line-height: 1.15 !important;
+  font-family: 'Times New Roman', serif !important;
+  color: #000000 !important;
+}
+
+/* Word-like text alignment */
+.word-document-editor [style*="text-align: left"] {
+  text-align: left !important;
+}
+
+.word-document-editor [style*="text-align: center"] {
+  text-align: center !important;
+}
+
+.word-document-editor [style*="text-align: right"] {
+  text-align: right !important;
+}
+
+/* Word-like selection styling */
+.word-document-editor::selection {
+  background-color: #0078d4 !important;
+  color: #ffffff !important;
+}
+
+.word-document-editor *::selection {
+  background-color: #0078d4 !important;
+  color: #ffffff !important;
+}
+
+/* Word-like focus styling */
+.word-document-editor:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #0078d4 !important;
+}
+
+/* Word-like placeholder text */
+.word-document-editor p:empty:before {
+  content: "Type here...";
+  color: #999999;
+  font-style: italic;
+}
+
+/* Word-like page break simulation */
+.word-document-editor {
+  page-break-after: always;
+}
+
+/* Word-like margins and spacing */
+.word-document-editor {
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Print view styling */
+.word-document-container.print-view .word-document-editor {
+  font-family: 'Times New Roman', serif !important;
+  font-size: 12pt !important;
+  line-height: 1.15 !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  margin: 0 !important;
+  padding: 1in 1in 1in 1in !important;
+  min-height: 11in !important;
+  width: 8.5in !important;
+  max-width: 8.5in !important;
+  margin: 0 auto !important;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
+  border: 1px solid #d1d5db !important;
+  outline: none !important;
+}
+
+/* Normal view styling */
+.word-document-container.normal-view .word-document-editor {
+  font-family: 'Times New Roman', serif !important;
+  font-size: 12pt !important;
+  line-height: 1.15 !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  min-height: 500px !important;
+  width: 100% !important;
+  max-width: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Ensure proper spacing between elements */
+.word-document-editor > * + * {
+  margin-top: 6pt !important;
+}
+
+/* Force proper line breaks and spacing */
+.word-document-editor {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Ensure paragraphs are properly separated */
+.word-document-editor p + p {
+  margin-top: 6pt !important;
+}
+
+/* Fix text flow and line breaks */
+.word-document-editor * {
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
+/* Ensure proper text flow */
+.word-document-editor br {
+  display: block !important;
+  margin: 6pt 0 !important;
+  line-height: 6pt !important;
+}
+
+/* Word-like table styling (if needed) */
+.word-document-editor table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 6pt 0 !important;
+}
+
+.word-document-editor td,
+.word-document-editor th {
+  border: 1px solid #000000 !important;
+  padding: 3pt !important;
+  font-size: 12pt !important;
+  font-family: 'Times New Roman', serif !important;
+}
+
+/* Word-like hyperlink styling */
+.word-document-editor a {
+  color: #0000ff !important;
+  text-decoration: underline !important;
+}
+
+.word-document-editor a:visited {
+  color: #800080 !important;
+}
+
+/* Word-like placeholder styling for empty content */
+.word-document-editor.is-editor-empty:before {
+  content: "Start typing your document...";
+  color: #999999;
+  font-style: italic;
+  font-size: 12pt;
+  font-family: 'Times New Roman', serif;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Word-like paragraph spacing */
+.word-document-editor p {
+  margin: 0 0 6pt 0 !important;
+  text-align: left !important;
+  font-size: 12pt !important;
+  line-height: 1.15 !important;
+  font-family: 'Times New Roman', serif !important;
+  min-height: 14.4pt; /* 12pt * 1.15 line height */
+}
+
+/* Word-like first paragraph spacing */
+.word-document-editor p:first-child {
+  margin-top: 0 !important;
+}
+
+/* Word-like last paragraph spacing */
+.word-document-editor p:last-child {
+  margin-bottom: 0 !important;
+}

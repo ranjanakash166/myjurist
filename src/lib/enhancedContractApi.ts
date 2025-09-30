@@ -438,6 +438,64 @@ export class EnhancedContractApi {
       return this.downloadContractWord(contractId);
     }
   }
+
+  async updateContract(
+    contractId: string, 
+    content?: string, 
+    title?: string, 
+    description?: string
+  ): Promise<ContractDraftResponse> {
+    try {
+      const url = `${this.baseUrl}/enhanced-contracts/drafts/${contractId}`;
+      
+      // Build request body with only provided fields
+      const requestBody: {
+        generated_content?: string;
+        title?: string;
+        description?: string;
+      } = {};
+      
+      if (content !== undefined) {
+        requestBody.generated_content = content;
+      }
+      if (title !== undefined) {
+        requestBody.title = title;
+      }
+      if (description !== undefined) {
+        requestBody.description = description;
+      }
+
+      console.log('🔄 Updating contract:', {
+        url,
+        method: 'PUT',
+        contractId,
+        requestBody
+      });
+
+      const response = await this.authenticatedFetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('📡 Update response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Update failed:', errorText);
+        throw new Error(`Failed to update contract: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Contract updated successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Update contract error:', error);
+      throw error;
+    }
+  }
 }
 
 // Factory function to create EnhancedContractApi instance

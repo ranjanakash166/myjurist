@@ -15,6 +15,7 @@ import { CategorySelector } from './components/CategorySelector';
 import { TemplateSelector } from './components/TemplateSelector';
 import { ContractForm } from './components/ContractForm';
 import { ContractPreview } from './components/ContractPreview';
+import { EnhancedContractPreview } from './components/EnhancedContractPreview';
 import { ContractHistory } from './components/ContractHistory';
 
 export default function SmartContractStudio() {
@@ -357,30 +358,31 @@ export default function SmartContractStudio() {
                   />
                 )}
 
-                {currentStep === 'preview' && generatedContract && (
-                  <ContractPreview
-                    contract={generatedContract}
-                    onBack={handleBack}
-                    onStartOver={handleStartOver}
-                    onDownload={async (format) => {
-                      try {
-                        const blob = await api.downloadContract(generatedContract.contract_id, format);
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${generatedContract.title}.${format}`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-                      } catch (err) {
-                        console.error('Download error:', err);
-                        const errorMessage = err instanceof Error ? err.message : 'Failed to download contract. Please try again.';
-                        setError(errorMessage);
-                      }
-                    }}
-                  />
-                )}
+            {currentStep === 'preview' && generatedContract && (
+              <EnhancedContractPreview
+                contract={generatedContract}
+                api={api}
+                onBack={handleBack}
+                onStartOver={handleStartOver}
+                onDownload={async (format) => {
+                  try {
+                    const blob = await api.downloadContract(generatedContract.contract_id, format);
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${generatedContract.title}.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  } catch (err) {
+                    console.error('Download error:', err);
+                    const errorMessage = err instanceof Error ? err.message : 'Failed to download contract. Please try again.';
+                    setError(errorMessage);
+                  }
+                }}
+              />
+            )}
               </div>
             )}
           </TabsContent>
