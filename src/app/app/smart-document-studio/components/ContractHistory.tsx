@@ -39,7 +39,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('Failed to load contract history. The API is not available. Please ensure the backend server is running.');
+        setError('Failed to load contract history. Please try again.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load contract history. Please try again.';
         setError(errorMessage);
@@ -152,11 +152,6 @@ export function ContractHistory({ api }: ContractHistoryProps) {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <p className="text-red-700 text-sm font-medium">{error}</p>
-                {error.includes('API is not available') && (
-                  <p className="text-red-600 text-xs mt-1">
-                    Please ensure the backend server is running on http://localhost:8000
-                  </p>
-                )}
               </div>
               <Button
                 variant="outline"

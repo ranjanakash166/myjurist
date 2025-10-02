@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, getLegalDocument, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse, DownloadPDFRequest } from "@/lib/legalResearchApi";
+import { searchLegalResearch, downloadOriginalLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
 import LegalResearchHistory from "./components/LegalResearchHistory";
@@ -112,27 +112,32 @@ export default function LegalResearchPage() {
     setLoadingViewSource(documentId);
     
     try {
-      const authHeaders = getAuthHeaders();
-      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+      // Try to find the document in search results to get the content
+      const searchResult = searchResults?.results.find(result => result.document_id === documentId);
       
-      // First fetch the full document to get the Indian Kanoon URL
-      const document = await getLegalDocument(documentId, authToken, getAuthHeaders, refreshToken);
-      
-      // Extract Indian Kanoon URL from the full content
-      const indianKanoonMatch = document.full_content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
-      
-      if (indianKanoonMatch && indianKanoonMatch[1]) {
-        const indianKanoonUrl = indianKanoonMatch[1];
-        window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
+      if (searchResult) {
+        // Extract Indian Kanoon URL from the content
+        const indianKanoonMatch = searchResult.content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
         
-        toast({
-          title: "Opening Indian Kanoon",
-          description: "Redirecting to the original source",
-        });
+        if (indianKanoonMatch && indianKanoonMatch[1]) {
+          const indianKanoonUrl = indianKanoonMatch[1];
+          window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
+          
+          toast({
+            title: "Opening Indian Kanoon",
+            description: "Redirecting to the original source",
+          });
+        } else {
+          toast({
+            title: "Source not found",
+            description: "Indian Kanoon URL not available for this document",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
-          title: "Source not found",
-          description: "Indian Kanoon URL not available for this document",
+          title: "Document not found",
+          description: "Document not available in search results",
           variant: "destructive",
         });
       }
@@ -152,17 +157,29 @@ export default function LegalResearchPage() {
     setError(null);
     
     try {
-      const authHeaders = getAuthHeaders();
-      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+      // Try to find the document in search results
+      const searchResult = searchResults?.results.find(result => result.document_id === documentId);
       
-      const document = await getLegalDocument(documentId, authToken, getAuthHeaders, refreshToken);
-      setSelectedDocument(document);
-      setCurrentDocumentId(documentId); // Store the document ID
-      
-      toast({
-        title: "Document loaded",
-        description: `Retrieved ${document.title}`,
-      });
+      if (searchResult) {
+        // Create a DocumentResponse from the search result
+        const document: DocumentResponse = {
+          source_file: searchResult.source_file,
+          title: searchResult.title,
+          full_content: searchResult.content, // Use the content from search results
+          content_length: searchResult.content.length,
+          retrieval_time_ms: 0 // Not available from search results
+        };
+        
+        setSelectedDocument(document);
+        setCurrentDocumentId(documentId); // Store the document ID
+        
+        toast({
+          title: "Document loaded",
+          description: `Retrieved ${document.title}`,
+        });
+      } else {
+        throw new Error("Document not found in search results");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to load document");
       toast({
@@ -191,13 +208,8 @@ export default function LegalResearchPage() {
       const authHeaders = getAuthHeaders();
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      const downloadRequest: DownloadPDFRequest = {
-        document_id: currentDocumentId,
-        include_header: true,
-        font_size: 12
-      };
-
-      const blob = await downloadLegalDocumentPDF(downloadRequest, authToken, getAuthHeaders, refreshToken);
+      // Download original PDF file directly
+      const blob = await downloadOriginalLegalDocumentPDF(currentDocumentId, authToken, getAuthHeaders, refreshToken);
       
       // Create download link
       const url = window.URL.createObjectURL(blob);
@@ -211,7 +223,7 @@ export default function LegalResearchPage() {
 
       toast({
         title: "PDF downloaded",
-        description: "Document has been downloaded as PDF",
+        description: "Original PDF document has been downloaded",
       });
     } catch (err: any) {
       console.error('PDF download error:', err);

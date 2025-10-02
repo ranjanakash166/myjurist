@@ -56,7 +56,7 @@ export default function SmartContractStudio() {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('The Smart Document Studio API is not available. Please ensure the backend server is running on http://localhost:8000');
+        setError('Failed to load contract categories. Please try again.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load contract categories. Please try again.';
         setError(errorMessage);
@@ -84,7 +84,7 @@ export default function SmartContractStudio() {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('Failed to load templates. The API is not available. Please ensure the backend server is running.');
+        setError('Failed to load templates. Please try again.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load templates for this category. Please try again.';
         setError(errorMessage);
@@ -111,7 +111,7 @@ export default function SmartContractStudio() {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('Failed to load template details. The API is not available. Please ensure the backend server is running.');
+        setError('Failed to load template details. Please try again.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load template details. Please try again.';
         setError(errorMessage);
@@ -139,7 +139,7 @@ export default function SmartContractStudio() {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('Failed to search templates. The API is not available. Please ensure the backend server is running.');
+        setError('Failed to search templates. Please try again.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to search templates. Please try again.';
         setError(errorMessage);
@@ -178,7 +178,7 @@ export default function SmartContractStudio() {
         err.message.includes('404') ||
         err.message.includes('500')
       )) {
-        setError('Failed to generate contract. The API is not available. Please ensure the backend server is running.');
+        setError('Failed to generate contract. Please try again.');
       } else {
         const errorMessage = err instanceof Error ? err.message : 'Failed to generate contract. Please try again.';
         setError(errorMessage);
@@ -285,27 +285,6 @@ export default function SmartContractStudio() {
               <AlertCircle className="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-red-700 font-medium">{error}</p>
-                {error.includes('API is not available') && (
-                  <div className="mt-2 text-sm text-red-600">
-                    <p className="font-medium">To fix this issue:</p>
-                    <ul className="list-disc list-inside mt-1 space-y-1">
-                      <li>Ensure your backend server is running on http://localhost:8000</li>
-                      <li>Check that the enhanced-contracts API endpoints are implemented</li>
-                      <li>Verify your authentication token is valid</li>
-                    </ul>
-                    <div className="mt-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={loadCategories}
-                        disabled={isLoading}
-                        className="text-red-600 border-red-300 hover:bg-red-50"
-                      >
-                        {isLoading ? 'Retrying...' : 'Retry Connection'}
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>

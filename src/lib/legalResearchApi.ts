@@ -65,24 +65,27 @@ export const searchLegalResearch = async (
   getAuthHeaders: () => Record<string, string>,
   refreshToken: () => Promise<boolean>
 ): Promise<LegalResearchResponse> => {
-  const response = await apiCallWithRefresh(
-    `${API_BASE_URL}/legal-research/enhanced-search`,
-    {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
+  // Use direct fetch to avoid apiCallWithRefresh issues
+  const authHeaders = getAuthHeaders();
+  
+  const response = await fetch(`${API_BASE_URL}/legal-research/enhanced-search`, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      ...authHeaders,
     },
-    getAuthHeaders,
-    refreshToken
-  );
+    body: JSON.stringify(request),
+  });
 
   if (!response.ok) {
     if (response.status === 422) {
-      const errorData: ValidationError = await response.json();
-      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      try {
+        const errorData: ValidationError = await response.json();
+        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      } catch (jsonError) {
+        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
+      }
     }
     if (response.status === 401) {
       throw new Error('Authentication failed. Please log in again.');
@@ -90,7 +93,11 @@ export const searchLegalResearch = async (
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (jsonError) {
+    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+  }
 };
 
 export interface DocumentResponse {
@@ -107,30 +114,39 @@ export interface DownloadPDFRequest {
   font_size?: number;
 }
 
+export interface DownloadDOCRequest {
+  document_id: string;
+  include_header?: boolean;
+  font_size?: number;
+}
+
 export const getLegalDocument = async (
   documentId: string,
   authToken: string,
   getAuthHeaders: () => Record<string, string>,
   refreshToken: () => Promise<boolean>
 ): Promise<DocumentResponse> => {
-  const response = await apiCallWithRefresh(
-    `${API_BASE_URL}/legal-research/document`,
-    {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ document_id: documentId }),
+  // Use direct fetch to avoid apiCallWithRefresh issues
+  const authHeaders = getAuthHeaders();
+  
+  const response = await fetch(`${API_BASE_URL}/legal-research/document`, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'Content-Type': 'application/json',
+      ...authHeaders,
     },
-    getAuthHeaders,
-    refreshToken
-  );
+    body: JSON.stringify({ document_id: documentId }),
+  });
 
   if (!response.ok) {
     if (response.status === 422) {
-      const errorData: ValidationError = await response.json();
-      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      try {
+        const errorData: ValidationError = await response.json();
+        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      } catch (jsonError) {
+        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
+      }
     }
     if (response.status === 401) {
       throw new Error('Authentication failed. Please log in again.');
@@ -138,7 +154,11 @@ export const getLegalDocument = async (
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (jsonError) {
+    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+  }
 };
 
 export const downloadLegalDocumentPDF = async (
@@ -147,32 +167,170 @@ export const downloadLegalDocumentPDF = async (
   getAuthHeaders: () => Record<string, string>,
   refreshToken: () => Promise<boolean>
 ): Promise<Blob> => {
-  const response = await apiCallWithRefresh(
-    `${API_BASE_URL}/legal-research/document/pdf`,
-    {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
+  // Use direct fetch for binary PDF downloads to avoid JSON parsing issues
+  const authHeaders = getAuthHeaders();
+  
+  const response = await fetch(`${API_BASE_URL}/legal-research/document/pdf`, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/pdf',
+      'Content-Type': 'application/json',
+      ...authHeaders,
     },
-    getAuthHeaders,
-    refreshToken
-  );
+    body: JSON.stringify(request),
+  });
 
   if (!response.ok) {
     if (response.status === 422) {
-      const errorData: ValidationError = await response.json();
-      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      try {
+        const errorData: ValidationError = await response.json();
+        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      } catch (jsonError) {
+        // If JSON parsing fails, it might be a PDF response with wrong content type
+        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
+      }
     }
     if (response.status === 401) {
-      throw new Error('Authentication failed. Please log in again.');
+      // Try to refresh token and retry
+      const refreshSuccess = await refreshToken();
+      if (refreshSuccess) {
+        const newAuthHeaders = getAuthHeaders();
+        const retryResponse = await fetch(`${API_BASE_URL}/legal-research/document/pdf`, {
+          method: 'POST',
+          headers: {
+            'accept': 'application/pdf',
+            'Content-Type': 'application/json',
+            ...newAuthHeaders,
+          },
+          body: JSON.stringify(request),
+        });
+        
+        if (!retryResponse.ok) {
+          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+        }
+        
+        return await retryResponse.blob();
+      } else {
+        throw new Error('Authentication failed. Please log in again.');
+      }
     }
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.blob();
+  // The backend returns binary PDF data directly
+  return await response.blob();
+};
+
+export const downloadOriginalLegalDocumentPDF = async (
+  documentId: string,
+  authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
+): Promise<Blob> => {
+  // Try different endpoint patterns for downloading original PDF
+  const authHeaders = getAuthHeaders();
+  
+  // Try the document endpoint with PDF accept header first
+  const response = await fetch(`${API_BASE_URL}/legal-research/document`, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/pdf',
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    body: JSON.stringify({ document_id: documentId }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      // Try to refresh token and retry
+      const refreshSuccess = await refreshToken();
+      if (refreshSuccess) {
+        const newAuthHeaders = getAuthHeaders();
+        const retryResponse = await fetch(`${API_BASE_URL}/legal-research/document`, {
+          method: 'POST',
+          headers: {
+            'accept': 'application/pdf',
+            'Content-Type': 'application/json',
+            ...newAuthHeaders,
+          },
+          body: JSON.stringify({ document_id: documentId }),
+        });
+        
+        if (!retryResponse.ok) {
+          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+        }
+        
+        return await retryResponse.blob();
+      } else {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  // Return the original PDF file
+  return await response.blob();
+};
+
+export const downloadLegalDocumentDOC = async (
+  request: DownloadDOCRequest,
+  authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  refreshToken: () => Promise<boolean>
+): Promise<Blob> => {
+  // Use direct fetch for binary DOC downloads to avoid JSON parsing issues
+  const authHeaders = getAuthHeaders();
+  
+  const response = await fetch(`${API_BASE_URL}/legal-research/document`, {
+    method: 'POST',
+    headers: {
+      'accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    if (response.status === 422) {
+      try {
+        const errorData: ValidationError = await response.json();
+        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      } catch (jsonError) {
+        // If JSON parsing fails, it might be a DOC response with wrong content type
+        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
+      }
+    }
+    if (response.status === 401) {
+      // Try to refresh token and retry
+      const refreshSuccess = await refreshToken();
+      if (refreshSuccess) {
+        const newAuthHeaders = getAuthHeaders();
+        const retryResponse = await fetch(`${API_BASE_URL}/legal-research/document`, {
+          method: 'POST',
+          headers: {
+            'accept': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'Content-Type': 'application/json',
+            ...newAuthHeaders,
+          },
+          body: JSON.stringify(request),
+        });
+        
+        if (!retryResponse.ok) {
+          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+        }
+        
+        return await retryResponse.blob();
+      } else {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  // The backend returns binary DOC data directly
+  return await response.blob();
 };
 
 // Legal Research History interfaces
@@ -207,22 +365,25 @@ export const getLegalResearchHistory = async (
   if (params.limit) searchParams.append('limit', params.limit.toString());
   if (params.offset) searchParams.append('offset', params.offset.toString());
 
-  const response = await apiCallWithRefresh(
-    `${API_BASE_URL}/legal-research/history?${searchParams.toString()}`,
-    {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-      },
+  // Use direct fetch to avoid apiCallWithRefresh issues
+  const authHeaders = getAuthHeaders();
+  
+  const response = await fetch(`${API_BASE_URL}/legal-research/history?${searchParams.toString()}`, {
+    method: 'GET',
+    headers: {
+      'accept': 'application/json',
+      ...authHeaders,
     },
-    getAuthHeaders,
-    refreshToken
-  );
+  });
 
   if (!response.ok) {
     if (response.status === 422) {
-      const errorData: ValidationError = await response.json();
-      throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      try {
+        const errorData: ValidationError = await response.json();
+        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      } catch (jsonError) {
+        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
+      }
     }
     if (response.status === 401) {
       throw new Error('Authentication failed. Please log in again.');
@@ -230,5 +391,9 @@ export const getLegalResearchHistory = async (
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  try {
+    return await response.json();
+  } catch (jsonError) {
+    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+  }
 }; 
