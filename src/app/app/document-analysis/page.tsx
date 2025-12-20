@@ -76,7 +76,10 @@ function generateSessionId() {
 }
 
 export default function DocumentAnalysisPage() {
-  const { getAuthHeaders } = useAuth();
+  const { getAuthHeaders, user } = useAuth();
+  
+  // Get user's initial from full_name, fallback to "U" if not available
+  const userInitial = user?.full_name ? user.full_name.trim().charAt(0).toUpperCase() : "U";
   const [tab, setTab] = useState<'new' | 'history'>('new');
   const [processing, setProcessing] = useState(false);
   const [apiResult, setApiResult] = useState<ApiResponse | null>(null);
@@ -929,6 +932,7 @@ export default function DocumentAnalysisPage() {
                   disabled={chatLoading || streaming}
                   continuingSession={false}
                   onDeleteDocument={handleDeleteDocument}
+                  userInitial={userInitial}
                 />
               </CardContent>
             </Card>
@@ -1389,6 +1393,7 @@ export default function DocumentAnalysisPage() {
                       addToSessionSuccessTrigger={addToSessionSuccessTrigger}
                       onUploadNewDocuments={handleUploadNewDocuments}
                       uploadingNewDocuments={uploadingNewDocuments}
+                      userInitial={userInitial}
                     />
                   </div>
                 )}
@@ -1509,6 +1514,7 @@ export default function DocumentAnalysisPage() {
                   addToSessionSuccessTrigger={addToSessionSuccessTrigger}
                   onUploadNewDocuments={handleUploadNewDocuments}
                   uploadingNewDocuments={uploadingNewDocuments}
+                  userInitial={userInitial}
                 />
               </CardContent>
             </Card>

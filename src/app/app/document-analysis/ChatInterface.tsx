@@ -60,6 +60,7 @@ interface ChatInterfaceProps {
   addToSessionSuccessTrigger?: number;
   onUploadNewDocuments?: (files: FileList) => void;
   uploadingNewDocuments?: boolean;
+  userInitial?: string;
 }
 
 export default function ChatInterface({ 
@@ -84,7 +85,8 @@ export default function ChatInterface({
   onAddToSession,
   addToSessionSuccessTrigger,
   onUploadNewDocuments,
-  uploadingNewDocuments
+  uploadingNewDocuments,
+  userInitial = "U"
 }: ChatInterfaceProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -240,7 +242,7 @@ export default function ChatInterface({
             >
               {msg.sender === "system" && (
                 <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
-                  AI
+                  MJ
                 </div>
               )}
               <div
@@ -257,7 +259,7 @@ export default function ChatInterface({
               </div>
               {msg.sender === "user" && (
                 <div className="flex-shrink-0 w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-800">
-                  U
+                  {userInitial.toUpperCase()}
                 </div>
               )}
             </div>
@@ -267,7 +269,7 @@ export default function ChatInterface({
           {streaming && (
             <div className="mb-4 flex items-end gap-3 justify-start">
               <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
-                AI
+                MJ
               </div>
               <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-neutral-900 text-neutral-200 shadow-lg border border-neutral-800 rounded-bl-md">
                 <div className="whitespace-pre-wrap">{streamedText || <span className="opacity-60">Typing...</span>}</div>
@@ -285,7 +287,7 @@ export default function ChatInterface({
           {loading && !streaming && (
             <div className="mb-4 flex items-end gap-3 justify-start">
               <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
-                AI
+                MJ
               </div>
               <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-neutral-900 text-neutral-200 shadow-lg border border-neutral-800 rounded-bl-md">
                 <div className="flex items-center gap-2">
