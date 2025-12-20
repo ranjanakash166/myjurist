@@ -253,9 +253,6 @@ export default function ChatInterface({
                 }`}
               >
                 <div className="whitespace-pre-wrap">{msg.text}</div>
-                <div className={`text-xs mt-2 ${msg.sender === "user" ? "text-neutral-400" : "text-neutral-500"}`}>
-                  {formatTime(new Date(msg.time))}
-                </div>
               </div>
               {msg.sender === "user" && (
                 <div className="flex-shrink-0 w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-800">
