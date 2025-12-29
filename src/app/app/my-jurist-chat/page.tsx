@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Search, FileText, Clock, Shield, Lightbulb, TrendingUp, BookOpen } from "lucide-react";
+import { Send, Loader2, Search, Shield, Lightbulb, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "../../../components/AuthProvider";
@@ -19,21 +18,6 @@ interface ChatMessage {
   response?: AgenticRAGSearchResponse;
 }
 
-const QUERY_TYPE_ICONS: Record<string, React.ComponentType<any>> = {
-  "legal_case_search": BookOpen,
-  "patent_query": Lightbulb,
-  "regulatory_query": Shield,
-  "financial_legal": TrendingUp,
-  "general_legal": FileText,
-};
-
-const QUERY_TYPE_COLORS: Record<string, string> = {
-  "legal_case_search": "bg-purple-500",
-  "patent_query": "bg-yellow-500",
-  "regulatory_query": "bg-red-500",
-  "financial_legal": "bg-green-500",
-  "general_legal": "bg-blue-500",
-};
 
 export default function MyJuristChatPage() {
   const { getAuthHeaders, refreshToken } = useAuth();
@@ -52,13 +36,6 @@ export default function MyJuristChatPage() {
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatQueryType = (queryType: string): string => {
-    return queryType
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -137,61 +114,41 @@ export default function MyJuristChatPage() {
   };
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
-    let content = `🔍 **Search Results**\n\n`;
-    
-    // Add query classification info
-    const QueryIcon = QUERY_TYPE_ICONS[response.query_type] || FileText;
-    content += `**Query Type:** ${formatQueryType(response.query_type)}\n`;
-    content += `**RAG Variant:** ${response.rag_variant.replace(/_/g, ' ')}\n`;
-    content += `**Confidence:** ${(response.confidence * 100).toFixed(1)}%\n`;
-    content += `**Processing Time:** ${response.processing_time_ms}ms\n\n`;
-
-    if (response.routing_metadata) {
-      content += `**${response.routing_metadata.variant_description}**\n\n`;
-    }
-
     if (response.results && response.results.length > 0) {
-      content += `**Found ${response.total_results} result(s):**\n\n`;
+      let content = `I found ${response.total_results} relevant result${response.total_results > 1 ? 's' : ''} for your query:\n\n`;
       
       response.results.forEach((result, index) => {
-        content += `${index + 1}. **${result.title}**\n`;
+        content += `**${result.title}**\n`;
         if (result.section_header) {
-          content += `   Section: ${result.section_header}\n`;
+          content += `*${result.section_header}*\n`;
         }
-        content += `   Source: ${result.source_file}\n`;
-        content += `   Relevance: ${(result.similarity_score * 100).toFixed(1)}%\n`;
-        content += `   Content: ${result.content.substring(0, 300)}${result.content.length > 300 ? '...' : ''}\n\n`;
+        content += `${result.content}\n\n`;
       });
+      
+      return content;
     } else {
-      content += `No results found for your query.\n\n`;
+      return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
     }
-
-    return content;
   };
 
   const renderResultCard = (result: SearchResult, index: number) => {
     return (
       <Card key={index} className="mb-3 border-neutral-800 bg-neutral-900/50">
         <CardContent className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold text-white mb-1">{result.title}</h4>
-              {result.section_header && (
-                <p className="text-xs text-neutral-400 mb-1">Section: {result.section_header}</p>
-              )}
-              <p className="text-xs text-neutral-500 mb-2">Source: {result.source_file}</p>
-            </div>
-            <Badge variant="secondary" className="ml-2">
-              {(result.similarity_score * 100).toFixed(0)}%
-            </Badge>
+          <div className="mb-3">
+            <h4 className="text-base font-semibold text-white mb-1">{result.title}</h4>
+            {result.section_header && (
+              <p className="text-sm text-neutral-400 italic mb-2">{result.section_header}</p>
+            )}
+            <p className="text-xs text-neutral-500">Source: {result.source_file}</p>
           </div>
-          <p className="text-sm text-neutral-300 leading-relaxed">{result.content}</p>
+          <p className="text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap">{result.content}</p>
           {result.metadata?.url && (
             <a
               href={result.metadata.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-400 hover:text-blue-300 mt-2 inline-block"
+              className="text-xs text-blue-400 hover:text-blue-300 mt-3 inline-block"
             >
               View source →
             </a>
@@ -201,14 +158,6 @@ export default function MyJuristChatPage() {
     );
   };
 
-  const getQueryTypeIcon = (queryType: string) => {
-    const Icon = QUERY_TYPE_ICONS[queryType] || FileText;
-    return Icon;
-  };
-
-  const getQueryTypeColor = (queryType: string) => {
-    return QUERY_TYPE_COLORS[queryType] || "bg-blue-500";
-  };
 
   return (
     <div className="h-screen flex flex-col bg-neutral-950">
@@ -298,13 +247,7 @@ export default function MyJuristChatPage() {
                     message.sender === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.sender === "assistant" && message.response && (
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getQueryTypeColor(message.response.query_type)}`}>
-                      {React.createElement(getQueryTypeIcon(message.response.query_type), { className: "w-4 h-4 text-white" })}
-                    </div>
-                  )}
-                  
-                  {message.sender === "assistant" && !message.response && (
+                  {message.sender === "assistant" && (
                     <div className="w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center">
                       <Search className="w-4 h-4 text-neutral-400" />
                     </div>
@@ -320,20 +263,8 @@ export default function MyJuristChatPage() {
                     <div className="whitespace-pre-wrap">
                       <SimpleMarkdownRenderer content={message.content} />
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="text-xs text-neutral-500">
-                        {formatTime(message.timestamp)}
-                      </div>
-                      {message.response && (
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {formatQueryType(message.response.query_type)}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {message.response.total_results} results
-                          </Badge>
-                        </div>
-                      )}
+                    <div className="text-xs text-neutral-500 mt-2">
+                      {formatTime(message.timestamp)}
                     </div>
                   </div>
 
