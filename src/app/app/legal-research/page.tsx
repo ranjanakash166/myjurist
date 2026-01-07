@@ -301,6 +301,9 @@ export default function LegalResearchPage() {
         ai_summary: parsedSummary.ai_summary || aiSummary.ai_summary,
         key_legal_insights: parsedSummary.key_legal_insights || aiSummary.key_legal_insights,
         relevant_precedents: parsedSummary.relevant_precedents || aiSummary.relevant_precedents,
+        statutory_provisions: parsedSummary.statutory_provisions || aiSummary.statutory_provisions,
+        procedural_developments: parsedSummary.procedural_developments || aiSummary.procedural_developments,
+        practical_implications: parsedSummary.practical_implications || aiSummary.practical_implications,
         legal_areas_covered: parsedSummary.legal_areas_covered || aiSummary.legal_areas_covered,
         confidence_score: parsedSummary.confidence_score || aiSummary.confidence_score,
       };
@@ -312,6 +315,9 @@ export default function LegalResearchPage() {
         ai_summary: aiSummary.ai_summary,
         key_legal_insights: aiSummary.key_legal_insights,
         relevant_precedents: aiSummary.relevant_precedents,
+        statutory_provisions: aiSummary.statutory_provisions,
+        procedural_developments: aiSummary.procedural_developments,
+        practical_implications: aiSummary.practical_implications,
         legal_areas_covered: aiSummary.legal_areas_covered,
         confidence_score: aiSummary.confidence_score,
       };
@@ -425,6 +431,13 @@ export default function LegalResearchPage() {
                     <SelectItem value="5">5 results</SelectItem>
                     <SelectItem value="10">10 results</SelectItem>
                     <SelectItem value="15">15 results</SelectItem>
+                    <SelectItem value="20">20 results</SelectItem>
+                    <SelectItem value="25">25 results</SelectItem>
+                    <SelectItem value="30">30 results</SelectItem>
+                    <SelectItem value="40">40 results</SelectItem>
+                    <SelectItem value="50">50 results</SelectItem>
+                    <SelectItem value="75">75 results</SelectItem>
+                    <SelectItem value="100">100 results</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -582,6 +595,60 @@ export default function LegalResearchPage() {
                           <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
                             <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                             <span className="text-sm text-gray-700 dark:text-gray-300">{precedent}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Statutory Provisions */}
+                  {getParsedAISummaryData().statutory_provisions && getParsedAISummaryData().statutory_provisions.length > 0 && (
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <BookOpen className="w-5 h-5 text-indigo-500" />
+                        <h3 className="font-semibold text-lg">Statutory Provisions</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {getParsedAISummaryData().statutory_provisions.map((provision: string, index: number) => (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{provision}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Procedural Developments */}
+                  {getParsedAISummaryData().procedural_developments && getParsedAISummaryData().procedural_developments.length > 0 && (
+                    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Zap className="w-5 h-5 text-teal-500" />
+                        <h3 className="font-semibold text-lg">Procedural Developments</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {getParsedAISummaryData().procedural_developments.map((development: string, index: number) => (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+                            <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{development}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Practical Implications */}
+                  {getParsedAISummaryData().practical_implications && getParsedAISummaryData().practical_implications.length > 0 && (
+                    <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-lg p-6 border">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Users className="w-5 h-5 text-rose-500" />
+                        <h3 className="font-semibold text-lg">Practical Implications</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {getParsedAISummaryData().practical_implications.map((implication: string, index: number) => (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+                            <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{implication}</span>
                           </div>
                         ))}
                       </div>

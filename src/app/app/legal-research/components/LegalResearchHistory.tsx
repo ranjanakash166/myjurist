@@ -24,7 +24,9 @@ import {
   Target,
   Award,
   Lightbulb,
-  Sparkles
+  Sparkles,
+  Zap,
+  Users
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -157,6 +159,30 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
         summaryText += `Relevant Precedents:\n`;
         parsedData.relevant_precedents.forEach((precedent: string, index: number) => {
           summaryText += `${index + 1}. ${precedent}\n`;
+        });
+        summaryText += `\n`;
+      }
+      
+      if (parsedData.statutory_provisions && parsedData.statutory_provisions.length > 0) {
+        summaryText += `Statutory Provisions:\n`;
+        parsedData.statutory_provisions.forEach((provision: string, index: number) => {
+          summaryText += `${index + 1}. ${provision}\n`;
+        });
+        summaryText += `\n`;
+      }
+      
+      if (parsedData.procedural_developments && parsedData.procedural_developments.length > 0) {
+        summaryText += `Procedural Developments:\n`;
+        parsedData.procedural_developments.forEach((development: string, index: number) => {
+          summaryText += `${index + 1}. ${development}\n`;
+        });
+        summaryText += `\n`;
+      }
+      
+      if (parsedData.practical_implications && parsedData.practical_implications.length > 0) {
+        summaryText += `Practical Implications:\n`;
+        parsedData.practical_implications.forEach((implication: string, index: number) => {
+          summaryText += `${index + 1}. ${implication}\n`;
         });
         summaryText += `\n`;
       }
@@ -349,6 +375,9 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
         ai_summary: parsedSummary.ai_summary || aiSummary.ai_summary,
         key_legal_insights: parsedSummary.key_legal_insights || aiSummary.key_legal_insights,
         relevant_precedents: parsedSummary.relevant_precedents || aiSummary.relevant_precedents,
+        statutory_provisions: parsedSummary.statutory_provisions || aiSummary.statutory_provisions,
+        procedural_developments: parsedSummary.procedural_developments || aiSummary.procedural_developments,
+        practical_implications: parsedSummary.practical_implications || aiSummary.practical_implications,
         legal_areas_covered: parsedSummary.legal_areas_covered || aiSummary.legal_areas_covered,
         confidence_score: parsedSummary.confidence_score || aiSummary.confidence_score,
       };
@@ -360,6 +389,9 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
         ai_summary: aiSummary.ai_summary,
         key_legal_insights: aiSummary.key_legal_insights,
         relevant_precedents: aiSummary.relevant_precedents,
+        statutory_provisions: aiSummary.statutory_provisions,
+        procedural_developments: aiSummary.procedural_developments,
+        practical_implications: aiSummary.practical_implications,
         legal_areas_covered: aiSummary.legal_areas_covered,
         confidence_score: aiSummary.confidence_score,
       };
@@ -688,6 +720,57 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                        <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
                                          <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                                          <span className="text-sm">{precedent}</span>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+
+                               {parsedData.statutory_provisions && parsedData.statutory_provisions.length > 0 && (
+                                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-4 border">
+                                   <div className="flex items-center gap-2 mb-3">
+                                     <BookOpen className="w-5 h-5 text-indigo-500" />
+                                     <h4 className="font-semibold">Statutory Provisions</h4>
+                                   </div>
+                                   <div className="space-y-2">
+                                     {parsedData.statutory_provisions.map((provision, index) => (
+                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                         <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
+                                         <span className="text-sm">{provision}</span>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+
+                               {parsedData.procedural_developments && parsedData.procedural_developments.length > 0 && (
+                                 <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-lg p-4 border">
+                                   <div className="flex items-center gap-2 mb-3">
+                                     <Zap className="w-5 h-5 text-teal-500" />
+                                     <h4 className="font-semibold">Procedural Developments</h4>
+                                   </div>
+                                   <div className="space-y-2">
+                                     {parsedData.procedural_developments.map((development, index) => (
+                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                         <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
+                                         <span className="text-sm">{development}</span>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+
+                               {parsedData.practical_implications && parsedData.practical_implications.length > 0 && (
+                                 <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-lg p-4 border">
+                                   <div className="flex items-center gap-2 mb-3">
+                                     <Users className="w-5 h-5 text-rose-500" />
+                                     <h4 className="font-semibold">Practical Implications</h4>
+                                   </div>
+                                   <div className="space-y-2">
+                                     {parsedData.practical_implications.map((implication, index) => (
+                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                         <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
+                                         <span className="text-sm">{implication}</span>
                                        </div>
                                      ))}
                                    </div>

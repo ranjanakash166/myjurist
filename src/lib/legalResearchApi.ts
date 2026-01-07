@@ -35,6 +35,9 @@ export interface AISummaryResponse {
   ai_summary: string;
   key_legal_insights: string[];
   relevant_precedents: string[];
+  statutory_provisions: string[];
+  procedural_developments: string[];
+  practical_implications: string[];
   legal_areas_covered: string[];
   confidence_score: number;
   sources_analyzed: string[];
@@ -227,19 +230,36 @@ export const downloadOriginalLegalDocumentPDF = async (
   getAuthHeaders: () => Record<string, string>,
   refreshToken: () => Promise<boolean>
 ): Promise<Blob> => {
-  // Try different endpoint patterns for downloading original PDF
+  // Use the new GET /pdf/{path} endpoint
+  // documentId format: {court_type}/{year}/{filename}
+  // Example: "supreme-court/2018/2018_1_937_1006_EN.pdf"
   const authHeaders = getAuthHeaders();
   
-  // Try the document endpoint with PDF accept header first
-  const response = await fetch(`${API_BASE_URL}/legal-research/document`, {
-    method: 'POST',
+  // Use the /pdf/{path} endpoint as documented
+  // documentId format: {court_type}/{year}/{filename}
+  // Encode each path segment to handle any special characters
+  const pathSegments = documentId.split('/').map(segment => encodeURIComponent(segment));
+  const encodedPath = pathSegments.join('/');
+  
+  // Try the direct /pdf endpoint first (as per API documentation)
+  let response = await fetch(`${API_BASE_URL}/pdf/${encodedPath}`, {
+    method: 'GET',
     headers: {
       'accept': 'application/pdf',
-      'Content-Type': 'application/json',
       ...authHeaders,
     },
-    body: JSON.stringify({ document_id: documentId }),
   });
+  
+  // If 404, try the legal-research endpoint as fallback
+  if (response.status === 404) {
+    response = await fetch(`${API_BASE_URL}/legal-research/pdf/${encodedPath}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/pdf',
+        ...authHeaders,
+      },
+    });
+  }
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -247,18 +267,32 @@ export const downloadOriginalLegalDocumentPDF = async (
       const refreshSuccess = await refreshToken();
       if (refreshSuccess) {
         const newAuthHeaders = getAuthHeaders();
-        const retryResponse = await fetch(`${API_BASE_URL}/legal-research/document`, {
-          method: 'POST',
+        const retryPathSegments = documentId.split('/').map(segment => encodeURIComponent(segment));
+        const retryEncodedPath = retryPathSegments.join('/');
+        
+        // Try direct /pdf endpoint first
+        let retryResponse = await fetch(`${API_BASE_URL}/pdf/${retryEncodedPath}`, {
+          method: 'GET',
           headers: {
             'accept': 'application/pdf',
-            'Content-Type': 'application/json',
             ...newAuthHeaders,
           },
-          body: JSON.stringify({ document_id: documentId }),
         });
         
+        // If 404, try legal-research endpoint as fallback
+        if (retryResponse.status === 404) {
+          retryResponse = await fetch(`${API_BASE_URL}/legal-research/pdf/${retryEncodedPath}`, {
+            method: 'GET',
+            headers: {
+              'accept': 'application/pdf',
+              ...newAuthHeaders,
+            },
+          });
+        }
+        
         if (!retryResponse.ok) {
-          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+          const errorText = await retryResponse.text().catch(() => '');
+          throw new Error(`HTTP error! status: ${retryResponse.status}. URL: ${API_BASE_URL}/pdf/${retryEncodedPath}. Error: ${errorText}`);
         }
         
         return await retryResponse.blob();
@@ -266,7 +300,21 @@ export const downloadOriginalLegalDocumentPDF = async (
         throw new Error('Authentication failed. Please log in again.');
       }
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+    if (response.status === 404) {
+      const errorText = await response.text().catch(() => '');
+      const attemptedUrl = response.url || `${API_BASE_URL}/pdf/${encodedPath}`;
+      throw new Error(`PDF not found (404). Document ID: ${documentId}. Attempted URL: ${attemptedUrl}. Error: ${errorText}`);
+    }
+    if (response.status === 422) {
+      try {
+        const errorData: ValidationError = await response.json();
+        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
+      } catch (jsonError) {
+        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
+      }
+    }
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`HTTP error! status: ${response.status}. Error: ${errorText}`);
   }
 
   // Return the original PDF file
