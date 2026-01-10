@@ -453,11 +453,11 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
   });
 
   return (
-    <div className="w-full px-4 md:px-6 lg:px-8 py-6 space-y-6">
+    <div className="w-full px-6 md:px-8 lg:px-12 py-6 space-y-6">
 
 
       {/* Search and Filter Controls */}
-      <Card className="w-full max-w-5xl mx-auto">
+      <Card className="w-full max-w-7xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
@@ -501,14 +501,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive" className="max-w-5xl mx-auto">
+        <Alert variant="destructive" className="max-w-7xl mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {/* History List */}
-      <div className="space-y-4 max-w-5xl mx-auto">
+      <div className="space-y-4 max-w-7xl mx-auto">
         {loading && history.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center">

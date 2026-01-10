@@ -366,7 +366,27 @@ body {
     animation: hero-subtitle-shift 4s ease-in-out infinite;
   }
 
-  @keyframes hero-subtitle-shift {
+  @keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+@keyframes hero-subtitle-shift {
     0%, 100% {
       background-position: 0% 50%;
     }

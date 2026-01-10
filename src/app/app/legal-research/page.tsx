@@ -15,6 +15,7 @@ import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, Le
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
 import LegalResearchHistory from "./components/LegalResearchHistory";
+import LegalResearchSkeleton from "./components/LegalResearchSkeleton";
 
 export default function LegalResearchPage() {
   const { getAuthHeaders, refreshToken } = useAuth();
@@ -293,7 +294,7 @@ export default function LegalResearchPage() {
 
 
   return (
-    <div className="w-full px-4 md:px-6 lg:px-8 py-6 space-y-6">
+    <div className="w-full px-6 md:px-8 lg:px-12 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
@@ -309,7 +310,7 @@ export default function LegalResearchPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-5xl mx-auto grid-cols-2">
+        <TabsList className="grid w-full max-w-7xl mx-auto grid-cols-2">
           <TabsTrigger value="search" className="flex items-center gap-2">
             <Search className="w-4 h-4" />
             Search
@@ -323,7 +324,7 @@ export default function LegalResearchPage() {
         <TabsContent value="search" className="space-y-6">
 
       {/* Search Form */}
-      <Card className="w-full max-w-5xl mx-auto">
+      <Card className="w-full max-w-7xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="w-5 h-5" />
@@ -447,17 +448,22 @@ export default function LegalResearchPage() {
 
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive" className="max-w-5xl mx-auto">
+        <Alert variant="destructive" className="max-w-7xl mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      )}
+
+      {/* Loading Skeleton */}
+      {isSearching && !searchResults && (
+        <LegalResearchSkeleton />
       )}
 
       {/* Search Results and AI Summary */}
       {searchResults && (
         <div className="space-y-6">
           {/* AI Summary Section */}
-          <Card className="max-w-5xl mx-auto">
+          <Card className="max-w-7xl mx-auto">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="w-5 h-5 text-purple-500" />
@@ -658,7 +664,7 @@ export default function LegalResearchPage() {
           </Card>
 
           {/* Search Results */}
-          <div className="space-y-4 max-w-5xl mx-auto">
+          <div className="space-y-4 max-w-7xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-semibold">Search Results ({searchResults.total_results})</h2>
@@ -761,7 +767,7 @@ export default function LegalResearchPage() {
 
       {/* Empty State */}
       {!searchResults && !isSearching && (
-        <Card className="max-w-5xl mx-auto">
+        <Card className="max-w-7xl mx-auto">
           <CardContent className="pt-6 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
               <BookOpen className="w-8 h-8 text-white" />
