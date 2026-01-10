@@ -43,7 +43,7 @@ import {
   getLegalResearchHistory, 
   LegalResearchHistoryItem, 
   LegalResearchHistoryParams,
-  downloadOriginalLegalDocumentPDF,
+  downloadLegalDocumentPDF,
   AISummaryResponse
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
@@ -251,8 +251,8 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
         }
       }
       
-      // Download original PDF file directly
-      const blob = await downloadOriginalLegalDocumentPDF(targetDocumentId, authToken, getAuthHeaders, refreshToken);
+      // Download PDF using the older endpoint
+      const blob = await downloadLegalDocumentPDF({ document_id: targetDocumentId }, authToken, getAuthHeaders, refreshToken);
       
       // Create download link
       const url = window.URL.createObjectURL(blob);

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, downloadOriginalLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse } from "@/lib/legalResearchApi";
+import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
 import LegalResearchHistory from "./components/LegalResearchHistory";
@@ -208,8 +208,8 @@ export default function LegalResearchPage() {
       const authHeaders = getAuthHeaders();
       const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
       
-      // Download original PDF file directly
-      const blob = await downloadOriginalLegalDocumentPDF(currentDocumentId, authToken, getAuthHeaders, refreshToken);
+      // Download PDF using the older endpoint
+      const blob = await downloadLegalDocumentPDF({ document_id: currentDocumentId }, authToken, getAuthHeaders, refreshToken);
       
       // Create download link
       const url = window.URL.createObjectURL(blob);
