@@ -14,7 +14,6 @@ import {
   Eye, 
   Copy, 
   Download, 
-  ExternalLink,
   Loader2,
   AlertCircle,
   CheckCircle,
@@ -26,7 +25,8 @@ import {
   Lightbulb,
   Sparkles,
   Zap,
-  Users
+  Users,
+  FileText as FileTextIcon
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,8 @@ import {
   LegalResearchHistoryItem, 
   LegalResearchHistoryParams,
   downloadLegalDocumentPDF,
-  AISummaryResponse
+  AISummaryResponse,
+  DocumentResponse
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
@@ -63,6 +64,9 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
   const [selectedResearch, setSelectedResearch] = useState<LegalResearchHistoryItem | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
+  const [isLoadingDocument, setIsLoadingDocument] = useState(false);
+  const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,8 +146,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       let summaryText = `Legal Research Summary\n`;
       summaryText += `Query: ${research.query}\n`;
       summaryText += `Search Type: ${research.search_type}\n`;
-      summaryText += `Date: ${formatDate(research.created_at)}\n`;
-      summaryText += `Confidence Score: ${(parsedData.confidence_score * 100).toFixed(0)}%\n\n`;
+      summaryText += `Date: ${formatDate(research.created_at)}\n\n`;
       
       summaryText += `AI Summary:\n${parsedData.ai_summary}\n\n`;
       
@@ -196,7 +199,6 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
       }
       
       summaryText += `Total Results: ${research.total_results}\n`;
-      summaryText += `Research ID: ${research.research_id}\n`;
       
       // Create and download the text file
       const blob = new Blob([summaryText], { type: 'text/plain' });
@@ -288,43 +290,88 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
     }
   };
 
-  const handleViewSource = async (documentId: string) => {
+  const handleViewFullDocument = async (documentId: string) => {
+    setIsLoadingDocument(true);
+    setError(null);
+    
     try {
-      // Try to find the document in search results to get the content
+      // Try to find the document in search results
       const searchResult = selectedResearch?.search_results.find(result => result.document_id === documentId);
       
       if (searchResult) {
-        // Extract Indian Kanoon URL from the content
-        const indianKanoonMatch = searchResult.content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
+        // Create a DocumentResponse from the search result
+        const document: DocumentResponse = {
+          source_file: searchResult.source_file,
+          title: searchResult.title,
+          full_content: searchResult.content, // Use the content from search results
+          content_length: searchResult.content.length,
+          retrieval_time_ms: 0 // Not available from search results
+        };
         
-        if (indianKanoonMatch && indianKanoonMatch[1]) {
-          const indianKanoonUrl = indianKanoonMatch[1];
-          window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
-          
-          toast({
-            title: "Opening Indian Kanoon",
-            description: "Redirecting to the original source",
-          });
-        } else {
-          toast({
-            title: "Source not found",
-            description: "Indian Kanoon URL not available for this document",
-            variant: "destructive",
-          });
-        }
-      } else {
+        setSelectedDocument(document);
+        setCurrentDocumentId(documentId); // Store the document ID
+        
         toast({
-          title: "Document not found",
-          description: "Document not available in search results",
-          variant: "destructive",
+          title: "Document loaded",
+          description: `Retrieved ${document.title}`,
         });
+      } else {
+        throw new Error("Document not found in search results");
       }
     } catch (err: any) {
+      setError(err.message || "Failed to load document");
       toast({
-        title: "Failed to open source",
-        description: err.message || "Failed to retrieve document source",
+        title: "Failed to load document",
+        description: err.message || "Failed to load document",
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingDocument(false);
+    }
+  };
+
+  const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
+    if (!currentDocumentId) {
+      toast({
+        title: "Error",
+        description: "Document ID not found. Please try viewing the document again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGeneratingPDF(true);
+    
+    try {
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+      
+      // Download PDF using the older endpoint
+      const blob = await downloadLegalDocumentPDF({ document_id: currentDocumentId }, authToken, getAuthHeaders, refreshToken);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "PDF downloaded",
+        description: "Original PDF document has been downloaded",
+      });
+    } catch (err: any) {
+      console.error('PDF download error:', err);
+      toast({
+        title: "PDF download failed",
+        description: err.message || "Failed to download PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -406,11 +453,11 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="w-full px-4 md:px-6 lg:px-8 py-6 space-y-6">
 
 
       {/* Search and Filter Controls */}
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full max-w-5xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
@@ -454,14 +501,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive" className="max-w-4xl mx-auto">
+        <Alert variant="destructive" className="max-w-5xl mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {/* History List */}
-      <div className="space-y-4 max-w-4xl mx-auto">
+      <div className="space-y-4 max-w-5xl mx-auto">
         {loading && history.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center">
@@ -621,10 +668,6 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                               <p>{selectedResearch.search_time_ms}ms</p>
                             </div>
                           )}
-                          <div>
-                            <span className="text-muted-foreground">Research ID:</span>
-                            <p className="font-mono text-xs">{selectedResearch.research_id}</p>
-                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -639,15 +682,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                           AI Summary
                         </CardTitle>
                       </CardHeader>
-                                             <CardContent className="space-y-4">
+                                             <CardContent className="space-y-6">
                          {(() => {
                            const parsedData = getParsedAISummaryData(selectedResearch.ai_summary);
                            return (
                              <>
                                <div className="flex items-center justify-between">
-                                 <Badge className={`${getConfidenceColor(parsedData.confidence_score)}`}>
-                                   {(parsedData.confidence_score * 100).toFixed(0)}% Confidence
-                                 </Badge>
+                                 <div className="flex items-center gap-3">
+                                 </div>
                                  <div className="flex items-center gap-2">
                                    <Button
                                      variant="outline"
@@ -668,10 +710,10 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                  </div>
                                </div>
 
-                               <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-4 border">
-                                 <div className="flex items-center gap-2 mb-3">
+                               <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
+                                 <div className="flex items-center gap-2 mb-4">
                                    <Sparkles className="w-5 h-5 text-purple-500" />
-                                   <h4 className="font-semibold">Summary</h4>
+                                   <h3 className="font-semibold text-lg">AI Summary</h3>
                                  </div>
                                  <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                                    {(() => {
@@ -693,16 +735,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                </div>
 
                                {parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
-                                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-4 border">
-                                   <div className="flex items-center gap-2 mb-3">
+                                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
                                      <Lightbulb className="w-5 h-5 text-green-500" />
-                                     <h4 className="font-semibold">Key Legal Insights</h4>
+                                     <h3 className="font-semibold text-lg">Key Legal Insights</h3>
                                    </div>
-                                   <div className="space-y-2">
+                                   <div className="space-y-3">
                                      {parsedData.key_legal_insights.map((insight, index) => (
-                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                       <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
                                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                                         <span className="text-sm">{insight}</span>
+                                         <span className="text-sm text-gray-700 dark:text-gray-300">{insight}</span>
                                        </div>
                                      ))}
                                    </div>
@@ -710,16 +752,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                )}
 
                                {parsedData.relevant_precedents && parsedData.relevant_precedents.length > 0 && (
-                                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-4 border">
-                                   <div className="flex items-center gap-2 mb-3">
+                                 <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
                                      <Award className="w-5 h-5 text-orange-500" />
-                                     <h4 className="font-semibold">Relevant Precedents</h4>
+                                     <h3 className="font-semibold text-lg">Relevant Precedents</h3>
                                    </div>
-                                   <div className="space-y-2">
+                                   <div className="space-y-3">
                                      {parsedData.relevant_precedents.map((precedent, index) => (
-                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                       <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
                                          <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                                         <span className="text-sm">{precedent}</span>
+                                         <span className="text-sm text-gray-700 dark:text-gray-300">{precedent}</span>
                                        </div>
                                      ))}
                                    </div>
@@ -727,16 +769,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                )}
 
                                {parsedData.statutory_provisions && parsedData.statutory_provisions.length > 0 && (
-                                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-4 border">
-                                   <div className="flex items-center gap-2 mb-3">
+                                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
                                      <BookOpen className="w-5 h-5 text-indigo-500" />
-                                     <h4 className="font-semibold">Statutory Provisions</h4>
+                                     <h3 className="font-semibold text-lg">Statutory Provisions</h3>
                                    </div>
-                                   <div className="space-y-2">
+                                   <div className="space-y-3">
                                      {parsedData.statutory_provisions.map((provision, index) => (
-                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                       <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
                                          <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
-                                         <span className="text-sm">{provision}</span>
+                                         <span className="text-sm text-gray-700 dark:text-gray-300">{provision}</span>
                                        </div>
                                      ))}
                                    </div>
@@ -744,16 +786,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                )}
 
                                {parsedData.procedural_developments && parsedData.procedural_developments.length > 0 && (
-                                 <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-lg p-4 border">
-                                   <div className="flex items-center gap-2 mb-3">
+                                 <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
                                      <Zap className="w-5 h-5 text-teal-500" />
-                                     <h4 className="font-semibold">Procedural Developments</h4>
+                                     <h3 className="font-semibold text-lg">Procedural Developments</h3>
                                    </div>
-                                   <div className="space-y-2">
+                                   <div className="space-y-3">
                                      {parsedData.procedural_developments.map((development, index) => (
-                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                       <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
                                          <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
-                                         <span className="text-sm">{development}</span>
+                                         <span className="text-sm text-gray-700 dark:text-gray-300">{development}</span>
                                        </div>
                                      ))}
                                    </div>
@@ -761,16 +803,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                )}
 
                                {parsedData.practical_implications && parsedData.practical_implications.length > 0 && (
-                                 <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-lg p-4 border">
-                                   <div className="flex items-center gap-2 mb-3">
+                                 <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
                                      <Users className="w-5 h-5 text-rose-500" />
-                                     <h4 className="font-semibold">Practical Implications</h4>
+                                     <h3 className="font-semibold text-lg">Practical Implications</h3>
                                    </div>
-                                   <div className="space-y-2">
+                                   <div className="space-y-3">
                                      {parsedData.practical_implications.map((implication, index) => (
-                                       <div key={index} className="flex items-start gap-2 p-2 bg-white/50 dark:bg-gray-800/50 rounded border">
+                                       <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
                                          <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
-                                         <span className="text-sm">{implication}</span>
+                                         <span className="text-sm text-gray-700 dark:text-gray-300">{implication}</span>
                                        </div>
                                      ))}
                                    </div>
@@ -778,16 +820,33 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                                )}
 
                                {parsedData.legal_areas_covered && parsedData.legal_areas_covered.length > 0 && (
-                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-4 border">
-                                   <div className="flex items-center gap-2 mb-3">
+                                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
                                      <Target className="w-5 h-5 text-blue-500" />
-                                     <h4 className="font-semibold">Legal Areas Covered</h4>
+                                     <h3 className="font-semibold text-lg">Legal Areas Covered</h3>
                                    </div>
                                    <div className="flex flex-wrap gap-2">
                                      {parsedData.legal_areas_covered.map((area, index) => (
-                                       <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                       <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1">
                                          {area}
                                        </Badge>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )}
+
+                               {/* Sources Analyzed */}
+                               {selectedResearch.ai_summary.sources_analyzed && selectedResearch.ai_summary.sources_analyzed.length > 0 && (
+                                 <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-lg p-6 border">
+                                   <div className="flex items-center gap-2 mb-4">
+                                     <FileText className="w-5 h-5 text-gray-500" />
+                                     <h3 className="font-semibold text-lg">Sources Analyzed</h3>
+                                   </div>
+                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                     {selectedResearch.ai_summary.sources_analyzed.map((source, index) => (
+                                       <div key={index} className="text-sm text-muted-foreground bg-white dark:bg-gray-800 rounded px-3 py-2 border">
+                                         {formatFileName(source)}
+                                       </div>
                                      ))}
                                    </div>
                                  </div>
@@ -810,67 +869,79 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                      <CardContent>
                        <div className="space-y-4">
                         {selectedResearch.search_results.map((result, index) => (
-                          <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                            <div className="flex items-start justify-between gap-3 mb-3">
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-sm mb-1 truncate" title={result.title}>
-                                  {result.title}
-                                </h4>
-                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                  <span>{formatFileName(result.source_file)}</span>
-                                  {result.section_header && (
-                                    <>
-                                      <span>•</span>
-                                      <span>{result.section_header}</span>
-                                    </>
-                                  )}
-                                  <span>•</span>
-                                  <span>Chunk {result.chunk_index}</span>
+                          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+                            <CardHeader className="pb-3">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <FileText className="w-4 h-4 text-primary" />
+                                    <h3 className="font-semibold text-foreground truncate" title={result.title}>
+                                      {result.title}
+                                    </h3>
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                                    <span className="flex items-center gap-1">
+                                      <Filter className="w-3 h-3" />
+                                      {formatFileName(result.source_file)}
+                                    </span>
+                                    {result.section_header && (
+                                      <span className="flex items-center gap-1">
+                                        <BookOpen className="w-3 h-3" />
+                                        {result.section_header}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleCopyContent(result.content)}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <Copy className="w-4 h-4" />
+                                  </Button>
                                 </div>
                               </div>
-                                                             <div className="flex items-center gap-2 flex-shrink-0">
-                                 <Badge className={`text-xs ${getSimilarityColor(result.similarity_score)}`}>
-                                   {(result.similarity_score * 100).toFixed(1)}% match
-                                 </Badge>
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={() => handleCopyContent(result.content)}
-                                   className="h-6 w-6 p-0"
-                                 >
-                                   <Copy className="w-3 h-3" />
-                                 </Button>
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={() => handleViewSource(result.document_id)}
-                                   className="h-6 w-6 p-0"
-                                 >
-                                   <ExternalLink className="w-3 h-3" />
-                                 </Button>
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={() => handleDownloadPDF(selectedResearch, result.document_id)}
-                                   disabled={isGeneratingPDF}
-                                   className="h-6 w-6 p-0"
-                                   title="Download PDF"
-                                 >
-                                   {isGeneratingPDF ? (
-                                     <Loader2 className="w-3 h-3 animate-spin" />
-                                   ) : (
-                                     <Download className="w-3 h-3" />
-                                   )}
-                                 </Button>
-                               </div>
-                            </div>
-                            <div className="bg-muted/50 rounded p-3 text-sm">
-                              <SimpleMarkdownRenderer 
-                                content={result.content} 
-                                className="text-sm leading-relaxed"
-                              />
-                            </div>
-                          </div>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                              <div className="bg-muted/50 rounded-lg p-4 border">
+                                <SimpleMarkdownRenderer 
+                                  content={result.content} 
+                                  className="text-sm leading-relaxed"
+                                />
+                              </div>
+                              <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleCopyContent(result.content)}
+                                    className="h-8 text-xs"
+                                  >
+                                    <Copy className="w-3 h-3 mr-1" />
+                                    Copy
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => handleViewFullDocument(result.document_id)}
+                                    disabled={isLoadingDocument}
+                                  >
+                                    {isLoadingDocument ? (
+                                      <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <FileTextIcon className="w-3 h-3 mr-1" />
+                                    )}
+                                    Full Document
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
                         ))}
                       </div>
                     </CardContent>
@@ -881,6 +952,60 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-semibold text-foreground truncate">
+                  {selectedDocument.title}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {selectedDocument.source_file} • {selectedDocument.content_length} characters
+                </p>
+              </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDownloadPDFFromModal(selectedDocument)}
+                  disabled={isGeneratingPDF}
+                >
+                  {isGeneratingPDF ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  {isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedDocument(null);
+                    setCurrentDocumentId(null);
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div className="bg-muted/50 rounded-lg p-6 border">
+                <SimpleMarkdownRenderer 
+                  content={selectedDocument.full_content} 
+                  className="text-sm leading-relaxed max-w-none"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

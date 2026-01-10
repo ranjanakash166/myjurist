@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, ExternalLink, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
+import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,6 @@ export default function LegalResearchPage() {
   const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
   const [isLoadingDocument, setIsLoadingDocument] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [loadingViewSource, setLoadingViewSource] = useState<string | null>(null);
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
   
   // State variables for AI Summary
@@ -105,50 +104,6 @@ export default function LegalResearchPage() {
         description: "Failed to copy content to clipboard",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleViewSource = async (documentId: string) => {
-    setLoadingViewSource(documentId);
-    
-    try {
-      // Try to find the document in search results to get the content
-      const searchResult = searchResults?.results.find(result => result.document_id === documentId);
-      
-      if (searchResult) {
-        // Extract Indian Kanoon URL from the content
-        const indianKanoonMatch = searchResult.content.match(/Indian Kanoon - (http:\/\/indiankanoon\.org\/doc\/\d+)/);
-        
-        if (indianKanoonMatch && indianKanoonMatch[1]) {
-          const indianKanoonUrl = indianKanoonMatch[1];
-          window.open(indianKanoonUrl, '_blank', 'noopener,noreferrer');
-          
-          toast({
-            title: "Opening Indian Kanoon",
-            description: "Redirecting to the original source",
-          });
-        } else {
-          toast({
-            title: "Source not found",
-            description: "Indian Kanoon URL not available for this document",
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Document not found",
-          description: "Document not available in search results",
-          variant: "destructive",
-        });
-      }
-    } catch (err: any) {
-      toast({
-        title: "Failed to open source",
-        description: err.message || "Failed to retrieve document source",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingViewSource(null);
     }
   };
 
@@ -338,7 +293,7 @@ export default function LegalResearchPage() {
 
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="w-full px-4 md:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
@@ -354,7 +309,7 @@ export default function LegalResearchPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-2">
+        <TabsList className="grid w-full max-w-5xl mx-auto grid-cols-2">
           <TabsTrigger value="search" className="flex items-center gap-2">
             <Search className="w-4 h-4" />
             Search
@@ -368,7 +323,7 @@ export default function LegalResearchPage() {
         <TabsContent value="search" className="space-y-6">
 
       {/* Search Form */}
-      <Card className="w-full max-w-4xl mx-auto">
+      <Card className="w-full max-w-5xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="w-5 h-5" />
@@ -492,7 +447,7 @@ export default function LegalResearchPage() {
 
       {/* Error Display */}
       {error && (
-        <Alert variant="destructive" className="max-w-4xl mx-auto">
+        <Alert variant="destructive" className="max-w-5xl mx-auto">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -502,7 +457,7 @@ export default function LegalResearchPage() {
       {searchResults && (
         <div className="space-y-6">
           {/* AI Summary Section */}
-          <Card className="max-w-4xl mx-auto">
+          <Card className="max-w-5xl mx-auto">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="w-5 h-5 text-purple-500" />
@@ -525,9 +480,6 @@ export default function LegalResearchPage() {
                   {/* Summary Header */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Badge className={`${getConfidenceColor(getParsedAISummaryData().confidence_score)}`}>
-                        {(getParsedAISummaryData().confidence_score * 100).toFixed(0)}% Confidence
-                      </Badge>
                     </div>
                     <Button
                       variant="outline"
@@ -706,7 +658,7 @@ export default function LegalResearchPage() {
           </Card>
 
           {/* Search Results */}
-          <div className="space-y-4 max-w-4xl mx-auto">
+          <div className="space-y-4 max-w-5xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-semibold">Search Results ({searchResults.total_results})</h2>
@@ -735,16 +687,9 @@ export default function LegalResearchPage() {
                             {result.section_header}
                           </span>
                         )}
-                        <span className="flex items-center gap-1">
-                          <TrendingUp className="w-3 h-3" />
-                          Chunk {result.chunk_index}
-                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <Badge className={`text-xs ${getSimilarityColor(result.similarity_score)}`}>
-                        {(result.similarity_score * 100).toFixed(1)}% match
-                      </Badge>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -765,7 +710,6 @@ export default function LegalResearchPage() {
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t">
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>Document ID: {result.document_id.slice(0, 8)}...</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -776,20 +720,6 @@ export default function LegalResearchPage() {
                       >
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 text-xs"
-                        onClick={() => handleViewSource(result.document_id)}
-                        disabled={loadingViewSource === result.document_id}
-                      >
-                        {loadingViewSource === result.document_id ? (
-                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-3 h-3 mr-1" />
-                        )}
-                        View Source
                       </Button>
                       <Button
                         variant="outline"
@@ -831,7 +761,7 @@ export default function LegalResearchPage() {
 
       {/* Empty State */}
       {!searchResults && !isSearching && (
-        <Card className="max-w-4xl mx-auto">
+        <Card className="max-w-5xl mx-auto">
           <CardContent className="pt-6 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
               <BookOpen className="w-8 h-8 text-white" />

@@ -67,7 +67,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground relative">
+    <div className="min-h-screen flex bg-background text-foreground relative group">
       {/* Mobile Top Navbar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
@@ -175,7 +175,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex group w-16 hover:w-72 p-4 flex-col gap-4 bg-card border-r border-border min-h-screen transition-all duration-300 ease-in-out overflow-hidden">
+      <aside className="hidden md:flex w-16 hover:w-72 p-4 flex-col gap-4 bg-card border-r border-border min-h-screen transition-all duration-300 ease-in-out overflow-hidden group/sidebar">
         {/* Company Logo/Icon */}
         <Link href="/app/home" className="flex items-center justify-center mb-8 min-w-max hover:opacity-80 transition-opacity">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
@@ -185,7 +185,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               className="w-full h-full object-contain"
             />
           </div>
-          <span className="text-2xl font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-3">
+          <span className="text-2xl font-bold text-foreground opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 ml-3">
             My Jurist
           </span>
         </Link>
@@ -197,7 +197,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none min-w-max ${
+                className={`flex items-center justify-center group-hover/sidebar:justify-start px-2 group-hover/sidebar:px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 focus:outline-none min-w-max ${
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-lg'
                     : 'hover:bg-accent text-muted-foreground hover:text-foreground'
@@ -209,7 +209,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     className: `w-6 h-6 ${isActive ? 'text-primary-foreground' : ''}` 
                   })}
                 </div>
-                <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap truncate">
+                <span className="ml-3 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap truncate">
                   {item.label}
                 </span>
               </Link>
@@ -222,7 +222,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {user && (
             <button
               type="button"
-              className="flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 min-w-max w-full text-left hover:bg-accent rounded-lg transition-colors"
+              className="flex items-center justify-center group-hover/sidebar:justify-start px-2 group-hover/sidebar:px-4 py-3 min-w-max w-full text-left hover:bg-accent rounded-lg transition-colors"
               onClick={() => setProfileOpen(true)}
               title="View Profile"
             >
@@ -231,7 +231,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <User className="w-4 h-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-3">
+              <div className="flex-1 min-w-0 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 ml-3">
                 <p className="text-sm font-medium text-foreground truncate">
                   {user.full_name}
                 </p>
@@ -250,13 +250,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               await logout();
               router.push("/login");
             }}
-            className="w-full flex items-center justify-center group-hover:justify-start px-2 group-hover:px-4 py-3 min-w-max"
+            className="w-full flex items-center justify-center group-hover/sidebar:justify-start px-2 group-hover/sidebar:px-4 py-3 min-w-max"
             title="Logout"
           >
             <div className="w-6 h-6 flex items-center justify-center">
               <LogOut className="w-6 h-6" />
             </div>
-            <span className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            <span className="ml-3 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">
               Logout
             </span>
           </Button>
@@ -264,7 +264,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-16 pt-16 md:pt-0 overflow-x-hidden">
+      <main className="flex-1 md:ml-16 group-hover/sidebar:md:ml-72 pt-16 md:pt-0 overflow-x-hidden transition-all duration-300">
         {children}
       </main>
       <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
