@@ -43,9 +43,13 @@ export default function LegalResearchPage() {
     e.preventDefault();
     if (!query.trim()) return;
 
-    setIsSearching(true);
+    // IMMEDIATELY clear all previous results before starting new search
+    setSearchResults(null);
+    setAiSummary(null);
+    setSelectedDocument(null);
+    setCurrentDocumentId(null);
     setError(null);
-    setAiSummary(null); // Clear previous summary
+    setIsSearching(true);
     
     try {
       const authHeaders = getAuthHeaders();
@@ -386,14 +390,6 @@ export default function LegalResearchPage() {
                     <SelectItem value="3">3 results</SelectItem>
                     <SelectItem value="5">5 results</SelectItem>
                     <SelectItem value="10">10 results</SelectItem>
-                    <SelectItem value="15">15 results</SelectItem>
-                    <SelectItem value="20">20 results</SelectItem>
-                    <SelectItem value="25">25 results</SelectItem>
-                    <SelectItem value="30">30 results</SelectItem>
-                    <SelectItem value="40">40 results</SelectItem>
-                    <SelectItem value="50">50 results</SelectItem>
-                    <SelectItem value="75">75 results</SelectItem>
-                    <SelectItem value="100">100 results</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
