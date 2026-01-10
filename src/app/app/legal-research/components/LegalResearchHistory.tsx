@@ -873,12 +873,6 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
                             <CardHeader className="pb-3">
                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <FileText className="w-4 h-4 text-primary" />
-                                    <h3 className="font-semibold text-foreground truncate" title={result.title}>
-                                      {result.title}
-                                    </h3>
-                                  </div>
                                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                                     <span className="flex items-center gap-1">
                                       <Filter className="w-3 h-3" />

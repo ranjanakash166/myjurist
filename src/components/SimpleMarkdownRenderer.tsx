@@ -82,19 +82,24 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
 
     const parseBoldText = (text: string): React.ReactNode => {
       // Handle bold text (**text**)
-      const boldRegex = /\*\*(.*?)\*\*/g;
+      // Use regex to find all bold sections
+      const boldRegex = /\*\*([^*]+)\*\*/g;
       let parts: React.ReactNode[] = [];
       let lastIndex = 0;
       let match;
+      let matchIndex = 0;
+
+      // Reset regex lastIndex to ensure we start from the beginning
+      boldRegex.lastIndex = 0;
 
       while ((match = boldRegex.exec(text)) !== null) {
         // Add text before the match
         if (match.index > lastIndex) {
           parts.push(text.slice(lastIndex, match.index));
         }
-        // Add bold text
+        // Add bold text with stronger styling (font-bold instead of font-semibold)
         parts.push(
-          <strong key={`bold-${match.index}`} className="font-semibold text-foreground">
+          <strong key={`bold-${matchIndex++}`} className="font-bold text-foreground">
             {match[1]}
           </strong>
         );
