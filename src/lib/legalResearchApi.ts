@@ -4,7 +4,7 @@ import { apiCallWithRefresh } from "./utils";
 export interface LegalResearchRequest {
   query: string;
   top_k: number;
-  search_type: "general" | "specific";
+  search_type: "general" | "supreme_court" | "high_court";
   include_ai_summary?: boolean;
   summary_type?: "comprehensive" | "brief" | "detailed";
   max_summary_length?: number;
@@ -385,7 +385,7 @@ export const downloadLegalDocumentDOC = async (
 export interface LegalResearchHistoryItem {
   research_id: string;
   query: string;
-  search_type: "general" | "specific";
+  search_type: "general" | "supreme_court" | "high_court";
   top_k: number;
   total_results: number;
   search_time_ms: number | null;

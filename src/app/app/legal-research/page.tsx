@@ -20,7 +20,7 @@ import LegalResearchSkeleton from "./components/LegalResearchSkeleton";
 export default function LegalResearchPage() {
   const { getAuthHeaders, refreshToken } = useAuth();
   const [query, setQuery] = useState("");
-  const [searchType, setSearchType] = useState<"general" | "specific">("general");
+  const [searchType, setSearchType] = useState<"general" | "supreme_court" | "high_court">("general");
   const [topK, setTopK] = useState(5);
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<LegalResearchResponse | null>(null);
@@ -369,14 +369,15 @@ export default function LegalResearchPage() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Search Type</label>
-                <Select value={searchType} onValueChange={(value: "general" | "specific") => setSearchType(value)}>
+                <label className="block text-sm font-medium mb-2">Court Type</label>
+                <Select value={searchType} onValueChange={(value: "general" | "supreme_court" | "high_court") => setSearchType(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="general">General Search</SelectItem>
-                    <SelectItem value="specific">Specific Search</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="supreme_court">Supreme Court</SelectItem>
+                    <SelectItem value="high_court">High Court</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
