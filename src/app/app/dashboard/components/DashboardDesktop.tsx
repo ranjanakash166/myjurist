@@ -61,7 +61,7 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">

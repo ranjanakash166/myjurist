@@ -6,7 +6,7 @@ export default function LegalResearchSkeleton() {
   return (
     <div className="space-y-6">
       {/* AI Summary Skeleton */}
-      <Card className="max-w-7xl mx-auto">
+      <Card className="w-full">
         <CardHeader>
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-5 rounded" />
@@ -55,7 +55,7 @@ export default function LegalResearchSkeleton() {
       </Card>
 
       {/* Search Results Skeleton */}
-      <div className="space-y-4 max-w-7xl mx-auto">
+      <div className="space-y-4 w-full">
         <div className="flex items-center gap-2 mb-4">
           <Skeleton className="h-5 w-5 rounded" />
           <Skeleton className="h-7 w-48" />

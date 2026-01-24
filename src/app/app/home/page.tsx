@@ -86,7 +86,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       {/* Quick Actions Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 pt-8 pb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Sparkles className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />

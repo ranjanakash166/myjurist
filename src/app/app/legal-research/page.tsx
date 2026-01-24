@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Search, FileText, Clock, TrendingUp, BookOpen, Filter, Download, Copy, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
+import { Search, FileText, Clock, BookOpen, Filter, Download, Copy, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,39 @@ export default function LegalResearchPage() {
  
  // State for tabs
  const [activeTab, setActiveTab] = useState("search");
+
+ // State for recent searches
+ const [recentSearches, setRecentSearches] = useState<string[]>([]);
+ const [isLoadingRecentSearches, setIsLoadingRecentSearches] = useState(false);
+
+ // Fetch recent searches on component mount
+ React.useEffect(() => {
+   const fetchRecentSearches = async () => {
+     setIsLoadingRecentSearches(true);
+     try {
+       const authHeaders = getAuthHeaders();
+       const response = await fetch('https://api.myjurist.io/api/v1/legal-research/history?limit=5', {
+         method: 'GET',
+         headers: authHeaders,
+       });
+       
+       if (response.ok) {
+         const data = await response.json();
+         // Data is an array of LegalResearchHistoryItem[]
+         const queries = data
+           .map((item: any) => item.query)
+           .filter((q: string) => q && q.trim());
+         setRecentSearches(queries);
+       }
+     } catch (err) {
+       console.error('Failed to fetch recent searches:', err);
+     } finally {
+       setIsLoadingRecentSearches(false);
+     }
+   };
+
+   fetchRecentSearches();
+ }, [getAuthHeaders]);
 
  const handleSearch = async (e: React.FormEvent) => {
  e.preventDefault();
@@ -285,107 +318,88 @@ export default function LegalResearchPage() {
  }
  };
 
- const quickSearchQueries = [
- "financial irregularities",
- "fraudulent trading",
- "insolvency proceedings",
- "corporate governance",
- "contract disputes",
- "intellectual property",
- "regulatory compliance",
- "employment law",
- ];
-
-
-
  return (
  <div className="w-full px-6 md:px-8 lg:px-12 py-6 space-y-6">
  {/* Header */}
- <div className="text-center space-y-4">
- <div className="flex items-center justify-center gap-3">
- <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
- <BookOpen className="w-6 h-6 text-white" />
+ <div className="space-y-2">
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
+ <BookOpen className="w-5 h-5 text-white" />
  </div>
- <h1 className="text-3xl font-bold text-foreground">Legal Research</h1>
+ <h1 className="text-2xl font-bold text-foreground">Legal Research</h1>
  </div>
- <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
- Search through our comprehensive legal database to find relevant case law, regulations, and legal precedents
+ <p className="text-sm text-muted-foreground">
+ Search through case law, regulations, and legal precedents
  </p>
  </div>
 
  {/* Tabs */}
  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
- <TabsList className="grid w-full max-w-7xl mx-auto grid-cols-2">
- <TabsTrigger value="search" className="flex items-center gap-2">
+ <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted/50">
+ <TabsTrigger value="search" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
  <Search className="w-4 h-4" />
  Search
  </TabsTrigger>
- <TabsTrigger value="history" className="flex items-center gap-2">
+ <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
  <History className="w-4 h-4" />
  History
  </TabsTrigger>
  </TabsList>
 
- <TabsContent value="search" className="space-y-6">
+ <TabsContent value="search" className="space-y-6 mt-6">
 
  {/* Search Form */}
- <Card className="w-full max-w-7xl mx-auto">
- <CardHeader>
- <CardTitle className="flex items-center gap-2">
+ <Card className="w-full border-0 shadow-sm bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
+ <CardContent className="pt-6">
+ <form onSubmit={handleSearch} className="space-y-5">
+ {/* Search Input */}
+ <div className="relative">
+ <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
  <Search className="w-5 h-5" />
- Search Legal Database
- </CardTitle>
- </CardHeader>
- <CardContent>
- <form onSubmit={handleSearch} className="space-y-4">
- <div className="flex flex-col sm:flex-row gap-4">
- <div className="flex-1">
+ </div>
  <Input
  type="text"
- placeholder="Enter your legal research query..."
+ placeholder="What legal information are you looking for?"
  value={query}
  onChange={(e) => setQuery(e.target.value)}
- className="h-12 text-base"
+ className="h-14 text-base pl-12 pr-32 rounded-xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
  disabled={isSearching}
  />
- </div>
  <Button 
  type="submit" 
- className="h-12 px-8"
+ className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md"
  disabled={isSearching || !query.trim()}
  >
  {isSearching ? (
  <div className="flex items-center gap-2">
  <Loader2 className="w-4 h-4 animate-spin" />
- Searching...
+ <span className="hidden sm:inline">Searching...</span>
  </div>
  ) : (
- <div className="flex items-center gap-2">
- <Search className="w-4 h-4" />
- Search
- </div>
+ <span>Search</span>
  )}
  </Button>
  </div>
 
+ {/* Filters Row */}
  <div className="flex flex-col sm:flex-row gap-4">
  <div className="flex-1">
- <label className="block text-sm font-medium mb-2">Court Type</label>
+ <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Court Type</label>
  <Select value={searchType} onValueChange={(value: "general" | "supreme_court" | "high_court") => setSearchType(value)}>
- <SelectTrigger>
+ <SelectTrigger className="h-11 rounded-lg">
  <SelectValue />
  </SelectTrigger>
  <SelectContent>
- <SelectItem value="general">General</SelectItem>
+ <SelectItem value="general">All Courts</SelectItem>
  <SelectItem value="supreme_court">Supreme Court</SelectItem>
  <SelectItem value="high_court">High Court</SelectItem>
  </SelectContent>
  </Select>
  </div>
  <div className="flex-1">
- <label className="block text-sm font-medium mb-2">Number of Results</label>
+ <label className="block text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Results</label>
  <Select value={topK.toString()} onValueChange={(value) => setTopK(parseInt(value))}>
- <SelectTrigger>
+ <SelectTrigger className="h-11 rounded-lg">
  <SelectValue />
  </SelectTrigger>
  <SelectContent>
@@ -398,55 +412,42 @@ export default function LegalResearchPage() {
  </div>
  </form>
 
- {/* Quick Search Suggestions */}
- <div className="mt-6 pt-6 border-t">
- <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
- <TrendingUp className="w-4 h-4" />
- Popular Searches
- </h3>
- <div className="flex flex-wrap gap-2">
- {quickSearchQueries.map((quickQuery, index) => (
- <Button
- key={index}
- variant="outline"
- size="sm"
- onClick={() => handleQuickSearch(quickQuery)}
- className="text-xs"
- >
- {quickQuery}
- </Button>
- ))}
- </div>
- </div>
-
- {/* Search History */}
- {searchHistory.length > 0 && (
- <div className="mt-4 pt-4 border-t">
- <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
- <Clock className="w-4 h-4" />
+ {/* Recent Searches from API */}
+ <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+ <h3 className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wide">
+ <Clock className="w-3.5 h-3.5" />
  Recent Searches
  </h3>
- <div className="flex flex-wrap gap-2">
- {searchHistory.map((historyQuery, index) => (
- <Button
- key={index}
- variant="ghost"
- size="sm"
- onClick={() => handleQuickSearch(historyQuery)}
- className="text-xs"
- >
- {historyQuery}
- </Button>
+ {isLoadingRecentSearches ? (
+ <div className="flex gap-2">
+ {[1, 2, 3].map((i) => (
+ <div key={i} className="h-8 w-24 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse" />
  ))}
  </div>
+ ) : recentSearches.length > 0 ? (
+ <div className="flex flex-wrap gap-2">
+ {recentSearches.map((recentQuery, index) => (
+ <button
+ key={index}
+ onClick={() => handleQuickSearch(recentQuery)}
+ className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800"
+ >
+ <Search className="w-3 h-3" />
+ {recentQuery}
+ </button>
+ ))}
  </div>
+ ) : (
+ <p className="text-sm text-muted-foreground">No recent searches yet. Start searching to build your history.</p>
  )}
+ </div>
+
  </CardContent>
  </Card>
 
  {/* Error Display */}
  {error && (
- <Alert variant="destructive" className="max-w-7xl mx-auto">
+ <Alert variant="destructive">
  <AlertCircle className="h-4 w-4" />
  <AlertDescription>{error}</AlertDescription>
  </Alert>
@@ -461,7 +462,7 @@ export default function LegalResearchPage() {
  {searchResults && (
  <div className="space-y-6">
  {/* AI Summary Section */}
- <Card className="max-w-7xl mx-auto">
+ <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
  <Brain className="w-5 h-5 text-purple-500" />
@@ -662,7 +663,7 @@ export default function LegalResearchPage() {
  </Card>
 
  {/* Search Results */}
- <div className="space-y-4 max-w-7xl mx-auto">
+ <div className="space-y-4">
  <div className="flex items-center gap-2 mb-4">
  <FileText className="w-5 h-5 text-primary" />
  <h2 className="text-xl font-semibold">Search Results ({searchResults.total_results})</h2>
@@ -755,37 +756,10 @@ export default function LegalResearchPage() {
  )}
  </div>
  </div>
- )}
+)}
 
- {/* Empty State */}
- {!searchResults && !isSearching && (
- <Card className="max-w-7xl mx-auto">
- <CardContent className="pt-6 text-center">
- <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
- <BookOpen className="w-8 h-8 text-white" />
- </div>
- <h3 className="text-lg font-semibold mb-2">Start Your Legal Research</h3>
- <p className="text-muted-foreground mb-4">
- Enter a query above to search through our comprehensive legal database
- </p>
- <div className="flex flex-wrap justify-center gap-2">
- {quickSearchQueries.slice(0, 4).map((quickQuery, index) => (
- <Button
- key={index}
- variant="outline"
- onClick={() => handleQuickSearch(quickQuery)}
- className="text-sm"
- >
- {quickQuery}
- </Button>
- ))}
- </div>
- </CardContent>
- </Card>
- )}
-
- {/* Document Viewer Modal */}
- {selectedDocument && (
+{/* Document Viewer Modal */}
+{selectedDocument && (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
  <div className="bg-background rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
  {/* Modal Header */}
