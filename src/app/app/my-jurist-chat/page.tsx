@@ -9,6 +9,7 @@ import { useAuth } from "../../../components/AuthProvider";
 import { toast } from '@/hooks/use-toast';
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { searchAgenticRAG, AgenticRAGSearchResponse, SearchResult } from "@/lib/agenticRagApi";
+import { normalizeContentLineBreaks } from "@/lib/utils";
 
 interface ChatMessage {
   id: string;
@@ -142,7 +143,7 @@ export default function MyJuristChatPage() {
             )}
             <p className="text-xs text-neutral-500">Source: {result.source_file}</p>
           </div>
-          <p className="text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap">{result.content}</p>
+          <p className="text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap">{normalizeContentLineBreaks(result.content)}</p>
           {result.metadata?.url && (
             <a
               href={result.metadata.url}
