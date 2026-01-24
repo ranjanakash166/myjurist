@@ -661,10 +661,9 @@ export default function DocumentAnalysisPage() {
   const steps = [
     { key: 'create', label: 'Start' },
     { key: 'upload', label: 'Upload' },
-    { key: 'select', label: 'Setup' },
     { key: 'chat', label: 'Chat' },
   ];
-  const currentStepIndex = createdSession ? 3 : (sessionSuccess ? 2 : (uploadSuccess ? 1 : 0));
+  const currentStepIndex = createdSession ? 2 : (uploadSuccess ? 1 : 0);
   const [collapsedSteps, setCollapsedSteps] = useState<{[key: string]: boolean}>({});
   const handleToggleStep = (key: string) => {
     setCollapsedSteps(prev => ({ ...prev, [key]: !prev[key] }));
@@ -1016,7 +1015,89 @@ export default function DocumentAnalysisPage() {
             </Card>
           )}
 
-          {tab === 'new' && (
+          {tab === 'new' && createdSession && (
+            <div className="w-full h-full flex-1 flex flex-col min-h-[calc(100vh-200px)]">
+              {/* Timeline */}
+              <div className="flex w-full justify-between items-center mb-4">
+                {steps.map((step, idx) => (
+                  <React.Fragment key={step.key}>
+                    <div
+                      className={`flex flex-col items-center flex-1 min-w-0 ${
+                        idx < currentStepIndex
+                          ? 'text-primary'
+                          : idx === currentStepIndex
+                          ? 'font-bold text-primary'
+                          : 'text-muted-foreground'
+                      }`}
+                      style={{ minWidth: 0 }}
+                    >
+                      <div
+                        className={`rounded-full w-9 h-9 flex items-center justify-center mb-1 border-2 transition-colors
+                          ${
+                            idx < currentStepIndex
+                              ? 'bg-primary text-white border-primary'
+                              : idx === currentStepIndex
+                              ? 'bg-primary/80 text-black dark:text-black border-primary'
+                              : 'bg-muted text-black dark:text-white border-border'
+                          }
+                        `}
+                      >
+                        {idx < currentStepIndex ? (
+                          <Check className="w-5 h-5 text-white dark:text-black" />
+                        ) : (
+                          idx + 1
+                        )}
+                      </div>
+                      <span className="text-xs text-center break-words w-full max-w-[80px]">{step.label}</span>
+                    </div>
+                    {idx < steps.length - 1 && (
+                      <div
+                        className="flex-1 h-1 mx-1 transition-colors"
+                        style={{
+                          background:
+                            idx < currentStepIndex
+                              ? 'var(--tw-prose-bold, hsl(var(--primary)))'
+                              : 'hsl(var(--border))',
+                          opacity: idx < currentStepIndex ? 1 : 0.5,
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+              
+              {/* Full-height Chat Interface */}
+              <div className="flex-1">
+                <ChatInterface
+                  chat={chatMessages}
+                  onSend={handleSendChatMessage}
+                  input={chatInput}
+                  setInput={setChatInput}
+                  loading={chatLoading}
+                  streaming={false}
+                  streamedText={""}
+                  error={chatError}
+                  disabled={chatLoading}
+                  continuingSession={true}
+                  continuingSessionId={createdSession.id}
+                  chatDocuments={chatDocuments}
+                  sessionDocuments={sessionDocuments}
+                  chatId={createdChat?.id}
+                  sessionId={createdSession?.id}
+                  onViewDocument={handleView}
+                  onDownloadDocument={handleDownload}
+                  onDeleteDocument={handleDeleteDocument}
+                  onAddToSession={handleAddToSession}
+                  addToSessionSuccessTrigger={addToSessionSuccessTrigger}
+                  onUploadNewDocuments={handleUploadNewDocuments}
+                  uploadingNewDocuments={uploadingNewDocuments}
+                  userInitial={userInitial}
+                />
+              </div>
+            </div>
+          )}
+
+          {tab === 'new' && !createdSession && (
             <div className="w-full">
               {/* Timeline */}
               <div className="flex w-full justify-between items-center mb-6">
@@ -1344,11 +1425,11 @@ export default function DocumentAnalysisPage() {
                 )}
               </CollapsibleSection>
 
-              {/* Step 3: Session Setup (Auto) */}
+              {/* Step 3: Chat (Auto session creation) */}
               <CollapsibleSection
-                title="3. Session Setup"
-                isCollapsed={currentStepIndex > 2 && collapsedSteps['select'] !== false}
-                onToggle={() => handleToggleStep('select')}
+                title="3. Chat"
+                isCollapsed={currentStepIndex > 2 && collapsedSteps['chat'] !== false}
+                onToggle={() => handleToggleStep('chat')}
                 className="w-full"
               >
                 {sessionLoading && (
@@ -1386,44 +1467,6 @@ export default function DocumentAnalysisPage() {
                 )}
               </CollapsibleSection>
 
-              {/* Step 4: Chat */}
-              <CollapsibleSection
-                title="4. Chat"
-                isCollapsed={currentStepIndex < 3 || collapsedSteps['chat'] === true}
-                onToggle={() => handleToggleStep('chat')}
-                className="w-full"
-              >
-                {createdSession && (
-                  <div className="w-full mx-auto mt-8">
-                    <h3 className="text-lg font-bold mb-2 text-foreground">4. Chat</h3>
-                    <ChatInterface
-                      chat={chatMessages}
-                      onSend={handleSendChatMessage}
-                      input={chatInput}
-                      setInput={setChatInput}
-                      loading={chatLoading}
-                      streaming={false}
-                      streamedText={""}
-                      error={chatError}
-                      disabled={chatLoading}
-                      continuingSession={true}
-                      continuingSessionId={createdSession.id}
-                      chatDocuments={chatDocuments}
-                      sessionDocuments={sessionDocuments}
-                      chatId={createdChat?.id}
-                      sessionId={createdSession?.id}
-                      onViewDocument={handleView}
-                      onDownloadDocument={handleDownload}
-                      onDeleteDocument={handleDeleteDocument}
-                      onAddToSession={handleAddToSession}
-                      addToSessionSuccessTrigger={addToSessionSuccessTrigger}
-                      onUploadNewDocuments={handleUploadNewDocuments}
-                      uploadingNewDocuments={uploadingNewDocuments}
-                      userInitial={userInitial}
-                    />
-                  </div>
-                )}
-              </CollapsibleSection>
             </div>
           )}
         </TabsContent>
