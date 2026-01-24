@@ -1,8 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { StatsCard } from './shared/StatsCard';
 import { ActivityItem } from './shared/ActivityItem';
 import { 
@@ -24,6 +25,16 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
+import { 
+  FileText, 
+  Scale, 
+  MessageSquare, 
+  Upload, 
+  Search,
+  Clock,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 
 interface DashboardDesktopProps {
   dashboardData: DashboardStats;
@@ -72,7 +83,88 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
           </p>
         </div>
 
+        {/* Quick Actions - Desktop Layout (Moved to top) */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              Quick Actions
+            </h2>
+            <Badge variant="secondary" className="text-xs">
+              Get Started
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Document Analysis Action */}
+            <Link href="/app/document-analysis" className="group">
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="p-3 bg-blue-600 dark:bg-blue-700 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <Upload className="h-6 w-6 text-white" />
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                    Upload & Analyze
+                  </CardTitle>
+                  <CardDescription className="text-gray-700 dark:text-gray-300">
+                    Upload legal documents for AI-powered analysis
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+
+            {/* Patent Analysis Action */}
+            <Link href="/app/patent-analysis" className="group">
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="p-3 bg-green-600 dark:bg-green-700 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <Scale className="h-6 w-6 text-white" />
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-green-600 dark:text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                    Patent Analysis
+                  </CardTitle>
+                  <CardDescription className="text-gray-700 dark:text-gray-300">
+                    Analyze patents and intellectual property
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+
+            {/* Chat History Action */}
+            <Link href="/app/document-analysis?tab=history" className="group">
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="p-3 bg-purple-600 dark:bg-purple-700 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                      <Clock className="h-6 w-6 text-white" />
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                    Chat History
+                  </CardTitle>
+                  <CardDescription className="text-gray-700 dark:text-gray-300">
+                    Review past conversations and analyses
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        <Separator className="mb-8" />
+
         {/* Stats Cards - Desktop Layout */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Your Statistics
+          </h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatsCard
             title="Total Documents Analyzed"
@@ -98,6 +190,11 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
         </div>
 
         {/* Charts Section - Desktop Layout */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Activity Insights
+          </h2>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Pie Chart */}
           <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
@@ -206,28 +303,6 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
               )}
             </CardContent>
           </Card>
-        </div>
-
-        {/* Quick Actions - Desktop Layout */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Button asChild className="h-16 text-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
-              <Link href="/app/document-analysis">
-                📄 Upload & Analyze Document
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 text-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
-              <Link href="/app/patent-analysis">
-                📋 Patent Analysis
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 text-lg hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
-              <Link href="/app/document-analysis?tab=history">
-                💬 View Chat History
-              </Link>
-            </Button>
-          </div>
         </div>
 
         {/* Recent Activity - Desktop Layout */}
