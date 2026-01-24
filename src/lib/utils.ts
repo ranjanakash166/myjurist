@@ -1,8 +1,50 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import React from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Parses text and renders bold markdown (**text**) as <strong> elements
+ * @param text - The text string to parse
+ * @returns React node with bold text properly rendered
+ */
+export function parseBoldText(text: string): React.ReactNode {
+  if (!text) return text;
+  
+  // Handle bold text (**text**)
+  const boldRegex = /\*\*([^*]+)\*\*/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  let matchIndex = 0;
+
+  // Reset regex lastIndex to ensure we start from the beginning
+  boldRegex.lastIndex = 0;
+
+  while ((match = boldRegex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    // Add bold text
+    parts.push(
+      React.createElement('strong', { 
+        key: `bold-${matchIndex++}`, 
+        className: 'font-semibold text-foreground' 
+      }, match[1])
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? React.createElement(React.Fragment, null, ...parts) : text;
 }
 
 /**

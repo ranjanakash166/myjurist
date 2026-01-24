@@ -14,7 +14,7 @@ import { useAuth } from "../../../components/AuthProvider";
 import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
-import { normalizeContentLineBreaks } from "@/lib/utils";
+import { normalizeContentLineBreaks, parseBoldText } from "@/lib/utils";
 import LegalResearchHistory from "./components/LegalResearchHistory";
 import LegalResearchSkeleton from "./components/LegalResearchSkeleton";
 
@@ -533,7 +533,7 @@ export default function LegalResearchPage() {
  {getParsedAISummaryData().key_legal_insights.map((insight: string, index: number) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{insight}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(insight)}</span>
  </div>
  ))}
  </div>
@@ -551,7 +551,7 @@ export default function LegalResearchPage() {
  {getParsedAISummaryData().relevant_precedents.map((precedent: string, index: number) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{precedent}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(precedent)}</span>
  </div>
  ))}
  </div>
@@ -569,7 +569,7 @@ export default function LegalResearchPage() {
  {getParsedAISummaryData().statutory_provisions.map((provision: string, index: number) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{provision}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(provision)}</span>
  </div>
  ))}
  </div>
@@ -587,7 +587,7 @@ export default function LegalResearchPage() {
  {getParsedAISummaryData().procedural_developments.map((development: string, index: number) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{development}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(development)}</span>
  </div>
  ))}
  </div>
@@ -605,7 +605,7 @@ export default function LegalResearchPage() {
  {getParsedAISummaryData().practical_implications.map((implication: string, index: number) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{implication}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(implication)}</span>
  </div>
  ))}
  </div>
