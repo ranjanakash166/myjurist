@@ -328,6 +328,9 @@ export default function DocumentAnalysisPage() {
         setUploadedDocs(data.uploaded_documents || []);
         setUploadSuccess(true);
         setUploadFiles([]);
+        
+        // Auto-create session and navigate to chat
+        await handleAutoCreateSession(createdChat.id, data.uploaded_documents || []);
       } else {
         // Handle upload failure
         const failedDocs = data.failed_documents || [];
@@ -546,12 +549,41 @@ export default function DocumentAnalysisPage() {
     setPdfFilename("");
   };
 
-  // Step 1: Create Chat handler
-  const handleCreateChat = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Helper function to generate auto names
+  const generateAutoName = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `Document Analysis - ${dateStr}`;
+  };
+
+  const generateSessionName = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `Session - ${dateStr}`;
+  };
+
+  // Step 1: Create Chat handler - now auto-generates values
+  const handleCreateChat = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setNewChatError(null);
     setNewChatSuccess(false);
     setNewChatLoading(true);
+    
+    // Auto-generate chat name and description
+    const autoName = generateAutoName();
+    const autoDescription = "Auto-generated document analysis session";
+    
     try {
       const res = await fetch(`${API_BASE_URL}/chats`, {
         method: "POST",
@@ -560,8 +592,8 @@ export default function DocumentAnalysisPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: newChatName,
-          description: newChatDescription,
+          name: autoName,
+          description: autoDescription,
         }),
       });
       if (!res.ok) {
@@ -579,11 +611,57 @@ export default function DocumentAnalysisPage() {
     }
   };
 
+  // Auto-create session after documents are uploaded
+  const handleAutoCreateSession = async (chatId: string, documents: any[]) => {
+    setSessionError(null);
+    setSessionLoading(true);
+    
+    // Auto-generate session name
+    const autoSessionName = generateSessionName();
+    
+    // Include all uploaded documents in the session by default
+    const documentIds = documents.map((doc: any) => doc.id);
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/chats/${chatId}/sessions/`, {
+        method: 'POST',
+        headers: {
+          ...getAuthHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: autoSessionName,
+          document_ids: documentIds, // Include all uploaded documents
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.detail?.[0]?.msg || 'Failed to create session');
+      }
+      const data = await res.json();
+      setCreatedSession(data);
+      setSessionSuccess(true);
+      setChatMessages([]);
+      setChatInput("");
+      
+      // Fetch documents for the new session
+      await fetchChatDocuments(chatId);
+      await fetchSessionDocuments(chatId, data.id);
+      
+      // Collapse previous steps
+      setCollapsedSteps({ create: true, upload: true, select: true, chat: false });
+    } catch (err: any) {
+      setSessionError(err.message || 'An error occurred while creating session.');
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
   // Timeline/collapsible logic for new analysis flow
   const steps = [
-    { key: 'create', label: 'Create Chat' },
-    { key: 'upload', label: 'Upload Documents' },
-    { key: 'select', label: 'Select Documents & Start Session' },
+    { key: 'create', label: 'Start' },
+    { key: 'upload', label: 'Upload' },
+    { key: 'select', label: 'Setup' },
     { key: 'chat', label: 'Chat' },
   ];
   const currentStepIndex = createdSession ? 3 : (sessionSuccess ? 2 : (uploadSuccess ? 1 : 0));
@@ -854,7 +932,7 @@ export default function DocumentAnalysisPage() {
   }, [createdChat?.id, createdSession?.id]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
+    <div className="w-full px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
       <Tabs value={tab} onValueChange={(value) => {
         const newTab = value as 'new' | 'history';
         setTab(newTab);
@@ -997,111 +1075,74 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {newAnalysisStep === 'create' && !createdChat && (
-                  <div className="max-w-2xl w-full mx-auto">
-                    <Card className="w-full hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
+                  <div className="w-full">
+                    <Card className="w-full hover:shadow-lg transition-shadow duration-200">
                       <CardHeader className="text-center pb-6">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                          <MessageCircle className="w-8 h-8 text-white" />
+                        <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                          <MessageCircle className="w-10 h-10 text-white" />
                         </div>
-                        <CardTitle className="text-2xl font-bold mb-2">Start a New Analysis</CardTitle>
-                        <p className="text-muted-foreground">Create a new chat to begin your document analysis workflow</p>
+                        <CardTitle className="text-2xl font-bold mb-2">Start a New Document Analysis</CardTitle>
+                        <p className="text-muted-foreground max-w-lg mx-auto">
+                          Click the button below to begin. Your analysis session will be created automatically.
+                        </p>
                       </CardHeader>
                       <CardContent className="space-y-6">
-                        <form onSubmit={handleCreateChat} className="space-y-6">
-                          <div className="space-y-2">
-                            <label htmlFor="chat-name" className="block text-sm font-semibold text-foreground">
-                              <MessageCircle className="w-4 h-4 inline mr-2" />
-                              Chat Name
-                            </label>
-                            <input
-                              id="chat-name"
-                              type="text"
-                              className="w-full rounded-lg border-2 border-input bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200"
-                              placeholder="Enter a descriptive name for this analysis"
-                              value={newChatName}
-                              onChange={e => setNewChatName(e.target.value)}
-                              required
-                              maxLength={64}
-                            />
-                            <p className="text-xs text-muted-foreground">Choose a clear, descriptive name to help you identify this analysis later</p>
+                        {/* Status Messages */}
+                        {newChatError && (
+                          <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4" />
+                            {newChatError}
                           </div>
-                          
-                          <div className="space-y-2">
-                            <label htmlFor="chat-desc" className="block text-sm font-semibold text-foreground">
-                              <FileText className="w-4 h-4 inline mr-2" />
-                              Description
-                            </label>
-                            <textarea
-                              id="chat-desc"
-                              className="w-full rounded-lg border-2 border-input bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 min-h-[100px] resize-y transition-all duration-200"
-                              placeholder="Describe the purpose, scope, or specific questions you want to analyze..."
-                              value={newChatDescription}
-                              onChange={e => setNewChatDescription(e.target.value)}
-                              maxLength={256}
-                            />
-                            <div className="flex justify-between items-center">
-                              <p className="text-xs text-muted-foreground">Optional: Provide context about your analysis goals</p>
-                              <span className="text-xs text-muted-foreground">{newChatDescription.length}/256</span>
-                            </div>
-                          </div>
+                        )}
 
-                          {/* Status Messages */}
-                          {newChatError && (
-                            <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
-                              <AlertTriangle className="w-4 h-4" />
-                              {newChatError}
+                        {/* Action Button */}
+                        <Button
+                          onClick={() => handleCreateChat()}
+                          className="w-full py-4 text-lg font-semibold hover:scale-[1.01] hover:shadow-lg transition-all duration-200"
+                          disabled={newChatLoading}
+                        >
+                          {newChatLoading ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Creating Analysis Session...
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Plus className="w-5 h-5" />
+                              Start New Analysis
                             </div>
                           )}
-                          
-                          {newChatSuccess && (
-                            <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
-                              <Check className="w-4 h-4" />
-                              Chat created successfully! Ready to upload documents.
-                            </div>
-                          )}
+                        </Button>
 
-                          {/* Action Button */}
-                          <Button
-                            type="submit"
-                            className="w-full py-3 text-base font-semibold hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
-                            disabled={newChatLoading || !newChatName.trim()}
-                          >
-                            {newChatLoading ? (
-                              <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Creating Chat...
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <Plus className="w-4 h-4" />
-                                Create Chat
-                              </div>
-                            )}
-                          </Button>
-                        </form>
-
-                        {/* Quick Tips */}
+                        {/* Info Section */}
                         <div className="mt-6 pt-6 border-t border-border">
-                          <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                            <Settings className="w-4 h-4" />
-                            Quick Tips
-                          </h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                              <span>Use descriptive names like "Contract Review Q1 2024"</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                              <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                                <Upload className="w-5 h-5 text-blue-500" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">Upload Documents</p>
+                                <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, TXT</p>
+                              </div>
                             </div>
-                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                              <span>Add context about your analysis goals</span>
+                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                              <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                                <MessageCircle className="w-5 h-5 text-purple-500" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">Chat with AI</p>
+                                <p className="text-xs text-muted-foreground">Ask questions</p>
+                              </div>
                             </div>
-                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                              <span>You can upload multiple documents per chat</span>
-                            </div>
-                            <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                              <span>Create multiple sessions for different analysis topics</span>
+                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                              <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+                                <FileText className="w-5 h-5 text-green-500" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">Get Insights</p>
+                                <p className="text-xs text-muted-foreground">AI-powered analysis</p>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1119,7 +1160,7 @@ export default function DocumentAnalysisPage() {
                 className="w-full"
               >
                 {newAnalysisStep === 'upload' && createdChat && (
-                  <div className="w-full max-w-3xl mx-auto">
+                  <div className="w-full">
                     <Card className="w-full hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
                       <CardHeader className="text-center pb-6">
                         <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
@@ -1207,7 +1248,14 @@ export default function DocumentAnalysisPage() {
                           {uploadSuccess && (
                             <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" />
-                              Documents uploaded successfully! Ready to create session.
+                              Documents uploaded successfully! Starting chat session...
+                            </div>
+                          )}
+                          
+                          {sessionLoading && (
+                            <div className="bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                              Creating chat session...
                             </div>
                           )}
 
@@ -1296,64 +1344,42 @@ export default function DocumentAnalysisPage() {
                 )}
               </CollapsibleSection>
 
-              {/* Step 3: Select Documents & Start Session */}
+              {/* Step 3: Session Setup (Auto) */}
               <CollapsibleSection
-                title="3. Select Documents & Start Session"
+                title="3. Session Setup"
                 isCollapsed={currentStepIndex > 2 && collapsedSteps['select'] !== false}
                 onToggle={() => handleToggleStep('select')}
                 className="w-full"
               >
-
-                {newAnalysisStep === 'upload' && createdChat && uploadedDocs.length > 0 && (
-                  <div className="w-full max-w-2xl mx-auto mt-8">
+                {sessionLoading && (
+                  <div className="w-full">
                     <Card className="w-full">
-                      <CardHeader>
-                        <CardTitle>Select Documents & Start Session</CardTitle>
-                        <p className="text-muted-foreground text-sm">Select one or more documents and start a chat session for analysis.</p>
-                      </CardHeader>
-                      <CardContent>
-                        <form onSubmit={handleCreateSession} className="space-y-4">
-                          <div className="space-y-2">
-                            {uploadedDocs.map(doc => (
-                              <label key={doc.id} className="flex items-center gap-3 bg-muted rounded-lg px-3 py-2 cursor-pointer border border-border">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedDocIds.includes(doc.id)}
-                                  onChange={() => handleToggleDoc(doc.id)}
-                                  className="accent-primary w-5 h-5"
-                                />
-                                <span className="break-all flex-1 text-sm text-foreground">{doc.filename}</span>
-                                <span className="text-xs text-muted-foreground">{doc.file_size ? (doc.file_size / 1024).toFixed(1) + ' KB' : ''}</span>
-                              </label>
-                            ))}
+                      <CardContent className="py-8">
+                        <div className="flex flex-col items-center justify-center text-center">
+                          <div className="w-16 h-16 mb-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
                           </div>
-                          <div>
-                            <label htmlFor="session-name" className="block text-sm font-medium mb-1">Session Name</label>
-                            <input
-                              id="session-name"
-                              type="text"
-                              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                              placeholder="Enter a name for this session"
-                              value={sessionName}
-                              onChange={e => setSessionName(e.target.value)}
-                              required
-                              maxLength={64}
-                            />
-                          </div>
-                          {sessionError && (
-                            <div className="bg-red-900/80 text-red-200 rounded-lg px-4 py-3 text-center text-sm border border-red-700/50 shadow-lg">{sessionError}</div>
-                          )}
-                          {sessionSuccess && (
-                            <div className="bg-green-900/80 text-green-200 rounded-lg px-4 py-3 text-center text-sm border border-green-700/50 shadow-lg">Session created successfully!</div>
-                          )}
-                          <button
-                            type="submit"
-                            className="w-full py-3 rounded-lg bg-white text-black border border-border font-semibold hover:bg-gray-100 transition-colors disabled:opacity-60"
-                            disabled={sessionLoading || selectedDocIds.length === 0 || !sessionName.trim()}
-                          >
-                            {sessionLoading ? 'Creating Session...' : 'Start Session'}
-                          </button>
-                        </form>
+                          <h3 className="text-lg font-semibold mb-2">Setting up your chat session...</h3>
+                          <p className="text-sm text-muted-foreground">This will only take a moment</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+                {sessionError && !sessionLoading && (
+                  <div className="w-full">
+                    <Card className="w-full">
+                      <CardContent className="py-6">
+                        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          {sessionError}
+                        </div>
+                        <Button
+                          onClick={() => createdChat && handleAutoCreateSession(createdChat.id, uploadedDocs)}
+                          className="w-full mt-4"
+                        >
+                          Retry Session Creation
+                        </Button>
                       </CardContent>
                     </Card>
                   </div>
