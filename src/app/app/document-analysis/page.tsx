@@ -936,16 +936,47 @@ export default function DocumentAnalysisPage() {
         const newTab = value as 'new' | 'history';
         setTab(newTab);
         if (newTab === 'new') {
+          // Reset all state to start from Step 1
           setProcessing(false);
           setApiResult(null);
           setApiError(null);
-          setChatMessages([]); // Clear old chat history
-          setChatInput(""); // Clear old input
-          setChatLoading(false); // Clear old loading state
-          setChatError(null); // Clear old error state
+          setChatMessages([]);
+          setChatInput("");
+          setChatLoading(false);
+          setChatError(null);
           setSessionId(null);
           setDocumentId(null);
-          setChatInput("");
+          
+          // Reset new analysis flow state
+          setCreatedChat(null);
+          setCreatedSession(null);
+          setNewAnalysisStep('create');
+          setNewChatName("");
+          setNewChatDescription("");
+          setNewChatError(null);
+          setNewChatSuccess(false);
+          setNewChatLoading(false);
+          
+          // Reset upload state
+          setUploadFiles([]);
+          setUploadedDocs([]);
+          setUploadError(null);
+          setUploadSuccess(false);
+          setUploading(false);
+          
+          // Reset session state
+          setSelectedDocIds([]);
+          setSessionName("");
+          setSessionError(null);
+          setSessionSuccess(false);
+          setSessionLoading(false);
+          
+          // Reset document lists
+          setChatDocuments([]);
+          setSessionDocuments([]);
+          
+          // Reset collapsed steps
+          setCollapsedSteps({});
         }
       }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-auto">
