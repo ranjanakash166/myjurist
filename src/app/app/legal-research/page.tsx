@@ -14,7 +14,7 @@ import { useAuth } from "../../../components/AuthProvider";
 import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
-import { normalizeContentLineBreaks, parseBoldText } from "@/lib/utils";
+import { normalizeContentLineBreaks, parseBoldText, parseMarkdownText } from "@/lib/utils";
 import LegalResearchHistory from "./components/LegalResearchHistory";
 import LegalResearchSkeleton from "./components/LegalResearchSkeleton";
 
@@ -511,13 +511,13 @@ export default function LegalResearchPage() {
  try {
  const match = aiSummary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
  if (match) {
- return match[1];
+ return parseMarkdownText(match[1]);
  }
  } catch (e) {
  console.error('Failed to extract summary text:', e);
  }
  }
- return parsedData.ai_summary;
+ return parseMarkdownText(parsedData.ai_summary);
  })()}
  </div>
  </div>

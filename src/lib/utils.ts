@@ -48,6 +48,61 @@ export function parseBoldText(text: string): React.ReactNode {
 }
 
 /**
+ * Parses text and renders both bold (**text**) and italic (*text*) markdown
+ * @param text - The text string to parse
+ * @returns React node with bold and italic text properly rendered
+ */
+export function parseMarkdownText(text: string): React.ReactNode {
+  if (!text) return text;
+  
+  // Combined regex to match both **bold** and *italic* (but not **bold**)
+  // We need to handle bold first, then italic
+  // Pattern: **bold** or *italic* (where italic is not part of bold)
+  const combinedRegex = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  let matchIndex = 0;
+
+  // Reset regex lastIndex to ensure we start from the beginning
+  combinedRegex.lastIndex = 0;
+
+  while ((match = combinedRegex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    
+    if (match[1]) {
+      // Bold match (**text**)
+      parts.push(
+        React.createElement('strong', { 
+          key: `bold-${matchIndex++}`, 
+          className: 'font-semibold text-foreground' 
+        }, match[2])
+      );
+    } else if (match[3]) {
+      // Italic match (*text*)
+      parts.push(
+        React.createElement('em', { 
+          key: `italic-${matchIndex++}`, 
+          className: 'italic text-foreground' 
+        }, match[4])
+      );
+    }
+    
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? React.createElement(React.Fragment, null, ...parts) : text;
+}
+
+/**
  * Validates if a date string is valid and returns a formatted date or fallback
  * @param dateString - The date string to validate
  * @param fallback - The fallback text to return if date is invalid (default: 'Invalid date')
