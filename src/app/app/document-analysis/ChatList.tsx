@@ -75,11 +75,6 @@ export default function ChatList({
                           <p className="font-medium text-foreground text-sm sm:text-base break-all min-w-0 w-full max-w-full">
                             {chat.name}
                           </p>
-                          {chat.description && (
-                            <p className="text-xs text-muted-foreground mt-1 break-all min-w-0 w-full max-w-full">
-                              {chat.description}
-                            </p>
-                          )}
                           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                             <Clock className="w-3 h-3" />
                             <span className="hidden sm:inline">
