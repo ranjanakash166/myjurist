@@ -23,9 +23,12 @@ import {
   Scale,
   Tags,
   Clock,
-  Sparkles
+  Sparkles,
+  Upload
 } from "lucide-react";
 import { useAuth } from "../../../components/AuthProvider";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface FeatureCardProps {
   title: string;
@@ -94,38 +97,32 @@ export default function HomePage() {
 
   const features: FeatureCardProps[] = [
     {
-      title: "Agents & Automation",
-      description: "Specialized AI Agents & Workflows. Leverage domain-specific AI agents for complex legal tasks and automated workflows.",
-      icon: <Settings className="w-6 h-6" />,
+      title: "Legal Research",
+      description: "AI-enhanced case law and precedent search. Leverage powerful search tools to find relevant legal documents and insights.",
+      icon: <Search className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Patent Analysis",
-          description: "Comprehensive patent evaluation and reporting",
-          icon: <Shield className="w-4 h-4" />,
-          href: "/app/patent-analysis"
-        },
-        {
-          title: "Legal Research",
-          description: "AI-enhanced case law and precedent search",
+          title: "Case Law Search",
+          description: "Find relevant cases and precedents",
           icon: <Search className="w-4 h-4" />,
           href: "/app/legal-research"
         },
         {
-          title: "Regulatory Compliance",
-          description: "Automated compliance checking and guidance",
-          icon: <CheckCircle className="w-4 h-4" />,
-          href: "/app/regulatory-compliance"
+          title: "Legal Analysis",
+          description: "AI-powered legal document analysis",
+          icon: <FileSearch className="w-4 h-4" />,
+          href: "/app/legal-research"
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Intelligence",
+      title: "Document Analysis",
       description: "AI-Powered Document Analysis & Chat. Search, analyze, and understand legal documents with intelligent AI assistance. Ask follow-up questions and get instant insights.",
       icon: <Brain className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Document Analysis",
+          title: "Document Chat",
           description: "Upload and chat with your legal documents",
           icon: <MessageSquare className="w-4 h-4" />,
           href: "/app/document-analysis"
@@ -135,24 +132,94 @@ export default function HomePage() {
           description: "Smart tools for understanding and sorting documents",
           icon: <Tags className="w-4 h-4" />,
           href: "/app/document-categorization"
-        },
-        {
-          title: "Smart Document Drafting",
-          description: "AI-powered document creation and generation",
-          icon: <Sparkles className="w-4 h-4" />,
-          href: "/app/smart-document-studio"
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     },
     {
-      title: "Forge",
-      description: "AI-Generated Legal Content Creation. Generate and revise detailed legal documents including contracts, briefs, and contractual provisions with intelligent assistance.",
-      icon: <Leaf className="w-6 h-6" />,
+      title: "Regulatory Compliance",
+      description: "Automated compliance checking and guidance. Stay compliant with AI-powered regulatory analysis and monitoring.",
+      icon: <Shield className="w-6 h-6" />,
       subFeatures: [
         {
-          title: "Smart Document Drafting",
-          description: "Advanced document creation with AI enhancement",
+          title: "Compliance Check",
+          description: "Automated compliance verification",
+          icon: <CheckCircle className="w-4 h-4" />,
+          href: "/app/regulatory-compliance"
+        },
+        {
+          title: "Regulatory Updates",
+          description: "Stay updated with latest regulations",
+          icon: <Scale className="w-4 h-4" />,
+          href: "/app/regulatory-compliance"
+        }
+      ],
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
+    },
+    {
+      title: "Timeline Extractor",
+      description: "Automated Event Timeline Extraction. Extract and organize chronological events from legal documents with precision.",
+      icon: <Clock className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Extract Timeline",
+          description: "Automated event extraction from documents",
+          icon: <Calendar className="w-4 h-4" />,
+          href: "/app/timeline-extractor"
+        }
+      ],
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
+    },
+    {
+      title: "My Jurist Chat",
+      description: "AI Legal Assistant. Get instant answers to legal questions and comprehensive legal guidance powered by advanced AI.",
+      icon: <MessageSquare className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Legal Q&A",
+          description: "Ask any legal question and get AI-powered answers",
+          icon: <MessageSquare className="w-4 h-4" />,
+          href: "/app/my-jurist-chat"
+        }
+      ],
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
+    },
+    {
+      title: "Patent Analysis",
+      description: "Comprehensive Patent Evaluation. Analyze patents and intellectual property with detailed AI-powered insights.",
+      icon: <FileSearch className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Patent Review",
+          description: "Comprehensive patent evaluation and reporting",
+          icon: <Shield className="w-4 h-4" />,
+          href: "/app/patent-analysis"
+        }
+      ],
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
+    },
+    {
+      title: "Document Categorization",
+      description: "Smart Document Classification. Automatically categorize and organize legal documents with AI assistance.",
+      icon: <Tags className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Auto-Categorize",
+          description: "Smart tools for understanding and sorting documents",
+          icon: <Tags className="w-4 h-4" />,
+          href: "/app/document-categorization"
+        }
+      ],
+      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
+    },
+    {
+      title: "Smart Document Drafting",
+      description: "AI-Generated Legal Content Creation. Generate and revise detailed legal documents including contracts, briefs, and provisions with intelligent assistance.",
+      icon: <Sparkles className="w-6 h-6" />,
+      subFeatures: [
+        {
+          title: "Document Drafting",
+          description: "AI-powered document creation and generation",
           icon: <Sparkles className="w-4 h-4" />,
           href: "/app/smart-document-studio"
         },
@@ -164,36 +231,94 @@ export default function HomePage() {
         }
       ],
       gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
-    },
-    {
-      title: "Repository",
-      description: "Secure Document Storage & Management. Upload, store, and organize thousands of legal documents with advanced search and metadata management.",
-      icon: <Database className="w-6 h-6" />,
-      subFeatures: [
-        {
-          title: "Timeline Extractor",
-          description: "Automated event extraction from documents",
-          icon: <Clock className="w-4 h-4" />,
-          href: "/app/timeline-extractor"
-        },
-        {
-          title: "Document Management",
-          description: "Organize and search your legal library",
-          icon: <FolderOpen className="w-4 h-4" />,
-          href: "/app/document-analysis"
-        }
-      ],
-      gradient: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900"
     }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Quick Actions Section - Now at the top */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+            <Sparkles className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+            Quick Actions
+          </h2>
+          <Badge variant="secondary" className="text-xs">
+            Get Started
+          </Badge>
+        </div>
+        <p className="text-base text-muted-foreground mb-6">
+          Start working with the most common features
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Legal Research Action */}
+          <Link href="/app/legal-research" className="group">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="p-3 bg-blue-600 dark:bg-blue-700 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Search className="h-6 w-6 text-white" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                  Legal Research
+                </CardTitle>
+                <CardDescription className="text-gray-700 dark:text-gray-300">
+                  AI-powered case law and precedent search
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          {/* Document Analysis Action */}
+          <Link href="/app/document-analysis" className="group">
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="p-3 bg-green-600 dark:bg-green-700 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Upload className="h-6 w-6 text-white" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-green-600 dark:text-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                  Document Analysis
+                </CardTitle>
+                <CardDescription className="text-gray-700 dark:text-gray-300">
+                  Upload and analyze legal documents with AI
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          {/* Regulatory Compliance Action */}
+          <Link href="/app/regulatory-compliance" className="group">
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 cursor-pointer h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="p-3 bg-purple-600 dark:bg-purple-700 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-3">
+                  Regulatory Compliance
+                </CardTitle>
+                <CardDescription className="text-gray-700 dark:text-gray-300">
+                  Automated compliance checking and guidance
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+        </div>
+      </div>
+
       {/* Features Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-            Powerful Features at Your Fingertips
+            All Features
           </h2>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover how our platform transforms legal workflows with cutting-edge AI technology
@@ -219,78 +344,6 @@ export default function HomePage() {
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}
-        </div>
-      </div>
-
-      {/* Quick Actions Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="bg-card/50 rounded-2xl border border-border/50 p-6 backdrop-blur-sm">
-          <div className="text-center mb-6">
-            <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">
-              Quick Actions
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Get started quickly with these common tasks
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link
-              href="/app/dashboard"
-              className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Dashboard</p>
-                <p className="text-sm text-muted-foreground">View overview</p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform ml-auto" />
-            </Link>
-
-            <Link
-              href="/app/document-analysis"
-              className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Brain className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Analyze Document</p>
-                <p className="text-sm text-muted-foreground">Upload & chat</p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform ml-auto" />
-            </Link>
-
-            <Link
-              href="/app/smart-document-studio"
-              className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <Leaf className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Draft Document</p>
-                <p className="text-sm text-muted-foreground">AI-powered creation</p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform ml-auto" />
-            </Link>
-
-            <Link
-              href="/app/patent-analysis"
-              className="flex items-center gap-3 p-4 rounded-xl bg-background/50 hover:bg-background border border-border/50 hover:border-border transition-all duration-200 hover:scale-105 group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-purple-500" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Patent Analysis</p>
-                <p className="text-sm text-muted-foreground">Comprehensive review</p>
-              </div>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform ml-auto" />
-            </Link>
-          </div>
         </div>
       </div>
     </div>
