@@ -4,13 +4,11 @@ import React, { useState } from 'react';
 import { useScrollSpy } from '../hooks/useScrollSpy';
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
-import Introduction from '../components/Introduction';
-import ProblemSection from '../components/ProblemSection';
-import SolutionSection from '../components/SolutionSection';
-import MarketSection from '../components/MarketSection';
-import AdvantageSection from '../components/AdvantageSection';
-import PricingSection from '../components/PricingSection';
-import StrategySection from '../components/StrategySection';
+import SocialProofSection from '../components/SocialProofSection';
+import ProductShowcaseSection from '../components/ProductShowcaseSection';
+import LegalDataSourcesSection from '../components/LegalDataSourcesSection';
+import UseCasesSection from '../components/UseCasesSection';
+import ValuePropositionsSection from '../components/ValuePropositionsSection';
 import Footer from '../components/Footer';
 
 interface NavigationItem {
@@ -22,12 +20,8 @@ interface NavigationItem {
 const MyJuristApp = () => {
   const navigation: NavigationItem[] = [
     { id: 'home', label: 'Home' },
-    { id: 'problem', label: 'Problem' },
-    { id: 'solution', label: 'Solution' },
-    { id: 'market', label: 'Market' },
-    { id: 'advantage', label: 'Advantage' },
-    { id: 'pricing', label: 'Pricing' },
-    { id: 'strategy', label: 'Strategy' },
+    { id: 'products', label: 'Platform' },
+    { id: 'use-cases', label: 'Solutions' },
     { id: 'contact', label: 'Contact Us', href: '/contact' },
     { id: 'request-demo', label: 'Request Demo', href: '/request-demo' },
     { id: 'login', label: 'Login', href: '/login' }
@@ -52,16 +46,18 @@ const MyJuristApp = () => {
       />
       
       <HeroSection />
-      <Introduction />
-      <ProblemSection />
-      <SolutionSection />
-      <MarketSection />
-      <AdvantageSection />
-      <PricingSection />
-      <StrategySection />
+      <SocialProofSection />
+      <div id="products">
+        <ProductShowcaseSection />
+      </div>
+      <LegalDataSourcesSection />
+      <div id="use-cases">
+        <UseCasesSection />
+      </div>
+      <ValuePropositionsSection />
       <Footer />
     </div>
   );
 };
 
-export default MyJuristApp; 
+export default MyJuristApp;
