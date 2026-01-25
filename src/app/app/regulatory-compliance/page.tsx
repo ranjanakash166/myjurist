@@ -1,16 +1,35 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../../components/AuthProvider";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Loader2, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
+import { 
+  Search, 
+  Loader2, 
+  ExternalLink, 
+  CheckCircle, 
+  Scale, 
+  BookOpen, 
+  FileText, 
+  Sparkles,
+  Link2,
+  AlertTriangle,
+  Lightbulb
+} from "lucide-react";
 import { fetchRegulatorySuggestions, submitRegulatoryQuery, RegulatoryQueryResponse, RegulatoryAmendment } from "@/lib/regulatoryComplianceApi";
 import { useToast } from "@/hooks/use-toast";
 import SimpleMarkdownRenderer from "@/components/SimpleMarkdownRenderer";
+
+// Example queries for quick access
+const exampleQueries = [
+  "Define 'contract' under Indian Contract Act, 1872",
+  "What is Section 1 of Companies Act, 2013?",
+  "Amendments to Income Tax Act, 1961",
+  "Consumer Protection Act provisions",
+  "GST compliance requirements"
+];
 
 export default function RegulatoryCompliancePage() {
   const { user, getAuthHeaders } = useAuth();
@@ -24,6 +43,11 @@ export default function RegulatoryCompliancePage() {
   const [selectedSuggestion, setSelectedSuggestion] = useState<string | null>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleExampleClick = (exampleQuery: string) => {
+    setQuery(exampleQuery);
+    inputRef.current?.focus();
+  };
 
   // Debounced search for suggestions
   useEffect(() => {
@@ -114,183 +138,185 @@ export default function RegulatoryCompliancePage() {
     }
   };
 
-  const formatConfidenceScore = (score: number) => {
-    return `${(score * 100).toFixed(1)}%`;
-  };
-
-  const getConfidenceColor = (score: number) => {
-    if (score >= 0.7) return "text-green-600";
-    if (score >= 0.5) return "text-yellow-600";
-    return "text-red-600";
-  };
-
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Regulatory Compliance</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Search and analyze regulatory compliance information. Get detailed answers about laws, 
-          regulations, and legal requirements with AI-powered insights.
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
+            <Scale className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Regulatory Compliance</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Search laws, regulations, and legal requirements with AI-powered analysis
         </p>
       </div>
 
       {/* Search Section */}
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="w-5 h-5" />
-            Search Regulatory Compliance
-          </CardTitle>
-          <CardDescription>
-            Enter your query or select from suggestions to get regulatory compliance information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative">
-            <Input
-              ref={inputRef}
-              type="text"
-              placeholder="e.g., Define 'contract' under Indian Contract Act, 1872"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="pr-10"
-            />
-            {isLoading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+      <Card className="w-full border-0 shadow-sm bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
+        <CardContent className="pt-6">
+          <div className="space-y-5">
+            {/* Search Input with integrated button */}
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <Search className="w-5 h-5" />
               </div>
-            )}
-            
-            {/* Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div
-                ref={suggestionsRef}
-                className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+              <Input
+                ref={inputRef}
+                type="text"
+                placeholder="What regulatory information are you looking for?"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="h-14 text-base pl-12 pr-32 rounded-xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                disabled={isSubmitting}
+              />
+              <Button 
+                onClick={handleSubmit}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md"
+                disabled={isSubmitting || !query.trim()}
               >
-                {suggestions.map((suggestion, index) => (
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="hidden sm:inline">Analyzing...</span>
+                  </div>
+                ) : (
+                  <span>Search</span>
+                )}
+              </Button>
+              
+              {/* Loading indicator */}
+              {isLoading && (
+                <div className="absolute right-36 top-1/2 -translate-y-1/2">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                </div>
+              )}
+              
+              {/* Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div
+                  ref={suggestionsRef}
+                  className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto"
+                >
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="w-full text-left px-4 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors border-b border-border last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Search className="w-4 h-4 text-emerald-500" />
+                        <span className="text-sm">{suggestion}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Example Queries */}
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <h3 className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wide">
+                <Lightbulb className="w-3.5 h-3.5" />
+                Example Queries
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {exampleQueries.map((exampleQuery, index) => (
                   <button
                     key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full text-left px-4 py-3 hover:bg-accent transition-colors border-b border-border last:border-b-0"
+                    onClick={() => handleExampleClick(exampleQuery)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800"
                   >
-                    <div className="flex items-center gap-2">
-                      <Search className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">{suggestion}</span>
-                    </div>
+                    <Search className="w-3 h-3" />
+                    {exampleQuery.length > 35 ? exampleQuery.substring(0, 35) + '...' : exampleQuery}
                   </button>
                 ))}
               </div>
-            )}
+            </div>
           </div>
-
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting || !query.trim()}
-            className="w-full"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Search className="w-4 h-4 mr-2" />
-                Regulatory Compliance Check
-              </>
-            )}
-          </Button>
         </CardContent>
       </Card>
 
-      {/* Results Section */}
-      {result && (
-        <Card className="max-w-4xl mx-auto">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                Analysis Results
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">
-                  Confidence: <span className={getConfidenceColor(result.confidence_score)}>
-                    {formatConfidenceScore(result.confidence_score)}
-                  </span>
-                </Badge>
+      {/* Loading Skeleton */}
+      {isSubmitting && (
+        <Card className="w-full">
+          <CardContent className="py-8">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
               </div>
+              <h3 className="text-lg font-semibold mb-2">Analyzing Regulatory Information...</h3>
+              <p className="text-muted-foreground text-sm">
+                Searching through laws, regulations, and legal precedents
+              </p>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Answer */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Answer</h3>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Results Section */}
+      {result && !isSubmitting && (
+        <div className="space-y-4">
+          {/* Results Header */}
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-emerald-500" />
+            <span className="font-semibold text-foreground">Analysis Complete</span>
+          </div>
+
+          {/* AI Answer */}
+          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5 text-purple-500" />
+              <h3 className="font-semibold text-lg">AI Analysis</h3>
+            </div>
+            <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
               <SimpleMarkdownRenderer content={result.answer} />
             </div>
+          </div>
 
-            <Separator />
-
-            {/* Related Sections */}
-            {result.related_sections.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Related Sections</h3>
-                <div className="flex flex-wrap gap-2">
-                  {result.related_sections.map((section, index) => (
-                    <Badge key={index} variant="secondary">
-                      Section {section}
-                    </Badge>
-                  ))}
-                </div>
+          {/* Related Sections */}
+          {result.related_sections.length > 0 && (
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-6 border">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-emerald-500" />
+                <h3 className="font-semibold text-lg">Related Sections</h3>
               </div>
-            )}
-
-            {/* Amendments */}
-            {result.amendments_found.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Amendments Found</h3>
-                <div className="space-y-3">
-                  {result.amendments_found.map((amendment, index) => (
-                    <div key={index} className="p-3 border rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{amendment.title}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{amendment.snippet}</p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open(amendment.source, '_blank')}
-                          className="ml-2 flex-shrink-0"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {result.related_sections.map((section, index) => (
+                  <Badge 
+                    key={index} 
+                    className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                  >
+                    Section {section}
+                  </Badge>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            <Separator />
-
-            {/* Sources */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Sources</h3>
-              <div className="space-y-2">
-                {result.sources.map((source, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+          {/* Amendments */}
+          {result.amendments_found.length > 0 && (
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-6 border">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+                <h3 className="font-semibold text-lg">Amendments Found</h3>
+                <Badge variant="secondary" className="ml-auto">{result.amendments_found.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {result.amendments_found.map((amendment, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border hover:shadow-sm transition-shadow">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{source.title}</p>
-                      <p className="text-xs text-muted-foreground">{source.domain}</p>
-                      <p className="text-xs text-muted-foreground">Relevance: {source.relevance}</p>
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{amendment.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{amendment.snippet}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => window.open(source.url, '_blank')}
-                      className="ml-2"
+                      onClick={() => window.open(amendment.source, '_blank')}
+                      className="flex-shrink-0 hover:bg-orange-100 dark:hover:bg-orange-900/30"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </Button>
@@ -298,41 +324,47 @@ export default function RegulatoryCompliancePage() {
                 ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          )}
+
+          {/* Sources */}
+          {result.sources.length > 0 && (
+            <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20 rounded-lg p-6 border">
+              <div className="flex items-center gap-2 mb-4">
+                <Link2 className="w-5 h-5 text-slate-500" />
+                <h3 className="font-semibold text-lg">Sources</h3>
+                <Badge variant="secondary" className="ml-auto">{result.sources.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {result.sources.map((source, index) => (
+                  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border hover:shadow-sm transition-shadow">
+                    <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-4 h-4 text-slate-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{source.title}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-xs text-muted-foreground">{source.domain}</span>
+                        <Badge variant="outline" className="text-xs">
+                          Relevance: {source.relevance}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => window.open(source.url, '_blank')}
+                      className="flex-shrink-0 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* Info Section */}
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            How to Use
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <h4 className="font-semibold">Search Tips:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Be specific with your legal questions</li>
-                <li>• Include act names and years when relevant</li>
-                <li>• Ask about specific sections or provisions</li>
-                <li>• Use natural language for complex queries</li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <h4 className="font-semibold">Example Queries:</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• "Define contract under Indian Contract Act"</li>
-                <li>• "What is section 1 of Companies Act, 2013?"</li>
-                <li>• "Amendments to Income Tax Act, 1961"</li>
-                <li>• "Sections of Indian Contract Act"</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 } 
