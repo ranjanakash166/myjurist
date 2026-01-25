@@ -13,8 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import { Eye, Download, FileText, Check, Plus, Upload, Clock, CheckCircle, AlertTriangle, Calendar, List, Trash2, X } from "lucide-react";
+import { Eye, Download, FileText, Check, Plus, Upload, Clock, CheckCircle, AlertTriangle, Calendar, List, Trash2, X, History } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 
 interface TimelineEvent {
@@ -302,7 +301,20 @@ export default function TimelineExtractorPage() {
   }, [timelines, timelineResult]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-4 sm:gap-6 min-h-screen">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-4 sm:gap-6 min-h-screen">
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
+            <Calendar className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">Timeline Extractor</h1>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Generate legal timelines from documents using AI-powered analysis
+        </p>
+      </div>
+
       <Tabs value={tab} onValueChange={(value) => {
         const newTab = value as 'new' | 'history';
         setTab(newTab);
@@ -311,51 +323,51 @@ export default function TimelineExtractorPage() {
           setApiError(null);
           setUploadFiles([]);
           setTimelineTitle("");
-          // Don't clear timeline results here as they might be loaded from history
         } else if (newTab === 'history') {
           setTimelinesError(null);
-          // Clear timeline result and URL when switching to history tab
           clearTimelineResult();
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-auto">
-          <TabsTrigger value="new" className="text-sm py-2 px-2 sm:px-4">New Timeline</TabsTrigger>
-          <TabsTrigger value="history" className="text-sm py-2 px-2 sm:px-4">History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted/50">
+          <TabsTrigger value="new" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <Upload className="w-4 h-4" />
+            New Timeline
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <History className="w-4 h-4" />
+            History
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="new" className="space-y-6 flex-1">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">Timeline Extractor</h1>
-            <p className="text-muted-foreground">
-              Generate legal timelines from uploaded documents using AI-powered analysis
-            </p>
-            {(timelineResult || enhancedTimelineResult) && (
-              <div className="flex justify-center mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setTimelineResult(null);
-                    setEnhancedTimelineResult(null);
-                    setUploadFiles([]);
-                    setTimelineTitle("");
-                    setApiError(null);
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create New Timeline
-                </Button>
-              </div>
-            )}
-          </div>
+        <TabsContent value="new" className="space-y-6 flex-1 mt-6">
+          {/* Create New Button when results exist */}
+          {(timelineResult || enhancedTimelineResult) && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setTimelineResult(null);
+                  setEnhancedTimelineResult(null);
+                  setUploadFiles([]);
+                  setTimelineTitle("");
+                  setApiError(null);
+                }}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create New Timeline
+              </Button>
+            </div>
+          )}
 
           {/* Upload Section */}
-          <Card className="w-full">
+          <Card className="w-full border-0 shadow-sm bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                  <Upload className="w-4 h-4 text-white" />
+                </div>
                 Upload Documents for Timeline Extraction
               </CardTitle>
             </CardHeader>
@@ -380,21 +392,26 @@ export default function TimelineExtractorPage() {
 
           {/* Results Section */}
           {timelineResult && (
-            <Card className="w-full">
-              <CardHeader>
+            <Card className="w-full border shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg break-words truncate">
-                      {timelineResult.timeline_title}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-lg break-words truncate">
+                        {timelineResult.timeline_title}
+                      </CardTitle>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2 ml-10">
                       {timelineResult.total_events} events extracted • {timelineResult.document_sources.length} documents
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge variant="secondary" className="text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20">
+                    <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      {selectedTimeline ? 'Timeline from History' : 'Timeline Generated'}
+                      {selectedTimeline ? 'From History' : 'Generated'}
                     </Badge>
                     {selectedTimeline && (
                       <Button
@@ -410,7 +427,7 @@ export default function TimelineExtractorPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <TimelineResults 
                   timeline={timelineResult}
                   onExportCSV={handleExportCSV}
@@ -421,22 +438,27 @@ export default function TimelineExtractorPage() {
 
           {/* Enhanced Results Section */}
           {enhancedTimelineResult && (
-            <Card className="w-full">
-              <CardHeader>
+            <Card className="w-full border shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-t-lg">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg break-words truncate">
-                      {enhancedTimelineResult.timeline_title}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {enhancedTimelineResult.metadata.total_events} events extracted • {enhancedTimelineResult.metadata.document_sources.length} documents • 
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-lg break-words truncate">
+                        {enhancedTimelineResult.timeline_title}
+                      </CardTitle>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2 ml-10">
+                      {enhancedTimelineResult.metadata.total_events} events • {enhancedTimelineResult.metadata.document_sources.length} documents • 
                       Status: {enhancedTimelineResult.metadata.status}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge variant="secondary" className="text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20">
+                    <Badge className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Enhanced Timeline
+                      Enhanced
                     </Badge>
                     <Button
                       variant="outline"
@@ -450,7 +472,7 @@ export default function TimelineExtractorPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <EnhancedTimelineResults 
                   timeline={enhancedTimelineResult}
                   onExportCSV={handleExportCSV}
@@ -460,15 +482,7 @@ export default function TimelineExtractorPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="history" className="flex flex-col gap-6 flex-1">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">Timeline History</h1>
-            <p className="text-muted-foreground">
-              View and manage your previously generated timelines
-            </p>
-          </div>
-
+        <TabsContent value="history" className="flex flex-col gap-6 flex-1 mt-6">
           {/* Error Alert */}
           {timelinesError && (
             <Alert variant="destructive">
