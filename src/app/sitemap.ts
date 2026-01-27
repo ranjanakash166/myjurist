@@ -1,8 +1,10 @@
 import { MetadataRoute } from 'next';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://myjurist.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.myjurist.io';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = siteUrl;
+  
   const routes = [
     '',
     '/login',
@@ -16,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   return routes.map((route) => ({
-    url: `${siteUrl}${route}`,
+    url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: route === '' ? 'weekly' : 'monthly',
     priority: route === '' ? 1.0 : 0.8,
