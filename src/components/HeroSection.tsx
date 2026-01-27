@@ -13,11 +13,11 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section id="home" className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-background">
+    <section id="home" className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-background">
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30"></div>
       
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
         {/* Main Headline */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground leading-tight">
           Legal Intelligence, Evolved.
@@ -29,7 +29,7 @@ const HeroSection: React.FC = () => {
         </p>
         
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-0">
           <Button 
             onClick={handleRequestDemo}
             size="lg"

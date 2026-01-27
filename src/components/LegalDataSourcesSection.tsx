@@ -7,26 +7,14 @@ const LegalDataSourcesSection: React.FC = () => {
     {
       name: 'Supreme Court of India',
       location: 'New Delhi',
-      image: '/images/courts/supreme-court.jpg', // Placeholder path
+      image: '/images/courts/supreme-court.jpg',
       description: 'Access comprehensive case law and judgments from India\'s highest court'
     },
     {
-      name: 'Bombay High Court',
-      location: 'Mumbai',
-      image: '/images/courts/bombay-high-court.jpg', // Placeholder path
-      description: 'Complete database of Bombay High Court decisions and precedents'
-    },
-    {
-      name: 'Delhi High Court',
-      location: 'New Delhi',
-      image: '/images/courts/delhi-high-court.jpg', // Placeholder path
-      description: 'Extensive collection of Delhi High Court rulings and case law'
-    },
-    {
-      name: 'Allahabad High Court',
-      location: 'Allahabad',
-      image: '/images/courts/allahabad-high-court.jpg', // Placeholder path
-      description: 'Comprehensive archive of Allahabad High Court judgments'
+      name: 'High Courts of India',
+      location: 'Across India',
+      image: '/images/courts/bombay-high-court.jpg', // Using one of the high court images
+      description: 'Complete database of all High Court decisions and precedents from across India'
     }
   ];
 
@@ -49,7 +37,7 @@ const LegalDataSourcesSection: React.FC = () => {
         </div>
 
         {/* Courts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {courts.map((court, index) => (
             <Card key={index} className="border-border hover:shadow-xl transition-all duration-300 group overflow-hidden">
               <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
