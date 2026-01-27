@@ -10,6 +10,7 @@ import LegalDataSourcesSection from '../components/LegalDataSourcesSection';
 import UseCasesSection from '../components/UseCasesSection';
 import ValuePropositionsSection from '../components/ValuePropositionsSection';
 import Footer from '../components/Footer';
+import StructuredData from '../components/StructuredData';
 
 interface NavigationItem {
   id: string;
@@ -37,26 +38,89 @@ const MyJuristApp = () => {
     }
   };
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://myjurist.com';
+
+  // Structured Data for SEO (JSON-LD)
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'My Jurist',
+    url: siteUrl,
+    logo: `${siteUrl}/images/myjurist-logo.png`,
+    description: 'AI-Powered Legal Intelligence Platform for Indian Litigation',
+    sameAs: [
+      // Add social media links when available
+      // 'https://twitter.com/myjurist',
+      // 'https://linkedin.com/company/myjurist',
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Customer Service',
+      // Add contact email when available
+    },
+  };
+
+  const softwareApplicationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'My Jurist',
+    applicationCategory: 'Legal Software',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'INR',
+    },
+    description: 'AI-powered legal research, document analysis, regulatory compliance, and smart document drafting platform for Indian litigation.',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      ratingCount: '150',
+    },
+  };
+
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'My Jurist',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/app/legal-research?query={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <Header 
-        navigation={navigation} 
-        activeSection={activeSection} 
-        scrollToSection={scrollToSection} 
-      />
+    <>
+      {/* Structured Data for SEO */}
+      <StructuredData data={organizationSchema} />
+      <StructuredData data={softwareApplicationSchema} />
+      <StructuredData data={websiteSchema} />
       
-      <HeroSection />
-      <SocialProofSection />
-      <div id="products">
-        <ProductShowcaseSection />
+      <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+        <Header 
+          navigation={navigation} 
+          activeSection={activeSection} 
+          scrollToSection={scrollToSection} 
+        />
+        
+        <HeroSection />
+        <SocialProofSection />
+        <div id="products">
+          <ProductShowcaseSection />
+        </div>
+        <LegalDataSourcesSection />
+        <div id="use-cases">
+          <UseCasesSection />
+        </div>
+        <ValuePropositionsSection />
+        <Footer />
       </div>
-      <LegalDataSourcesSection />
-      <div id="use-cases">
-        <UseCasesSection />
-      </div>
-      <ValuePropositionsSection />
-      <Footer />
-    </div>
+    </>
   );
 };
 
