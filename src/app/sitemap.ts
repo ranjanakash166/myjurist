@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.myjurist.io';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = siteUrl;
+  const baseUrl = siteUrl || 'https://www.myjurist.io';
   
   const routes = [
     '',
@@ -17,10 +17,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/app/timeline-extractor',
   ];
 
-  return routes.map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: route === '' ? 'weekly' : 'monthly',
-    priority: route === '' ? 1.0 : 0.8,
-  }));
+  return routes.map((route) => {
+    const url = route === '' ? baseUrl : `${baseUrl}${route}`;
+    return {
+      url: url,
+      lastModified: new Date(),
+      changeFrequency: (route === '' ? 'weekly' : 'monthly') as 'weekly' | 'monthly',
+      priority: route === '' ? 1.0 : 0.8,
+    };
+  });
 }
