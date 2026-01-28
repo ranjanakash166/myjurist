@@ -17,7 +17,7 @@ export const DashboardMobile: React.FC<DashboardMobileProps> = ({ dashboardData 
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1.5 leading-tight">
-            Welcome back, {dashboardData.user_info.name}! 👋
+            Welcome back, {dashboardData.user_info.name}!
           </h1>
           <p className="text-xs text-gray-600 dark:text-gray-300">
             Member since {formatDate(dashboardData.user_info.member_since)}

@@ -472,8 +472,8 @@ export default function LegalResearchPage() {
  <CardContent>
  {isSearching ? (
  <div className="text-center py-8">
- <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center">
- <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
  </div>
  <h3 className="text-lg font-semibold mb-2">Generating AI Summary...</h3>
  <p className="text-muted-foreground">
@@ -496,10 +496,10 @@ export default function LegalResearchPage() {
  </Button>
  </div>
 
- {/* AI Summary Content */}
- <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <Sparkles className="w-5 h-5 text-purple-500" />
+                {/* AI Summary Content */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-6 border">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="w-5 h-5 text-emerald-500" />
  <h3 className="font-semibold text-lg">AI Summary</h3>
  </div>
  <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -612,16 +612,16 @@ export default function LegalResearchPage() {
  </div>
  )}
 
- {/* Legal Areas Covered */}
- {getParsedAISummaryData().legal_areas_covered && getParsedAISummaryData().legal_areas_covered.length > 0 && (
- <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <Target className="w-5 h-5 text-blue-500" />
- <h3 className="font-semibold text-lg">Legal Areas Covered</h3>
- </div>
- <div className="flex flex-wrap gap-2">
- {getParsedAISummaryData().legal_areas_covered.map((area: string, index: number) => (
- <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1">
+                {/* Legal Areas Covered */}
+                {getParsedAISummaryData().legal_areas_covered && getParsedAISummaryData().legal_areas_covered.length > 0 && (
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-6 border">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Target className="w-5 h-5 text-emerald-500" />
+                      <h3 className="font-semibold text-lg">Legal Areas Covered</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {getParsedAISummaryData().legal_areas_covered.map((area: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-3 py-1">
  {area}
  </Badge>
  ))}
@@ -649,9 +649,9 @@ export default function LegalResearchPage() {
 
  </div>
  ) : (
- <div className="text-center py-8">
- <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full flex items-center justify-center">
- <Brain className="w-8 h-8 text-purple-500" />
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center">
+                    <Brain className="w-8 h-8 text-emerald-500" />
  </div>
  <h3 className="text-lg font-semibold mb-2">No AI Summary Available</h3>
  <p className="text-muted-foreground">
