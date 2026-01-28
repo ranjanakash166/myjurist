@@ -28,19 +28,19 @@ const ContactPage: React.FC = () => {
       {/* Main content with padding for fixed header */}
       <div className="pt-20">
         {/* Two Column Layout: About Us (Left) and Get In Touch (Right) */}
-        <section className="py-20">
-          <div className="container-legal max-w-7xl">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+        <section className="py-12 md:py-20">
+          <div className="container-legal max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
               {/* Left Side - About Us */}
-              <div className="space-y-6">
+              <div className="space-y-6 lg:sticky lg:top-24">
                 <div>
-                  <p className="text-lg font-serif mb-4 text-primary font-semibold">About Us</p>
-                  <h1 className="text-4xl md:text-5xl font-serif font-bold mb-8 leading-tight text-foreground">
+                  <p className="text-base md:text-lg font-serif mb-3 md:mb-4 text-primary font-semibold">About Us</p>
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-6 md:mb-8 leading-tight text-foreground">
                     Legal Due Diligence Needs A New AI Partner
                   </h1>
                 </div>
                 
-                <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
+                <div className="space-y-4 md:space-y-6 text-base md:text-lg leading-relaxed text-muted-foreground">
                   <p>
                     My Jurist was built for legal professionals who are tired of AI vendors overpromising and underdelivering. Too many solutions sound impressive in theory but fail to handle the real-world complexity of legal document analysis and contract drafting.
                   </p>
@@ -50,7 +50,7 @@ const ContactPage: React.FC = () => {
                 </div>
 
                 {/* Link to About Us Page */}
-                <div className="pt-6">
+                <div className="pt-4 md:pt-6">
                   <Link 
                     href="/about" 
                     className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold transition-colors group"
@@ -62,10 +62,11 @@ const ContactPage: React.FC = () => {
               </div>
 
               {/* Right Side - Get In Touch Form */}
-              <div>
+              <div className="w-full">
                 <ContactFormSection 
                   title="Get In Touch"
                   subtitle="Ready to transform your legal due diligence process? Let's discuss how My Jurist can help."
+                  inlineMode={true}
                 />
               </div>
             </div>

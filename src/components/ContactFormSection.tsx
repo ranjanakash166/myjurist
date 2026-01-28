@@ -22,13 +22,15 @@ interface ContactFormSectionProps {
   subtitle?: string;
   showBackButton?: boolean;
   buttonText?: string;
+  inlineMode?: boolean;
 }
 
 const ContactFormSection: React.FC<ContactFormSectionProps> = ({ 
   title = "Get In Touch",
   subtitle = "Ready to transform your legal due diligence process? Let's discuss how My Jurist can help.",
   showBackButton = false,
-  buttonText = "Send Message"
+  buttonText = "Send Message",
+  inlineMode = false
 }) => {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -96,21 +98,33 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
     }
   };
 
-  return (
-    <section className="section-legal bg-background">
-      <div className="container-legal max-w-4xl">
-        <div className="text-center mb-16">
-          <h2 className="text-legal-title text-foreground mb-4">
+  const content = (
+    <>
+      {!inlineMode && (
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {title}
           </h2>
-          <div className="w-24 h-1 bg-primary mx-auto rounded-full"></div>
-          <p className="text-legal-body text-muted-foreground mt-6">
+          <div className="w-24 h-1 bg-primary mx-auto rounded-full mb-4"></div>
+          <p className="text-base md:text-lg text-muted-foreground">
             {subtitle}
           </p>
         </div>
-        
-        <Card className="document-card">
-          <CardContent className="p-8">
+      )}
+      
+      {inlineMode && (
+        <div className="mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+            {title}
+          </h2>
+          <p className="text-sm md:text-base text-muted-foreground mb-6">
+            {subtitle}
+          </p>
+        </div>
+      )}
+      
+      <Card className="border-2 shadow-lg">
+        <CardContent className="p-6 md:p-8">
             {isSubmitted ? (
               <div className="text-center py-12">
                 <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -215,8 +229,19 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                 </Button>
               </form>
             )}
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
+    </>
+  );
+
+  if (inlineMode) {
+    return <div className="w-full">{content}</div>;
+  }
+
+  return (
+    <section className="section-legal bg-background">
+      <div className="container-legal max-w-4xl">
+        {content}
       </div>
     </section>
   );
