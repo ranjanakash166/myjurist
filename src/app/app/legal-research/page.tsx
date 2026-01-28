@@ -348,9 +348,9 @@ export default function LegalResearchPage() {
 
  <TabsContent value="search" className="space-y-6 mt-6">
 
- {/* Search Form */}
- <Card className="w-full border-0 shadow-sm bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
- <CardContent className="pt-6">
+        {/* Search Form */}
+        <Card className="w-full border-2 shadow-lg bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
+          <CardContent className="pt-6">
  <form onSubmit={handleSearch} className="space-y-5">
  {/* Search Input */}
  <div className="relative">
@@ -461,48 +461,51 @@ export default function LegalResearchPage() {
  {/* Search Results and AI Summary */}
  {searchResults && (
  <div className="space-y-6">
- {/* AI Summary Section */}
- <Card>
- <CardHeader>
- <CardTitle className="flex items-center gap-2">
- <Brain className="w-5 h-5 text-purple-500" />
- AI Summary
- </CardTitle>
- </CardHeader>
- <CardContent>
- {isSearching ? (
- <div className="text-center py-8">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
- </div>
- <h3 className="text-lg font-semibold mb-2">Generating AI Summary...</h3>
- <p className="text-muted-foreground">
- Analyzing search results and creating intelligent summary
- </p>
- </div>
- ) : aiSummary ? (
- <div className="space-y-6">
- {/* Summary Header */}
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-3">
- </div>
- <Button
- variant="outline"
- size="sm"
- onClick={() => handleCopyContent(getParsedAISummaryData().ai_summary)}
- >
- <Copy className="w-4 h-4 mr-2" />
- Copy Summary
- </Button>
- </div>
-
+        {/* AI Summary Section */}
+        <Card className="border-2 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg border-b">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+                  <Brain className="w-5 h-5 text-white" />
+                </div>
+                <span>AI Summary</span>
+              </CardTitle>
+              {aiSummary && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyContent(getParsedAISummaryData().ai_summary)}
+                  className="gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy Summary
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            {isSearching ? (
+              <div className="text-center py-12">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center shadow-lg">
+                  <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Generating AI Summary...</h3>
+                <p className="text-muted-foreground">
+                  Analyzing search results and creating intelligent summary
+                </p>
+              </div>
+            ) : aiSummary ? (
+              <div className="space-y-6">
                 {/* AI Summary Content */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-6 border">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-emerald-500" />
- <h3 className="font-semibold text-lg">AI Summary</h3>
- </div>
- <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-6 border-2 border-emerald-200 dark:border-emerald-800">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="font-bold text-lg text-foreground">Summary</h3>
+                  </div>
+                  <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300 prose prose-sm max-w-none">
  {(() => {
  const parsedData = getParsedAISummaryData();
  // Check if we got the raw JSON back (parsing failed)
@@ -522,95 +525,105 @@ export default function LegalResearchPage() {
  </div>
  </div>
 
- {/* Key Legal Insights */}
- {getParsedAISummaryData().key_legal_insights && getParsedAISummaryData().key_legal_insights.length > 0 && (
- <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <Lightbulb className="w-5 h-5 text-green-500" />
- <h3 className="font-semibold text-lg">Key Legal Insights</h3>
- </div>
- <div className="space-y-3">
- {getParsedAISummaryData().key_legal_insights.map((insight: string, index: number) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(insight)}</span>
- </div>
- ))}
- </div>
- </div>
- )}
+                {/* Key Legal Insights */}
+                {getParsedAISummaryData().key_legal_insights && getParsedAISummaryData().key_legal_insights.length > 0 && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl p-6 border-2 border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
+                        <Lightbulb className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">Key Legal Insights</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {getParsedAISummaryData().key_legal_insights.map((insight: string, index: number) => (
+                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-green-100 dark:border-green-900/50 hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-green-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(insight)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
- {/* Relevant Precedents */}
- {getParsedAISummaryData().relevant_precedents && getParsedAISummaryData().relevant_precedents.length > 0 && (
- <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <Award className="w-5 h-5 text-orange-500" />
- <h3 className="font-semibold text-lg">Relevant Precedents</h3>
- </div>
- <div className="space-y-3">
- {getParsedAISummaryData().relevant_precedents.map((precedent: string, index: number) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(precedent)}</span>
- </div>
- ))}
- </div>
- </div>
- )}
+                {/* Relevant Precedents */}
+                {getParsedAISummaryData().relevant_precedents && getParsedAISummaryData().relevant_precedents.length > 0 && (
+                  <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-xl p-6 border-2 border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
+                        <Award className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">Relevant Precedents</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {getParsedAISummaryData().relevant_precedents.map((precedent: string, index: number) => (
+                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-orange-100 dark:border-orange-900/50 hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(precedent)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
- {/* Statutory Provisions */}
- {getParsedAISummaryData().statutory_provisions && getParsedAISummaryData().statutory_provisions.length > 0 && (
- <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <BookOpen className="w-5 h-5 text-indigo-500" />
- <h3 className="font-semibold text-lg">Statutory Provisions</h3>
- </div>
- <div className="space-y-3">
- {getParsedAISummaryData().statutory_provisions.map((provision: string, index: number) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(provision)}</span>
- </div>
- ))}
- </div>
- </div>
- )}
+                {/* Statutory Provisions */}
+                {getParsedAISummaryData().statutory_provisions && getParsedAISummaryData().statutory_provisions.length > 0 && (
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-800">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                        <BookOpen className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">Statutory Provisions</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {getParsedAISummaryData().statutory_provisions.map((provision: string, index: number) => (
+                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-indigo-100 dark:border-indigo-900/50 hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(provision)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
- {/* Procedural Developments */}
- {getParsedAISummaryData().procedural_developments && getParsedAISummaryData().procedural_developments.length > 0 && (
- <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <Zap className="w-5 h-5 text-teal-500" />
- <h3 className="font-semibold text-lg">Procedural Developments</h3>
- </div>
- <div className="space-y-3">
- {getParsedAISummaryData().procedural_developments.map((development: string, index: number) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(development)}</span>
- </div>
- ))}
- </div>
- </div>
- )}
+                {/* Procedural Developments */}
+                {getParsedAISummaryData().procedural_developments && getParsedAISummaryData().procedural_developments.length > 0 && (
+                  <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-xl p-6 border-2 border-teal-200 dark:border-teal-800">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-md">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">Procedural Developments</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {getParsedAISummaryData().procedural_developments.map((development: string, index: number) => (
+                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-teal-100 dark:border-teal-900/50 hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-teal-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(development)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
- {/* Practical Implications */}
- {getParsedAISummaryData().practical_implications && getParsedAISummaryData().practical_implications.length > 0 && (
- <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <Users className="w-5 h-5 text-rose-500" />
- <h3 className="font-semibold text-lg">Practical Implications</h3>
- </div>
- <div className="space-y-3">
- {getParsedAISummaryData().practical_implications.map((implication: string, index: number) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(implication)}</span>
- </div>
- ))}
- </div>
- </div>
- )}
+                {/* Practical Implications */}
+                {getParsedAISummaryData().practical_implications && getParsedAISummaryData().practical_implications.length > 0 && (
+                  <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-xl p-6 border-2 border-rose-200 dark:border-rose-800">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
+                        <Users className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">Practical Implications</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {getParsedAISummaryData().practical_implications.map((implication: string, index: number) => (
+                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-rose-100 dark:border-rose-900/50 hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-rose-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(implication)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Legal Areas Covered */}
                 {getParsedAISummaryData().legal_areas_covered && getParsedAISummaryData().legal_areas_covered.length > 0 && (
@@ -629,131 +642,159 @@ export default function LegalResearchPage() {
  </div>
  )}
 
- {/* Sources Analyzed */}
- {aiSummary.sources_analyzed && aiSummary.sources_analyzed.length > 0 && (
- <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-lg p-6 border">
- <div className="flex items-center gap-2 mb-4">
- <FileText className="w-5 h-5 text-gray-500" />
- <h3 className="font-semibold text-lg">Sources Analyzed</h3>
- </div>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
- {aiSummary.sources_analyzed.map((source, index) => (
- <div key={index} className="text-sm text-muted-foreground bg-white dark:bg-gray-800 rounded px-3 py-2 border">
- {formatFileName(source)}
- </div>
- ))}
- </div>
- </div>
- )}
+                {/* Sources Analyzed */}
+                {aiSummary.sources_analyzed && aiSummary.sources_analyzed.length > 0 && (
+                  <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-xl p-6 border-2 border-gray-200 dark:border-gray-800">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg flex items-center justify-center shadow-md">
+                        <FileText className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className="font-bold text-lg text-foreground">Sources Analyzed</h3>
+                      <Badge variant="secondary" className="ml-auto">
+                        {aiSummary.sources_analyzed.length} {aiSummary.sources_analyzed.length === 1 ? 'source' : 'sources'}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {aiSummary.sources_analyzed.map((source, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm text-foreground bg-white/70 dark:bg-gray-800/70 rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                          <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="truncate">{formatFileName(source)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
 
  </div>
- ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center">
-                    <Brain className="w-8 h-8 text-emerald-500" />
- </div>
- <h3 className="text-lg font-semibold mb-2">No AI Summary Available</h3>
- <p className="text-muted-foreground">
- AI summary will be generated automatically when search results are found
- </p>
- </div>
- )}
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center shadow-lg">
+                    <Brain className="w-10 h-10 text-emerald-500" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">No AI Summary Available</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    AI summary will be generated automatically when search results are found
+                  </p>
+                </div>
+              )}
  </CardContent>
  </Card>
 
- {/* Search Results */}
- <div className="space-y-4">
- <div className="flex items-center gap-2 mb-4">
- <FileText className="w-5 h-5 text-primary" />
- <h2 className="text-xl font-semibold">Search Results ({searchResults.total_results})</h2>
- </div>
- 
- {/* Results List */}
- {searchResults.results.map((result, index) => (
- <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
- <CardHeader className="pb-3">
- <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
- <div className="flex-1 min-w-0">
- <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
- <span className="flex items-center gap-1">
- <Filter className="w-3 h-3" />
- {formatFileName(result.source_file)}
- </span>
- {result.section_header && (
- <span className="flex items-center gap-1">
- <BookOpen className="w-3 h-3" />
- {result.section_header}
- </span>
- )}
- </div>
- </div>
- <div className="flex items-center gap-2 flex-shrink-0">
- <Button
- variant="ghost"
- size="sm"
- onClick={() => handleCopyContent(result.content)}
- className="h-8 w-8 p-0"
- >
- <Copy className="w-4 h-4" />
- </Button>
- </div>
- </div>
- </CardHeader>
- <CardContent className="pt-0">
- <div className="bg-muted/50 rounded-lg p-4 border">
- <SimpleMarkdownRenderer 
- content={normalizeContentLineBreaks(result.content)} 
- className="text-sm leading-relaxed"
- />
- </div>
- <div className="flex items-center justify-between mt-3 pt-3 border-t">
- <div className="flex items-center gap-4 text-xs text-muted-foreground">
- </div>
- <div className="flex items-center gap-2">
- <Button
- variant="outline"
- size="sm"
- onClick={() => handleCopyContent(result.content)}
- className="h-8 text-xs"
- >
- <Copy className="w-3 h-3 mr-1" />
- Copy
- </Button>
- <Button
- variant="outline"
- size="sm"
- className="h-8 text-xs"
- onClick={() => handleViewFullDocument(result.document_id)}
- disabled={isLoadingDocument}
- >
- {isLoadingDocument ? (
- <Loader2 className="w-3 h-3 mr-1 animate-spin" />
- ) : (
- <FileTextIcon className="w-3 h-3 mr-1" />
- )}
- Full Document
- </Button>
- </div>
- </div>
- </CardContent>
- </Card>
- ))}
+        {/* Search Results */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Search Results</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Found {searchResults.total_results} {searchResults.total_results === 1 ? 'result' : 'results'}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Results List */}
+          <div className="space-y-4">
+            {searchResults.results.map((result, index) => (
+              <Card key={index} className="border-2 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-xl transition-all duration-300 group">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start gap-4">
+                    {/* Result Number Badge */}
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <span className="text-white font-bold text-sm">{index + 1}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <Badge variant="outline" className="flex items-center gap-1.5 px-2.5 py-1">
+                          <Filter className="w-3 h-3" />
+                          <span className="text-xs font-medium">{formatFileName(result.source_file)}</span>
+                        </Badge>
+                        {result.section_header && (
+                          <Badge variant="outline" className="flex items-center gap-1.5 px-2.5 py-1">
+                            <BookOpen className="w-3 h-3" />
+                            <span className="text-xs font-medium">{result.section_header}</span>
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Action Button */}
+                    <div className="flex-shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyContent(result.content)}
+                        className="h-9 w-9 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/30 dark:to-gray-900/30 rounded-xl p-5 border border-slate-200 dark:border-slate-800">
+                    <SimpleMarkdownRenderer 
+                      content={normalizeContentLineBreaks(result.content)} 
+                      className="text-sm leading-relaxed text-gray-700 dark:text-gray-300"
+                    />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCopyContent(result.content)}
+                      className="h-9 text-xs gap-2"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      Copy
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="h-9 text-xs gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                      onClick={() => handleViewFullDocument(result.document_id)}
+                      disabled={isLoadingDocument}
+                    >
+                      {isLoadingDocument ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <FileTextIcon className="w-3.5 h-3.5" />
+                          View Full Document
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
- {/* No Results */}
- {searchResults.results.length === 0 && (
- <Card>
- <CardContent className="pt-6 text-center">
- <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
- <Search className="w-8 h-8 text-muted-foreground" />
- </div>
- <h3 className="text-lg font-semibold mb-2">No results found</h3>
- <p className="text-muted-foreground">
- Try adjusting your search terms or using different keywords
- </p>
- </CardContent>
- </Card>
- )}
+          {/* No Results */}
+          {searchResults.results.length === 0 && (
+            <Card className="border-2">
+              <CardContent className="pt-12 pb-12 text-center">
+                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-slate-100 to-gray-100 dark:from-slate-800 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg">
+                  <Search className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No results found</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Try adjusting your search terms or using different keywords to find relevant legal information
+                </p>
+              </CardContent>
+            </Card>
+          )}
  </div>
  </div>
 )}
