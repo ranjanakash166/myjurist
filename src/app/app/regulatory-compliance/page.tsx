@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../../components/AuthProvider";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -154,7 +154,7 @@ export default function RegulatoryCompliancePage() {
       </div>
 
       {/* Search Section */}
-      <Card className="w-full border-0 shadow-sm bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
+      <Card className="w-full border-2 shadow-lg bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
         <CardContent className="pt-6">
           <div className="space-y-5">
             {/* Search Input with integrated button */}
@@ -241,14 +241,14 @@ export default function RegulatoryCompliancePage() {
 
       {/* Loading Skeleton */}
       {isSubmitting && (
-        <Card className="w-full">
-          <CardContent className="py-8">
+        <Card className="w-full border-2 shadow-lg">
+          <CardContent className="py-12">
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+              <div className="w-20 h-20 mb-6 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center shadow-lg">
+                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Analyzing Regulatory Information...</h3>
-              <p className="text-muted-foreground text-sm">
+              <h3 className="text-xl font-semibold mb-2 text-foreground">Analyzing Regulatory Information...</h3>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto">
                 Searching through laws, regulations, and legal precedents
               </p>
             </div>
@@ -258,109 +258,155 @@ export default function RegulatoryCompliancePage() {
 
       {/* Results Section */}
       {result && !isSubmitting && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Results Header */}
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-emerald-500" />
-            <span className="font-semibold text-foreground">Analysis Complete</span>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+              <CheckCircle className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Analysis Complete</h2>
+              <p className="text-sm text-muted-foreground mt-1">Regulatory compliance analysis results</p>
+            </div>
           </div>
 
           {/* AI Answer */}
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-purple-500" />
-              <h3 className="font-semibold text-lg">AI Analysis</h3>
-            </div>
-            <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-              <SimpleMarkdownRenderer content={result.answer} />
-            </div>
-          </div>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg border-b">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span>AI Analysis</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-6 border-2 border-emerald-200 dark:border-emerald-800">
+                <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300 prose prose-sm max-w-none">
+                  <SimpleMarkdownRenderer content={result.answer} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Related Sections */}
           {result.related_sections.length > 0 && (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-6 border">
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-5 h-5 text-emerald-500" />
-                <h3 className="font-semibold text-lg">Related Sections</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {result.related_sections.map((section, index) => (
-                  <Badge 
-                    key={index} 
-                    className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
-                  >
-                    Section {section}
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+                      <BookOpen className="w-5 h-5 text-white" />
+                    </div>
+                    <span>Related Sections</span>
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-sm">
+                    {result.related_sections.length} {result.related_sections.length === 1 ? 'section' : 'sections'}
                   </Badge>
-                ))}
-              </div>
-            </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="flex flex-wrap gap-3">
+                  {result.related_sections.map((section, index) => (
+                    <Badge 
+                      key={index} 
+                      className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-2 border-emerald-200 dark:border-emerald-800 px-4 py-2 text-sm font-medium hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                    >
+                      Section {section}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Amendments */}
           {result.amendments_found.length > 0 && (
-            <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-6 border">
-              <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-5 h-5 text-orange-500" />
-                <h3 className="font-semibold text-lg">Amendments Found</h3>
-                <Badge variant="secondary" className="ml-auto">{result.amendments_found.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {result.amendments_found.map((amendment, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border hover:shadow-sm transition-shadow">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{amendment.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{amendment.snippet}</p>
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-t-lg border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
+                      <AlertTriangle className="w-5 h-5 text-white" />
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => window.open(amendment.source, '_blank')}
-                      className="flex-shrink-0 hover:bg-orange-100 dark:hover:bg-orange-900/30"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
+                    <span>Amendments Found</span>
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-sm">
+                    {result.amendments_found.length} {result.amendments_found.length === 1 ? 'amendment' : 'amendments'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-3">
+                  {result.amendments_found.map((amendment, index) => (
+                    <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border-2 border-orange-100 dark:border-orange-900/50 hover:shadow-md transition-shadow">
+                      <div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1">{amendment.title}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{amendment.snippet}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(amendment.source, '_blank')}
+                        className="flex-shrink-0 hover:bg-orange-100 dark:hover:bg-orange-900/30 gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        View
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Sources */}
           {result.sources.length > 0 && (
-            <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20 rounded-lg p-6 border">
-              <div className="flex items-center gap-2 mb-4">
-                <Link2 className="w-5 h-5 text-slate-500" />
-                <h3 className="font-semibold text-lg">Sources</h3>
-                <Badge variant="secondary" className="ml-auto">{result.sources.length}</Badge>
-              </div>
-              <div className="space-y-3">
-                {result.sources.map((source, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border hover:shadow-sm transition-shadow">
-                    <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-4 h-4 text-slate-500" />
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20 rounded-t-lg border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="w-10 h-10 bg-gradient-to-br from-slate-500 to-gray-600 rounded-lg flex items-center justify-center shadow-md">
+                      <Link2 className="w-5 h-5 text-white" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{source.title}</p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs text-muted-foreground">{source.domain}</span>
-                        <Badge variant="outline" className="text-xs">
-                          Relevance: {source.relevance}
-                        </Badge>
+                    <span>Sources</span>
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-sm">
+                    {result.sources.length} {result.sources.length === 1 ? 'source' : 'sources'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-3">
+                  {result.sources.map((source, index) => (
+                    <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border-2 border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
+                      <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-gray-100 dark:from-slate-800 dark:to-gray-800 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <FileText className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-2 truncate">{source.title}</p>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-xs text-muted-foreground">{source.domain}</span>
+                          <Badge variant="outline" className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
+                            Relevance: {source.relevance}
+                          </Badge>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(source.url, '_blank')}
+                        className="flex-shrink-0 hover:bg-slate-100 dark:hover:bg-slate-800 gap-2"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Open
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => window.open(source.url, '_blank')}
-                      className="flex-shrink-0 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
