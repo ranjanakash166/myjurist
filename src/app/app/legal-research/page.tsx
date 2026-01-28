@@ -44,34 +44,48 @@ export default function LegalResearchPage() {
  const [recentSearches, setRecentSearches] = useState<string[]>([]);
  const [isLoadingRecentSearches, setIsLoadingRecentSearches] = useState(false);
 
- // Fetch recent searches on component mount
- React.useEffect(() => {
-   const fetchRecentSearches = async () => {
-     setIsLoadingRecentSearches(true);
-     try {
-       const authHeaders = getAuthHeaders();
-       const response = await fetch('https://api.myjurist.io/api/v1/legal-research/history?limit=5', {
-         method: 'GET',
-         headers: authHeaders,
-       });
-       
-       if (response.ok) {
-         const data = await response.json();
-         // Data is an array of LegalResearchHistoryItem[]
-         const queries = data
-           .map((item: any) => item.query)
-           .filter((q: string) => q && q.trim());
-         setRecentSearches(queries);
-       }
-     } catch (err) {
-       console.error('Failed to fetch recent searches:', err);
-     } finally {
-       setIsLoadingRecentSearches(false);
-     }
-   };
+  // Fetch recent searches on component mount
+  React.useEffect(() => {
+    const fetchRecentSearches = async () => {
+      setIsLoadingRecentSearches(true);
+      try {
+        const authHeaders = getAuthHeaders();
+        const response = await fetch('https://api.myjurist.io/api/v1/legal-research/history?limit=5', {
+          method: 'GET',
+          headers: authHeaders,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Data is an array of LegalResearchHistoryItem[]
+          const queries = data
+            .map((item: any) => item.query)
+            .filter((q: string) => q && q.trim());
+          setRecentSearches(queries);
+        }
+      } catch (err) {
+        console.error('Failed to fetch recent searches:', err);
+      } finally {
+        setIsLoadingRecentSearches(false);
+      }
+    };
 
-   fetchRecentSearches();
- }, [getAuthHeaders]);
+    fetchRecentSearches();
+  }, [getAuthHeaders]);
+
+  // Reset search tab when switching from History to Search
+  React.useEffect(() => {
+    if (activeTab === "search") {
+      // Clear all search-related state when switching to search tab
+      setSearchResults(null);
+      setAiSummary(null);
+      setSelectedDocument(null);
+      setCurrentDocumentId(null);
+      setError(null);
+      setQuery("");
+      setIsSearching(false);
+    }
+  }, [activeTab]);
 
  const handleSearch = async (e: React.FormEvent) => {
  e.preventDefault();
