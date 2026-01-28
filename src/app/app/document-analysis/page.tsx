@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { MessageCircle, FileText, Check, Plus, Upload, Settings, AlertTriangle, FileUp, X, Clock, CheckCircle } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
 
@@ -573,16 +574,23 @@ export default function DocumentAnalysisPage() {
     return `Session - ${dateStr}`;
   };
 
-  // Step 1: Create Chat handler - now auto-generates values
+  // Step 1: Create Chat handler - uses user input for name and description
   const handleCreateChat = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    
+    // Validate that chat name is provided
+    if (!newChatName.trim()) {
+      setNewChatError("Please enter a chat name");
+      return;
+    }
+    
     setNewChatError(null);
     setNewChatSuccess(false);
     setNewChatLoading(true);
     
-    // Auto-generate chat name and description
-    const autoName = generateAutoName();
-    const autoDescription = "Auto-generated document analysis session";
+    // Use user input for both name and description
+    const chatName = newChatName.trim();
+    const chatDescription = newChatName.trim(); // Use same value for description
     
     try {
       const res = await fetch(`${API_BASE_URL}/chats`, {
@@ -592,8 +600,8 @@ export default function DocumentAnalysisPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: autoName,
-          description: autoDescription,
+          name: chatName,
+          description: chatDescription,
         }),
       });
       if (!res.ok) {
@@ -1207,24 +1215,39 @@ export default function DocumentAnalysisPage() {
                           </div>
                         )}
 
-                        {/* Action Button */}
-                        <Button
-                          onClick={() => handleCreateChat()}
-                          className="w-full py-4 text-lg font-semibold hover:scale-[1.01] hover:shadow-lg transition-all duration-200"
-                          disabled={newChatLoading}
-                        >
-                          {newChatLoading ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Creating Analysis Session...
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <Plus className="w-5 h-5" />
-                              Start New Analysis
-                            </div>
-                          )}
-                        </Button>
+                        {/* Chat Name Input and Action Button - Side by Side */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Input
+                            type="text"
+                            placeholder="Enter chat name..."
+                            value={newChatName}
+                            onChange={(e) => setNewChatName(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && newChatName.trim()) {
+                                handleCreateChat();
+                              }
+                            }}
+                            className="flex-1 h-11 text-base"
+                            disabled={newChatLoading}
+                          />
+                          <Button
+                            onClick={() => handleCreateChat()}
+                            className="sm:w-auto w-full h-11 px-6 font-semibold hover:scale-[1.01] hover:shadow-lg transition-all duration-200"
+                            disabled={newChatLoading || !newChatName.trim()}
+                          >
+                            {newChatLoading ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Creating...
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <Plus className="w-4 h-4" />
+                                Start Analysis
+                              </div>
+                            )}
+                          </Button>
+                        </div>
 
                         {/* Info Section */}
                         <div className="mt-6 pt-6 border-t border-border">
