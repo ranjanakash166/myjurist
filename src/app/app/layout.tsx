@@ -22,7 +22,6 @@ const getNavItems = (userRole?: string) => {
     { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "My Jurist Chat", icon: <Search className="w-6 h-6" />, href: "/app/my-jurist-chat" },
-    { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
     { label: "Smart Drafting", icon: <FileEdit className="w-6 h-6" />, href: "/app/smart-drafting" },
     { label: "Smart Document Drafting", icon: <Sparkles className="w-6 h-6" />, href: "/app/smart-document-studio" },
