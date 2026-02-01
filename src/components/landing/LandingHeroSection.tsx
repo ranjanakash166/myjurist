@@ -142,7 +142,7 @@ const LandingHeroSection: React.FC = () => {
 
         {/* 4. Key metrics */}
         <div
-          className="w-full flex flex-wrap items-center justify-center gap-12 md:gap-16 lg:gap-24 pt-8 pb-6 border-b border-l border-dashed border-[var(--blue-400)]"
+          className="w-full flex flex-wrap items-center justify-center gap-12 md:gap-16 lg:gap-24 pt-8 pb-6"
           style={{ alignSelf: "stretch" }}
         >
           {metrics.map((item) => (
