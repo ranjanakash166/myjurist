@@ -101,3 +101,65 @@ export async function downloadDraftContract(
   URL.revokeObjectURL(a.href);
   document.body.removeChild(a);
 }
+
+/**
+ * Fetch the drafted contract as DOCX blob (for loading into editor).
+ * Does not trigger a download.
+ */
+export async function getDraftContractDocxBlob(
+  contractId: string,
+  getAuthHeaders: () => Record<string, string>
+): Promise<Blob> {
+  const url = `${API_BASE_URL}/drafting/contract/${contractId}/docx`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      accept: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg =
+      (err as { detail?: Array<{ msg?: string }> })?.detail?.[0]?.msg ||
+      (err as { message?: string }).message ||
+      res.statusText;
+    throw new Error(msg || `Failed to fetch contract: ${res.statusText}`);
+  }
+
+  return res.blob();
+}
+
+/**
+ * Update contract content (e.g. after user edits in the editor and saves).
+ * PUT /drafting/contract/{contract_id} with body { content: string }.
+ */
+export async function updateDraftContract(
+  contractId: string,
+  content: string,
+  getAuthHeaders: () => Record<string, string>
+): Promise<string> {
+  const url = `${API_BASE_URL}/drafting/contract/${contractId}/`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      accept: "application/json",
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify({ content }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg =
+      (err as { detail?: Array<{ msg?: string }> })?.detail?.[0]?.msg ||
+      (err as { message?: string }).message ||
+      res.statusText;
+    throw new Error(msg || `Update failed: ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  return typeof data === "string" ? data : String(data ?? "");
+}

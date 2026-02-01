@@ -23,6 +23,7 @@ import {
   DraftingQuestion,
   DraftingResponse,
 } from "@/lib/smartDraftingApi";
+import ContractEditor from "./ContractEditor";
 
 interface ChatMessage {
   id: string;
@@ -200,7 +201,7 @@ export default function SmartDraftingPage() {
   return (
     <div className="w-full px-2 sm:px-4 md:px-8 py-4 flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
             <FileEdit className="w-5 h-5 text-white" />
@@ -214,6 +215,10 @@ export default function SmartDraftingPage() {
         </div>
       </div>
 
+      {/* Side-by-side: left = chat, right = document editor */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
+        {/* Left: chat interface */}
+        <div className="flex flex-col gap-4 min-h-0 overflow-hidden">
       {/* Contract ready state */}
       {contractId && (
         <Card className="mb-6 border-emerald-500/30 bg-emerald-500/5">
@@ -439,6 +444,13 @@ export default function SmartDraftingPage() {
           </div>
         )}
       </Card>
+        </div>
+
+        {/* Right: document editor */}
+        <div className="flex flex-col min-h-[500px] lg:min-h-0">
+          <ContractEditor contractId={contractId} getAuthHeaders={getAuthHeaders} />
+        </div>
+      </div>
     </div>
   );
 }
