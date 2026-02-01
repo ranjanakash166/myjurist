@@ -31,7 +31,7 @@ const websiteSchema = {
   url: siteUrl,
 };
 
-export default function HomePage() {
+export default function NewLandingPage() {
   return (
     <>
       <StructuredData data={organizationSchema} />

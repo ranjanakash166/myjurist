@@ -2,13 +2,13 @@
 
 import React from "react";
 import LandingHeader from "@/components/landing/LandingHeader";
-import LandingHeroSection from "@/components/landing/LandingHeroSection";
-import LandingChallengeSection from "@/components/landing/LandingChallengeSection";
-import OurSolutionSection from "@/components/landing/OurSolutionSection";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import LandingCtaSection from "@/components/landing/LandingCtaSection";
-import ProductPreviewSection from "@/components/landing/ProductPreviewSection";
-import LandingFooter from "@/components/landing/LandingFooter";
+import HeroSection from "@/components/HeroSection";
+import SocialProofSection from "@/components/SocialProofSection";
+import ProductShowcaseSection from "@/components/ProductShowcaseSection";
+import LegalDataSourcesSection from "@/components/LegalDataSourcesSection";
+import UseCasesSection from "@/components/UseCasesSection";
+import ValuePropositionsSection from "@/components/ValuePropositionsSection";
+import Footer from "@/components/Footer";
 import StructuredData from "@/components/StructuredData";
 
 const siteUrl =
@@ -31,7 +31,7 @@ const websiteSchema = {
   url: siteUrl,
 };
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
     <>
       <StructuredData data={organizationSchema} />
@@ -39,13 +39,17 @@ export default function HomePage() {
       <div className="landing-page min-h-screen overflow-x-hidden bg-background text-foreground">
         <LandingHeader />
         <main>
-          <LandingHeroSection />
-          <ProductPreviewSection />
-          <LandingChallengeSection />
-          <OurSolutionSection />
-          <TestimonialsSection />
-          <LandingCtaSection />
-          <LandingFooter />
+          <HeroSection />
+          <SocialProofSection />
+          <div id="products">
+            <ProductShowcaseSection />
+          </div>
+          <LegalDataSourcesSection />
+          <div id="use-cases">
+            <UseCasesSection />
+          </div>
+          <ValuePropositionsSection />
+          <Footer />
         </main>
       </div>
     </>

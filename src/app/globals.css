@@ -113,6 +113,60 @@ body {
 }
 
 @layer components {
+  /* Figma landing – design tokens */
+  .landing-page,
+  :root {
+    --bg-primary: #ffffff;
+    --bg-black-solid: #0f172a;
+    --b-w-white: #ffffff;
+    --text-on-dark-color: #ffffff;
+    --Label-Label-1-fontFamily: Inter;
+    --Label-Label-1-fontSize: 16px;
+    --Label-Label-1-lineHeight: 22px;
+    --Label-Label-1-letterSpacing: -0.18px;
+    --Weights-Regular: 400;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-white: #ffffff;
+    --green-500: #22c55e;
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-400: #60a5fa;
+    --blue-600: #2563eb;
+    --fuchsia-600: #c026d3;
+    --bg-tertiary: #f1f5f9;
+    --bg-secondary: #f8fafc;
+    --header-gradient: linear-gradient(
+      90deg,
+      #e0e7ff 0%,
+      #f5f3ff 50%,
+      #fce7f3 100%
+    );
+  }
+
+  /* Landing page section theme (used on /landing) */
+  .landing-page {
+    --landing-hero-bg: #f8fafc;
+    --landing-hero-headline: #0f172a;
+    --landing-hero-subtext: #475569;
+    --landing-hero-cta-bg: #0f172a;
+    --landing-hero-cta-text: #ffffff;
+    --landing-challenge-bg: #f1f5f9;
+    --landing-challenge-heading: #0f172a;
+    --landing-challenge-text: #475569;
+    --landing-challenge-accent: #64748b;
+    --landing-section-bg: #ffffff;
+    --landing-section-alt-bg: #f8fafc;
+    --landing-section-heading: #0f172a;
+    --landing-section-text: #475569;
+    --landing-header-border: #e5e7eb;
+    --landing-cta-strip-bg: #0f172a;
+    --landing-cta-strip-text: #ffffff;
+    --landing-footer-bg: #f1f5f9;
+    --landing-footer-text: #0f172a;
+    --landing-footer-muted: #64748b;
+  }
+
   /* Law-themed utility classes */
   .container-legal {
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
