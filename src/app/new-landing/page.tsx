@@ -4,13 +4,11 @@ import React from "react";
 import LandingHeader from "@/components/landing/LandingHeader";
 import LandingHeroSection from "@/components/landing/LandingHeroSection";
 import LandingChallengeSection from "@/components/landing/LandingChallengeSection";
+import OurSolutionSection from "@/components/landing/OurSolutionSection";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import LandingCtaSection from "@/components/landing/LandingCtaSection";
 import ProductPreviewSection from "@/components/landing/ProductPreviewSection";
-import SocialProofSection from "@/components/SocialProofSection";
-import ProductShowcaseSection from "@/components/ProductShowcaseSection";
-import LegalDataSourcesSection from "@/components/LegalDataSourcesSection";
-import UseCasesSection from "@/components/UseCasesSection";
-import ValuePropositionsSection from "@/components/ValuePropositionsSection";
-import Footer from "@/components/Footer";
+import LandingFooter from "@/components/landing/LandingFooter";
 import StructuredData from "@/components/StructuredData";
 
 const siteUrl =
@@ -44,16 +42,10 @@ export default function NewLandingPage() {
           <LandingHeroSection />
           <ProductPreviewSection />
           <LandingChallengeSection />
-          <SocialProofSection />
-          <div id="products">
-            <ProductShowcaseSection />
-          </div>
-          <LegalDataSourcesSection />
-          <div id="use-cases">
-            <UseCasesSection />
-          </div>
-          <ValuePropositionsSection />
-          <Footer />
+          <OurSolutionSection />
+          <TestimonialsSection />
+          <LandingCtaSection />
+          <LandingFooter />
         </main>
       </div>
     </>

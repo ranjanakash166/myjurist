@@ -118,15 +118,24 @@ body {
   :root {
     --bg-primary: #ffffff;
     --bg-black-solid: #0f172a;
+    --b-w-white: #ffffff;
+    --text-on-dark-color: #ffffff;
+    --Label-Label-1-fontFamily: Inter;
+    --Label-Label-1-fontSize: 16px;
+    --Label-Label-1-lineHeight: 22px;
+    --Label-Label-1-letterSpacing: -0.18px;
+    --Weights-Regular: 400;
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-white: #ffffff;
     --green-500: #22c55e;
     --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
     --blue-400: #60a5fa;
     --blue-600: #2563eb;
     --fuchsia-600: #c026d3;
     --bg-tertiary: #f1f5f9;
+    --bg-secondary: #f8fafc;
     --header-gradient: linear-gradient(
       90deg,
       #e0e7ff 0%,
