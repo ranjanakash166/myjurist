@@ -118,7 +118,7 @@ const LandingHeader: React.FC = () => {
 
         {/* Right: Login + Contact Us */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
-          {/* Login – rounded pill, larger for clarity */}
+          {/* Login – rounded pill */}
           <Button
             asChild
             variant="outline"

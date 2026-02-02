@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { submitContactForm, ContactFormData } from '@/lib/contactApi';
+import CtaArrowIcon from '@/components/landing/CtaArrowIcon';
 
 interface FormData {
   firstName: string;
@@ -23,14 +24,20 @@ interface ContactFormSectionProps {
   showBackButton?: boolean;
   buttonText?: string;
   inlineMode?: boolean;
+  useLandingStyle?: boolean;
 }
+
+const inputLandingClass =
+  'border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]';
+const labelLandingStyle = { color: 'var(--text-primary, #0f172a)' };
 
 const ContactFormSection: React.FC<ContactFormSectionProps> = ({ 
   title = "Get In Touch",
   subtitle = "Ready to transform your legal due diligence process? Let's discuss how My Jurist can help.",
   showBackButton = false,
   buttonText = "Send Message",
-  inlineMode = false
+  inlineMode = false,
+  useLandingStyle = false
 }) => {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -114,29 +121,50 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
       
       {inlineMode && (
         <div className="mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+          <h2
+            className="text-2xl md:text-3xl font-bold mb-2"
+            style={useLandingStyle ? labelLandingStyle : undefined}
+          >
             {title}
           </h2>
-          <p className="text-sm md:text-base text-muted-foreground mb-6">
+          <p
+            className="text-sm md:text-base mb-6"
+            style={useLandingStyle ? { color: 'var(--text-secondary, #475569)' } : undefined}
+          >
             {subtitle}
           </p>
         </div>
       )}
       
-      <Card className="border-2 shadow-lg">
+      <Card
+        className={
+          useLandingStyle
+            ? 'bg-white border border-slate-200/80 shadow-xl rounded-2xl overflow-hidden'
+            : 'border-2 shadow-lg'
+        }
+      >
         <CardContent className="p-6 md:p-8">
             {isSubmitted ? (
               <div className="text-center py-12">
                 <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="h-10 w-10 text-white" />
                 </div>
-                <h3 className="text-3xl font-bold mb-4 text-foreground">
+                <h3
+                  className="text-3xl font-bold mb-4"
+                  style={useLandingStyle ? labelLandingStyle : undefined}
+                >
                   Thank You!
                 </h3>
-                <p className="text-xl text-muted-foreground mb-6">
+                <p
+                  className="text-xl mb-6"
+                  style={useLandingStyle ? { color: 'var(--text-secondary, #475569)' } : undefined}
+                >
                   {successMessage || 'Your query has been submitted successfully.'}
                 </p>
-                <p className="text-lg text-primary">
+                <p
+                  className="text-lg font-medium mb-6"
+                  style={useLandingStyle ? { color: 'var(--blue-600, #2563eb)' } : undefined}
+                >
                   Our team will get back to you soon.
                 </p>
                 <Button
@@ -145,9 +173,32 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                     setSuccessMessage('');
                     setError(null);
                   }}
-                  className="mt-8"
+                  className={
+                    useLandingStyle
+                      ? 'mt-8 rounded-full font-medium gap-3 px-10 py-5 text-white transition-all duration-200 hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100'
+                      : 'mt-8'
+                  }
+                  style={
+                    useLandingStyle
+                      ? {
+                          padding: '20px 44px',
+                          borderRadius: 100,
+                          background: 'var(--bg-black-solid, #0f172a)',
+                          color: 'var(--text-on-dark-color, #fff)',
+                          fontSize: '22px',
+                          lineHeight: '28px',
+                        }
+                      : undefined
+                  }
                 >
-                  Send Another Message
+                  {useLandingStyle ? (
+                    <span className="inline-flex items-center gap-3">
+                      Send Another Message
+                      <CtaArrowIcon size={36} className="shrink-0" />
+                    </span>
+                  ) : (
+                    'Send Another Message'
+                  )}
                 </Button>
               </div>
             ) : (
@@ -159,7 +210,13 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                 )}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label
+                      htmlFor="firstName"
+                      className={useLandingStyle ? 'font-medium' : ''}
+                      style={useLandingStyle ? labelLandingStyle : undefined}
+                    >
+                      First Name
+                    </Label>
                     <Input
                       id="firstName"
                       name="firstName"
@@ -167,10 +224,17 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                       onChange={handleInputChange}
                       placeholder="Enter your first name"
                       required
+                      className={useLandingStyle ? inputLandingClass : ''}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label
+                      htmlFor="lastName"
+                      className={useLandingStyle ? 'font-medium' : ''}
+                      style={useLandingStyle ? labelLandingStyle : undefined}
+                    >
+                      Last Name
+                    </Label>
                     <Input
                       id="lastName"
                       name="lastName"
@@ -178,12 +242,19 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                       onChange={handleInputChange}
                       placeholder="Enter your last name"
                       required
+                      className={useLandingStyle ? inputLandingClass : ''}
                     />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label
+                    htmlFor="email"
+                    className={useLandingStyle ? 'font-medium' : ''}
+                    style={useLandingStyle ? labelLandingStyle : undefined}
+                  >
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     name="email"
@@ -192,11 +263,18 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                     onChange={handleInputChange}
                     placeholder="Enter your email address"
                     required
+                    className={useLandingStyle ? inputLandingClass : ''}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label
+                    htmlFor="company"
+                    className={useLandingStyle ? 'font-medium' : ''}
+                    style={useLandingStyle ? labelLandingStyle : undefined}
+                  >
+                    Company
+                  </Label>
                   <Input
                     id="company"
                     name="company"
@@ -204,11 +282,18 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                     onChange={handleInputChange}
                     placeholder="Enter your company name"
                     required
+                    className={useLandingStyle ? inputLandingClass : ''}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
+                  <Label
+                    htmlFor="message"
+                    className={useLandingStyle ? 'font-medium' : ''}
+                    style={useLandingStyle ? labelLandingStyle : undefined}
+                  >
+                    Message
+                  </Label>
                   <Textarea
                     id="message"
                     name="message"
@@ -217,15 +302,41 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                     placeholder="Tell us about your needs..."
                     rows={6}
                     required
+                    className={useLandingStyle ? inputLandingClass : ''}
                   />
                 </div>
                 
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full"
+                  className={
+                    useLandingStyle
+                      ? 'w-full rounded-full font-medium gap-3 px-10 py-5 text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100 disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100'
+                      : 'w-full'
+                  }
+                  style={
+                    useLandingStyle
+                      ? {
+                          padding: '20px 44px',
+                          borderRadius: 100,
+                          background: 'var(--bg-black-solid, #0f172a)',
+                          color: 'var(--text-on-dark-color, #fff)',
+                          fontSize: '22px',
+                          lineHeight: '28px',
+                        }
+                      : undefined
+                  }
                 >
-                  {isSubmitting ? 'Sending...' : buttonText}
+                  {useLandingStyle ? (
+                    <span className="inline-flex items-center justify-center gap-3">
+                      {isSubmitting ? 'Sending...' : buttonText}
+                      {!isSubmitting && (
+                        <CtaArrowIcon size={36} className="shrink-0" />
+                      )}
+                    </span>
+                  ) : (
+                    isSubmitting ? 'Sending...' : buttonText
+                  )}
                 </Button>
               </form>
             )}

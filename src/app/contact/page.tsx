@@ -1,80 +1,124 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-import ContactFormSection from '@/components/ContactFormSection';
+import React from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import ContactFormSection from "@/components/ContactFormSection";
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header with back button */}
-      <div className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
-        <div className="container-legal">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
-              <ArrowLeft className="h-6 w-6 text-primary group-hover:text-accent transition-colors duration-300" />
-              <span className="text-lg font-semibold text-muted-foreground group-hover:text-primary transition-colors duration-300">
-                Back to Home
-              </span>
-            </Link>
-            <div className="text-2xl font-bold text-foreground">
-              Contact Us
+    <div
+      className="min-h-screen flex flex-col lg:flex-row font-[var(--Label-Label-1-fontFamily,Inter)]"
+      style={{ color: "var(--text-primary, #0f172a)" }}
+    >
+      {/* Header - Back to Home aligned with left panel content (same padding + max-w-md mx-auto) */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 flex items-center h-16 px-4 sm:px-6 lg:px-0 transition-all duration-300"
+        style={{
+          background: "rgba(255,255,255,0.2)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
+        }}
+      >
+        <div className="w-full flex items-center justify-between lg:grid lg:grid-cols-2 lg:min-h-16">
+          <div className="hidden lg:block px-8 md:px-12">
+            <div className="max-w-md mx-auto">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-[#0f172a] hover:text-[#020617] hover:underline underline-offset-2 transition-colors font-medium"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Back to Home</span>
+              </Link>
             </div>
+          </div>
+          <div className="lg:hidden flex items-center">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-[#0f172a] hover:text-[#020617] hover:underline underline-offset-2 transition-colors font-medium"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Back to Home</span>
+            </Link>
+          </div>
+          <div className="flex items-center justify-end lg:pr-12">
+            <span
+              className="text-lg font-semibold hidden sm:block"
+              style={{ color: "var(--text-primary, #0f172a)" }}
+            >
+              Contact Us
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Main content with padding for fixed header */}
-      <div className="pt-20">
-        {/* Two Column Layout: About Us (Left) and Get In Touch (Right) */}
-        <section className="py-12 md:py-20">
-          <div className="container-legal max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-start">
-              {/* Left Side - About Us */}
-              <div className="space-y-6 lg:sticky lg:top-24">
-                <div>
-                  <p className="text-base md:text-lg font-serif mb-3 md:mb-4 text-primary font-semibold">About Us</p>
-                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-6 md:mb-8 leading-tight text-foreground">
-                    Legal Due Diligence Needs A New AI Partner
-                  </h1>
-                </div>
-                
-                <div className="space-y-4 md:space-y-6 text-base md:text-lg leading-relaxed text-muted-foreground">
-                  <p>
-                    My Jurist was built for legal professionals who are tired of AI vendors overpromising and underdelivering. Too many solutions sound impressive in theory but fail to handle the real-world complexity of legal document analysis and contract drafting.
-                  </p>
-                  <p>
-                    At My Jurist, we combine deep legal expertise with purpose-built AI agents that seamlessly fit your workflows. Our technology goes beyond simple document summarization - it automates complex legal research, ensures full auditability, and delivers real operational impact. No black boxes. No shortcuts.
-                  </p>
-                </div>
-
-                {/* Link to About Us Page */}
-                <div className="pt-4 md:pt-6">
-                  <Link 
-                    href="/about" 
-                    className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold transition-colors group"
-                  >
-                    Learn more about our team
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right Side - Get In Touch Form */}
-              <div className="w-full">
-                <ContactFormSection 
-                  title="Get In Touch"
-                  subtitle="Ready to transform your legal due diligence process? Let's discuss how My Jurist can help."
-                  inlineMode={true}
-                />
-              </div>
-            </div>
+      {/* Left Side - About Us (landing dark panel) */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-center pt-24 pb-12 px-8 md:px-12 min-h-screen"
+        style={{ background: "var(--bg-black-solid, #0f172a)" }}
+      >
+        <div className="max-w-md mx-auto space-y-6">
+          <p
+            className="text-base md:text-lg font-semibold opacity-90"
+            style={{ color: "var(--text-on-dark-color, #fff)" }}
+          >
+            About Us
+          </p>
+          <h1
+            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
+            style={{ color: "var(--text-on-dark-color, #fff)" }}
+          >
+            Legal Due Diligence Needs A New AI Partner
+          </h1>
+          <div
+            className="space-y-4 md:space-y-6 text-base md:text-lg leading-relaxed opacity-90"
+            style={{ color: "var(--text-on-dark-color, #fff)" }}
+          >
+            <p>
+              My Jurist was built for legal professionals who are tired of AI
+              vendors overpromising and underdelivering. Too many solutions
+              sound impressive in theory but fail to handle the real-world
+              complexity of legal document analysis and contract drafting.
+            </p>
+            <p>
+              At My Jurist, we combine deep legal expertise with purpose-built
+              AI agents that seamlessly fit your workflows. Our technology goes
+              beyond simple document summarization - it automates complex legal
+              research, ensures full auditability, and delivers real
+              operational impact. No black boxes. No shortcuts.
+            </p>
           </div>
-        </section>
+          <div className="pt-4">
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 font-semibold transition-colors group text-white hover:opacity-90"
+            >
+              Learn more about our team
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Get In Touch Form (landing gradient + card) */}
+      <div
+        className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen pt-24"
+        style={{
+          background:
+            "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",
+        }}
+      >
+        <div className="w-full max-w-lg">
+          <ContactFormSection
+            title="Get In Touch"
+            subtitle="Ready to transform your legal due diligence process? Let's discuss how My Jurist can help."
+            inlineMode={true}
+            useLandingStyle={true}
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-export default ContactPage; 
+export default ContactPage;

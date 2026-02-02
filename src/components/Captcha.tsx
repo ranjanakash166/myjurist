@@ -44,12 +44,21 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <Label htmlFor="captcha">Security Verification</Label>
-      <Card>
+      <Label
+        htmlFor="captcha"
+        className="font-medium"
+        style={{ color: "var(--text-primary, #0f172a)" }}
+      >
+        Security Verification
+      </Label>
+      <Card className="bg-white border border-slate-200/80 rounded-xl shadow-sm">
         <CardContent className="p-3 sm:p-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <div className="flex items-center justify-between sm:justify-start gap-2">
-              <span className="text-base sm:text-lg font-mono text-foreground">
+              <span
+                className="text-base sm:text-lg font-mono font-medium"
+                style={{ color: "var(--text-primary, #0f172a)" }}
+              >
                 {num1} + {num2} = ?
               </span>
               <Button
@@ -57,7 +66,7 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleRefresh}
-                className="p-1.5 sm:p-1 h-auto"
+                className="p-1.5 sm:p-1 h-auto text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
                 title="Refresh CAPTCHA"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -68,7 +77,7 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
               id="captcha"
               value={userAnswer}
               onChange={(e) => handleAnswerChange(e.target.value)}
-              className="w-full sm:flex-1"
+              className="w-full sm:flex-1 border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]"
               placeholder="Enter answer"
               required
             />
@@ -76,14 +85,12 @@ export default function Captcha({ onValidated, error }: CaptchaProps) {
         </CardContent>
       </Card>
       {userAnswer && !isValid && (
-        <div className="text-destructive text-sm">
+        <p className="text-sm font-medium text-destructive">
           Incorrect answer. Please try again.
-        </div>
+        </p>
       )}
       {error && (
-        <div className="text-destructive text-sm">
-          {error}
-        </div>
+        <p className="text-sm font-medium text-destructive">{error}</p>
       )}
     </div>
   );
