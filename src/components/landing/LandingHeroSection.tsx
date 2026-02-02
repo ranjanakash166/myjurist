@@ -3,8 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CtaArrowIcon from "./CtaArrowIcon";
 
 const metrics = [
   { value: "50M+", label: "Case laws indexed" },
@@ -121,9 +121,9 @@ const LandingHeroSection: React.FC = () => {
         {/* 3. CTA button */}
         <Button
           asChild
-          className="rounded-full font-medium gap-2 text-white"
+          className="rounded-full font-medium gap-2 text-white px-8 py-4"
           style={{
-            padding: 16,
+            padding: "16px 32px",
             borderRadius: 100,
             background: "var(--bg-black-solid, #0F172A)",
             color: "var(--text-white, #FFF)",
@@ -136,7 +136,7 @@ const LandingHeroSection: React.FC = () => {
         >
           <Link href="/request-demo" className="inline-flex items-center gap-2">
             Request a Demo
-            <ExternalLink className="w-5 h-5 shrink-0" />
+            <CtaArrowIcon size={32} className="shrink-0" />
           </Link>
         </Button>
 

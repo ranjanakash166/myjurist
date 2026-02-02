@@ -2,8 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CtaArrowIcon from "./CtaArrowIcon";
 
 const LandingCtaSection: React.FC = () => {
   return (
@@ -56,9 +56,9 @@ const LandingCtaSection: React.FC = () => {
         {/* Request a Demo button */}
         <Button
           asChild
-          className="inline-flex items-center justify-center gap-2 rounded-full font-medium text-white hover:opacity-90"
+          className="inline-flex items-center justify-center gap-2 rounded-full font-medium text-white hover:opacity-90 px-8 py-4"
           style={{
-            padding: 16,
+            padding: "16px 32px",
             borderRadius: 100,
             background: "var(--bg-black-solid, #0F172A)",
             color: "var(--text-white, #FFF)",
@@ -72,7 +72,7 @@ const LandingCtaSection: React.FC = () => {
         >
           <Link href="/request-demo" className="inline-flex items-center gap-2">
             Request a Demo
-            <ArrowUpRight className="w-5 h-5 shrink-0" />
+            <CtaArrowIcon size={32} className="shrink-0" />
           </Link>
         </Button>
       </div>

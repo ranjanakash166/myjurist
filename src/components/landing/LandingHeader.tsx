@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Menu, ChevronDown, ExternalLink } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import MyJuristLogo from "./MyJuristLogo";
+import CtaArrowIcon from "./CtaArrowIcon";
 
 const navItems = [
   { label: "Home", href: "#home" },
@@ -115,25 +116,25 @@ const LandingHeader: React.FC = () => {
 
         {/* Right: Login + Contact Us */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
-          {/* Login – padding 8px 16px, border-radius 100px, bg #FFF */}
+          {/* Login – rounded pill, comfortable padding */}
           <Button
             asChild
             variant="outline"
-            className="rounded-full font-medium px-4 py-2 border-[var(--text-secondary)]/20 text-[#0f172a] hover:bg-black/5"
+            className="rounded-full font-medium px-5 py-2.5 border-[var(--text-secondary)]/20 text-[#0f172a] hover:bg-black/5"
             style={{
-              padding: "8px 16px",
+              padding: "10px 20px",
               borderRadius: 100,
               background: "var(--bg-primary)",
             }}
           >
             <Link href="/login">Login</Link>
           </Button>
-          {/* Contact Us – padding 12px, border-radius 100px, bg #0F172A, green dot + text + external icon */}
+          {/* Contact Us – primary CTA in header */}
           <Button
             asChild
-            className="rounded-full font-medium gap-2 px-4 py-3 text-white hover:opacity-90"
+            className="rounded-full font-medium gap-2 px-6 py-3 text-white hover:opacity-90"
             style={{
-              padding: "12px 16px",
+              padding: "12px 24px",
               borderRadius: 100,
               background: "var(--bg-black-solid)",
             }}
@@ -145,7 +146,7 @@ const LandingHeader: React.FC = () => {
                 aria-hidden
               />
               Contact Us
-              <ExternalLink className="w-4 h-4 shrink-0" />
+              <CtaArrowIcon size={24} className="shrink-0" />
             </Link>
           </Button>
         </div>
@@ -183,9 +184,9 @@ const LandingHeader: React.FC = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="rounded-full w-full"
+                  className="rounded-full w-full py-3"
                   style={{
-                    padding: "8px 16px",
+                    padding: "12px 20px",
                     borderRadius: 100,
                     background: "var(--bg-primary)",
                     color: "#0f172a",
@@ -195,9 +196,9 @@ const LandingHeader: React.FC = () => {
                 </Button>
                 <Button
                   asChild
-                  className="rounded-full w-full gap-2 text-white"
+                  className="rounded-full w-full gap-2 py-3 text-white"
                   style={{
-                    padding: "12px 16px",
+                    padding: "14px 24px",
                     borderRadius: 100,
                     background: "var(--bg-black-solid)",
                   }}
@@ -208,7 +209,7 @@ const LandingHeader: React.FC = () => {
                       style={{ backgroundColor: "var(--green-500)" }}
                     />
                     Contact Us
-                    <ExternalLink className="w-4 h-4" />
+                    <CtaArrowIcon size={24} className="shrink-0" />
                   </Link>
                 </Button>
               </div>
