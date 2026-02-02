@@ -37,17 +37,19 @@ const LandingHeader: React.FC = () => {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex flex-col justify-center items-stretch px-6 md:px-8 lg:px-12 xl:px-[250px]"
       style={{
-        background: "var(--header-gradient)",
+        background: "transparent",
         minHeight: 114,
       }}
     >
-      {/* Inner panel: white rounded bar (Figma: padding 0 250px constrains this) */}
+      {/* Inner panel: transparent at top, glass effect when scrolled */}
       <div
-        className="w-full flex items-center justify-between gap-6 lg:gap-8 px-6 py-3 rounded-3xl"
+        className={`w-full flex items-center justify-between gap-6 lg:gap-8 px-6 py-3 rounded-3xl transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/20 backdrop-blur-md border border-white/20 shadow-sm"
+            : ""
+        }`}
         style={{
-          backgroundColor: "var(--bg-primary)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-          border: "1px solid rgba(0,0,0,0.04)",
+          backgroundColor: isScrolled ? undefined : "transparent",
         }}
       >
         {/* Logo */}
@@ -116,13 +118,13 @@ const LandingHeader: React.FC = () => {
 
         {/* Right: Login + Contact Us */}
         <div className="hidden lg:flex items-center gap-4 shrink-0">
-          {/* Login – rounded pill, comfortable padding */}
+          {/* Login – rounded pill, larger for clarity */}
           <Button
             asChild
             variant="outline"
-            className="rounded-full font-medium px-5 py-2.5 border-[var(--text-secondary)]/20 text-[#0f172a] hover:bg-black/5"
+            className="rounded-full font-medium px-6 py-3 text-lg border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100"
             style={{
-              padding: "10px 20px",
+              padding: "14px 28px",
               borderRadius: 100,
               background: "var(--bg-primary)",
             }}
@@ -132,21 +134,21 @@ const LandingHeader: React.FC = () => {
           {/* Contact Us – primary CTA in header */}
           <Button
             asChild
-            className="rounded-full font-medium gap-2 px-6 py-3 text-white hover:opacity-90"
+            className="rounded-full font-medium gap-2 px-8 py-4 text-lg text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
             style={{
-              padding: "12px 24px",
+              padding: "16px 32px",
               borderRadius: 100,
               background: "var(--bg-black-solid)",
             }}
           >
             <Link href="/contact" className="flex items-center gap-2">
               <span
-                className="w-2 h-2 rounded-full shrink-0"
+                className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ backgroundColor: "var(--green-500)" }}
                 aria-hidden
               />
               Contact Us
-              <CtaArrowIcon size={24} className="shrink-0" />
+              <CtaArrowIcon size={28} className="shrink-0" />
             </Link>
           </Button>
         </div>
@@ -184,9 +186,9 @@ const LandingHeader: React.FC = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="rounded-full w-full py-3"
+                  className="rounded-full w-full py-4 text-base text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100"
                   style={{
-                    padding: "12px 20px",
+                    padding: "16px 24px",
                     borderRadius: 100,
                     background: "var(--bg-primary)",
                     color: "#0f172a",
@@ -196,20 +198,20 @@ const LandingHeader: React.FC = () => {
                 </Button>
                 <Button
                   asChild
-                  className="rounded-full w-full gap-2 py-3 text-white"
+                  className="rounded-full w-full gap-2 py-4 text-base text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
                   style={{
-                    padding: "14px 24px",
+                    padding: "18px 28px",
                     borderRadius: 100,
                     background: "var(--bg-black-solid)",
                   }}
                 >
                   <Link href="/contact" className="flex items-center gap-2">
                     <span
-                      className="w-2 h-2 rounded-full"
+                      className="w-2.5 h-2.5 rounded-full"
                       style={{ backgroundColor: "var(--green-500)" }}
                     />
                     Contact Us
-                    <CtaArrowIcon size={24} className="shrink-0" />
+                    <CtaArrowIcon size={28} className="shrink-0" />
                   </Link>
                 </Button>
               </div>
