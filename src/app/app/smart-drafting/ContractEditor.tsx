@@ -44,7 +44,10 @@ function EditorToolbar({
       const html = editor.getHTML();
       const content = htmlToMarkdownString(html);
       await updateDraftContract(contractId, content, getAuthHeaders);
-      toast({ title: "Saved", description: "Contract changes saved successfully." });
+      toast({
+        title: "Contract updated",
+        description: "Your changes have been saved. You can download the updated contract (PDF or Word) from this page.",
+      });
     } catch (err) {
       toast({
         title: "Save failed",
