@@ -140,7 +140,7 @@ export async function updateDraftContract(
   content: string,
   getAuthHeaders: () => Record<string, string>
 ): Promise<string> {
-  const url = `${API_BASE_URL}/drafting/contract/${contractId}/`;
+  const url = `${API_BASE_URL}/drafting/contract/${contractId}`;
   const res = await fetch(url, {
     method: "PUT",
     headers: {

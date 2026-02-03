@@ -3,11 +3,22 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useEditor, Tiptap, useTiptap } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import TurndownService from "turndown";
 import { Loader2, Bold, Italic, List, ListOrdered, Heading2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getDraftContractDocxBlob, updateDraftContract } from "@/lib/smartDraftingApi";
 import mammoth from "mammoth";
 import { toast } from "@/hooks/use-toast";
+
+/** Convert editor HTML to Markdown-style string so API gets original format (not HTML) for PDF/DOCX. */
+function htmlToMarkdownString(html: string): string {
+  const turndown = new TurndownService({
+    headingStyle: "atx",
+    bulletListMarker: "*",
+    hr: "---",
+  });
+  return turndown.turndown(html).trim();
+}
 
 interface ContractEditorProps {
   contractId: string | null;
@@ -29,8 +40,10 @@ function EditorToolbar({
     if (!contractId) return;
     setSaving(true);
     try {
+      // Convert HTML to Markdown-style string so API gets original format for PDF/DOCX; raw HTML breaks those.
       const html = editor.getHTML();
-      await updateDraftContract(contractId, html, getAuthHeaders);
+      const content = htmlToMarkdownString(html);
+      await updateDraftContract(contractId, content, getAuthHeaders);
       toast({ title: "Saved", description: "Contract changes saved successfully." });
     } catch (err) {
       toast({
