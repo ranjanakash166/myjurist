@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Check } from "lucide-react";
+import LegalResearchDemoCard from "./LegalResearchDemoCard";
 
 const CARD_WIDTH = 1356;
 const CARD_HEIGHT = 564;
@@ -274,7 +275,7 @@ const OurSolutionSection: React.FC = () => {
                     </ul>
                   </div>
                   <div
-                    className="w-full md:w-[min(50%,658px)] shrink-0 rounded-2xl md:rounded-l-none md:rounded-r-[24px]"
+                    className="w-full md:w-[min(50%,658px)] shrink-0 rounded-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden"
                     style={{
                       width: "min(50%, 658px)",
                       minWidth: 280,
@@ -283,7 +284,11 @@ const OurSolutionSection: React.FC = () => {
                       background: "var(--bg-secondary, #F8FAFC)",
                       borderRadius: 24,
                     }}
-                  />
+                  >
+                    {card.header === "Lightning-Fast Legal Research" ? (
+                      <LegalResearchDemoCard />
+                    ) : null}
+                  </div>
                 </div>
               </div>
             );
