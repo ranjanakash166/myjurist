@@ -519,24 +519,22 @@ export default function LegalResearchPage() {
                     </div>
                     <h3 className="font-bold text-lg text-foreground">Summary</h3>
                   </div>
-                  <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300 prose prose-sm max-w-none">
- {(() => {
- const parsedData = getParsedAISummaryData();
- // Check if we got the raw JSON back (parsing failed)
- if (parsedData.ai_summary === aiSummary.ai_summary && aiSummary.ai_summary.includes('"ai_summary"')) {
- // Try to extract just the summary text from the JSON string
- try {
- const match = aiSummary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
- if (match) {
- return parseMarkdownText(match[1]);
- }
- } catch (e) {
- console.error('Failed to extract summary text:', e);
- }
- }
- return parseMarkdownText(parsedData.ai_summary);
- })()}
- </div>
+                  <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300 max-w-none w-full">
+                    {(() => {
+                      const parsedData = getParsedAISummaryData();
+                      let textToShow = parsedData.ai_summary;
+                      if (parsedData.ai_summary === aiSummary.ai_summary && aiSummary.ai_summary.includes('"ai_summary"')) {
+                        try {
+                          const match = aiSummary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
+                          if (match) textToShow = match[1];
+                        } catch (e) {
+                          console.error('Failed to extract summary text:', e);
+                        }
+                      }
+                      const normalized = normalizeContentLineBreaks(textToShow);
+                      return parseMarkdownText(normalized);
+                    })()}
+                  </div>
  </div>
 
                 {/* Key Legal Insights */}

@@ -49,7 +49,7 @@ import {
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
-import { normalizeContentLineBreaks } from "@/lib/utils";
+import { normalizeContentLineBreaks, parseBoldText } from "@/lib/utils";
 
 interface LegalResearchHistoryProps {
  // No props needed since we removed the "Use This" functionality
@@ -454,7 +454,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  });
 
  return (
- <div className="w-full px-6 md:px-8 lg:px-12 py-6 space-y-6">
+   <div className="w-full px-6 md:px-8 lg:px-12 py-6 space-y-6">
 
 
  {/* Search and Filter Controls */}
@@ -717,21 +717,24 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  <h3 className="font-semibold text-lg">AI Summary</h3>
  </div>
  <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
- {(() => {
- // Check if we got the raw JSON back (parsing failed)
- if (parsedData.ai_summary === selectedResearch.ai_summary.ai_summary && selectedResearch.ai_summary.ai_summary.includes('"ai_summary"')) {
- // Try to extract just the summary text from the JSON string
- try {
- const match = selectedResearch.ai_summary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
- if (match) {
- return match[1];
- }
- } catch (e) {
- console.error('Failed to extract summary text:', e);
- }
- }
- return parsedData.ai_summary;
- })()}
+   {(() => {
+     let textToShow = parsedData.ai_summary;
+     if (parsedData.ai_summary === selectedResearch.ai_summary.ai_summary && selectedResearch.ai_summary.ai_summary.includes('"ai_summary"')) {
+       try {
+         const match = selectedResearch.ai_summary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
+         if (match) textToShow = match[1];
+       } catch (e) {
+         console.error('Failed to extract summary text:', e);
+       }
+     }
+     const normalized = normalizeContentLineBreaks(textToShow);
+     return (
+       <SimpleMarkdownRenderer
+         content={normalized}
+         className="text-sm leading-relaxed max-w-none"
+       />
+     );
+   })()}
  </div>
  </div>
 
@@ -745,7 +748,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  {parsedData.key_legal_insights.map((insight, index) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{insight}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(insight)}</span>
  </div>
  ))}
  </div>
@@ -762,7 +765,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  {parsedData.relevant_precedents.map((precedent, index) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{precedent}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(precedent)}</span>
  </div>
  ))}
  </div>
@@ -779,7 +782,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  {parsedData.statutory_provisions.map((provision, index) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{provision}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(provision)}</span>
  </div>
  ))}
  </div>
@@ -796,7 +799,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  {parsedData.procedural_developments.map((development, index) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{development}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(development)}</span>
  </div>
  ))}
  </div>
@@ -813,7 +816,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  {parsedData.practical_implications.map((implication, index) => (
  <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
  <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{implication}</span>
+ <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(implication)}</span>
  </div>
  ))}
  </div>
@@ -829,7 +832,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  <div className="flex flex-wrap gap-2">
  {parsedData.legal_areas_covered.map((area, index) => (
  <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1">
- {area}
+ {parseBoldText(area)}
  </Badge>
  ))}
  </div>

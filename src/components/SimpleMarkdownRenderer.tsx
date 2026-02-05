@@ -23,7 +23,7 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
     const lines = text.split('\n');
     const elements: React.ReactNode[] = [];
     let currentList: string[] = [];
-    let inBlockquote = false;
+    let currentParagraph: string[] = [];
 
     const flushList = () => {
       if (currentList.length > 0) {
@@ -37,6 +37,22 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
           </ul>
         );
         currentList = [];
+      }
+    };
+
+    const flushParagraph = () => {
+      if (currentParagraph.length > 0) {
+        elements.push(
+          <p key={`p-${elements.length}`} className="text-foreground mb-3 leading-relaxed">
+            {currentParagraph.map((line, lineIndex) => (
+              <React.Fragment key={`line-${lineIndex}`}>
+                {parseInlineMarkdown(line)}
+                {lineIndex < currentParagraph.length - 1 ? <br /> : null}
+              </React.Fragment>
+            ))}
+          </p>
+        );
+        currentParagraph = [];
       }
     };
 
@@ -119,6 +135,7 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
 
       // Handle headers
       if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+        flushParagraph();
         flushList();
         const headerText = trimmedLine.slice(2, -2);
         elements.push(
@@ -131,6 +148,7 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
 
       // Handle blockquotes
       if (trimmedLine.startsWith('"') && trimmedLine.endsWith('"')) {
+        flushParagraph();
         flushList();
         elements.push(
           <blockquote key={`blockquote-${index}`} className="border-l-4 border-primary pl-4 py-2 my-4 bg-muted/50 rounded-r-lg">
@@ -144,27 +162,24 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
 
       // Handle list items
       if (trimmedLine.startsWith('*') && trimmedLine.length > 1) {
+        flushParagraph();
         currentList.push(trimmedLine.slice(1));
         return;
       }
 
-
-
       // Handle regular paragraphs
       if (trimmedLine.length > 0) {
         flushList();
-        elements.push(
-          <p key={`p-${index}`} className="text-foreground mb-3 leading-relaxed">
-            {parseInlineMarkdown(trimmedLine)}
-          </p>
-        );
+        currentParagraph.push(trimmedLine);
       } else {
         // Empty line - flush any pending list
+        flushParagraph();
         flushList();
       }
     });
 
     // Flush any remaining list items
+    flushParagraph();
     flushList();
 
     return elements;
