@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Search, Shield, Lightbulb, BookOpen, Copy, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { Send, Loader2, Search, Shield, BookOpen, Copy, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -245,15 +245,6 @@ export default function MyJuristChatPage() {
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
                       Legal Cases
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("Patent search for AI technology")}
-                      className="border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                    >
-                      <Lightbulb className="w-4 h-4 mr-2" />
-                      Patent Search
                     </Button>
                     <Button
                       variant="outline"
