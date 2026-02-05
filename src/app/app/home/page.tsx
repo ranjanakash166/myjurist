@@ -6,7 +6,6 @@ import {
   Calendar, 
   Shield, 
   MessageSquare,
-  FileSearch,
   Tags,
   Clock,
   Sparkles,
@@ -68,12 +67,6 @@ export default function HomePage() {
       description: "AI legal assistant for instant answers",
       icon: MessageSquare,
       href: "/app/my-jurist-chat"
-    },
-    {
-      title: "Patent Analysis",
-      description: "Comprehensive patent evaluation",
-      icon: FileSearch,
-      href: "/app/patent-analysis"
     },
     {
       title: "Smart Document Drafting",

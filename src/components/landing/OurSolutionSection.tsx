@@ -180,18 +180,6 @@ const cardsData = [
     ],
   },
   {
-    icon: IconDocument,
-    header: "Smart Legal Drafting",
-    subHeader:
-      "Generate court-ready pleadings, notices, and contracts with AI assistance. Start from proven templates or create custom documents that match your style.",
-    list: [
-      "500+ legal document templates (petitions, notices, contracts)",
-      "AI-powered clause suggestions based on case facts",
-      "Automatic precedent citation insertion",
-      "Export to Word with proper formatting",
-    ],
-  },
-  {
     icon: IconDocumentAnalysis,
     header: "Intelligent Document Analysis",
     subHeader:
@@ -201,6 +189,18 @@ const cardsData = [
       "Automatic clause extraction and categorization",
       "Risk assessment and red flag identification",
       "Multi-document comparison side-by-side",
+    ],
+  },
+  {
+    icon: IconDocument,
+    header: "Smart Legal Drafting",
+    subHeader:
+      "Generate court-ready pleadings, notices, and contracts with AI assistance. Start from proven templates or create custom documents that match your style.",
+    list: [
+      "500+ legal document templates (petitions, notices, contracts)",
+      "AI-powered clause suggestions based on case facts",
+      "Automatic precedent citation insertion",
+      "Export to Word with proper formatting",
     ],
   },
   {
@@ -250,7 +250,7 @@ const OurSolutionSection: React.FC = () => {
                 style={{
                   minHeight:
                     card.header === "Lightning-Fast Legal Research" ||
-                    card.header === "Smart Legal Drafting"
+                    card.header === "Intelligent Document Analysis"
                       ? FIRST_CARD_RIGHT_PANEL_HEIGHT + 120
                       : CARD_HEIGHT + 120,
                 }}
@@ -261,7 +261,7 @@ const OurSolutionSection: React.FC = () => {
                     width: "100%",
                     height:
                       card.header === "Lightning-Fast Legal Research" ||
-                      card.header === "Smart Legal Drafting"
+                      card.header === "Intelligent Document Analysis"
                         ? FIRST_CARD_RIGHT_PANEL_HEIGHT
                         : CARD_HEIGHT,
                     maxWidth: CARD_WIDTH,
@@ -296,13 +296,13 @@ const OurSolutionSection: React.FC = () => {
                   <div
                     className={`rounded-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 ${
                       card.header === "Lightning-Fast Legal Research" ||
-                      card.header === "Smart Legal Drafting"
+                      card.header === "Intelligent Document Analysis"
                         ? "flex-1 flex flex-col"
                         : "w-full md:w-[min(50%,658px)] shrink-0"
                     }`}
                     style={
                       card.header === "Lightning-Fast Legal Research" ||
-                      card.header === "Smart Legal Drafting"
+                      card.header === "Intelligent Document Analysis"
                         ? {
                             height: "100%",
                             minHeight: FIRST_CARD_RIGHT_PANEL_HEIGHT,
@@ -335,7 +335,7 @@ const OurSolutionSection: React.FC = () => {
                       >
                         <LegalResearchDemoCard />
                       </div>
-                    ) : card.header === "Smart Legal Drafting" ? (
+                    ) : card.header === "Intelligent Document Analysis" ? (
                       <div
                         className="min-w-0 overflow-hidden"
                         style={{
