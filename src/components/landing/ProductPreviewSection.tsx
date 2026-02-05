@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import {
   MessageCircle,
@@ -65,6 +65,27 @@ const featureCards = [
 ];
 
 const ProductPreviewSection: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry?.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+        }
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
   return (
     <section
       id="product-preview"
@@ -76,9 +97,12 @@ const ProductPreviewSection: React.FC = () => {
       }}
     >
       <div className="w-full max-w-6xl mx-auto">
-        {/* App preview container – dark themed mockup */}
+        {/* App preview container – dark themed mockup (slides up when in view) */}
         <div
-          className="rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50"
+          ref={containerRef}
+          className={`rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 transition-all duration-700 ease-out ${
+            hasAnimated ? "animate-slide-up-in" : "product-preview-initial"
+          }`}
           style={{
             background: "linear-gradient(180deg, #1e1b4b 0%, #0f172a 50%, #020617 100%)",
             minHeight: 800,

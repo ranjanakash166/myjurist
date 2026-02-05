@@ -131,7 +131,7 @@ const ProductShowcaseSection: React.FC = () => {
                           <Link href={product.href}>
                             <Button 
                               size="lg"
-                              className="bg-foreground text-background hover:bg-foreground/90 font-semibold text-base md:text-lg px-8 md:px-10 py-6 md:py-7 shadow-lg hover:shadow-xl transition-all duration-300"
+                              className="landing-cta-text bg-foreground text-background hover:bg-foreground/90 font-semibold p-4 shadow-lg hover:shadow-xl transition-all duration-300"
                             >
                               Explore {product.title}
                               <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />

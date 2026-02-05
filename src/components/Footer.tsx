@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="landing-cta-text group flex items-center justify-center w-full md:w-48 min-w-[200px] p-4 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             <Mail className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Request Demo
@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
             variant="outline"
             size="lg"
             onClick={handleContactUs}
-            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 transform hover:scale-105"
+            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] p-4 border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 transform hover:scale-105"
           >
             <Phone className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Contact Us

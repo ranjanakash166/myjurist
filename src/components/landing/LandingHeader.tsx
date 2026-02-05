@@ -122,9 +122,9 @@ const LandingHeader: React.FC = () => {
           <Button
             asChild
             variant="outline"
-            className="rounded-full font-medium px-6 py-3 text-lg border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100"
+            className="rounded-full font-medium text-lg border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100"
             style={{
-              padding: "14px 28px",
+              padding: "16px",
               borderRadius: 100,
               background: "var(--bg-primary)",
             }}
@@ -134,9 +134,9 @@ const LandingHeader: React.FC = () => {
           {/* Contact Us – primary CTA in header */}
           <Button
             asChild
-            className="rounded-full font-medium gap-2 px-8 py-4 text-lg text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
+            className="landing-cta-text rounded-full font-medium gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
             style={{
-              padding: "16px 32px",
+              padding: "16px",
               borderRadius: 100,
               background: "var(--bg-black-solid)",
             }}
@@ -159,7 +159,7 @@ const LandingHeader: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden text-[var(--text-secondary)]"
+              className="lg:hidden text-[var(--text-secondary)] p-4"
             >
               <Menu className="h-6 w-6" />
               <span className="sr-only">Menu</span>
@@ -186,9 +186,9 @@ const LandingHeader: React.FC = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="rounded-full w-full py-4 text-base text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100"
+                  className="rounded-full w-full text-base text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100"
                   style={{
-                    padding: "16px 24px",
+                    padding: "16px",
                     borderRadius: 100,
                     background: "var(--bg-primary)",
                     color: "#0f172a",
@@ -198,9 +198,9 @@ const LandingHeader: React.FC = () => {
                 </Button>
                 <Button
                   asChild
-                  className="rounded-full w-full gap-2 py-4 text-base text-white transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
+                  className="landing-cta-text rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
                   style={{
-                    padding: "18px 28px",
+                    padding: "16px",
                     borderRadius: 100,
                     background: "var(--bg-black-solid)",
                   }}

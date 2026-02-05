@@ -56,18 +56,11 @@ const LandingCtaSection: React.FC = () => {
         {/* Request a Demo button */}
         <Button
           asChild
-          className="inline-flex items-center justify-center gap-3 rounded-full font-medium text-white px-10 py-5 transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100"
+          className="landing-cta-text inline-flex items-center justify-center gap-3 rounded-full font-medium transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100"
           style={{
-            padding: "20px 44px",
+            padding: "16px",
             borderRadius: 100,
             background: "var(--bg-black-solid, #0F172A)",
-            color: "var(--text-white, #FFF)",
-            fontFamily: "var(--Heading-H6-fontFamily, Inter)",
-            fontSize: "22px",
-            fontStyle: "normal",
-            fontWeight: 500,
-            lineHeight: "28px",
-            letterSpacing: 0,
           }}
         >
           <Link href="/request-demo" className="inline-flex items-center gap-3">

@@ -179,7 +179,7 @@ const UseCasesSection: React.FC = () => {
                   {/* CTA Button */}
                   <Button
                     variant="ghost"
-                    className="p-0 h-auto font-semibold text-foreground hover:text-foreground/80 group/btn transition-all duration-300"
+                    className="p-4 h-auto font-semibold text-foreground hover:text-foreground/80 group/btn transition-all duration-300"
                   >
                     <span className="group-hover/btn:translate-x-1 transition-transform duration-300 inline-block">
                       Learn More

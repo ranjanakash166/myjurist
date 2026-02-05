@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Search, FileText, ChevronDown, Filter, Sparkles, Lightbulb, Award, Target, X } from "lucide-react";
+import { Search, FileText, ChevronDown, Filter, Sparkles, Lightbulb, Award, FileCheck, X } from "lucide-react";
 
-type Stage = 0 | 1 | 2;
+type Stage = 0 | 1 | 2 | 3;
 
-const STAGE_DURATION_MS = 2800;
-const STAGE_2_HOLD_MS = 4500;
+const STAGE_DURATION_MS = 2600;
+const STAGE_3_HOLD_MS = 4500;
 
 const LegalResearchDemoCard: React.FC = () => {
   const [stage, setStage] = useState<Stage>(0);
@@ -24,13 +24,10 @@ const LegalResearchDemoCard: React.FC = () => {
     if (reducedMotion) return;
 
     const advance = () => {
-      setStage((prev) => {
-        const next: Stage = prev === 0 ? 1 : prev === 1 ? 2 : 0;
-        return next;
-      });
+      setStage((prev) => ((prev + 1) % 4) as Stage);
     };
 
-    const delay = stage === 2 ? STAGE_2_HOLD_MS : STAGE_DURATION_MS;
+    const delay = stage === 3 ? STAGE_3_HOLD_MS : STAGE_DURATION_MS;
     timeoutRef.current = setTimeout(advance, delay);
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -42,13 +39,10 @@ const LegalResearchDemoCard: React.FC = () => {
 
   return (
     <div
-      className="h-full flex flex-col px-6 md:px-8 lg:px-10 py-8 md:py-10 lg:py-12 transition-opacity duration-500 ease-in-out"
-      style={{
-        background: "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 50%, #E2E8F0 100%)",
-      }}
+      className="h-full flex flex-col min-h-0 overflow-hidden px-6 md:px-8 lg:px-10 py-8 md:py-10 lg:py-12 transition-opacity duration-500 ease-in-out"
       aria-hidden
     >
-      {/* Stage 0: center search bar; Stage 1 & 2: search bar at top */}
+      {/* Search bar: always on gradient (not on card) */}
       <div
         className={`transition-all duration-500 ease-in-out min-h-0 ${
           stage === 0
@@ -57,48 +51,75 @@ const LegalResearchDemoCard: React.FC = () => {
         }`}
       >
         <div className="flex items-center gap-2 w-full max-w-full rounded-full bg-white border border-slate-200/80 shadow-sm px-4 py-3 min-h-[52px]">
-        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
-          <Search className="w-4 h-4 text-blue-600" />
-        </div>
-        <div className="flex-1 min-w-0 flex items-center">
-          {stage === 0 && (
-            <span className="text-slate-500 text-sm md:text-base truncate">
-              {placeholder}
-            </span>
-          )}
-          {(stage === 1 || stage === 2) && (
-            <>
-              <span className="text-slate-800 text-sm md:text-base">
-                {typedQuery}
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
+            <Search className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="flex-1 min-w-0 flex items-center">
+            {stage === 0 && (
+              <span className="text-slate-500 text-sm md:text-base truncate">
+                {placeholder}
               </span>
-              {stage === 1 && (
-                <span
-                  className="inline-block w-0.5 h-4 md:h-5 bg-blue-600 ml-0.5 animate-pulse"
-                  style={{ animationDuration: "1s" }}
-                />
-              )}
-            </>
+            )}
+            {(stage === 1 || stage === 2 || stage === 3) && (
+              <>
+                <span className="text-slate-800 text-sm md:text-base">
+                  {typedQuery}
+                </span>
+                {stage === 1 && (
+                  <span
+                    className="inline-block w-0.5 h-4 md:h-5 bg-blue-600 ml-0.5 animate-pulse"
+                    style={{ animationDuration: "1s" }}
+                  />
+                )}
+              </>
+            )}
+          </div>
+          {(stage === 2 || stage === 3) && (
+            <button
+              type="button"
+              className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-white hover:bg-slate-600 transition-colors"
+              aria-hidden
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
-        </div>
-        <button
-          type="button"
-          className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-white hover:bg-slate-600 transition-colors"
-          aria-hidden
-        >
-          <X className="w-4 h-4" />
-        </button>
         </div>
       </div>
 
-      {/* Stage 2 only: results header + content below search */}
+      {/* White card: only shimmer (stage 2) and results (stage 3) */}
       <div
-        className={`flex flex-col min-h-0 overflow-hidden transition-all duration-500 ease-in-out ${
-          stage === 2 ? "flex-1 opacity-100 mt-5" : "flex-none max-h-0 opacity-0 mt-0"
+        className={`flex-1 flex flex-col min-h-0 overflow-hidden transition-all duration-500 ease-in-out ${
+          stage === 2 || stage === 3
+            ? "opacity-100 mt-5"
+            : "max-h-0 opacity-0 mt-0 flex-none"
         }`}
       >
         {stage === 2 && (
-          <>
-            <div className="flex items-center justify-between gap-2 mb-4 text-xs text-slate-600">
+          <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-4 md:p-5">
+            {/* Skeleton loading placeholders */}
+            <div className="flex justify-end gap-1.5 mb-4 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "0ms" }} />
+              <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "300ms" }} />
+            </div>
+            <div className="space-y-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-slate-200 shrink-0 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                    <span className="h-3 rounded bg-slate-200 w-1/4 animate-pulse" style={{ animationDelay: `${i * 80 + 40}ms` }} />
+                  </div>
+                  <span className="block h-3 rounded bg-slate-200 w-full animate-pulse" style={{ animationDelay: `${i * 80 + 80}ms` }} />
+                </div>
+              ))}
+              <span className="block h-3 rounded bg-slate-200 w-2/3 animate-pulse" style={{ animationDelay: "320ms" }} />
+            </div>
+          </div>
+        )}
+
+        {stage === 3 && (
+          <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-4 md:p-5">
+            <div className="flex items-center justify-between gap-2 mb-4 text-xs text-slate-600 shrink-0">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5" />
                 3 Sources analyzed
@@ -164,7 +185,7 @@ const LegalResearchDemoCard: React.FC = () => {
               {/* Legal Areas Covered */}
               <div className="rounded-lg p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 transition-opacity duration-300 ease-out">
                 <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-4 h-4 text-blue-600" />
+                  <FileCheck className="w-4 h-4 text-blue-600" />
                   <span className="font-semibold text-sm text-slate-800">Legal Areas Covered</span>
                 </div>
                 <p className="text-xs text-slate-700">
@@ -172,7 +193,7 @@ const LegalResearchDemoCard: React.FC = () => {
                 </p>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

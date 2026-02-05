@@ -3,9 +3,18 @@
 import React from "react";
 import { Check } from "lucide-react";
 import LegalResearchDemoCard from "./LegalResearchDemoCard";
+import SmartDraftingDemoCard from "./SmartDraftingDemoCard";
 
 const CARD_WIDTH = 1356;
 const CARD_HEIGHT = 564;
+const ANIMATION_SECTION_WIDTH = 658;
+const ANIMATION_SECTION_HEIGHT = 564;
+const ANIMATION_PADDING_TOP = 113;
+const ANIMATION_PADDING_RIGHT = 125;
+const ANIMATION_PADDING_BOTTOM = 40;
+const ANIMATION_PADDING_LEFT = 125;
+const FIRST_CARD_RIGHT_PANEL_HEIGHT =
+  ANIMATION_PADDING_TOP + ANIMATION_SECTION_HEIGHT + ANIMATION_PADDING_BOTTOM;
 
 const IconLightning: React.FC = () => (
   <svg
@@ -238,17 +247,27 @@ const OurSolutionSection: React.FC = () => {
               <div
                 key={card.header}
                 className="flex justify-center py-4 md:py-6"
-                style={{ minHeight: CARD_HEIGHT + 120 }}
+                style={{
+                  minHeight:
+                    card.header === "Lightning-Fast Legal Research" ||
+                    card.header === "Smart Legal Drafting"
+                      ? FIRST_CARD_RIGHT_PANEL_HEIGHT + 120
+                      : CARD_HEIGHT + 120,
+                }}
               >
                 <div
                   className="w-full max-w-[1356px] rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row sticky top-4 md:top-8 shrink-0 min-h-[400px] md:min-h-0"
                   style={{
                     width: "100%",
-                    height: CARD_HEIGHT,
+                    height:
+                      card.header === "Lightning-Fast Legal Research" ||
+                      card.header === "Smart Legal Drafting"
+                        ? FIRST_CARD_RIGHT_PANEL_HEIGHT
+                        : CARD_HEIGHT,
                     maxWidth: CARD_WIDTH,
                   }}
                 >
-                  <div className="flex-1 p-6 md:p-10 lg:p-12 flex flex-col justify-center min-w-0">
+                  <div className="flex-1 min-w-0 p-6 md:p-10 lg:p-12 flex flex-col justify-center">
                     <div className="mb-6">
                       <Icon />
                     </div>
@@ -275,18 +294,59 @@ const OurSolutionSection: React.FC = () => {
                     </ul>
                   </div>
                   <div
-                    className="w-full md:w-[min(50%,658px)] shrink-0 rounded-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden"
-                    style={{
-                      width: "min(50%, 658px)",
-                      minWidth: 280,
-                      height: "100%",
-                      minHeight: CARD_HEIGHT,
-                      background: "var(--bg-secondary, #F8FAFC)",
-                      borderRadius: 24,
-                    }}
+                    className={`rounded-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 ${
+                      card.header === "Lightning-Fast Legal Research" ||
+                      card.header === "Smart Legal Drafting"
+                        ? "flex-1 flex flex-col"
+                        : "w-full md:w-[min(50%,658px)] shrink-0"
+                    }`}
+                    style={
+                      card.header === "Lightning-Fast Legal Research" ||
+                      card.header === "Smart Legal Drafting"
+                        ? {
+                            height: "100%",
+                            minHeight: FIRST_CARD_RIGHT_PANEL_HEIGHT,
+                            background:
+                              "linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 35%, #F8FAFC 70%, #F1F5F9 100%)",
+                            borderRadius: 24,
+                            paddingTop: ANIMATION_PADDING_TOP,
+                            paddingRight: ANIMATION_PADDING_RIGHT,
+                            paddingBottom: ANIMATION_PADDING_BOTTOM,
+                            paddingLeft: ANIMATION_PADDING_LEFT,
+                          }
+                        : {
+                            minWidth: 280,
+                            height: "100%",
+                            minHeight: CARD_HEIGHT,
+                            background: "var(--bg-secondary, #F8FAFC)",
+                            borderRadius: 24,
+                          }
+                    }
                   >
                     {card.header === "Lightning-Fast Legal Research" ? (
-                      <LegalResearchDemoCard />
+                      <div
+                        className="min-w-0 overflow-hidden"
+                        style={{
+                          width: "100%",
+                          maxWidth: ANIMATION_SECTION_WIDTH,
+                          height: ANIMATION_SECTION_HEIGHT,
+                          borderRadius: 12,
+                        }}
+                      >
+                        <LegalResearchDemoCard />
+                      </div>
+                    ) : card.header === "Smart Legal Drafting" ? (
+                      <div
+                        className="min-w-0 overflow-hidden"
+                        style={{
+                          width: "100%",
+                          maxWidth: ANIMATION_SECTION_WIDTH,
+                          height: ANIMATION_SECTION_HEIGHT,
+                          borderRadius: 12,
+                        }}
+                      >
+                        <SmartDraftingDemoCard />
+                      </div>
                     ) : null}
                   </div>
                 </div>

@@ -33,7 +33,7 @@ const HeroSection: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="px-8 py-6 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="landing-cta-text p-4 font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Request a Demo
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -42,7 +42,7 @@ const HeroSection: React.FC = () => {
             variant="outline"
             size="lg"
             onClick={handleWatchVideo}
-            className="px-8 py-6 text-base font-semibold border-2 hover:bg-muted transition-all duration-200"
+            className="p-4 text-base font-semibold border-2 hover:bg-muted transition-all duration-200"
           >
             <Play className="mr-2 h-5 w-5" />
             Watch Video
