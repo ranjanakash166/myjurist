@@ -388,9 +388,6 @@ export default function RegulatoryCompliancePage() {
                         <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-2 truncate">{source.title}</p>
                         <div className="flex items-center gap-3 flex-wrap">
                           <span className="text-xs text-muted-foreground">{source.domain}</span>
-                          <Badge variant="outline" className="text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
-                            Relevance: {source.relevance}
-                          </Badge>
                         </div>
                       </div>
                       <Button
