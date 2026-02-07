@@ -38,7 +38,7 @@ export default function LandingPage() {
       <StructuredData data={websiteSchema} />
       <div className="landing-page min-h-screen overflow-x-hidden bg-background text-foreground">
         <LandingHeader />
-        <main>
+        <main className="overflow-x-hidden min-w-0">
           <HeroSection />
           <SocialProofSection />
           <div id="products">

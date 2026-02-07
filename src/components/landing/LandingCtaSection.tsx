@@ -9,22 +9,21 @@ const LandingCtaSection: React.FC = () => {
   return (
     <section
       id="cta"
-      className="w-full flex flex-col items-center justify-center px-4 py-16 md:py-20"
+      className="w-full flex flex-col items-center justify-center px-4 py-12 sm:py-16 md:py-20 min-h-[380px] sm:min-h-[420px] md:min-h-[460px] overflow-hidden"
       style={{
-        height: 460,
         alignSelf: "stretch",
         background: "var(--blue-100, #DBEAFE)",
       }}
     >
-      <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-6">
+      <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-4 sm:gap-6 w-full">
         {/* Header */}
         <h2
-          className="max-w-4xl mx-auto"
+          className="max-w-4xl mx-auto w-full px-2"
           style={{
             color: "var(--text-primary, #0F172A)",
             textAlign: "center",
             fontFamily: "var(--Title-Title-1-fontFamily, Inter)",
-            fontSize: "clamp(2rem, 5vw, 72px)",
+            fontSize: "clamp(1.5rem, 5vw, 72px)",
             fontStyle: "normal",
             fontWeight: 700,
             lineHeight: "clamp(2.5rem, 5.5vw, 88px)",
@@ -36,15 +35,14 @@ const LandingCtaSection: React.FC = () => {
 
         {/* Sub-header */}
         <p
-          className="max-w-2xl mx-auto"
+          className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl px-2"
           style={{
             color: "var(--text-secondary, #475569)",
             textAlign: "center",
             fontFamily: "var(--Heading-H5-fontFamily, Inter)",
-            fontSize: "var(--Heading-H5-fontSize, 24px)",
             fontStyle: "normal",
             fontWeight: 500,
-            lineHeight: "var(--Heading-H5-lineHeight, 30px)",
+            lineHeight: "1.4",
             letterSpacing: "-0.15px",
           }}
         >

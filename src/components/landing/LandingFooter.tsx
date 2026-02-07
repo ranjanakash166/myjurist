@@ -96,14 +96,14 @@ const complianceBadges = [
 const LandingFooter: React.FC = () => {
   return (
     <footer
-      className="w-full"
+      className="w-full overflow-hidden"
       style={{ background: "var(--bg-black-solid, #0F172A)" }}
     >
-      <div className="mx-auto max-w-7xl px-6 py-12 md:py-16 lg:px-8">
-        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between lg:gap-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-12 md:py-16 lg:px-8">
+        <div className="flex flex-col gap-8 sm:gap-10 lg:flex-row lg:justify-between lg:gap-16">
           {/* Left: logo, tagline, compliance badges */}
-          <div className="max-w-md space-y-6">
-            <div className="flex items-center gap-3">
+          <div className="max-w-md space-y-4 sm:space-y-6 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               <FooterLogoIcon />
               <FooterWordmark />
             </div>

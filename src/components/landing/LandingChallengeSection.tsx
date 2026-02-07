@@ -108,10 +108,10 @@ const LandingChallengeSection: React.FC = () => {
   return (
     <section
       id="challenge"
-      className="py-20 md:py-24 px-4"
+      className="py-12 sm:py-16 md:py-24 px-4 overflow-hidden"
       style={{ background: "var(--blue-50, #EFF6FF)" }}
     >
-      <div className="max-w-6xl mx-auto flex flex-col items-center">
+      <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
         {/* 1. THE CHALLENGE pill */}
         <div
           className="inline-flex items-center gap-4 rounded-full border px-2 py-2 pr-4 mb-8"
@@ -165,40 +165,38 @@ const LandingChallengeSection: React.FC = () => {
         </p>
 
         {/* 4. Three cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full min-w-0">
           {cards.map((card) => {
             const Icon = card.icon;
             return (
               <div
                 key={card.header}
-                className="rounded-2xl p-6 md:p-8 bg-white border border-slate-200/60 shadow-sm"
+                className="rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 bg-white border border-slate-200/60 shadow-sm min-w-0"
               >
-                <div className="mb-5 flex items-center justify-start">
+                <div className="mb-4 sm:mb-5 flex items-center justify-start">
                   <Icon />
                 </div>
                 <h3
-                  className="font-bold mb-3"
+                  className="font-bold mb-2 sm:mb-3 text-lg sm:text-xl md:text-2xl"
                   style={{
                     color: "var(--text-primary, #0F172A)",
                     fontFamily: "var(--Heading-H5-fontFamily, Inter)",
-                    fontSize: "var(--Heading-H5-fontSize, 24px)",
                     fontStyle: "normal",
                     fontWeight: 700,
-                    lineHeight: "var(--Heading-H5-lineHeight, 30px)",
+                    lineHeight: "1.3",
                     letterSpacing: "-0.15px",
                   }}
                 >
                   {card.header}
                 </h3>
                 <p
-                  className="leading-relaxed"
+                  className="leading-relaxed text-sm sm:text-base md:text-lg"
                   style={{
                     color: "var(--text-secondary, #475569)",
                     fontFamily: "var(--Heading-H6-fontFamily, Inter)",
-                    fontSize: "var(--Heading-H6-fontSize, 20px)",
                     fontStyle: "normal",
                     fontWeight: 500,
-                    lineHeight: "var(--Heading-H6-lineHeight, 24px)",
+                    lineHeight: "1.4",
                     letterSpacing: 0,
                   }}
                 >

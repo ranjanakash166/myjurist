@@ -22,28 +22,28 @@ const LandingHeroSection: React.FC = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[90vh] flex flex-col items-center justify-center pt-32 pb-20 px-4 overflow-hidden"
+      className="relative min-h-[90vh] flex flex-col items-center justify-center pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 overflow-hidden"
       style={{
         background: "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",
       }}
     >
-      <div className="flex flex-col items-center gap-10 w-full max-w-[974px] mx-auto">
+      <div className="flex flex-col items-center gap-6 sm:gap-8 md:gap-10 w-full max-w-[974px] mx-auto">
         {/* 1. Trust badge */}
         <div
-          className="inline-flex items-center gap-4 rounded-full border px-2 py-2 pr-4"
+          className="inline-flex items-center justify-center gap-2 sm:gap-4 rounded-full border px-2 py-2 pr-3 sm:pr-4 flex-wrap sm:flex-nowrap max-w-full"
           style={{
-            padding: "8px 16px 8px 8px",
-            gap: 16,
+            padding: "8px 12px 8px 8px",
+            gap: 12,
             borderRadius: 100,
             border: "1px solid var(--blue-400, #60A5FA)",
             background: "var(--blue-50, #EFF6FF)",
           }}
         >
-          <div className="flex items-center">
+          <div className="flex items-center shrink-0">
             {avatarSrcs.map((src, i) => (
               <div
                 key={i}
-                className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-200 border-2 border-[var(--blue-50)] shrink-0"
+                className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-slate-200 border-2 border-[var(--blue-50)] shrink-0"
                 style={{ marginLeft: i === 0 ? 0 : -8 }}
               >
                 <Image
@@ -60,10 +60,9 @@ const LandingHeroSection: React.FC = () => {
             ))}
           </div>
           <span
-            className="font-medium text-[var(--text-primary)]"
+            className="font-medium text-[var(--text-primary)] text-center sm:text-left text-sm sm:text-base md:text-lg"
             style={{
               fontFamily: "var(--Heading-H6-fontFamily, Inter)",
-              fontSize: "var(--Heading-H6-fontSize, 20px)",
               fontWeight: 500,
               lineHeight: "24px",
               letterSpacing: 0,
@@ -73,17 +72,17 @@ const LandingHeroSection: React.FC = () => {
           </span>
         </div>
 
-        {/* 2. Headline */}
+        {/* 2. Headline – Title/Title-1/Bold (responsive) */}
         <h1
-          className="text-center max-w-[974px]"
+          className="text-center max-w-[974px] w-full"
           style={{
             color: "var(--text-primary, #0F172A)",
             fontFamily: "var(--Title-Title-1-fontFamily, Inter)",
-            fontSize: "clamp(2.5rem, 5vw, 72px)",
+            fontSize: "clamp(1.75rem, 5vw, 72px)",
             fontStyle: "normal",
-            fontWeight: 700,
-            lineHeight: "clamp(3rem, 6vw, 88px)",
-            letterSpacing: "-0.8px",
+            fontWeight: "var(--Weights-Bold, 700)",
+            lineHeight: "clamp(2.25rem, 6vw, 88px)",
+            letterSpacing: "var(--Title-Title-1-letterSpacing, -0.8px)",
           }}
         >
           Win More Cases with{" "}
@@ -102,14 +101,13 @@ const LandingHeroSection: React.FC = () => {
 
         {/* Sub-paragraph */}
         <p
-          className="text-center max-w-[864px]"
+          className="text-center max-w-[864px] w-full text-base sm:text-lg md:text-xl lg:text-2xl px-1"
           style={{
             color: "var(--text-secondary, #475569)",
             fontFamily: "var(--Heading-H5-fontFamily, Inter)",
-            fontSize: "var(--Heading-H5-fontSize, 24px)",
             fontStyle: "normal",
             fontWeight: 500,
-            lineHeight: "var(--Heading-H5-lineHeight, 30px)",
+            lineHeight: "1.35",
             letterSpacing: "-0.15px",
           }}
         >
@@ -136,31 +134,29 @@ const LandingHeroSection: React.FC = () => {
 
         {/* 4. Key metrics */}
         <div
-          className="w-full flex flex-wrap items-center justify-center gap-12 md:gap-16 lg:gap-24 pt-8 pb-6"
+          className="w-full flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12 lg:gap-16 xl:gap-24 pt-6 sm:pt-8 pb-4 sm:pb-6"
           style={{ alignSelf: "stretch" }}
         >
           {metrics.map((item) => (
-            <div key={item.label} className="flex flex-col items-center gap-1">
+            <div key={item.label} className="flex flex-col items-center gap-0.5 sm:gap-1">
               <span
-                className="text-center"
+                className="text-center text-2xl sm:text-3xl md:text-4xl"
                 style={{
                   color: "var(--text-primary, #0F172A)",
                   fontFamily: "var(--Heading-H3-fontFamily, Inter)",
-                  fontSize: "var(--Heading-H3-fontSize, 40px)",
                   fontStyle: "normal",
                   fontWeight: 600,
-                  lineHeight: "var(--Heading-H3-lineHeight, 48px)",
+                  lineHeight: "1.2",
                   letterSpacing: "-0.3px",
                 }}
               >
                 {item.value}
               </span>
               <span
-                className="text-center"
+                className="text-center text-xs sm:text-sm md:text-base"
                 style={{
                   color: "var(--text-secondary, #475569)",
                   fontFamily: "var(--Heading-H6-fontFamily, Inter)",
-                  fontSize: "var(--Heading-H6-fontSize, 20px)",
                   fontWeight: 500,
                   lineHeight: "24px",
                   letterSpacing: 0,

@@ -58,7 +58,7 @@ const TestimonialsSection: React.FC = () => {
   return (
     <section
       id="testimonials"
-      className="py-20 md:py-24 px-4 overflow-hidden"
+      className="py-12 sm:py-16 md:py-24 px-4 overflow-hidden"
       style={{
         background:
           "linear-gradient(180deg, var(--blue-50, #EFF6FF) 0%, rgba(255,255,255,0.9) 100%)",
@@ -87,11 +87,11 @@ const TestimonialsSection: React.FC = () => {
 
         {/* 2. Header */}
         <h2
-          className="text-center max-w-4xl mx-auto mb-14"
+          className="text-center max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-14 px-2"
           style={{
             color: "var(--text-primary, #0F172A)",
             fontFamily: "var(--Title-Title-1-fontFamily, Inter)",
-            fontSize: "clamp(2rem, 5vw, 72px)",
+            fontSize: "clamp(1.5rem, 5vw, 72px)",
             fontStyle: "normal",
             fontWeight: 700,
             lineHeight: "clamp(2.5rem, 5.5vw, 88px)",

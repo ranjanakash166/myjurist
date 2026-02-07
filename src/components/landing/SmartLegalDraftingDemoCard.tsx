@@ -101,7 +101,7 @@ const SmartLegalDraftingDemoCard: React.FC = () => {
         className={`${stageLayerClass} ${transitionClass} ${stageVisible(0)}`}
       >
         <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-3">
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide space-y-2 pr-1">
+          <div className="flex-1 min-h-0 overflow-hidden max-md:overflow-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide space-y-2 pr-1">
             {TEMPLATE_ITEMS.slice(0, 5).map((item) => renderTemplateRow(item))}
             <div className="h-14 flex-shrink-0" />
           </div>
@@ -114,7 +114,7 @@ const SmartLegalDraftingDemoCard: React.FC = () => {
       >
         <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-3">
           <div
-            className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide space-y-2 pr-1 transition-transform duration-700 ease-out"
+            className="flex-1 min-h-0 overflow-hidden max-md:overflow-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide space-y-2 pr-1 transition-transform duration-700 ease-out"
             style={{ transform: "translateY(-72px)" }}
           >
             {TEMPLATE_ITEMS.map((item) => renderTemplateRow(item))}
@@ -127,7 +127,7 @@ const SmartLegalDraftingDemoCard: React.FC = () => {
         className={`${stageLayerClass} ${transitionClass} ${stageVisible(2)}`}
       >
         <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-3">
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide space-y-2 pr-1">
+          <div className="flex-1 min-h-0 overflow-hidden max-md:overflow-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide space-y-2 pr-1">
             {TEMPLATE_ITEMS.map((item) =>
               renderTemplateRow(
                 item,
@@ -186,7 +186,7 @@ const SmartLegalDraftingDemoCard: React.FC = () => {
               Required Information
             </span>
           </div>
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+          <div className="flex-1 min-h-0 overflow-hidden max-md:overflow-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide">
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
@@ -233,7 +233,7 @@ const SmartLegalDraftingDemoCard: React.FC = () => {
       >
         <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-4">
           <div className="flex-1 min-h-0 flex gap-3 overflow-hidden">
-            <div className="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white p-4 overflow-y-auto scrollbar-hide">
+            <div className="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white p-4 overflow-hidden max-md:overflow-hidden md:overflow-y-auto scrollbar-hide">
               <p className="font-semibold text-slate-800 text-sm mb-3">
                 Divorce Agreement
               </p>

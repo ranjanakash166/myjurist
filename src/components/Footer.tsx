@@ -13,8 +13,8 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-t from-muted/80 to-background/40 py-12 border-t border-border">
-      <div className="container-legal text-center">
+    <footer className="bg-gradient-to-t from-muted/80 to-background/40 py-8 sm:py-12 border-t border-border overflow-hidden">
+      <div className="container-legal text-center max-w-full px-4">
         <div className="flex items-center justify-center space-x-3 mb-6 group">
           <div className="relative">
             <Scale className="h-8 w-8 text-primary group-hover:text-accent transition-colors duration-300" />

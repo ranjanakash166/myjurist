@@ -104,7 +104,7 @@ const LegalResearchDemoCard: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "150ms" }} />
               <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "300ms" }} />
             </div>
-            <div className="space-y-3 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+            <div className="space-y-3 flex-1 min-h-0 overflow-hidden max-md:overflow-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ const LegalResearchDemoCard: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide space-y-2 min-h-0 pb-2">
+            <div className="flex-1 overflow-hidden max-md:overflow-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide space-y-2 min-h-0 pb-2">
               {/* AI Summary */}
               <div className="rounded-lg p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30 transition-opacity duration-300 ease-out">
                 <div className="flex items-center gap-2 mb-1.5">

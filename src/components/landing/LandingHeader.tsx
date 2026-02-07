@@ -35,15 +35,14 @@ const LandingHeader: React.FC = () => {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex flex-col justify-center items-stretch px-6 md:px-8 lg:px-12 xl:px-[250px]"
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex flex-col justify-center items-stretch px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[250px] min-h-[72px] md:min-h-[90px] lg:min-h-[114px]"
       style={{
         background: "transparent",
-        minHeight: 114,
       }}
     >
       {/* Inner panel: transparent at top, glass effect when scrolled */}
       <div
-        className={`w-full flex items-center justify-between gap-6 lg:gap-8 px-6 py-3 rounded-3xl transition-all duration-300 ${
+        className={`w-full max-w-full flex items-center justify-between gap-3 sm:gap-6 lg:gap-8 px-3 sm:px-6 py-2 sm:py-3 rounded-2xl md:rounded-3xl transition-all duration-300 ${
           isScrolled
             ? "bg-white/20 backdrop-blur-md border border-white/20 shadow-sm"
             : ""

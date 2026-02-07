@@ -225,7 +225,7 @@ const OurSolutionSection: React.FC = () => {
       className="py-20 md:py-24 px-4"
       style={{ background: "var(--bg-tertiary, #F1F5F9)" }}
     >
-      <div className="max-w-[1356px] mx-auto w-full overflow-hidden">
+      <div className="max-w-[1356px] mx-auto w-full overflow-x-hidden">
         <h2
           className="text-center mb-8 sm:mb-10 md:mb-14 font-semibold text-2xl sm:text-3xl md:text-4xl px-2"
           style={{
@@ -255,7 +255,7 @@ const OurSolutionSection: React.FC = () => {
                 <div
                     className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row sticky top-2 sm:top-4 md:top-8 shrink-0 ${
                     isAnimatedCard
-                      ? "h-[320px] sm:h-[400px] md:h-[500px] lg:h-[564px] min-h-0"
+                      ? "h-[720px] sm:h-[760px] md:h-[500px] lg:h-[564px] min-h-0"
                       : "min-h-[320px] sm:min-h-[400px] md:min-h-[564px]"
                   }`}
                   style={{
@@ -264,33 +264,33 @@ const OurSolutionSection: React.FC = () => {
                   }}
                 >
                   <div
-                    className={`flex-1 min-w-0 p-4 sm:p-6 md:p-10 lg:p-12 flex flex-col order-1 ${
+                    className={`min-w-0 w-full overflow-x-hidden p-3 sm:p-6 md:p-10 lg:p-12 flex flex-col order-1 ${
                       isAnimatedCard
-                        ? "min-h-0 overflow-y-auto justify-center"
-                        : "justify-center"
+                        ? "flex-1 min-h-0 overflow-y-auto overflow-x-hidden justify-start md:justify-center scrollbar-hide"
+                        : "flex-1 justify-center"
                     }`}
                   >
-                    <div className="mb-6">
+                    <div className="mb-3 sm:mb-6 shrink-0">
                       <Icon />
                     </div>
-                    <h3 className="mb-3 sm:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl" style={headerStyle}>
+                    <h3 className="mb-2 sm:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl break-words min-w-0" style={headerStyle}>
                       {card.header}
                     </h3>
-                    <p className="mb-4 sm:mb-6 max-w-xl text-sm sm:text-base md:text-lg" style={subHeaderStyle}>
+                    <p className="mb-3 sm:mb-6 max-w-xl text-sm sm:text-base md:text-lg break-words min-w-0" style={subHeaderStyle}>
                       {card.subHeader}
                     </p>
-                    <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base">
+                    <ul className="space-y-1.5 sm:space-y-3 text-sm sm:text-base min-w-0">
                       {card.list.map((item) => (
                         <li
                           key={item}
-                          className="flex items-start gap-2 sm:gap-3"
+                          className="flex items-start gap-2 sm:gap-3 min-w-0"
                           style={listItemStyle}
                         >
                           <Check
                             className="w-5 h-5 shrink-0 mt-0.5 text-[var(--blue-600)]"
                             strokeWidth={2.5}
                           />
-                          {item}
+                          <span className="min-w-0 break-words">{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -298,10 +298,10 @@ const OurSolutionSection: React.FC = () => {
                   <div
                     className={`rounded-b-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 order-2 ${
                       card.header === "Lightning-Fast Legal Research"
-                        ? "flex-1 flex flex-col min-h-0 h-[280px] sm:h-[340px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        ? "flex-1 flex flex-col min-h-0 h-[240px] sm:h-[280px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : card.header === "Intelligent Document Analysis" ||
                           card.header === "Smart Legal Drafting"
-                        ? "flex-1 flex flex-col min-h-0 h-[280px] sm:h-[340px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        ? "flex-1 flex flex-col min-h-0 h-[240px] sm:h-[280px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : "w-full md:w-[min(50%,658px)] shrink-0 min-h-[200px] md:min-h-[564px] p-4 sm:p-6"
                     }`}
                     style={
@@ -322,21 +322,21 @@ const OurSolutionSection: React.FC = () => {
                   >
                     {card.header === "Lightning-Fast Legal Research" ? (
                       <div
-                        className="min-w-0 flex-1 overflow-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
+                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
                         style={{ borderRadius: 12 }}
                       >
                         <LegalResearchDemoCard />
                       </div>
                     ) : card.header === "Intelligent Document Analysis" ? (
                       <div
-                        className="min-w-0 flex-1 overflow-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
+                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
                         style={{ borderRadius: 12 }}
                       >
                         <SmartDraftingDemoCard />
                       </div>
                     ) : card.header === "Smart Legal Drafting" ? (
                       <div
-                        className="min-w-0 flex-1 overflow-hidden w-full max-w-full md:max-w-[658px] h-full min-h-0 rounded-xl"
+                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-0 rounded-xl"
                         style={{ borderRadius: 12 }}
                       >
                         <SmartLegalDraftingDemoCard />

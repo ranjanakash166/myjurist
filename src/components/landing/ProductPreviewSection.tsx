@@ -89,29 +89,29 @@ const ProductPreviewSection: React.FC = () => {
   return (
     <section
       id="product-preview"
-      className="w-full flex flex-col items-center justify-center py-16 md:py-20 px-4"
+      className="w-full flex flex-col items-center justify-center py-10 sm:py-14 md:py-20 px-3 sm:px-4 overflow-hidden"
       style={{
-        minHeight: 1088,
+        minHeight: "min(100vh, 900px)",
         alignSelf: "stretch",
         background: "var(--bg-tertiary, #F1F5F9)",
       }}
     >
-      <div className="w-full max-w-6xl mx-auto">
+      <div className="w-full max-w-6xl mx-auto overflow-hidden">
         {/* App preview container – dark themed mockup (slides up when in view) */}
         <div
           ref={containerRef}
-          className={`rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 transition-all duration-700 ease-out ${
+          className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 transition-all duration-700 ease-out max-w-full ${
             hasAnimated ? "animate-slide-up-in" : "product-preview-initial"
           }`}
           style={{
             background: "linear-gradient(180deg, #1e1b4b 0%, #0f172a 50%, #020617 100%)",
-            minHeight: 800,
+            minHeight: "min(70vh, 600px)",
           }}
         >
-          <div className="flex min-h-[800px]">
-            {/* Left sidebar */}
+          <div className="flex min-h-[min(70vh,600px)] md:min-h-[800px]">
+            {/* Left sidebar – hidden on small screens */}
             <aside
-              className="w-56 shrink-0 flex flex-col p-4 border-r"
+              className="hidden md:flex w-48 lg:w-56 shrink-0 flex-col p-3 lg:p-4 border-r"
               style={{
                 background: "rgba(15, 23, 42, 0.6)",
                 borderColor: "rgba(148, 163, 184, 0.15)",
@@ -228,7 +228,7 @@ const ProductPreviewSection: React.FC = () => {
             </aside>
 
             {/* Main content */}
-            <div className="flex-1 flex flex-col p-6 md:p-8 relative overflow-hidden">
+            <div className="flex-1 flex flex-col p-4 sm:p-6 md:p-8 relative overflow-hidden min-w-0">
               {/* Subtle radial glow */}
               <div
                 className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-30 blur-3xl pointer-events-none"
@@ -278,19 +278,19 @@ const ProductPreviewSection: React.FC = () => {
               </div>
 
               {/* Central hero + input */}
-              <div className="flex flex-col items-center flex-1 relative z-10">
+              <div className="flex flex-col items-center flex-1 relative z-10 min-w-0">
                 <div
-                  className="w-32 h-32 md:w-40 md:h-40 rounded-full mb-6 opacity-90"
+                  className="w-20 h-20 sm:w-28 sm:h-28 md:w-40 md:h-40 rounded-full mb-4 md:mb-6 opacity-90 shrink-0"
                   style={{
                     background:
                       "radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.5), rgba(192, 38, 211, 0.4))",
                     boxShadow: "0 0 60px rgba(99, 102, 241, 0.3)",
                   }}
                 />
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white text-center mb-6 max-w-xl">
+                <h2 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-white text-center mb-4 md:mb-6 max-w-xl px-1">
                   Ready to research something new?
                 </h2>
-                <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-4 md:mb-6">
                   {quickActions.map((action) => {
                     const Icon = action.icon;
                     return (
@@ -361,7 +361,7 @@ const ProductPreviewSection: React.FC = () => {
                 </div>
 
                 {/* Feature cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full max-w-4xl mt-4 sm:mt-6 md:mt-8">
                   {featureCards.map((card) => {
                     const Icon = card.icon;
                     return (

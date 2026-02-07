@@ -50,7 +50,7 @@ const SmartDraftingDemoCard: React.FC = () => {
 
   return (
     <div
-      className="h-full flex flex-col min-h-0 overflow-hidden px-6 md:px-8 lg:px-10 py-8 md:py-10 lg:py-12 transition-opacity duration-500 ease-in-out"
+      className="h-full flex flex-col min-h-0 overflow-hidden overflow-x-hidden px-6 md:px-8 lg:px-10 py-8 md:py-10 lg:py-12 transition-opacity duration-500 ease-in-out"
       aria-hidden
     >
       {/* Stepper: on gradient, above card */}
@@ -200,7 +200,7 @@ const SmartDraftingDemoCard: React.FC = () => {
         {stage === 3 && (
           <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-5">
             <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-              <div className="space-y-3 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
+              <div className="space-y-3 flex-1 min-h-0 overflow-hidden max-md:overflow-hidden md:overflow-y-auto scrollbar-hide">
                 <div className="h-4 rounded bg-slate-200 w-3/4 animate-pulse" style={{ animationDelay: "0ms" }} />
                 <div className="h-4 rounded bg-slate-200 w-1/2 animate-pulse" style={{ animationDelay: "80ms" }} />
                 <div className="h-24 rounded bg-slate-200 w-full animate-pulse mt-2" style={{ animationDelay: "160ms" }} />
@@ -218,7 +218,7 @@ const SmartDraftingDemoCard: React.FC = () => {
                 file 187656.pdf
               </span>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+            <div className="flex-1 min-h-0 overflow-hidden max-md:overflow-y-hidden max-md:overflow-x-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide">
               <div className="rounded-lg p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4 h-4 text-emerald-600" />
