@@ -279,13 +279,13 @@ export default function LegalResearchPage() {
  };
 
  const getSimilarityColor = (score: number) => {
- if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+ if (score >= 0.8) return "text-primary bg-primary/10 dark:text-primary dark:bg-primary/20";
  if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
  return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
  };
 
  const getConfidenceColor = (score: number) => {
- if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+ if (score >= 0.8) return "text-primary bg-primary/10 dark:text-primary dark:bg-primary/20";
  if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
  return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
  };
@@ -350,11 +350,11 @@ export default function LegalResearchPage() {
  {/* Tabs */}
  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
  <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
- <TabsTrigger value="search" className="flex items-center gap-2 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
+ <TabsTrigger value="search" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
  <Search className="w-4 h-4" />
  Search
  </TabsTrigger>
- <TabsTrigger value="history" className="flex items-center gap-2 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
+ <TabsTrigger value="history" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
  <History className="w-4 h-4" />
  History
  </TabsTrigger>
@@ -866,7 +866,7 @@ export default function LegalResearchPage() {
  )}
  </TabsContent>
 
- <TabsContent value="history" className="space-y-6">
+ <TabsContent value="history" className="space-y-6 mt-6">
  <LegalResearchHistory />
  </TabsContent>
  </Tabs>

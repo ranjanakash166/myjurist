@@ -9,8 +9,8 @@ const ValuePropositionsSection: React.FC = () => {
       icon: Shield,
       title: 'Enterprise-Grade Security',
       description: 'Robust, industry-standard protection with zero training on your data. Your sensitive legal information stays secure and private.',
-      gradient: 'from-emerald-500 to-teal-600',
-      cardGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20'
+      gradient: 'from-primary to-blue-600',
+      cardGradient: 'from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-950/20'
     },
     {
       icon: Sparkles,

@@ -113,7 +113,7 @@ function EditorToolbar({
         size="sm"
         onClick={handleSave}
         disabled={saving}
-        className="bg-emerald-600 hover:bg-emerald-700 text-white"
+        className="bg-primary hover:bg-primary/90 text-primary-foreground"
       >
         {saving ? (
           <Loader2 className="w-4 h-4 animate-spin" />

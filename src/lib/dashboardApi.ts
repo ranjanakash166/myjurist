@@ -209,7 +209,7 @@ export function getActivityIcon(type: string): string {
 export function getStatusColor(status: string): string {
   switch (status) {
     case 'completed':
-      return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20';
+      return 'text-primary bg-primary/10 dark:text-primary dark:bg-primary/20';
     case 'active':
       return 'text-primary bg-primary/10';
     case 'failed':

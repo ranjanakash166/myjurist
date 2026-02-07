@@ -118,7 +118,7 @@ const ComplianceTrackingDemoCard: React.FC = () => {
         <div className="flex justify-center gap-2 mb-4 flex-wrap">
           <button
             type="button"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-full border-2 border-emerald-300 bg-white text-emerald-700 text-xs font-medium"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-full border-2 border-primary/40 bg-white text-primary text-xs font-medium"
             aria-hidden
           >
             <BookOpen className="w-3.5 h-3.5" />
@@ -161,7 +161,7 @@ const ComplianceTrackingDemoCard: React.FC = () => {
         <div className="flex justify-center gap-2 mb-4 flex-wrap">
           <button
             type="button"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-full border-2 border-emerald-300 bg-white text-emerald-700 text-xs font-medium"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-full border-2 border-primary/40 bg-white text-primary text-xs font-medium"
             aria-hidden
           >
             <BookOpen className="w-3.5 h-3.5" />

@@ -328,12 +328,12 @@ export default function TimelineExtractorPage() {
           clearTimelineResult();
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted/50">
-          <TabsTrigger value="new" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+          <TabsTrigger value="new" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
             <Upload className="w-4 h-4" />
             New Timeline
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger value="history" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
             <History className="w-4 h-4" />
             History
           </TabsTrigger>

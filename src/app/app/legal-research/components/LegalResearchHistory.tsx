@@ -393,13 +393,13 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  };
 
  const getSimilarityColor = (score: number) => {
- if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+ if (score >= 0.8) return "text-primary bg-primary/10 dark:text-primary dark:bg-primary/20";
  if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
  return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
  };
 
  const getConfidenceColor = (score: number) => {
- if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+ if (score >= 0.8) return "text-primary bg-primary/10 dark:text-primary dark:bg-primary/20";
  if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
  return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
  };
@@ -454,8 +454,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  });
 
  return (
-   <div className="w-full px-6 md:px-8 lg:px-12 py-6 space-y-6">
-
+   <div className="w-full space-y-6">
 
  {/* Search and Filter Controls */}
  <Card className="w-full">
@@ -739,7 +738,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  </div>
 
  {parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
- <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
+ <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
  <Lightbulb className="w-5 h-5 text-primary" />
  <h3 className="font-semibold text-lg text-foreground">Key Legal Insights</h3>
@@ -790,7 +789,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {parsedData.procedural_developments && parsedData.procedural_developments.length > 0 && (
- <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
+ <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
  <Zap className="w-5 h-5 text-primary" />
  <h3 className="font-semibold text-lg text-foreground">Procedural Developments</h3>

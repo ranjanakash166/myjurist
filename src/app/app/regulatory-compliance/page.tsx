@@ -143,8 +143,8 @@ export default function RegulatoryCompliancePage() {
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
-            <Scale className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg">
+            <Scale className="w-5 h-5 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Regulatory Compliance</h1>
         </div>
@@ -159,7 +159,7 @@ export default function RegulatoryCompliancePage() {
           <div className="space-y-5">
             {/* Search Input with integrated button */}
             <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
                 <Search className="w-5 h-5" />
               </div>
               <Input
@@ -169,12 +169,12 @@ export default function RegulatoryCompliancePage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="h-14 text-base pl-12 pr-32 rounded-xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="h-14 text-base pl-12 pr-32 rounded-xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 disabled={isSubmitting}
               />
               <Button 
                 onClick={handleSubmit}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
                 disabled={isSubmitting || !query.trim()}
               >
                 {isSubmitting ? (
@@ -244,8 +244,8 @@ export default function RegulatoryCompliancePage() {
         <Card className="w-full border-2 shadow-lg">
           <CardContent className="py-12">
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="w-20 h-20 mb-6 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center shadow-lg">
-                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+              <div className="w-20 h-20 mb-6 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center shadow-lg">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
               </div>
               <h3 className="text-xl font-semibold mb-2 text-foreground">Analyzing Regulatory Information...</h3>
               <p className="text-muted-foreground text-sm max-w-md mx-auto">
@@ -261,8 +261,8 @@ export default function RegulatoryCompliancePage() {
         <div className="space-y-6">
           {/* Results Header */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
-              <CheckCircle className="w-5 h-5 text-white" />
+<div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+            <CheckCircle className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground">Analysis Complete</h2>
@@ -272,16 +272,16 @@ export default function RegulatoryCompliancePage() {
 
           {/* AI Answer */}
           <Card className="border-2 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg border-b">
+            <CardHeader className="bg-primary/5 dark:bg-primary/10 rounded-t-lg border-b border-border">
               <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <span>AI Analysis</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-6 border-2 border-emerald-200 dark:border-emerald-800">
+              <div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border-2 border-primary/20 dark:border-primary/30">
                 <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300 prose prose-sm max-w-none">
                   <SimpleMarkdownRenderer content={result.answer} />
                 </div>
@@ -292,11 +292,11 @@ export default function RegulatoryCompliancePage() {
           {/* Related Sections */}
           {result.related_sections.length > 0 && (
             <Card className="border-2 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg border-b">
+              <CardHeader className="bg-primary/5 dark:bg-primary/10 rounded-t-lg border-b border-border">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-3 text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
-                      <BookOpen className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                      <BookOpen className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <span>Related Sections</span>
                   </CardTitle>
@@ -310,7 +310,7 @@ export default function RegulatoryCompliancePage() {
                   {result.related_sections.map((section, index) => (
                     <Badge 
                       key={index} 
-                      className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-2 border-emerald-200 dark:border-emerald-800 px-4 py-2 text-sm font-medium hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                      className="bg-primary/10 dark:bg-primary/20 text-primary border-2 border-primary/20 dark:border-primary/40 px-4 py-2 text-sm font-medium hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors"
                     >
                       Section {section}
                     </Badge>

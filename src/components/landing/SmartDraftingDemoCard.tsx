@@ -150,7 +150,7 @@ const SmartDraftingDemoCard: React.FC = () => {
                 </p>
                 <p className="text-slate-500 text-xs">4.2 MB</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
                 <Check className="w-4 h-4 text-white" strokeWidth={2.5} />
               </div>
             </div>
@@ -219,9 +219,9 @@ const SmartDraftingDemoCard: React.FC = () => {
               </span>
             </div>
             <div className="flex-1 min-h-0 overflow-hidden max-md:overflow-y-hidden max-md:overflow-x-hidden md:overflow-y-auto md:overflow-x-hidden scrollbar-hide">
-              <div className="rounded-lg p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+              <div className="rounded-lg p-4 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <Sparkles className="w-4 h-4 text-primary" />
                   <span className="font-semibold text-sm text-slate-800">
                     AI Summary
                   </span>

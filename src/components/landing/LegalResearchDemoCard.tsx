@@ -159,9 +159,9 @@ const LegalResearchDemoCard: React.FC = () => {
               </div>
 
               {/* Key Legal Insights */}
-              <div className="rounded-lg p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 transition-opacity duration-300 ease-out">
+              <div className="rounded-lg p-3 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 transition-opacity duration-300 ease-out">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <Lightbulb className="w-3.5 h-3.5 text-emerald-600" />
+                  <Lightbulb className="w-3.5 h-3.5 text-primary" />
                   <span className="font-semibold text-sm text-slate-800">Key Legal Insights</span>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed line-clamp-2">

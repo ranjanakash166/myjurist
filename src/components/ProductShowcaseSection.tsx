@@ -32,8 +32,8 @@ const ProductShowcaseSection: React.FC = () => {
       title: 'Regulatory Compliance',
       description: 'Automated compliance checking and guidance. Stay compliant with AI-powered regulatory analysis and monitoring.',
       href: '/app/regulatory-compliance',
-      gradient: 'from-emerald-500 to-teal-600',
-      cardGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20'
+      gradient: 'from-primary to-blue-600',
+      cardGradient: 'from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-950/20'
     },
     {
       icon: FileEdit,

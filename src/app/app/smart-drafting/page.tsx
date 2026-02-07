@@ -203,7 +203,7 @@ export default function SmartDraftingPage() {
       {/* Header */}
       <div className="mb-4 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-primary to-blue-500 rounded-xl flex items-center justify-center">
             <FileEdit className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -221,10 +221,10 @@ export default function SmartDraftingPage() {
         <div className="flex flex-col gap-4 min-h-0 overflow-hidden">
       {/* Contract ready state */}
       {contractId && (
-        <Card className="mb-6 border-emerald-500/30 bg-emerald-500/5">
+        <Card className="mb-6 border-primary/30 bg-primary/5">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle className="w-5 h-5 text-primary" />
               <CardTitle className="text-lg">Contract ready</CardTitle>
             </div>
           </CardHeader>
@@ -243,7 +243,7 @@ export default function SmartDraftingPage() {
                 size="sm"
                 onClick={() => handleDownload("pdf")}
                 disabled={downloadFormat !== null}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {downloadFormat === "pdf" ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -309,14 +309,14 @@ export default function SmartDraftingPage() {
               <div
                 className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${
                   msg.sender === "user"
-                    ? "bg-emerald-600 text-white rounded-br-md dark:bg-emerald-700 dark:text-white"
+                    ? "bg-primary text-primary-foreground rounded-br-md dark:bg-primary/90"
                     : "bg-muted text-foreground rounded-bl-md border border-border"
                 }`}
               >
                 {msg.sender === "user" ? (
                   <>
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    <div className="text-xs text-emerald-100 dark:text-emerald-200 opacity-90 mt-2">
+                    <div className="text-xs text-primary-foreground/90 opacity-90 mt-2">
                       {formatTime(msg.timestamp)}
                     </div>
                   </>

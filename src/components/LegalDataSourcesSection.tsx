@@ -24,8 +24,8 @@ const LegalDataSourcesSection: React.FC = () => {
         {/* Section Header */}
         <div className="text-center mb-10 sm:mb-16">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shrink-0">
-              <Building2 className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center shrink-0">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
             </div>
             <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground">
               Connected to Legal Data Sources
@@ -75,7 +75,7 @@ const LegalDataSourcesSection: React.FC = () => {
         {/* Additional Info */}
         <div className="mt-12 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-background rounded-lg border border-border">
-            <Scale className="w-5 h-5 text-emerald-500" />
+            <Scale className="w-5 h-5 text-primary" />
             <span className="text-sm font-medium text-foreground">
               Continuously updated with latest judgments and legal precedents
             </span>

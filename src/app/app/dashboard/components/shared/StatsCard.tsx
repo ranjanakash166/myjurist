@@ -17,9 +17,9 @@ const colorClasses = {
     border: 'border-primary/20'
   },
   green: {
-    value: 'text-green-600 dark:text-green-400',
-    bg: 'bg-green-50 dark:bg-green-900/20',
-    border: 'border-green-200 dark:border-green-800'
+    value: 'text-primary dark:text-primary',
+    bg: 'bg-primary/10 dark:bg-primary/20',
+    border: 'border-primary/20 dark:border-primary/40'
   },
   purple: {
     value: 'text-purple-600 dark:text-purple-400',

@@ -143,7 +143,7 @@ const LandingHeader: React.FC = () => {
             <Link href="/contact" className="flex items-center gap-2">
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: "var(--green-500)" }}
+                style={{ backgroundColor: "hsl(var(--primary))" }}
                 aria-hidden
               />
               Contact Us
@@ -207,7 +207,7 @@ const LandingHeader: React.FC = () => {
                   <Link href="/contact" className="flex items-center gap-2">
                     <span
                       className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: "var(--green-500)" }}
+                      style={{ backgroundColor: "hsl(var(--primary))" }}
                     />
                     Contact Us
                     <CtaArrowIcon size={28} className="shrink-0" />

@@ -146,7 +146,7 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
         <CardContent className="p-6 md:p-8">
             {isSubmitted ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="h-10 w-10 text-white" />
                 </div>
                 <h3

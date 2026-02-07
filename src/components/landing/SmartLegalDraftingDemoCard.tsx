@@ -20,9 +20,9 @@ const TEMPLATE_ITEMS = [
   { name: "Corporate Business Contract", count: 19, color: "bg-slate-600" },
   { name: "Power of Attorney Contract", count: 10, color: "bg-purple-500" },
   { name: "Property Contract", count: 7, color: "bg-indigo-600" },
-  { name: "Will Contract", count: 5, color: "bg-teal-500" },
+  { name: "Will Contract", count: 5, color: "bg-blue-500" },
   { name: "Family Law Contract", count: 12, color: "bg-amber-600" },
-  { name: "Bonds Contract", count: 8, color: "bg-emerald-500" },
+  { name: "Bonds Contract", count: 8, color: "bg-primary" },
 ];
 
 const SmartLegalDraftingDemoCard: React.FC = () => {
