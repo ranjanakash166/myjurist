@@ -66,7 +66,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground relative group">
+    <div className="app-shell min-h-screen flex bg-background text-foreground relative group">
+      {/* Portal target for modals so they inherit app-shell theme (inside app layout) */}
+      <div id="app-modal-root" aria-hidden="true" className="contents" />
       {/* Mobile Top Navbar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">

@@ -73,7 +73,7 @@ export default function TimelineHistoryList({
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+        return 'bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary-foreground';
       case 'processing':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
       case 'failed':

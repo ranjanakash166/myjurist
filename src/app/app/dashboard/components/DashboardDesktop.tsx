@@ -60,14 +60,14 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
   const barData = getActivityOverTimeData(dashboardData.recent_activity);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="w-full">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Welcome back, {dashboardData.user_info.name}!
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-muted-foreground">
             Member since {formatDate(dashboardData.user_info.member_since)}
           </p>
         </div>
@@ -76,10 +76,10 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Recent Activity - Left Column */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            <h2 className="text-2xl font-semibold text-foreground mb-4">
               Recent Activity
             </h2>
-            <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 h-full">
+            <Card className="bg-card shadow-sm border border-border h-full">
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   {dashboardData.recent_activity.slice(0, 10).map((activity, index) => (
@@ -91,7 +91,7 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
                   ))}
                 </div>
                 {dashboardData.recent_activity.length === 0 && (
-                  <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  <div className="text-center text-muted-foreground py-8">
                     <p>No recent activity</p>
                   </div>
                 )}
@@ -101,7 +101,7 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
 
           {/* Your Statistics - Right Column */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            <h2 className="text-2xl font-semibold text-foreground mb-4">
               Your Statistics
             </h2>
             <div className="grid grid-cols-1 gap-6 h-full">
@@ -132,15 +132,15 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
 
         {/* Charts Section - Desktop Layout */}
         <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-2xl font-semibold text-foreground mb-4">
             Activity Insights
           </h2>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Pie Chart */}
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
+          <Card className="bg-card shadow-sm border border-border hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <CardTitle className="text-lg font-semibold text-foreground">
                 Activity Type Distribution
               </CardTitle>
             </CardHeader>
@@ -178,7 +178,7 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
               </div>
               <div className="flex justify-center gap-6 mt-6 flex-wrap">
                 {pieData.map((entry) => (
-                  <span key={entry.name} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span key={entry.name} className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span className="inline-block w-3 h-3 rounded-full" style={{ background: entry.color }}></span>
                     {entry.name} ({entry.value})
                   </span>
@@ -188,9 +188,9 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
           </Card>
 
           {/* Bar Chart */}
-          <Card className="bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
+          <Card className="bg-card shadow-sm border border-border hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <CardTitle className="text-lg font-semibold text-foreground">
                 Activity Over Time (Last 7 Days)
               </CardTitle>
             </CardHeader>
@@ -238,7 +238,7 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
                 </ResponsiveContainer>
               </div>
               {barData.length === 0 && (
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                <div className="text-center text-muted-foreground py-8">
                   No activity data available for the selected time period.
                 </div>
               )}

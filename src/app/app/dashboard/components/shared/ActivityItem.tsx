@@ -16,7 +16,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({
   if (isMobile) {
     return (
       <div
-        className={`flex items-center justify-between p-2.5 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-[1.01] hover:shadow-md transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+        className={`flex items-center justify-between p-2.5 bg-muted rounded-lg border-b border-border last:border-b-0 hover:bg-accent hover:scale-[1.01] hover:shadow-md transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
         onClick={onClick}
       >
         <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -24,10 +24,10 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({
             {getActivityIcon(activity.type)}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-gray-900 dark:text-gray-100 text-xs truncate leading-tight">
+            <h3 className="font-medium text-foreground text-xs truncate leading-tight">
               {activity.title}
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+            <p className="text-xs text-muted-foreground leading-tight">
               {formatDate(activity.timestamp)}
             </p>
           </div>
@@ -43,7 +43,7 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({
 
   return (
     <div
-      className={`flex items-center justify-between p-4 bg-gray-50 dark:bg-neutral-700 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-600 hover:scale-[1.02] hover:shadow-xl transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`flex items-center justify-between p-4 bg-muted rounded-lg border-b border-border last:border-b-0 hover:bg-accent hover:scale-[1.02] hover:shadow-xl transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-center space-x-4">
@@ -51,10 +51,10 @@ export const ActivityItem: React.FC<ActivityItemProps> = ({
           {getActivityIcon(activity.type)}
         </div>
         <div>
-          <h3 className="font-medium text-gray-900 dark:text-gray-100">
+          <h3 className="font-medium text-foreground">
             {activity.title}
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             {formatDate(activity.timestamp)}
           </p>
         </div>

@@ -625,10 +625,10 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
  {/* Detail Modal */}
  <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
- <DialogContent className="max-w-7xl h-[90vh] flex flex-col p-0">
- <DialogHeader className="flex-shrink-0 p-6 pb-4">
- <DialogTitle className="flex items-center gap-2">
- <BookOpen className="w-5 h-5" />
+ <DialogContent className="app-shell max-w-7xl h-[90vh] flex flex-col p-0 bg-background text-foreground border-border">
+ <DialogHeader className="flex-shrink-0 p-6 pb-4 border-b border-border">
+ <DialogTitle className="flex items-center gap-2 text-foreground">
+ <BookOpen className="w-5 h-5 text-primary" />
  Legal Research Analysis
  </DialogTitle>
  </DialogHeader>
@@ -638,17 +638,17 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  <div className="flex-1 overflow-y-auto px-6 pb-6">
  <div className="space-y-6">
  {/* Search Query Header */}
- <Card>
+ <Card className="bg-card border-border">
  <CardHeader>
- <CardTitle className="flex items-center gap-2">
- <Search className="w-5 h-5" />
+ <CardTitle className="flex items-center gap-2 text-foreground">
+ <Search className="w-5 h-5 text-primary" />
  Search Query
  </CardTitle>
  </CardHeader>
  <CardContent>
- <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg p-4 border">
+ <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-card dark:to-primary/10 rounded-lg p-4 border border-border">
  <div className="flex items-center justify-between mb-3">
- <h3 className="text-lg font-semibold">{selectedResearch.query}</h3>
+ <h3 className="text-lg font-semibold text-foreground">{selectedResearch.query}</h3>
  <div className="flex items-center gap-2">
  <Badge variant="outline">{selectedResearch.search_type}</Badge>
  <Badge variant="outline">{selectedResearch.total_results} results</Badge>
@@ -676,10 +676,10 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
  {/* AI Summary */}
  {selectedResearch.ai_summary && (
- <Card>
+ <Card className="bg-card border-border">
  <CardHeader>
- <CardTitle className="flex items-center gap-2">
- <Brain className="w-5 h-5 text-purple-500" />
+ <CardTitle className="flex items-center gap-2 text-foreground">
+ <Brain className="w-5 h-5 text-primary" />
  AI Summary
  </CardTitle>
  </CardHeader>
@@ -711,12 +711,12 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  </div>
  </div>
 
- <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <Sparkles className="w-5 h-5 text-purple-500" />
- <h3 className="font-semibold text-lg">AI Summary</h3>
+ <Sparkles className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">AI Summary</h3>
  </div>
- <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+ <div className="text-sm leading-relaxed text-foreground">
    {(() => {
      let textToShow = parsedData.ai_summary;
      if (parsedData.ai_summary === selectedResearch.ai_summary.ai_summary && selectedResearch.ai_summary.ai_summary.includes('"ai_summary"')) {
@@ -739,16 +739,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  </div>
 
  {parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
- <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <Lightbulb className="w-5 h-5 text-green-500" />
- <h3 className="font-semibold text-lg">Key Legal Insights</h3>
+ <Lightbulb className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">Key Legal Insights</h3>
  </div>
  <div className="space-y-3">
  {parsedData.key_legal_insights.map((insight, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(insight)}</span>
+ <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
+ <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+ <span className="text-sm text-foreground">{parseBoldText(insight)}</span>
  </div>
  ))}
  </div>
@@ -756,16 +756,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {parsedData.relevant_precedents && parsedData.relevant_precedents.length > 0 && (
- <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <Award className="w-5 h-5 text-orange-500" />
- <h3 className="font-semibold text-lg">Relevant Precedents</h3>
+ <Award className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">Relevant Precedents</h3>
  </div>
  <div className="space-y-3">
  {parsedData.relevant_precedents.map((precedent, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(precedent)}</span>
+ <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
+ <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+ <span className="text-sm text-foreground">{parseBoldText(precedent)}</span>
  </div>
  ))}
  </div>
@@ -773,16 +773,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {parsedData.statutory_provisions && parsedData.statutory_provisions.length > 0 && (
- <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <BookOpen className="w-5 h-5 text-indigo-500" />
- <h3 className="font-semibold text-lg">Statutory Provisions</h3>
+ <BookOpen className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">Statutory Provisions</h3>
  </div>
  <div className="space-y-3">
  {parsedData.statutory_provisions.map((provision, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-indigo-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(provision)}</span>
+ <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
+ <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+ <span className="text-sm text-foreground">{parseBoldText(provision)}</span>
  </div>
  ))}
  </div>
@@ -790,16 +790,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {parsedData.procedural_developments && parsedData.procedural_developments.length > 0 && (
- <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <Zap className="w-5 h-5 text-teal-500" />
- <h3 className="font-semibold text-lg">Procedural Developments</h3>
+ <Zap className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">Procedural Developments</h3>
  </div>
  <div className="space-y-3">
  {parsedData.procedural_developments.map((development, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-teal-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(development)}</span>
+ <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
+ <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+ <span className="text-sm text-foreground">{parseBoldText(development)}</span>
  </div>
  ))}
  </div>
@@ -807,16 +807,16 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {parsedData.practical_implications && parsedData.practical_implications.length > 0 && (
- <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <Users className="w-5 h-5 text-rose-500" />
- <h3 className="font-semibold text-lg">Practical Implications</h3>
+ <Users className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">Practical Implications</h3>
  </div>
  <div className="space-y-3">
  {parsedData.practical_implications.map((implication, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
- <div className="w-2 h-2 bg-rose-500 rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-gray-700 dark:text-gray-300">{parseBoldText(implication)}</span>
+ <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
+ <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+ <span className="text-sm text-foreground">{parseBoldText(implication)}</span>
  </div>
  ))}
  </div>
@@ -824,14 +824,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {parsedData.legal_areas_covered && parsedData.legal_areas_covered.length > 0 && (
- <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <Target className="w-5 h-5 text-blue-500" />
- <h3 className="font-semibold text-lg">Legal Areas Covered</h3>
+ <Target className="w-5 h-5 text-primary" />
+ <h3 className="font-semibold text-lg text-foreground">Legal Areas Covered</h3>
  </div>
  <div className="flex flex-wrap gap-2">
  {parsedData.legal_areas_covered.map((area, index) => (
- <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1">
+ <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-primary/20 dark:text-foreground px-3 py-1">
  {parseBoldText(area)}
  </Badge>
  ))}
@@ -841,14 +841,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
  {/* Sources Analyzed */}
  {selectedResearch.ai_summary.sources_analyzed && selectedResearch.ai_summary.sources_analyzed.length > 0 && (
- <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-lg p-6 border">
+ <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
  <div className="flex items-center gap-2 mb-4">
- <FileText className="w-5 h-5 text-gray-500" />
- <h3 className="font-semibold text-lg">Sources Analyzed</h3>
+ <FileText className="w-5 h-5 text-muted-foreground" />
+ <h3 className="font-semibold text-lg text-foreground">Sources Analyzed</h3>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
  {selectedResearch.ai_summary.sources_analyzed.map((source, index) => (
- <div key={index} className="text-sm text-muted-foreground bg-white dark:bg-gray-800 rounded px-3 py-2 border">
+ <div key={index} className="text-sm text-muted-foreground bg-muted rounded px-3 py-2 border border-border">
  {formatFileName(source)}
  </div>
  ))}
@@ -863,9 +863,9 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  )}
 
  {/* Search Results */}
- <Card>
+ <Card className="bg-card border-border">
  <CardHeader>
- <CardTitle className="flex items-center gap-2">
+ <CardTitle className="flex items-center gap-2 text-foreground">
  <FileText className="w-5 h-5 text-primary" />
  Search Results ({selectedResearch.search_results.length})
  </CardTitle>
@@ -873,7 +873,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  <CardContent>
  <div className="space-y-4">
  {selectedResearch.search_results.map((result, index) => (
- <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+ <Card key={index} className="hover:shadow-lg transition-shadow duration-200 bg-card border-border">
  <CardHeader className="pb-3">
  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
  <div className="flex-1 min-w-0">
@@ -954,9 +954,9 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  {/* Document Viewer Modal */}
  {selectedDocument && (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-background rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+ <div className="bg-background text-foreground rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-border">
  {/* Modal Header */}
- <div className="flex items-center justify-between p-6 border-b">
+ <div className="flex items-center justify-between p-6 border-b border-border">
  <div className="flex-1 min-w-0">
  <h2 className="text-xl font-semibold text-foreground truncate">
  {selectedDocument.title}
@@ -994,7 +994,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  
  {/* Modal Content */}
  <div className="flex-1 overflow-auto p-6">
- <div className="bg-muted/50 rounded-lg p-6 border">
+ <div className="bg-muted/50 rounded-lg p-6 border border-border">
  <SimpleMarkdownRenderer 
  content={normalizeContentLineBreaks(selectedDocument.full_content)} 
  className="text-sm leading-relaxed max-w-none"

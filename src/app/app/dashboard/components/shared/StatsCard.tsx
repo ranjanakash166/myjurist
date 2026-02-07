@@ -46,19 +46,19 @@ export const StatsCard: React.FC<StatsCardProps> = ({
   if (isMobile) {
     return (
       <Card 
-        className={`bg-white dark:bg-neutral-800 shadow-sm border ${colors.border} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+        className={`bg-card shadow-sm border ${colors.border} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${onClick ? 'cursor-pointer' : ''}`}
         onClick={onClick}
       >
         <CardContent className="p-3">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0 pr-2">
-              <h3 className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 leading-tight">
+              <h3 className="text-xs font-medium text-muted-foreground mb-1 leading-tight">
                 {title}
               </h3>
               <div className={`text-lg font-bold ${colors.value} mb-0.5 leading-tight`}>
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+              <p className="text-xs text-muted-foreground leading-tight">
                 {description}
               </p>
             </div>
@@ -73,11 +73,11 @@ export const StatsCard: React.FC<StatsCardProps> = ({
 
   return (
     <Card 
-      className={`bg-white dark:bg-neutral-800 shadow-sm border-0 hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`bg-card shadow-sm border border-border hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 ${onClick ? 'cursor-pointer' : ''}`}
       onClick={onClick}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
       </CardHeader>
@@ -85,7 +85,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
         <div className={`text-3xl font-bold ${colors.value}`}>
           {typeof value === 'number' ? value.toLocaleString() : value}
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {description}
         </p>
       </CardContent>

@@ -160,10 +160,10 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+          <Card className="bg-primary/5 dark:bg-primary/10 border border-border">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Lightbulb className="w-5 h-5" />
+                <Lightbulb className="w-5 h-5 text-primary" />
                 Key Insights
               </CardTitle>
             </CardHeader>
@@ -171,7 +171,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
               <div className="space-y-2">
                 {timeline.summary.key_insights.map((insight, index) => (
                   <div key={index} className="flex items-start gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                     <span className="text-muted-foreground">{insight}</span>
                   </div>
                 ))}
@@ -195,7 +195,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-green-500" />
+              <FileText className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Documents</span>
             </div>
             <p className="text-2xl font-bold mt-1">{timeline.metadata.document_sources.length}</p>

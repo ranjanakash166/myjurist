@@ -814,9 +814,9 @@ export default function LegalResearchPage() {
 {/* Document Viewer Modal */}
 {selectedDocument && (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-background rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+ <div className="bg-background text-foreground rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-border">
  {/* Modal Header */}
- <div className="flex items-center justify-between p-6 border-b">
+ <div className="flex items-center justify-between p-6 border-b border-border">
  <div className="flex-1 min-w-0">
  <h2 className="text-xl font-semibold text-foreground truncate">
  {selectedDocument.title}
@@ -854,7 +854,7 @@ export default function LegalResearchPage() {
  
  {/* Modal Content */}
  <div className="flex-1 overflow-auto p-6">
- <div className="bg-muted/50 rounded-lg p-6 border">
+ <div className="bg-muted/50 rounded-lg p-6 border border-border">
  <SimpleMarkdownRenderer 
  content={normalizeContentLineBreaks(selectedDocument.full_content)} 
  className="text-sm leading-relaxed max-w-none"

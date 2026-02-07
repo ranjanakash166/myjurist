@@ -9,7 +9,7 @@ interface ErrorDisplayProps {
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, isMobile = false }) => {
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-4">
+      <div className="min-h-screen bg-background p-4">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
             <div className="flex items-center space-x-3 mb-4">
@@ -36,7 +36,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, isMobile = fa
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-8">
           <div className="flex items-center space-x-4 mb-6">

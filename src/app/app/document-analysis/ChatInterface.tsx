@@ -121,18 +121,18 @@ export default function ChatInterface({
  return (
  <div className="flex h-full gap-4">
  {/* Left Side - Chat Documents */}
- <div className="w-64 bg-neutral-950/90 rounded-lg border border-neutral-800 p-4 flex flex-col">
- <div className="flex items-center gap-2 mb-4 pb-2 border-b border-neutral-800">
- <FileText className="w-4 h-4 text-neutral-400" />
- <h3 className="text-sm font-semibold text-neutral-200">Chat Documents</h3>
- <span className="ml-auto text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded">
+ <div className="w-64 bg-card rounded-lg border border-border p-4 flex flex-col">
+ <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
+ <FileText className="w-4 h-4 text-muted-foreground" />
+ <h3 className="text-sm font-semibold text-foreground">Chat Documents</h3>
+ <span className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
  {chatDocuments.length}
  </span>
  </div>
  
  <div className="flex-1 overflow-y-auto space-y-2">
  {!Array.isArray(chatDocuments) || chatDocuments.length === 0 ? (
- <div className="text-center text-neutral-500 text-sm py-8">
+ <div className="text-center text-muted-foreground text-sm py-8">
  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
  <p>No documents in chat</p>
  </div>
@@ -142,10 +142,10 @@ export default function ChatInterface({
  return (
  <div
  key={doc.id}
- className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800 hover:bg-neutral-900 transition-colors"
+ className="p-3 bg-muted/80 rounded-lg border border-border hover:bg-accent transition-colors"
  >
  <div className="flex items-start justify-between mb-2">
- <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
+ <h4 className="text-sm font-medium text-foreground truncate flex-1">
  {doc.filename}
  </h4>
  {/* Checkbox for eligible docs */}
@@ -169,7 +169,7 @@ export default function ChatInterface({
  {onViewDocument && (
  <button
  onClick={() => onViewDocument(doc.id, doc.filename)}
- className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+ className="p-1 text-muted-foreground hover:text-foreground transition-colors"
  title="View document"
  >
  <EyeIcon className="w-4 h-4" />
@@ -178,7 +178,7 @@ export default function ChatInterface({
  {onDownloadDocument && (
  <button
  onClick={() => onDownloadDocument(doc.id, doc.filename)}
- className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+ className="p-1 text-muted-foreground hover:text-foreground transition-colors"
  title="Download document"
  >
  <Download className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function ChatInterface({
  {onDeleteDocument && (
  <button
  onClick={() => !inSession && onDeleteDocument(doc.id, 'chat')}
- className={`p-1 ${inSession ? 'text-gray-500 cursor-not-allowed' : 'text-red-400 hover:text-red-600'} transition-colors`}
+ className={`p-1 ${inSession ? 'text-muted-foreground cursor-not-allowed' : 'text-red-400 hover:text-red-600'} transition-colors`}
  title={inSession ? 'Cannot delete: document is in session context' : 'Delete document'}
  disabled={inSession}
  >
@@ -217,21 +217,21 @@ export default function ChatInterface({
  <div className="flex-1 flex flex-col">
  {/* Banner for continuing old chat */}
  {continuingSession && continuingSessionId && (
- <div className="mb-3 p-3 rounded-lg bg-neutral-900/80 border border-neutral-700 text-neutral-100 text-sm font-semibold text-center">
- Continuing previous chat session: <span className="font-mono text-neutral-300">{continuingSessionId.slice(0, 8)}...</span>
+ <div className="mb-3 p-3 rounded-lg bg-muted border border-border text-foreground text-sm font-semibold text-center">
+ Continuing previous chat session: <span className="font-mono text-muted-foreground">{continuingSessionId.slice(0, 8)}...</span>
  </div>
  )}
 
  {/* Scrollable Chat Area - Takes remaining space */}
- <div className="flex-1 overflow-y-auto bg-neutral-950/90 rounded-lg p-4 transition-all border border-neutral-800">
+ <div className="flex-1 overflow-y-auto bg-card rounded-lg p-4 transition-all border border-border">
  {chat.length === 0 && !loading && !streaming && (
- <div className="flex items-center justify-center h-full text-neutral-400">
+ <div className="flex items-center justify-center h-full text-muted-foreground">
  <div className="text-center">
- <div className="w-16 h-16 mx-auto mb-4 bg-neutral-900 rounded-full flex items-center justify-center border border-neutral-800">
- <Search className="w-8 h-8 text-neutral-600" />
+ <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center border border-border">
+ <Search className="w-8 h-8 text-muted-foreground" />
  </div>
- <h3 className="text-lg font-semibold mb-2 text-neutral-200">Start a Conversation</h3>
- <p className="text-sm text-neutral-400">Ask questions about your document to get started</p>
+ <h3 className="text-lg font-semibold mb-2 text-foreground">Start a Conversation</h3>
+ <p className="text-sm text-muted-foreground">Ask questions about your document to get started</p>
  </div>
  </div>
  )}
@@ -242,21 +242,21 @@ export default function ChatInterface({
  className={`mb-4 flex items-end gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
  >
  {msg.sender === "system" && (
- <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
+ <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm border border-border">
  MJ
  </div>
  )}
  <div
  className={`px-4 py-3 rounded-2xl max-w-md text-sm shadow-lg transition-all duration-200 ${
  msg.sender === "user"
- ? "bg-neutral-800 text-neutral-100 rounded-br-md border border-neutral-700"
- : "bg-neutral-900 text-neutral-200 rounded-bl-md border border-neutral-800"
+ ? "bg-primary text-primary-foreground rounded-br-md border border-primary"
+ : "bg-muted text-foreground rounded-bl-md border border-border"
  }`}
  >
  <SimpleMarkdownRenderer content={msg.text} className="text-sm leading-relaxed" />
  </div>
  {msg.sender === "user" && (
- <div className="flex-shrink-0 w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-800">
+ <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm border border-border">
  {userInitial.toUpperCase()}
  </div>
  )}
@@ -266,20 +266,20 @@ export default function ChatInterface({
  {/* Simulated streaming bubble */}
  {streaming && (
  <div className="mb-4 flex items-end gap-3 justify-start">
- <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
+ <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm border border-border">
  MJ
  </div>
- <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-neutral-900 text-neutral-200 shadow-lg border border-neutral-800 rounded-bl-md">
+ <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-muted text-foreground shadow-lg border border-border rounded-bl-md">
  {streamedText ? (
  <SimpleMarkdownRenderer content={streamedText} className="text-sm leading-relaxed" />
  ) : (
  <span className="opacity-60">Typing...</span>
  )}
- <div className="text-xs text-neutral-500 mt-2 flex items-center gap-1">
+ <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
  <div className="flex gap-1">
- <div className="w-1 h-1 bg-neutral-500 rounded-full animate-bounce"></div>
- <div className="w-1 h-1 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
- <div className="w-1 h-1 bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+ <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce"></div>
+ <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+ <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
  </div>
  </div>
  </div>
@@ -288,12 +288,12 @@ export default function ChatInterface({
  
  {loading && !streaming && (
  <div className="mb-4 flex items-end gap-3 justify-start">
- <div className="flex-shrink-0 w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center text-neutral-200 font-bold text-sm border border-neutral-700">
+ <div className="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold text-sm border border-border">
  MJ
  </div>
- <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-neutral-900 text-neutral-200 shadow-lg border border-neutral-800 rounded-bl-md">
+ <div className="px-4 py-3 rounded-2xl max-w-md text-sm bg-muted text-foreground shadow-lg border border-border rounded-bl-md">
  <div className="flex items-center gap-2">
- <div className="w-4 h-4 border-2 border-neutral-500 border-t-transparent rounded-full animate-spin"></div>
+ <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
  <span>Generating response...</span>
  </div>
  </div>
@@ -303,12 +303,12 @@ export default function ChatInterface({
  </div>
  
  {/* Input Area - Fixed at bottom */}
- <div className="bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 p-4 shadow-xl mt-4 rounded-lg relative">
+ <div className="bg-card backdrop-blur-sm border-t border-border p-4 shadow-xl mt-4 rounded-lg relative">
  {/* Loader overlay when uploading */}
  {uploadingNewDocuments && (
- <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 rounded-lg">
+ <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-20 rounded-lg">
  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
- <span className="text-primary-foreground font-semibold">Uploading documents...</span>
+ <span className="text-foreground font-semibold">Uploading documents...</span>
  </div>
  )}
  <form onSubmit={handleSubmit} className="w-full">
@@ -317,7 +317,7 @@ export default function ChatInterface({
  <input
  ref={inputRef}
  type="text"
- className="w-full px-4 py-4 pr-16 rounded-2xl bg-neutral-900 border border-neutral-800 focus:border-neutral-600 focus:outline-none text-neutral-100 placeholder-neutral-500 text-base shadow-lg transition-all duration-200"
+ className="w-full px-4 py-4 pr-16 rounded-2xl bg-background border border-border focus:border-primary focus:outline-none text-foreground placeholder:text-muted-foreground text-base shadow-lg transition-all duration-200"
  placeholder="Ask a follow-up question..."
  value={input}
  onChange={e => setInput(e.target.value)}
@@ -327,7 +327,7 @@ export default function ChatInterface({
  {/* Send Button */}
  <button
  type="submit"
- className="absolute right-2 top-1/2 transform -translate-y-1/2 p-3 rounded-xl bg-neutral-800 text-neutral-100 hover:bg-neutral-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+ className="absolute right-2 top-1/2 transform -translate-y-1/2 p-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
  disabled={disabled || !input.trim()}
  >
  <Send className="w-5 h-5" />
@@ -340,21 +340,21 @@ export default function ChatInterface({
  <div className="flex items-center gap-2">
  <button
  type="button"
- className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
+ className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
  title="Search"
  >
  <Search className="w-4 h-4" />
  </button>
  <button
  type="button"
- className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
+ className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
  title="Generate"
  >
  <Zap className="w-4 h-4" />
  </button>
  <button
  type="button"
- className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
+ className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
  title="Visual Search"
  >
  <Eye className="w-4 h-4" />
@@ -365,7 +365,7 @@ export default function ChatInterface({
  {/* Upload icon */}
  <button
  type="button"
- className={`p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 ${uploadingNewDocuments ? 'opacity-60 cursor-wait' : 'text-neutral-400 hover:text-neutral-200'} transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg`}
+ className={`p-3 rounded-xl bg-muted hover:bg-accent ${uploadingNewDocuments ? 'opacity-60 cursor-wait' : 'text-muted-foreground hover:text-foreground'} transition-all duration-200 border border-border shadow-md hover:shadow-lg`}
  title="Upload new documents"
  onClick={() => !uploadingNewDocuments && fileInputRef.current?.click()}
  disabled={uploadingNewDocuments}
@@ -390,7 +390,7 @@ export default function ChatInterface({
  </button>
  <button
  type="button"
- className="p-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 transition-all duration-200 border border-neutral-800 shadow-md hover:shadow-lg"
+ className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
  title="Voice Input"
  >
  <Mic className="w-4 h-4" />
@@ -409,18 +409,18 @@ export default function ChatInterface({
  </div>
 
  {/* Right Side - Session Documents */}
- <div className="w-64 bg-neutral-950/90 rounded-lg border border-neutral-800 p-4 flex flex-col">
- <div className="flex items-center gap-2 mb-4 pb-2 border-b border-neutral-800">
- <FileText className="w-4 h-4 text-neutral-400" />
- <h3 className="text-sm font-semibold text-neutral-200">Session Context</h3>
- <span className="ml-auto text-xs text-neutral-500 bg-neutral-800 px-2 py-1 rounded">
+ <div className="w-64 bg-card rounded-lg border border-border p-4 flex flex-col">
+ <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border">
+ <FileText className="w-4 h-4 text-muted-foreground" />
+ <h3 className="text-sm font-semibold text-foreground">Session Context</h3>
+ <span className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
  {sessionDocuments.length}
  </span>
  </div>
  
  <div className="flex-1 overflow-y-auto space-y-2">
  {!Array.isArray(sessionDocuments) || sessionDocuments.length === 0 ? (
- <div className="text-center text-neutral-500 text-sm py-8">
+ <div className="text-center text-muted-foreground text-sm py-8">
  <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
  <p>No documents in context</p>
  </div>
@@ -428,10 +428,10 @@ export default function ChatInterface({
  (sessionDocuments as any[]).map((doc) => (
  <div
  key={doc.id}
- className="p-3 bg-neutral-900/50 rounded-lg border border-neutral-800 hover:bg-neutral-900 transition-colors"
+ className="p-3 bg-muted/80 rounded-lg border border-border hover:bg-accent transition-colors"
  >
  <div className="flex items-start justify-between mb-2">
- <h4 className="text-sm font-medium text-neutral-200 truncate flex-1">
+ <h4 className="text-sm font-medium text-foreground truncate flex-1">
  {doc.filename}
  </h4>
  </div>
@@ -439,7 +439,7 @@ export default function ChatInterface({
  {onViewDocument && (
  <button
  onClick={() => onViewDocument(doc.id, doc.filename)}
- className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+ className="p-1 text-muted-foreground hover:text-foreground transition-colors"
  title="View document"
  >
  <EyeIcon className="w-4 h-4" />
@@ -448,7 +448,7 @@ export default function ChatInterface({
  {onDownloadDocument && (
  <button
  onClick={() => onDownloadDocument(doc.id, doc.filename)}
- className="p-1 text-neutral-400 hover:text-neutral-200 transition-colors"
+ className="p-1 text-muted-foreground hover:text-foreground transition-colors"
  title="Download document"
  >
  <Download className="w-4 h-4" />

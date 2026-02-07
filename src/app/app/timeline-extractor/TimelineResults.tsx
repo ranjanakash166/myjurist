@@ -181,7 +181,7 @@ export default function TimelineResults({ timeline, onExportCSV }: TimelineResul
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-green-500" />
+              <FileText className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Documents</span>
             </div>
             <p className="text-2xl font-bold mt-1">{timeline.document_sources.length}</p>

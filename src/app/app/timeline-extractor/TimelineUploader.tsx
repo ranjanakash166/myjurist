@@ -118,15 +118,15 @@ export default function TimelineUploader({
             disabled={processing}
             accept=".pdf,.doc,.docx,.txt,.rtf"
           />
-          <div className="border-2 border-dashed border-emerald-200 dark:border-emerald-800 rounded-xl p-8 text-center hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors duration-200 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-              <FileText className="w-8 h-8 text-white" />
+          <div className="border-2 border-dashed border-primary/40 rounded-xl p-8 text-center hover:border-primary transition-colors duration-200 bg-primary/5 dark:bg-primary/10">
+            <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center">
+              <FileText className="w-8 h-8 text-primary-foreground" />
             </div>
             <p className="text-lg font-medium mb-2">Drop files here or click to browse</p>
             <p className="text-sm text-muted-foreground mb-4">
               Supports PDF, DOC, DOCX, TXT, RTF files • Multiple files allowed
             </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg text-sm font-medium">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
               <Upload className="w-4 h-4" />
               Choose Files
             </div>
@@ -159,21 +159,21 @@ export default function TimelineUploader({
                     <button
                       type="button"
                       onClick={() => handleViewFile(file)}
-                      className="p-1 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-full transition-colors"
+                      className="p-1 hover:bg-primary/10 rounded-full transition-colors"
                       disabled={processing}
                       title="View File"
                     >
-                      <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <Eye className="w-4 h-4 text-primary" />
                     </button>
                     
                     <button
                       type="button"
                       onClick={() => handleOpenFileInNewTab(file)}
-                      className="p-1 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-full transition-colors"
+                      className="p-1 hover:bg-primary/10 rounded-full transition-colors"
                       disabled={processing}
                       title="Open in New Tab"
                     >
-                      <ExternalLink className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <ExternalLink className="w-4 h-4 text-primary" />
                     </button>
                     
                     <button
@@ -282,7 +282,7 @@ export default function TimelineUploader({
       <Button
         onClick={onGenerate}
         disabled={files.length === 0 || !timelineTitle.trim() || processing}
-        className="w-full py-3 text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg transition-all duration-200"
+        className="w-full py-3 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg transition-all duration-200"
       >
         {processing ? (
           <div className="flex items-center gap-2">
@@ -313,7 +313,7 @@ export default function TimelineUploader({
             <span>Use descriptive timeline titles for easy identification</span>
           </div>
           <div className="flex items-start gap-2 text-xs text-muted-foreground">
-            <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
             <span>Event types include: filings, hearings, judgments, amendments</span>
           </div>
           <div className="flex items-start gap-2 text-xs text-muted-foreground">
