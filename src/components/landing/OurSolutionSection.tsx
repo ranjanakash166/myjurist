@@ -223,19 +223,82 @@ const cardsData = [
   },
 ];
 
+/** When section bottom is above this offset from viewport top, release the stack so it scrolls away. */
+const RELEASE_THRESHOLD_PX = 0;
+const EXIT_DURATION_MS = 400;
+const EXIT_EASING = "cubic-bezier(0.25, 0.1, 0.25, 1)";
+
 const OurSolutionSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const translateYRef = useRef<number[]>(Array(CARD_COUNT).fill(0));
   const rafRef = useRef<number | null>(null);
+  const releasedRef = useRef(false);
+  const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useLayoutEffect(() => {
+    const finishRelease = () => {
+      const sectionEl = sectionRef.current;
+      if (sectionEl) {
+        sectionEl.style.position = "relative";
+        sectionEl.style.zIndex = "-1";
+      }
+      for (let i = 0; i < CARD_COUNT; i++) {
+        const el = cardRefs.current[i];
+        if (el) {
+          translateYRef.current[i] = 0;
+          el.style.transition = "";
+          el.style.transform = "translateY(0px)";
+          el.style.zIndex = "-1";
+        }
+      }
+    };
+
     const updateOffsets = () => {
       const prev = translateYRef.current;
+      const sectionBottom = sectionRef.current?.getBoundingClientRect().bottom ?? 0;
+
+      if (sectionBottom <= RELEASE_THRESHOLD_PX) {
+        if (!releasedRef.current) {
+          releasedRef.current = true;
+          const sectionEl = sectionRef.current;
+          if (sectionEl) {
+            sectionEl.style.position = "relative";
+            sectionEl.style.zIndex = "-1";
+          }
+          const exitY = -(typeof window !== "undefined" ? window.innerHeight : 800) - 200;
+          for (let i = 0; i < CARD_COUNT; i++) {
+            const el = cardRefs.current[i];
+            if (el) {
+              el.style.zIndex = String(i);
+              el.style.transition = `transform ${EXIT_DURATION_MS}ms ${EXIT_EASING}`;
+              el.style.transform = `translateY(${exitY}px)`;
+              prev[i] = exitY;
+            }
+          }
+          if (exitTimeoutRef.current) clearTimeout(exitTimeoutRef.current);
+          exitTimeoutRef.current = setTimeout(finishRelease, EXIT_DURATION_MS + 50);
+        }
+        return;
+      }
+
+      releasedRef.current = false;
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+        exitTimeoutRef.current = null;
+      }
+      const sectionEl = sectionRef.current;
+      if (sectionEl) {
+        sectionEl.style.position = "";
+        sectionEl.style.zIndex = "";
+      }
       const rects = cardRefs.current.map((el) => el?.getBoundingClientRect() ?? null);
       for (let i = 0; i < CARD_COUNT; i++) {
         const el = cardRefs.current[i];
         const rect = rects[i];
         if (!el || !rect) continue;
+        el.style.transition = "";
+        el.style.zIndex = String(i);
         const desiredTopPx = STICK_TOP_REM[i] * REM_PX;
         const currentTranslate = prev[i] ?? 0;
         const layoutTop = rect.top - currentTranslate;
@@ -258,11 +321,13 @@ const OurSolutionSection: React.FC = () => {
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+      if (exitTimeoutRef.current) clearTimeout(exitTimeoutRef.current);
     };
   }, []);
 
   return (
     <section
+      ref={sectionRef}
       id="solutions"
       className="py-20 md:py-24 px-4"
       style={{ background: "var(--bg-tertiary, #F1F5F9)" }}
