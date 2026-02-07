@@ -81,7 +81,7 @@ const TestimonialsSection: React.FC = () => {
   return (
     <section
       id="testimonials"
-      className="py-12 sm:py-16 md:py-24 px-4 overflow-hidden"
+      className="py-12 sm:py-16 md:py-24 px-4 overflow-hidden relative z-0"
       style={{ background: "#F8FAFC" }}
     >
       <div className="max-w-6xl mx-auto w-full flex flex-col items-center">
