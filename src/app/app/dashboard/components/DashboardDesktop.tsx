@@ -165,13 +165,13 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
                     </Pie>
                     <RechartsTooltip
                       contentStyle={{ 
-                        background: 'rgba(30,41,59,0.95)', 
-                        color: '#fff', 
-                        border: 'none',
+                        background: 'hsl(var(--card))',
+                        color: 'hsl(var(--card-foreground))',
+                        border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                         padding: '8px 12px'
                       }}
-                      itemStyle={{ color: '#fff' }}
+                      itemStyle={{ color: 'hsl(var(--card-foreground))' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -218,13 +218,13 @@ export const DashboardDesktop: React.FC<DashboardDesktopProps> = ({ dashboardDat
                     />
                     <RechartsTooltip
                       contentStyle={{ 
-                        background: 'rgba(30,41,59,0.95)', 
-                        color: '#fff', 
-                        border: 'none',
+                        background: 'hsl(var(--card))',
+                        color: 'hsl(var(--card-foreground))',
+                        border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                         padding: '8px 12px'
                       }}
-                      itemStyle={{ color: '#fff' }}
+                      itemStyle={{ color: 'hsl(var(--card-foreground))' }}
                     />
                     <Legend 
                       wrapperStyle={{

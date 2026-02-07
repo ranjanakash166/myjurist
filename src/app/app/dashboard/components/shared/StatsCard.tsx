@@ -12,9 +12,9 @@ interface StatsCardProps {
 
 const colorClasses = {
   blue: {
-    value: 'text-blue-600 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800'
+    value: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/20'
   },
   green: {
     value: 'text-green-600 dark:text-green-400',
@@ -63,7 +63,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
               </p>
             </div>
             <div className={`w-8 h-8 rounded-full ${colors.bg} flex items-center justify-center flex-shrink-0`}>
-              <div className={`w-4 h-4 rounded-full ${colors.value.replace('text-', 'bg-')} opacity-20`}></div>
+              <div className={`w-4 h-4 rounded-full ${color === 'blue' ? 'bg-primary opacity-30' : colors.value.replace('text-', 'bg-') + ' opacity-20'}`}></div>
             </div>
           </div>
         </CardContent>

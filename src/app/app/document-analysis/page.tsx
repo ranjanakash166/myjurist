@@ -987,9 +987,9 @@ export default function DocumentAnalysisPage() {
           setCollapsedSteps({});
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-auto">
-          <TabsTrigger value="new" className="text-sm py-2 px-2 sm:px-4">New Analysis</TabsTrigger>
-          <TabsTrigger value="history" className="text-sm py-2 px-2 sm:px-4">History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+          <TabsTrigger value="new" className="text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">New Analysis</TabsTrigger>
+          <TabsTrigger value="history" className="text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="new" className="space-y-6 flex-1">
@@ -1016,18 +1016,18 @@ export default function DocumentAnalysisPage() {
           
           {/* Chat Interface for New Analysis - Show when document is processed */}
           {apiResult && (
-            <Card className="w-full flex-1 min-h-[500px] flex flex-col">
+            <Card className="w-full flex-1 min-h-[500px] flex flex-col bg-card border border-border">
               {/* Document Header for New Analysis */}
-              <CardHeader className="border-b">
+              <CardHeader className="border-b border-border">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg break-words truncate">{apiResult.filename}</CardTitle>
+                    <CardTitle className="text-lg break-words truncate text-foreground">{apiResult.filename}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       Document processed successfully • {apiResult.total_tokens} tokens • {apiResult.total_chunks} chunks
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge variant="secondary" className="text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20">
+                    <Badge variant="secondary" className="bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary-foreground">
                       Ready for chat
                     </Badge>
                   </div>
@@ -1196,12 +1196,12 @@ export default function DocumentAnalysisPage() {
               >
                 {newAnalysisStep === 'create' && !createdChat && (
                   <div className="w-full">
-                    <Card className="w-full hover:shadow-lg transition-shadow duration-200">
+                    <Card className="w-full hover:shadow-lg transition-shadow duration-200 bg-card border border-border">
                       <CardHeader className="text-center pb-6">
-                        <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                          <MessageCircle className="w-10 h-10 text-white" />
+                        <div className="w-20 h-20 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center">
+                          <MessageCircle className="w-10 h-10 text-primary-foreground" />
                         </div>
-                        <CardTitle className="text-2xl font-bold mb-2">Start a New Document Analysis</CardTitle>
+                        <CardTitle className="text-2xl font-bold mb-2 text-foreground">Start a New Document Analysis</CardTitle>
                         <p className="text-muted-foreground max-w-lg mx-auto">
                           Click the button below to begin. Your analysis session will be created automatically.
                         </p>
@@ -1252,30 +1252,30 @@ export default function DocumentAnalysisPage() {
                         {/* Info Section */}
                         <div className="mt-6 pt-6 border-t border-border">
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                              <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
-                                <Upload className="w-5 h-5 text-blue-500" />
+                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <Upload className="w-5 h-5 text-primary" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">Upload Documents</p>
+                                <p className="text-sm font-medium text-foreground">Upload Documents</p>
                                 <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, TXT</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                              <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
-                                <MessageCircle className="w-5 h-5 text-purple-500" />
+                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <MessageCircle className="w-5 h-5 text-primary" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">Chat with AI</p>
+                                <p className="text-sm font-medium text-foreground">Chat with AI</p>
                                 <p className="text-xs text-muted-foreground">Ask questions</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                              <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
-                                <FileText className="w-5 h-5 text-green-500" />
+                            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <FileText className="w-5 h-5 text-primary" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">Get Insights</p>
+                                <p className="text-sm font-medium text-foreground">Get Insights</p>
                                 <p className="text-xs text-muted-foreground">AI-powered analysis</p>
                               </div>
                             </div>
@@ -1296,12 +1296,12 @@ export default function DocumentAnalysisPage() {
               >
                 {newAnalysisStep === 'upload' && createdChat && (
                   <div className="w-full">
-                    <Card className="w-full hover:scale-[1.02] hover:shadow-xl transition-transform duration-200">
+                    <Card className="w-full hover:scale-[1.02] hover:shadow-xl transition-transform duration-200 bg-card border border-border">
                       <CardHeader className="text-center pb-6">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                          <FileUp className="w-8 h-8 text-white" />
+                        <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center">
+                          <FileUp className="w-8 h-8 text-primary-foreground" />
                         </div>
-                        <CardTitle className="text-2xl font-bold mb-2">Upload Documents</CardTitle>
+                        <CardTitle className="text-2xl font-bold mb-2 text-foreground">Upload Documents</CardTitle>
                         <p className="text-muted-foreground">Add one or more documents to your analysis chat</p>
                       </CardHeader>
                       <CardContent className="space-y-6">
@@ -1381,15 +1381,15 @@ export default function DocumentAnalysisPage() {
                           )}
                           
                           {uploadSuccess && (
-                            <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                            <div className="bg-primary/10 border border-primary/20 text-primary rounded-lg px-4 py-3 text-sm flex items-center gap-2">
                               <CheckCircle className="w-4 h-4" />
                               Documents uploaded successfully! Starting chat session...
                             </div>
                           )}
                           
                           {sessionLoading && (
-                            <div className="bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="bg-primary/10 border border-primary/20 text-primary rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                               Creating chat session...
                             </div>
                           )}
@@ -1418,14 +1418,14 @@ export default function DocumentAnalysisPage() {
                         {uploadedDocs.length > 0 && (
                           <div className="mt-8 pt-6 border-t border-border">
                             <h3 className="text-lg font-semibold mb-4 text-foreground flex items-center gap-2">
-                              <CheckCircle className="w-5 h-5 text-green-500" />
+                              <CheckCircle className="w-5 h-5 text-primary" />
                               Uploaded Documents ({uploadedDocs.length})
                             </h3>
                             <div className="grid gap-3">
                               {uploadedDocs.map((doc, idx) => (
                                 <div key={doc.id || idx} className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg border border-border hover:bg-muted transition-colors">
-                                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <FileText className="w-5 h-5 text-white" />
+                                  <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <FileText className="w-5 h-5 text-primary-foreground" />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium text-sm truncate" title={doc.filename}>{doc.filename}</p>
@@ -1456,19 +1456,19 @@ export default function DocumentAnalysisPage() {
                           </h4>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
                               <span>Maximum file size: 10MB per document</span>
                             </div>
                             <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
                               <span>Supported formats: PDF, DOC, DOCX, TXT, RTF</span>
                             </div>
                             <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
                               <span>You can upload multiple files at once</span>
                             </div>
                             <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
                               <span>Documents are processed automatically after upload</span>
                             </div>
                           </div>
@@ -1488,13 +1488,13 @@ export default function DocumentAnalysisPage() {
               >
                 {sessionLoading && (
                   <div className="w-full">
-                    <Card className="w-full">
+                    <Card className="w-full bg-card border border-border">
                       <CardContent className="py-8">
                         <div className="flex flex-col items-center justify-center text-center">
-                          <div className="w-16 h-16 mb-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                            <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-16 h-16 mb-4 bg-primary/10 rounded-full flex items-center justify-center">
+                            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                           </div>
-                          <h3 className="text-lg font-semibold mb-2">Setting up your chat session...</h3>
+                          <h3 className="text-lg font-semibold mb-2 text-foreground">Setting up your chat session...</h3>
                           <p className="text-sm text-muted-foreground">This will only take a moment</p>
                         </div>
                       </CardContent>
@@ -1503,7 +1503,7 @@ export default function DocumentAnalysisPage() {
                 )}
                 {sessionError && !sessionLoading && (
                   <div className="w-full">
-                    <Card className="w-full">
+                    <Card className="w-full bg-card border border-border">
                       <CardContent className="py-6">
                         <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-4 py-3 text-sm flex items-center gap-2">
                           <AlertTriangle className="w-4 h-4" />
@@ -1594,12 +1594,12 @@ export default function DocumentAnalysisPage() {
 
           {/* Chat Interface - Takes full width at bottom */}
           {selectedSession && (
-            <Card className="w-full flex-1 min-h-[500px] flex flex-col">
+            <Card className="w-full flex-1 min-h-[500px] flex flex-col bg-card border border-border">
               {/* Session Header */}
-              <CardHeader className="border-b">
+              <CardHeader className="border-b border-border">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg break-words truncate">{selectedSession.name}</CardTitle>
+                    <CardTitle className="text-lg break-words truncate text-foreground">{selectedSession.name}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       Session: {selectedSession.id.slice(0, 8)}... • {selectedSession.message_count} messages
                     </p>
@@ -1645,12 +1645,12 @@ export default function DocumentAnalysisPage() {
 
           {/* Empty State when no session is selected */}
           {selectedChat && !selectedSession && (
-            <Card className="w-full flex items-center justify-center py-12">
+            <Card className="w-full flex items-center justify-center py-12 bg-card border border-border">
               <CardContent className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
                   <MessageCircle className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Select a Session</h3>
+                <h3 className="text-lg font-semibold mb-2 text-foreground">Select a Session</h3>
                 <p className="text-sm text-muted-foreground">Choose a session from the list above to start conversing</p>
               </CardContent>
             </Card>

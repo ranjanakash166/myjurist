@@ -204,10 +204,10 @@ export default function RegulatoryCompliancePage() {
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full text-left px-4 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors border-b border-border last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
+                      className="w-full text-left px-4 py-3 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors border-b border-border last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
                     >
                       <div className="flex items-center gap-2">
-                        <Search className="w-4 h-4 text-emerald-500" />
+                        <Search className="w-4 h-4 text-primary" />
                         <span className="text-sm">{suggestion}</span>
                       </div>
                     </button>
@@ -227,7 +227,7 @@ export default function RegulatoryCompliancePage() {
                   <button
                     key={index}
                     onClick={() => handleExampleClick(exampleQuery)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 dark:hover:bg-primary/20 hover:text-primary transition-colors border border-transparent hover:border-primary/40"
                   >
                     <Search className="w-3 h-3" />
                     {exampleQuery.length > 35 ? exampleQuery.substring(0, 35) + '...' : exampleQuery}

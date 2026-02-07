@@ -35,7 +35,7 @@ function ResultCard({ result, index }: { result: SearchResult; index: number }) 
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <Badge className="shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+            <Badge className="shrink-0 bg-primary text-primary-foreground">
               {index + 1}
             </Badge>
             <h4 className="text-base font-semibold text-foreground truncate">{result.title}</h4>
@@ -196,8 +196,8 @@ export default function MyJuristChatPage() {
       <div className="bg-card border-b border-border p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-              <Search className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md">
+              <Search className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">My Jurist Chat</h1>
@@ -228,8 +228,8 @@ export default function MyJuristChatPage() {
             {messages.length === 0 && (
               <div className="flex items-center justify-center min-h-[280px]">
                 <div className="text-center max-w-lg">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl flex items-center justify-center">
-                    <Search className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Search className="w-8 h-8 text-primary" />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">Welcome to My Jurist Chat</h3>
                   <p className="text-muted-foreground mb-6">
@@ -241,7 +241,7 @@ export default function MyJuristChatPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setInput("Supreme Court cases on data privacy")}
-                      className="border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                      className="border-primary/40 hover:bg-primary/10"
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
                       Legal Cases
@@ -250,7 +250,7 @@ export default function MyJuristChatPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setInput("Regulatory compliance requirements")}
-                      className="border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                      className="border-primary/40 hover:bg-primary/10"
                     >
                       <Shield className="w-4 h-4 mr-2" />
                       Compliance
@@ -268,8 +268,8 @@ export default function MyJuristChatPage() {
                   }`}
                 >
                   {message.sender === "assistant" && (
-                    <div className="w-8 h-8 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                      <Search className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
+                      <Search className="w-4 h-4 text-primary-foreground" />
                     </div>
                   )}
                   <div
@@ -311,8 +311,8 @@ export default function MyJuristChatPage() {
 
             {isLoading && (
               <div className="flex items-start gap-3 justify-start">
-                <div className="w-8 h-8 shrink-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                  <Search className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
+                  <Search className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <div className="px-4 py-3 rounded-2xl bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm">
                   <div className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export default function MyJuristChatPage() {
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading || input.trim().length < 3 || input.trim().length > 1000}
-                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shrink-0"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
