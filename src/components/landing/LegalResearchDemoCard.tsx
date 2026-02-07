@@ -39,24 +39,26 @@ const LegalResearchDemoCard: React.FC = () => {
 
   return (
     <div
-      className="h-full flex flex-col min-h-0 overflow-hidden px-6 md:px-8 lg:px-10 py-8 md:py-10 lg:py-12 transition-opacity duration-500 ease-in-out"
+      className="h-full flex flex-col min-h-0 overflow-hidden px-4 md:px-6 lg:px-8 pt-2 md:pt-3 pb-4 md:pb-6 lg:pb-8 transition-opacity duration-500 ease-in-out"
       aria-hidden
     >
-      {/* Search bar: always on gradient (not on card) */}
+      {/* Search bar: centered in stage 0, at top when user has typed (stages 1–3) */}
       <div
-        className={`transition-all duration-500 ease-in-out min-h-0 ${
-          stage === 0
-            ? "flex-1 flex justify-center items-center"
-            : "flex-none"
+        className={`transition-all duration-500 ease-in-out ${
+          stage === 0 ? "flex-1 flex justify-center items-center" : "flex-none"
         }`}
       >
-        <div className="flex items-center gap-2 w-full max-w-full rounded-full bg-white border border-slate-200/80 shadow-sm px-4 py-3 min-h-[52px]">
+        <div className="flex items-center gap-2 w-full max-w-full rounded-full bg-white border border-slate-200/80 shadow-sm px-3 py-2.5 min-h-[48px]">
           <div className="flex-shrink-0 w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
             <Search className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="flex-1 min-w-0 flex items-center">
+          <div
+            className={`flex-1 min-w-0 flex items-center ${
+              stage === 0 ? "justify-center" : ""
+            }`}
+          >
             {stage === 0 && (
-              <span className="text-slate-500 text-sm md:text-base truncate">
+              <span className="text-slate-500 text-sm md:text-base truncate text-center">
                 {placeholder}
               </span>
             )}
@@ -90,19 +92,19 @@ const LegalResearchDemoCard: React.FC = () => {
       <div
         className={`flex-1 flex flex-col min-h-0 overflow-hidden transition-all duration-500 ease-in-out ${
           stage === 2 || stage === 3
-            ? "opacity-100 mt-5"
+            ? "opacity-100 mt-2"
             : "max-h-0 opacity-0 mt-0 flex-none"
         }`}
       >
         {stage === 2 && (
-          <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-4 md:p-5">
+          <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-3 md:p-4">
             {/* Skeleton loading placeholders */}
-            <div className="flex justify-end gap-1.5 mb-4 shrink-0">
+            <div className="flex justify-end gap-1.5 mb-2 shrink-0">
               <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "0ms" }} />
               <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "150ms" }} />
               <span className="w-2 h-2 rounded-full bg-slate-200 animate-pulse" style={{ animationDelay: "300ms" }} />
             </div>
-            <div className="space-y-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
+            <div className="space-y-3 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -118,8 +120,8 @@ const LegalResearchDemoCard: React.FC = () => {
         )}
 
         {stage === 3 && (
-          <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-4 md:p-5">
-            <div className="flex items-center justify-between gap-2 mb-4 text-xs text-slate-600 shrink-0">
+          <div className="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2 mb-2 text-xs text-slate-600 shrink-0">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5" />
                 3 Sources analyzed
@@ -141,11 +143,11 @@ const LegalResearchDemoCard: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide space-y-3 min-h-0 pb-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide space-y-2 min-h-0 pb-2">
               {/* AI Summary */}
-              <div className="rounded-lg p-4 bg-purple-50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30 transition-opacity duration-300 ease-out">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
+              <div className="rounded-lg p-3 bg-purple-50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30 transition-opacity duration-300 ease-out">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                   <span className="font-semibold text-sm text-slate-800">AI Summary</span>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed line-clamp-2">
@@ -157,9 +159,9 @@ const LegalResearchDemoCard: React.FC = () => {
               </div>
 
               {/* Key Legal Insights */}
-              <div className="rounded-lg p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 transition-opacity duration-300 ease-out">
-                <div className="flex items-center gap-2 mb-2">
-                  <Lightbulb className="w-4 h-4 text-emerald-600" />
+              <div className="rounded-lg p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 transition-opacity duration-300 ease-out">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Lightbulb className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="font-semibold text-sm text-slate-800">Key Legal Insights</span>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed line-clamp-2">
@@ -170,9 +172,9 @@ const LegalResearchDemoCard: React.FC = () => {
               </div>
 
               {/* Relevant Precedents */}
-              <div className="rounded-lg p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 transition-opacity duration-300 ease-out">
-                <div className="flex items-center gap-2 mb-2">
-                  <Award className="w-4 h-4 text-amber-600" />
+              <div className="rounded-lg p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 transition-opacity duration-300 ease-out">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Award className="w-3.5 h-3.5 text-amber-600" />
                   <span className="font-semibold text-sm text-slate-800">Relevant Precedents</span>
                 </div>
                 <p className="text-xs text-slate-700 leading-relaxed line-clamp-2">
@@ -183,9 +185,9 @@ const LegalResearchDemoCard: React.FC = () => {
               </div>
 
               {/* Legal Areas Covered */}
-              <div className="rounded-lg p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 transition-opacity duration-300 ease-out">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileCheck className="w-4 h-4 text-blue-600" />
+              <div className="rounded-lg p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 transition-opacity duration-300 ease-out">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <FileCheck className="w-3.5 h-3.5 text-blue-600" />
                   <span className="font-semibold text-sm text-slate-800">Legal Areas Covered</span>
                 </div>
                 <p className="text-xs text-slate-700">

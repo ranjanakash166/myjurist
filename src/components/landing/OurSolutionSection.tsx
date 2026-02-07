@@ -4,6 +4,7 @@ import React from "react";
 import { Check } from "lucide-react";
 import LegalResearchDemoCard from "./LegalResearchDemoCard";
 import SmartDraftingDemoCard from "./SmartDraftingDemoCard";
+import SmartLegalDraftingDemoCard from "./SmartLegalDraftingDemoCard";
 
 const CARD_WIDTH = 1356;
 const CARD_HEIGHT = 564;
@@ -224,15 +225,14 @@ const OurSolutionSection: React.FC = () => {
       className="py-20 md:py-24 px-4"
       style={{ background: "var(--bg-tertiary, #F1F5F9)" }}
     >
-      <div className="max-w-[1356px] mx-auto">
+      <div className="max-w-[1356px] mx-auto w-full overflow-hidden">
         <h2
-          className="text-center mb-14 font-semibold"
+          className="text-center mb-8 sm:mb-10 md:mb-14 font-semibold text-2xl sm:text-3xl md:text-4xl px-2"
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--Heading-H3-fontFamily, Inter)",
-            fontSize: "var(--Heading-H3-fontSize, 40px)",
             fontWeight: 600,
-            lineHeight: "48px",
+            lineHeight: "1.2",
             letterSpacing: "-0.3px",
           }}
         >
@@ -243,45 +243,47 @@ const OurSolutionSection: React.FC = () => {
         <div className="flex flex-col gap-0">
           {cardsData.map((card) => {
             const Icon = card.icon;
+            const isAnimatedCard =
+              card.header === "Lightning-Fast Legal Research" ||
+              card.header === "Intelligent Document Analysis" ||
+              card.header === "Smart Legal Drafting";
             return (
               <div
                 key={card.header}
-                className="flex justify-center py-4 md:py-6"
-                style={{
-                  minHeight:
-                    card.header === "Lightning-Fast Legal Research" ||
-                    card.header === "Intelligent Document Analysis"
-                      ? FIRST_CARD_RIGHT_PANEL_HEIGHT + 120
-                      : CARD_HEIGHT + 120,
-                }}
+                className="flex justify-center py-3 sm:py-4 md:py-6"
               >
                 <div
-                  className="w-full max-w-[1356px] rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row sticky top-4 md:top-8 shrink-0 min-h-[400px] md:min-h-0"
+                    className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row sticky top-2 sm:top-4 md:top-8 shrink-0 ${
+                    isAnimatedCard
+                      ? "h-[320px] sm:h-[400px] md:h-[500px] lg:h-[564px] min-h-0"
+                      : "min-h-[320px] sm:min-h-[400px] md:min-h-[564px]"
+                  }`}
                   style={{
                     width: "100%",
-                    height:
-                      card.header === "Lightning-Fast Legal Research" ||
-                      card.header === "Intelligent Document Analysis"
-                        ? FIRST_CARD_RIGHT_PANEL_HEIGHT
-                        : CARD_HEIGHT,
                     maxWidth: CARD_WIDTH,
                   }}
                 >
-                  <div className="flex-1 min-w-0 p-6 md:p-10 lg:p-12 flex flex-col justify-center">
+                  <div
+                    className={`flex-1 min-w-0 p-4 sm:p-6 md:p-10 lg:p-12 flex flex-col order-1 ${
+                      isAnimatedCard
+                        ? "min-h-0 overflow-y-auto justify-center"
+                        : "justify-center"
+                    }`}
+                  >
                     <div className="mb-6">
                       <Icon />
                     </div>
-                    <h3 className="mb-4" style={headerStyle}>
+                    <h3 className="mb-3 sm:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl" style={headerStyle}>
                       {card.header}
                     </h3>
-                    <p className="mb-6 max-w-xl" style={subHeaderStyle}>
+                    <p className="mb-4 sm:mb-6 max-w-xl text-sm sm:text-base md:text-lg" style={subHeaderStyle}>
                       {card.subHeader}
                     </p>
-                    <ul className="space-y-3">
+                    <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base">
                       {card.list.map((item) => (
                         <li
                           key={item}
-                          className="flex items-start gap-3"
+                          className="flex items-start gap-2 sm:gap-3"
                           style={listItemStyle}
                         >
                           <Check
@@ -294,30 +296,25 @@ const OurSolutionSection: React.FC = () => {
                     </ul>
                   </div>
                   <div
-                    className={`rounded-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 ${
-                      card.header === "Lightning-Fast Legal Research" ||
-                      card.header === "Intelligent Document Analysis"
-                        ? "flex-1 flex flex-col"
-                        : "w-full md:w-[min(50%,658px)] shrink-0"
+                    className={`rounded-b-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 order-2 ${
+                      card.header === "Lightning-Fast Legal Research"
+                        ? "flex-1 flex flex-col min-h-0 h-[280px] sm:h-[340px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        : card.header === "Intelligent Document Analysis" ||
+                          card.header === "Smart Legal Drafting"
+                        ? "flex-1 flex flex-col min-h-0 h-[280px] sm:h-[340px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        : "w-full md:w-[min(50%,658px)] shrink-0 min-h-[200px] md:min-h-[564px] p-4 sm:p-6"
                     }`}
                     style={
                       card.header === "Lightning-Fast Legal Research" ||
-                      card.header === "Intelligent Document Analysis"
+                      card.header === "Intelligent Document Analysis" ||
+                      card.header === "Smart Legal Drafting"
                         ? {
-                            height: "100%",
-                            minHeight: FIRST_CARD_RIGHT_PANEL_HEIGHT,
                             background:
                               "linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 35%, #F8FAFC 70%, #F1F5F9 100%)",
                             borderRadius: 24,
-                            paddingTop: ANIMATION_PADDING_TOP,
-                            paddingRight: ANIMATION_PADDING_RIGHT,
-                            paddingBottom: ANIMATION_PADDING_BOTTOM,
-                            paddingLeft: ANIMATION_PADDING_LEFT,
                           }
                         : {
                             minWidth: 280,
-                            height: "100%",
-                            minHeight: CARD_HEIGHT,
                             background: "var(--bg-secondary, #F8FAFC)",
                             borderRadius: 24,
                           }
@@ -325,27 +322,24 @@ const OurSolutionSection: React.FC = () => {
                   >
                     {card.header === "Lightning-Fast Legal Research" ? (
                       <div
-                        className="min-w-0 overflow-hidden"
-                        style={{
-                          width: "100%",
-                          maxWidth: ANIMATION_SECTION_WIDTH,
-                          height: ANIMATION_SECTION_HEIGHT,
-                          borderRadius: 12,
-                        }}
+                        className="min-w-0 flex-1 overflow-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
+                        style={{ borderRadius: 12 }}
                       >
                         <LegalResearchDemoCard />
                       </div>
                     ) : card.header === "Intelligent Document Analysis" ? (
                       <div
-                        className="min-w-0 overflow-hidden"
-                        style={{
-                          width: "100%",
-                          maxWidth: ANIMATION_SECTION_WIDTH,
-                          height: ANIMATION_SECTION_HEIGHT,
-                          borderRadius: 12,
-                        }}
+                        className="min-w-0 flex-1 overflow-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
+                        style={{ borderRadius: 12 }}
                       >
                         <SmartDraftingDemoCard />
+                      </div>
+                    ) : card.header === "Smart Legal Drafting" ? (
+                      <div
+                        className="min-w-0 flex-1 overflow-hidden w-full max-w-full md:max-w-[658px] h-full min-h-0 rounded-xl"
+                        style={{ borderRadius: 12 }}
+                      >
+                        <SmartLegalDraftingDemoCard />
                       </div>
                     ) : null}
                   </div>
