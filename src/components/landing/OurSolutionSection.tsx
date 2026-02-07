@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import LegalResearchDemoCard from "./LegalResearchDemoCard";
 import SmartDraftingDemoCard from "./SmartDraftingDemoCard";
 import SmartLegalDraftingDemoCard from "./SmartLegalDraftingDemoCard";
+import ComplianceTrackingDemoCard from "./ComplianceTrackingDemoCard";
 
 const CARD_WIDTH = 1356;
 const CARD_HEIGHT = 564;
@@ -246,7 +247,8 @@ const OurSolutionSection: React.FC = () => {
             const isAnimatedCard =
               card.header === "Lightning-Fast Legal Research" ||
               card.header === "Intelligent Document Analysis" ||
-              card.header === "Smart Legal Drafting";
+              card.header === "Smart Legal Drafting" ||
+              card.header === "Real-Time Compliance Tracking";
             return (
               <div
                 key={card.header}
@@ -300,14 +302,16 @@ const OurSolutionSection: React.FC = () => {
                       card.header === "Lightning-Fast Legal Research"
                         ? "flex-1 flex flex-col min-h-0 h-[240px] sm:h-[280px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : card.header === "Intelligent Document Analysis" ||
-                          card.header === "Smart Legal Drafting"
+                          card.header === "Smart Legal Drafting" ||
+                          card.header === "Real-Time Compliance Tracking"
                         ? "flex-1 flex flex-col min-h-0 h-[240px] sm:h-[280px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : "w-full md:w-[min(50%,658px)] shrink-0 min-h-[200px] md:min-h-[564px] p-4 sm:p-6"
                     }`}
                     style={
                       card.header === "Lightning-Fast Legal Research" ||
                       card.header === "Intelligent Document Analysis" ||
-                      card.header === "Smart Legal Drafting"
+                      card.header === "Smart Legal Drafting" ||
+                      card.header === "Real-Time Compliance Tracking"
                         ? {
                             background:
                               "linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 35%, #F8FAFC 70%, #F1F5F9 100%)",
@@ -340,6 +344,13 @@ const OurSolutionSection: React.FC = () => {
                         style={{ borderRadius: 12 }}
                       >
                         <SmartLegalDraftingDemoCard />
+                      </div>
+                    ) : card.header === "Real-Time Compliance Tracking" ? (
+                      <div
+                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-0 rounded-xl"
+                        style={{ borderRadius: 12 }}
+                      >
+                        <ComplianceTrackingDemoCard />
                       </div>
                     ) : null}
                   </div>
