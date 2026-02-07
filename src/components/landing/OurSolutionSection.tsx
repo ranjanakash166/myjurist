@@ -1,7 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { Check } from "lucide-react";
+
+const STICK_TOP_REM = [1, 5, 9, 13]; // rem from viewport top for each card when stacked
+const REM_PX = 16;
+const CARD_COUNT = 4;
 import LegalResearchDemoCard from "./LegalResearchDemoCard";
 import SmartDraftingDemoCard from "./SmartDraftingDemoCard";
 import SmartLegalDraftingDemoCard from "./SmartLegalDraftingDemoCard";
@@ -220,13 +224,50 @@ const cardsData = [
 ];
 
 const OurSolutionSection: React.FC = () => {
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const translateYRef = useRef<number[]>(Array(CARD_COUNT).fill(0));
+  const rafRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const updateOffsets = () => {
+      const prev = translateYRef.current;
+      const rects = cardRefs.current.map((el) => el?.getBoundingClientRect() ?? null);
+      for (let i = 0; i < CARD_COUNT; i++) {
+        const el = cardRefs.current[i];
+        const rect = rects[i];
+        if (!el || !rect) continue;
+        const desiredTopPx = STICK_TOP_REM[i] * REM_PX;
+        const currentTranslate = prev[i] ?? 0;
+        const layoutTop = rect.top - currentTranslate;
+        const next = layoutTop > desiredTopPx ? 0 : desiredTopPx - layoutTop;
+        prev[i] = next;
+        el.style.transform = `translateY(${next}px)`;
+      }
+    };
+
+    const onScroll = () => {
+      if (rafRef.current != null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        updateOffsets();
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    updateOffsets();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   return (
     <section
       id="solutions"
       className="py-20 md:py-24 px-4"
       style={{ background: "var(--bg-tertiary, #F1F5F9)" }}
     >
-      <div className="max-w-[1356px] mx-auto w-full overflow-x-hidden">
+      <div className="max-w-[1356px] mx-auto w-full overflow-x-clip">
         <h2
           className="text-center mb-8 sm:mb-10 md:mb-14 font-semibold text-2xl sm:text-3xl md:text-4xl px-2"
           style={{
@@ -240,9 +281,9 @@ const OurSolutionSection: React.FC = () => {
           Our solution
         </h2>
 
-        {/* Cards laid one after the other; each sticks on scroll so they stack bottom to top */}
+        {/* Scroll-driven stacking: each card translates up as you scroll so they stack with a visible peek. */}
         <div className="flex flex-col gap-0">
-          {cardsData.map((card) => {
+          {cardsData.map((card, index) => {
             const Icon = card.icon;
             const isAnimatedCard =
               card.header === "Lightning-Fast Legal Research" ||
@@ -252,10 +293,13 @@ const OurSolutionSection: React.FC = () => {
             return (
               <div
                 key={card.header}
-                className="flex justify-center py-3 sm:py-4 md:py-6"
+                className="min-h-[75vh] flex justify-center pt-4 md:pt-6"
               >
                 <div
-                    className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row sticky top-2 sm:top-4 md:top-8 shrink-0 ${
+                  ref={(el) => {
+                    cardRefs.current[index] = el;
+                  }}
+                  className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row shrink-0 will-change-transform ${
                     isAnimatedCard
                       ? "h-[720px] sm:h-[760px] md:h-[500px] lg:h-[564px] min-h-0"
                       : "min-h-[320px] sm:min-h-[400px] md:min-h-[564px]"
@@ -263,6 +307,7 @@ const OurSolutionSection: React.FC = () => {
                   style={{
                     width: "100%",
                     maxWidth: CARD_WIDTH,
+                    zIndex: index,
                   }}
                 >
                   <div
@@ -358,6 +403,8 @@ const OurSolutionSection: React.FC = () => {
               </div>
             );
           })}
+        {/* Final spacer so last card can scroll up and stack */}
+        <div className="min-h-[30vh]" aria-hidden />
         </div>
       </div>
     </section>

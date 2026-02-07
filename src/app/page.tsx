@@ -36,9 +36,9 @@ export default function HomePage() {
     <>
       <StructuredData data={organizationSchema} />
       <StructuredData data={websiteSchema} />
-      <div className="landing-page min-h-screen overflow-x-hidden bg-background text-foreground">
+      <div className="landing-page min-h-screen overflow-x-clip bg-background text-foreground">
         <LandingHeader />
-        <main className="overflow-x-hidden min-w-0">
+        <main className="overflow-x-clip min-w-0">
           <LandingHeroSection />
           <ProductPreviewSection />
           <LandingChallengeSection />
