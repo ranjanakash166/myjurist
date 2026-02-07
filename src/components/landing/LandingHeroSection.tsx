@@ -22,7 +22,7 @@ const LandingHeroSection: React.FC = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[90vh] flex flex-col items-center justify-center pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 overflow-hidden"
+      className="relative min-h-[65vh] flex flex-col items-center justify-center pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-10 md:pb-12 px-4 overflow-hidden"
       style={{
         background: "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",
       }}
@@ -119,16 +119,20 @@ const LandingHeroSection: React.FC = () => {
         {/* 3. CTA button */}
         <Button
           asChild
-          className="landing-cta-text rounded-full font-medium gap-3 transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl active:scale-100"
+          className="landing-cta-text font-medium transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl active:scale-100"
           style={{
-            padding: "16px",
-            borderRadius: 100,
+            display: "flex",
+            padding: "18px 28px",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+            borderRadius: "100px",
             background: "var(--bg-black-solid, #0F172A)",
           }}
         >
-          <Link href="/request-demo" className="inline-flex items-center gap-3">
+          <Link href="/request-demo" className="inline-flex items-center justify-center text-base">
             Request a Demo
-            <CtaArrowIcon size={36} className="shrink-0" />
+            <CtaArrowIcon size={28} className="shrink-0" />
           </Link>
         </Button>
 

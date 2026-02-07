@@ -89,7 +89,7 @@ const ProductPreviewSection: React.FC = () => {
   return (
     <section
       id="product-preview"
-      className="w-full flex flex-col items-center justify-center py-10 sm:py-14 md:py-20 px-3 sm:px-4 overflow-hidden"
+      className="w-full flex flex-col items-center justify-center pt-4 sm:pt-6 md:pt-8 pb-10 sm:pb-14 md:pb-20 px-3 sm:px-4 overflow-hidden"
       style={{
         minHeight: "min(100vh, 900px)",
         alignSelf: "stretch",

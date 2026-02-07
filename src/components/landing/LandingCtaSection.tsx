@@ -9,25 +9,25 @@ const LandingCtaSection: React.FC = () => {
   return (
     <section
       id="cta"
-      className="w-full flex flex-col items-center justify-center px-4 py-12 sm:py-16 md:py-20 min-h-[380px] sm:min-h-[420px] md:min-h-[460px] overflow-hidden"
+      className="w-full flex flex-col items-center justify-center px-4 py-12 sm:py-16 md:py-20 min-h-[380px] sm:min-h-[420px] md:min-h-[460px] overflow-x-hidden"
       style={{
         alignSelf: "stretch",
         background: "var(--blue-100, #DBEAFE)",
       }}
     >
       <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-4 sm:gap-6 w-full">
-        {/* Header */}
+        {/* Header - Title/Title-1/Bold, one line; scales down on small screens so it stays in view */}
         <h2
-          className="max-w-4xl mx-auto w-full px-2"
+          className="max-w-4xl mx-auto w-full px-2 text-center whitespace-nowrap min-w-0 overflow-visible"
           style={{
             color: "var(--text-primary, #0F172A)",
             textAlign: "center",
             fontFamily: "var(--Title-Title-1-fontFamily, Inter)",
-            fontSize: "clamp(1.5rem, 5vw, 72px)",
+            fontSize: "clamp(1rem, 4vw, 48px)",
             fontStyle: "normal",
-            fontWeight: 700,
-            lineHeight: "clamp(2.5rem, 5.5vw, 88px)",
-            letterSpacing: "-0.8px",
+            fontWeight: "var(--Weights-Bold, 700)",
+            lineHeight: "clamp(1.25rem, 5vw, 58px)",
+            letterSpacing: "var(--Title-Title-1-letterSpacing, -0.8px)",
           }}
         >
           Ready to Transform Your Legal Practice?
@@ -54,16 +54,20 @@ const LandingCtaSection: React.FC = () => {
         {/* Request a Demo button */}
         <Button
           asChild
-          className="landing-cta-text inline-flex items-center justify-center gap-3 rounded-full font-medium transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100"
+          className="landing-cta-text font-medium transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100"
           style={{
-            padding: "16px",
-            borderRadius: 100,
+            display: "flex",
+            padding: "18px 28px",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+            borderRadius: "100px",
             background: "var(--bg-black-solid, #0F172A)",
           }}
         >
-          <Link href="/request-demo" className="inline-flex items-center gap-3">
+          <Link href="/request-demo" className="inline-flex items-center justify-center text-base">
             Request a Demo
-            <CtaArrowIcon size={36} className="shrink-0" />
+            <CtaArrowIcon size={28} className="shrink-0" />
           </Link>
         </Button>
       </div>
