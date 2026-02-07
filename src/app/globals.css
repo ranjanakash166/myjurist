@@ -93,6 +93,10 @@ body {
   opacity: 0;
   transform: translateY(60px);
 }
+.product-preview-no-animation {
+  opacity: 1;
+  transform: none;
+}
 
 /* Shared CTA button text (primary: white text on dark background) */
 .landing-cta-text {

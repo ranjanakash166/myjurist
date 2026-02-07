@@ -64,11 +64,23 @@ const featureCards = [
   },
 ];
 
+const ANIMATION_MIN_WIDTH_PX = 768;
+
 const ProductPreviewSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true);
 
   useEffect(() => {
+    const check = () =>
+      setIsDesktop(typeof window !== "undefined" && window.innerWidth >= ANIMATION_MIN_WIDTH_PX);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktop) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -84,7 +96,13 @@ const ProductPreviewSection: React.FC = () => {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasAnimated]);
+  }, [hasAnimated, isDesktop]);
+
+  const cardClass = !isDesktop
+    ? "product-preview-no-animation"
+    : hasAnimated
+      ? "animate-slide-up-in"
+      : "product-preview-initial";
 
   return (
     <section
@@ -97,12 +115,12 @@ const ProductPreviewSection: React.FC = () => {
       }}
     >
       <div className="w-full max-w-6xl mx-auto overflow-hidden">
-        {/* App preview container – dark themed mockup (slides up when in view) */}
+        {/* App preview container – slides up on desktop only; no animation on mobile */}
         <div
           ref={containerRef}
-          className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 transition-all duration-700 ease-out max-w-full ${
-            hasAnimated ? "animate-slide-up-in" : "product-preview-initial"
-          }`}
+          className={`rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border border-slate-200/50 max-w-full ${
+            isDesktop ? "transition-all duration-700 ease-out" : ""
+          } ${cardClass}`}
           style={{
             background: "linear-gradient(180deg, #1e1b4b 0%, #0f172a 50%, #020617 100%)",
             minHeight: "min(70vh, 600px)",

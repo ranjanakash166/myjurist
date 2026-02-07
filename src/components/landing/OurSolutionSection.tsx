@@ -227,6 +227,7 @@ const cardsData = [
 const RELEASE_THRESHOLD_PX = 0;
 const EXIT_DURATION_MS = 400;
 const EXIT_EASING = "cubic-bezier(0.25, 0.1, 0.25, 1)";
+const STACKING_MIN_WIDTH_PX = 768;
 
 const OurSolutionSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -237,6 +238,31 @@ const OurSolutionSection: React.FC = () => {
   const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useLayoutEffect(() => {
+    const isDesktop = () =>
+      typeof window !== "undefined" && window.innerWidth >= STACKING_MIN_WIDTH_PX;
+
+    const resetToNormal = () => {
+      const sectionEl = sectionRef.current;
+      if (sectionEl) {
+        sectionEl.style.position = "";
+        sectionEl.style.zIndex = "";
+      }
+      for (let i = 0; i < CARD_COUNT; i++) {
+        const el = cardRefs.current[i];
+        if (el) {
+          translateYRef.current[i] = 0;
+          el.style.transition = "";
+          el.style.transform = "translateY(0px)";
+          el.style.zIndex = "";
+        }
+      }
+      releasedRef.current = false;
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+        exitTimeoutRef.current = null;
+      }
+    };
+
     const finishRelease = () => {
       const sectionEl = sectionRef.current;
       if (sectionEl) {
@@ -255,6 +281,10 @@ const OurSolutionSection: React.FC = () => {
     };
 
     const updateOffsets = () => {
+      if (!isDesktop()) {
+        resetToNormal();
+        return;
+      }
       const prev = translateYRef.current;
       const sectionBottom = sectionRef.current?.getBoundingClientRect().bottom ?? 0;
 
@@ -317,9 +347,11 @@ const OurSolutionSection: React.FC = () => {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     updateOffsets();
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
       if (exitTimeoutRef.current) clearTimeout(exitTimeoutRef.current);
     };
