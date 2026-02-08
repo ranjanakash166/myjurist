@@ -109,28 +109,44 @@ body {
   letter-spacing: var(--Heading-H6-letterSpacing, 0);
 }
 
-/* Shared CTA button – landing page primary action (padding, pill shape, dark bg, typography, transition).
-   !important overrides Button component size variants (e.g. h-10 px-8) so the design spec is always applied. */
-.landing-cta-button {
+/* Shared CTA button – landing page primary action (Request a Demo, Contact Us).
+   Design spec: 20px 44px padding, pill shape, flex center, 12px gap. !important overrides Button/Link utilities. */
+.landing-cta-button,
+a.landing-cta-button,
+button.landing-cta-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
   padding: 20px 44px !important;
   min-height: unset !important;
   border-radius: 100px;
   background: var(--bg-black-solid, #0f172a);
-  color: var(--text-on-dark-color, #fff);
-  font-size: 22px;
-  line-height: 28px;
+  color: var(--text-white, #fff);
+  font-family: var(--Heading-H6-fontFamily, Inter);
+  font-size: var(--Heading-H6-fontSize, 20px);
+  font-style: normal;
+  font-weight: var(--Weights-Medium, 500);
+  line-height: var(--Heading-H6-lineHeight, 24px);
+  letter-spacing: var(--Heading-H6-letterSpacing, 0);
   transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 .landing-cta-button:hover,
-.landing-cta-button:focus-visible {
+.landing-cta-button:focus-visible,
+a.landing-cta-button:hover,
+a.landing-cta-button:focus-visible,
+button.landing-cta-button:hover,
+button.landing-cta-button:focus-visible {
   background: var(--bg-black-solid, #0f172a) !important;
-  color: var(--text-on-dark-color, #fff) !important;
+  color: var(--text-white, #fff) !important;
   filter: brightness(1.1);
 }
-.landing-cta-button:active {
+.landing-cta-button:active,
+a.landing-cta-button:active,
+button.landing-cta-button:active {
   background: var(--bg-black-solid, #0f172a) !important;
-  color: var(--text-on-dark-color, #fff) !important;
+  color: var(--text-white, #fff) !important;
   filter: brightness(0.95);
 }
 
