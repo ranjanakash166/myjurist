@@ -223,10 +223,11 @@ const cardsData = [
   },
 ];
 
-/** When section bottom is above this offset from viewport top, release the stack so it scrolls away. */
-const RELEASE_THRESHOLD_PX = 0;
-const EXIT_DURATION_MS = 400;
-const EXIT_EASING = "cubic-bezier(0.25, 0.1, 0.25, 1)";
+/** When section bottom is at or above this fraction of viewport height from top, release the stack so it scrolls away. 0.5 = when next section has scrolled halfway into view. */
+const RELEASE_THRESHOLD_FRACTION = 0.5;
+/** Exit animation when cards scroll away */
+const EXIT_DURATION_MS = 500;
+const EXIT_EASING = "cubic-bezier(0.33, 1, 0.68, 1)";
 const STACKING_MIN_WIDTH_PX = 768;
 
 const OurSolutionSection: React.FC = () => {
@@ -252,8 +253,10 @@ const OurSolutionSection: React.FC = () => {
         if (el) {
           translateYRef.current[i] = 0;
           el.style.transition = "";
-          el.style.transform = "translateY(0px)";
+          el.style.transform = "translate3d(0, 0, 0)";
           el.style.zIndex = "";
+          el.style.visibility = "";
+          el.style.pointerEvents = "";
         }
       }
       releasedRef.current = false;
@@ -264,18 +267,15 @@ const OurSolutionSection: React.FC = () => {
     };
 
     const finishRelease = () => {
-      const sectionEl = sectionRef.current;
-      if (sectionEl) {
-        sectionEl.style.position = "relative";
-        sectionEl.style.zIndex = "-1";
-      }
+      // Keep section in flow so its background stays visible (no z-index -1)
       for (let i = 0; i < CARD_COUNT; i++) {
         const el = cardRefs.current[i];
         if (el) {
           translateYRef.current[i] = 0;
           el.style.transition = "";
-          el.style.transform = "translateY(0px)";
-          el.style.zIndex = "-1";
+          el.style.transform = "translate3d(0, 0, 0)";
+          el.style.visibility = "hidden";
+          el.style.pointerEvents = "none";
         }
       }
     };
@@ -287,27 +287,25 @@ const OurSolutionSection: React.FC = () => {
       }
       const prev = translateYRef.current;
       const sectionBottom = sectionRef.current?.getBoundingClientRect().bottom ?? 0;
+      const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 800;
+      const releaseThreshold = viewportHeight * RELEASE_THRESHOLD_FRACTION;
 
-      if (sectionBottom <= RELEASE_THRESHOLD_PX) {
+      if (sectionBottom <= releaseThreshold) {
         if (!releasedRef.current) {
           releasedRef.current = true;
-          const sectionEl = sectionRef.current;
-          if (sectionEl) {
-            sectionEl.style.position = "relative";
-            sectionEl.style.zIndex = "-1";
-          }
+          // Do not set section z-index -1; keep section background visible
           const exitY = -(typeof window !== "undefined" ? window.innerHeight : 800) - 200;
           for (let i = 0; i < CARD_COUNT; i++) {
             const el = cardRefs.current[i];
             if (el) {
               el.style.zIndex = String(i);
               el.style.transition = `transform ${EXIT_DURATION_MS}ms ${EXIT_EASING}`;
-              el.style.transform = `translateY(${exitY}px)`;
+              el.style.transform = `translate3d(0, ${exitY}px, 0)`;
               prev[i] = exitY;
             }
           }
           if (exitTimeoutRef.current) clearTimeout(exitTimeoutRef.current);
-          exitTimeoutRef.current = setTimeout(finishRelease, EXIT_DURATION_MS + 50);
+          exitTimeoutRef.current = setTimeout(finishRelease, EXIT_DURATION_MS + 80);
         }
         return;
       }
@@ -327,14 +325,16 @@ const OurSolutionSection: React.FC = () => {
         const el = cardRefs.current[i];
         const rect = rects[i];
         if (!el || !rect) continue;
-        el.style.transition = "";
-        el.style.zIndex = String(i);
         const desiredTopPx = STICK_TOP_REM[i] * REM_PX;
         const currentTranslate = prev[i] ?? 0;
         const layoutTop = rect.top - currentTranslate;
         const next = layoutTop > desiredTopPx ? 0 : desiredTopPx - layoutTop;
         prev[i] = next;
-        el.style.transform = `translateY(${next}px)`;
+        el.style.transition = "";
+        el.style.zIndex = String(i);
+        el.style.transform = `translate3d(0, ${next}px, 0)`;
+        el.style.visibility = "";
+        el.style.pointerEvents = "";
       }
     };
 

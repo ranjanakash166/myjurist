@@ -175,20 +175,8 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                   }}
                   className={
                     useLandingStyle
-                      ? 'mt-8 rounded-full font-medium gap-3 px-10 py-5 text-white transition-all duration-200 hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100'
+                      ? 'landing-cta-button landing-cta-text mt-8 rounded-full font-medium gap-3 transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100'
                       : 'mt-8'
-                  }
-                  style={
-                    useLandingStyle
-                      ? {
-                          padding: '20px 44px',
-                          borderRadius: 100,
-                          background: 'var(--bg-black-solid, #0f172a)',
-                          color: 'var(--text-on-dark-color, #fff)',
-                          fontSize: '22px',
-                          lineHeight: '28px',
-                        }
-                      : undefined
                   }
                 >
                   {useLandingStyle ? (
@@ -311,20 +299,8 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                   disabled={isSubmitting}
                   className={
                     useLandingStyle
-                      ? 'w-full rounded-full font-medium gap-3 px-10 py-5 text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100 disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100'
+                      ? 'landing-cta-button landing-cta-text w-full rounded-full font-medium gap-3 transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100 disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100'
                       : 'w-full'
-                  }
-                  style={
-                    useLandingStyle
-                      ? {
-                          padding: '20px 44px',
-                          borderRadius: 100,
-                          background: 'var(--bg-black-solid, #0f172a)',
-                          color: 'var(--text-on-dark-color, #fff)',
-                          fontSize: '22px',
-                          lineHeight: '28px',
-                        }
-                      : undefined
                   }
                 >
                   {useLandingStyle ? (

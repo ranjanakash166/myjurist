@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="landing-cta-text group flex items-center justify-center w-full md:w-48 min-w-[200px] p-4 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="landing-cta-button landing-cta-text group flex items-center justify-center w-full md:w-48 min-w-[200px] shadow-lg hover:shadow-xl transition-all duration-200 ease-out hover:brightness-110 hover:scale-105"
           >
             <Mail className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Request Demo

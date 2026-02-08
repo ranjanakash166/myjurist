@@ -33,7 +33,7 @@ const HeroSection: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="landing-cta-text p-4 font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="landing-cta-button landing-cta-text font-semibold transition-all duration-200 ease-out hover:brightness-110 hover:shadow-xl"
           >
             Request a Demo
             <ArrowRight className="ml-2 h-5 w-5" />

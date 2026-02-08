@@ -133,12 +133,7 @@ const LandingHeader: React.FC = () => {
           {/* Contact Us – primary CTA in header */}
           <Button
             asChild
-            className="landing-cta-text rounded-full font-medium gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
-            style={{
-              padding: "16px",
-              borderRadius: 100,
-              background: "var(--bg-black-solid)",
-            }}
+            className="landing-cta-button landing-cta-text font-medium gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
           >
             <Link href="/contact" className="flex items-center gap-2">
               <span
@@ -197,12 +192,7 @@ const LandingHeader: React.FC = () => {
                 </Button>
                 <Button
                   asChild
-                  className="landing-cta-text rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
-                  style={{
-                    padding: "16px",
-                    borderRadius: 100,
-                    background: "var(--bg-black-solid)",
-                  }}
+                  className="landing-cta-button landing-cta-text rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
                 >
                   <Link href="/contact" className="flex items-center gap-2">
                     <span

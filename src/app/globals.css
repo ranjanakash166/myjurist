@@ -109,6 +109,31 @@ body {
   letter-spacing: var(--Heading-H6-letterSpacing, 0);
 }
 
+/* Shared CTA button – landing page primary action (padding, pill shape, dark bg, typography, transition).
+   !important overrides Button component size variants (e.g. h-10 px-8) so the design spec is always applied. */
+.landing-cta-button {
+  padding: 20px 44px !important;
+  min-height: unset !important;
+  border-radius: 100px;
+  background: var(--bg-black-solid, #0f172a);
+  color: var(--text-on-dark-color, #fff);
+  font-size: 22px;
+  line-height: 28px;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+.landing-cta-button:hover,
+.landing-cta-button:focus-visible {
+  background: var(--bg-black-solid, #0f172a) !important;
+  color: var(--text-on-dark-color, #fff) !important;
+  filter: brightness(1.1);
+}
+.landing-cta-button:active {
+  background: var(--bg-black-solid, #0f172a) !important;
+  color: var(--text-on-dark-color, #fff) !important;
+  filter: brightness(0.95);
+}
+
 @layer base {
   :root {
     /* Neutral black color palette - Professional and sophisticated */

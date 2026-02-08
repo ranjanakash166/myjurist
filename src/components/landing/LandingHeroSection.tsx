@@ -119,18 +119,9 @@ const LandingHeroSection: React.FC = () => {
         {/* 3. CTA button */}
         <Button
           asChild
-          className="landing-cta-text font-medium transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl active:scale-100"
-          style={{
-            display: "flex",
-            padding: "18px 28px",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "10px",
-            borderRadius: "100px",
-            background: "var(--bg-black-solid, #0F172A)",
-          }}
+          className="landing-cta-button landing-cta-text font-medium transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl active:scale-100"
         >
-          <Link href="/request-demo" className="inline-flex items-center justify-center text-base">
+          <Link href="/request-demo" className="inline-flex items-center justify-center gap-2">
             Request a Demo
             <CtaArrowIcon size={28} className="shrink-0" />
           </Link>
