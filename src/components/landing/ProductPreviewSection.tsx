@@ -413,10 +413,9 @@ const ProductPreviewSection: React.FC = () => {
                         <Button
                           asChild
                           size="sm"
-                          variant="outline"
-                          className="rounded-lg text-xs border-slate-500/50 text-slate-200 hover:bg-white/10"
+                          className="rounded-lg text-xs bg-white/10 text-white border border-white/20 hover:bg-white/20 hover:border-white/30 hover:text-white"
                         >
-                          <Link href="/app/legal-research">{card.button}</Link>
+                          <Link href={card.button === "Start Research" ? "/app/legal-research" : card.button === "Analyze Document" ? "/app/document-analysis" : "/app/smart-drafting"}>{card.button}</Link>
                         </Button>
                       </div>
                     );
