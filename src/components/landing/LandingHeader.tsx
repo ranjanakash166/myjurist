@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, ChevronDown } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -51,16 +52,20 @@ const LandingHeader: React.FC = () => {
           backgroundColor: isScrolled ? undefined : "transparent",
         }}
       >
-        {/* Logo */}
+        {/* Logo: icon (transparent) + MyJurist wordmark image */}
         <Link
           href="/"
           className="flex items-center gap-3 shrink-0"
           style={{ color: "#0f172a" }}
         >
           <MyJuristLogo size={41} />
-          <span className="font-semibold text-xl text-[#0f172a] whitespace-nowrap">
-            My Jurist
-          </span>
+          <Image
+            src="/images/myjurist-wordmark.png"
+            alt="My Jurist"
+            width={120}
+            height={32}
+            className="h-8 w-auto object-contain"
+          />
         </Link>
 
         {/* Desktop nav – H6/Medium: Inter 20px, weight 500, line-height 24px */}
