@@ -88,31 +88,31 @@ const cards = [
     icon: IconClock,
     header: "Hours Lost to Research",
     description:
-      "Searching through thousands of judgments manually wastes 8+ hours per case, time you could spend with clients.",
+      "Sifting through dozens of legal files to find key facts and inconsistencies can take an entire day—time better spent advising clients and building strategy.",
   },
   {
     icon: IconPaperPlane,
     header: "Scattered Information",
     description:
-      "Jumping between SCC, Manupatra, and court websites makes it impossible to find everything you need.",
+      "Asking questions across disconnected tools leads to fragmented answers and missed connections.",
   },
   {
     icon: IconWarning,
     header: "Missing Critical Precedents",
     description:
-      "Manual search means you might miss the one judgment that could change your case outcome.",
+      "Manual case law research takes hours, slows down your billable workflow, and risks missing key precedents.",
   },
 ];
 
 const LandingChallengeSection: React.FC = () => {
   return (
     <section
-      id="challenge"
+      id="problems"
       className="py-12 sm:py-16 md:py-24 px-4 overflow-hidden"
       style={{ background: "var(--blue-50, #EFF6FF)" }}
     >
       <div className="max-w-6xl mx-auto flex flex-col items-center w-full">
-        {/* 1. THE CHALLENGE pill */}
+        {/* 1. Problems pill */}
         <div
           className="inline-flex items-center gap-4 rounded-full border px-2 py-2 pr-4 mb-8"
           style={{
@@ -127,7 +127,7 @@ const LandingChallengeSection: React.FC = () => {
             className="font-semibold uppercase tracking-wider text-sm"
             style={{ color: "var(--blue-600, #2563EB)" }}
           >
-            The Challenge
+            Problems
           </span>
         </div>
 

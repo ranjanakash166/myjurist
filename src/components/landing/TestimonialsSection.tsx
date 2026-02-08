@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const CARDS_PER_VIEW = 3;
 const CARD_GAP = 24;
@@ -10,43 +9,21 @@ const CARD_GAP = 24;
 const testimonials = [
   {
     quote:
-      "MyJurist cut my research time from 8 hours to 20 minutes. I found a 2018 Bombay HC judgment that completely turned my client's case. This is a game-changer.",
-    name: "Adv. Rahul Mehta",
-    title: "Senior Advocate, Mumbai HC",
-    avatar: "/images/gaurav.jpeg",
-    initials: "RM",
+      "MyJurist changed how we handle legal work day to day. Instead of juggling documents, notes, and research tools, everything now happens in one place. The clarity it brings to complex matters is a real advantage.",
+    name: "Adv Mahesh Tewari",
+    title: "",
   },
   {
     quote:
-      "The document analysis feature is incredible. I analyzed a 150-page joint venture agreement in 3 minutes and identified 7 critical risks my team had missed.",
-    name: "Anjali Sharma",
-    title: "Partner, Corporate Law Firm",
-    avatar: "/images/shashank.jpeg",
-    initials: "AS",
+      "The universal chat is a game-changer. I can ask questions across multiple documents and keep refining my thoughts without losing context. What used to take hours of cross-checking now takes minutes.",
+    name: "Adv Devesh Singh",
+    title: "",
   },
   {
     quote:
-      "As a solo practitioner, MyJurist gives me the research capabilities of a 10-lawyer firm. The ROI paid for itself in the first week.",
-    name: "Adv. Priya Kulkarni",
-    title: "Solo Practitioner, Delhi",
-    avatar: "/images/akash-ranjan.jpeg",
-    initials: "PK",
-  },
-  {
-    quote:
-      "We use MyJurist for due diligence on every M&A. The speed and accuracy have become a standard in our practice.",
-    name: "Vikram Singh",
-    title: "Partner, Mergers & Acquisitions",
-    avatar: "/images/gaurav.jpeg",
-    initials: "VS",
-  },
-  {
-    quote:
-      "From contract review to compliance checks, MyJurist has streamlined our entire workflow. Highly recommend.",
-    name: "Dr. Meera Krishnan",
-    title: "Legal Counsel, Healthcare",
-    avatar: "/images/shashank.jpeg",
-    initials: "MK",
+      "From research to drafting to document analysis, MyJurist feels like a single, coherent system for legal work. It's not just faster, it's more structured, which makes a huge difference when deadlines are tight.",
+    name: "Adv Ritesh Mahto",
+    title: "",
   },
 ];
 
@@ -147,16 +124,6 @@ const TestimonialsSection: React.FC = () => {
                       "0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05)",
                   }}
                 >
-                  <div className="flex gap-0.5 mb-4 justify-start">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star
-                        key={i}
-                        className="w-5 h-5 fill-[#FFC107] text-[#FFC107] shrink-0"
-                        strokeWidth={0}
-                        aria-hidden
-                      />
-                    ))}
-                  </div>
                   <p
                     className="mb-6 leading-relaxed flex-1 text-left"
                     style={{
@@ -169,42 +136,21 @@ const TestimonialsSection: React.FC = () => {
                   >
                     &ldquo;{t.quote}&rdquo;
                   </p>
-                  <div className="flex items-center gap-4 mt-auto justify-start">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-[var(--blue-50)] border border-slate-200/80 shrink-0 flex items-center justify-center">
-                      <Image
-                        src={t.avatar}
-                        alt=""
-                        width={48}
-                        height={48}
-                        className="object-cover w-full h-full"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
-                          const parent = target.parentElement;
-                          if (parent) {
-                            const fallback = document.createElement("span");
-                            fallback.className =
-                              "text-sm font-semibold text-[var(--blue-600)]";
-                            fallback.textContent = t.initials;
-                            parent.appendChild(fallback);
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="min-w-0">
+                  <div className="min-w-0 mt-auto">
+                    <p
+                      className="font-semibold truncate"
+                      style={{
+                        color: "var(--text-primary, #0F172A)",
+                        fontFamily: "var(--Heading-H6-fontFamily, Inter)",
+                        fontSize: "var(--Heading-H6-fontSize, 20px)",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {t.name}
+                    </p>
+                    {t.title ? (
                       <p
-                        className="font-semibold truncate"
-                        style={{
-                          color: "var(--text-primary, #0F172A)",
-                          fontFamily: "var(--Heading-H6-fontFamily, Inter)",
-                          fontSize: "var(--Heading-H6-fontSize, 20px)",
-                          fontWeight: 600,
-                        }}
-                      >
-                        {t.name}
-                      </p>
-                      <p
-                        className="text-sm truncate"
+                        className="text-sm truncate mt-0.5"
                         style={{
                           color: "var(--text-secondary, #475569)",
                           fontFamily: "var(--Heading-H6-fontFamily, Inter)",
@@ -214,7 +160,7 @@ const TestimonialsSection: React.FC = () => {
                       >
                         {t.title}
                       </p>
-                    </div>
+                    ) : null}
                   </div>
                 </div>
               ))}

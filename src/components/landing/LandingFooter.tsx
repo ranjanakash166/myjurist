@@ -88,9 +88,7 @@ const followLinks = [
 ];
 
 const complianceBadges = [
-  { src: "/images/footer/iso27001.png", alt: "ISO 27001", label: "ISO 27001" },
-  { src: "/images/footer/gdpr.png", alt: "GDPR", label: "GDPR" },
-  { src: "/images/footer/soc2.png", alt: "SOC2 II", label: "SOC2 II" },
+  { src: "/images/footer/iso27001.png", alt: "ISO 27001 standards", label: "ISO 27001 standards" },
 ];
 
 const LandingFooter: React.FC = () => {
@@ -255,7 +253,7 @@ const LandingFooter: React.FC = () => {
               fontFamily: "var(--Label-Label-1-fontFamily, Inter)",
             }}
           >
-            © 2025 MyJurist Technologies Pvt. Ltd. All rights reserved
+            © 2026 MyJurist Technologies Pvt. Ltd. All rights reserved
           </p>
         </div>
       </div>

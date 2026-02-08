@@ -16,7 +16,7 @@ const navItems = [
   { label: "Home", href: "#home" },
   { label: "Solutions", href: "#solutions", hasDropdown: true },
   { label: "Company", href: "/about", hasDropdown: true },
-  { label: "The Challenge", href: "#challenge" },
+  { label: "Problems", href: "#problems" },
   { label: "Platform", href: "#platform" },
   { label: "Why Us", href: "#why" },
   { label: "Contact Us", href: "/contact" },

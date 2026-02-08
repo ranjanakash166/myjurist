@@ -2,20 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import CtaArrowIcon from "./CtaArrowIcon";
 
 const metrics = [
-  { value: "50M+", label: "Case laws indexed" },
-  { value: "8hrs → 15min", label: "Average research time" },
-  { value: "25+", label: "Courts covered" },
-];
-
-const avatarSrcs = [
-  "/images/gaurav.jpeg",
-  "/images/shashank.jpeg",
-  "/images/akash-ranjan.jpeg",
+  { value: "50M+", label: "Indian Judgments & Precedents Indexed" },
+  { value: "8hrs → 15min", label: "Reduce Research Time from Hours to Minutes" },
+  { value: "25+", label: "Coverage Across 25+ Indian Courts" },
 ];
 
 const LandingHeroSection: React.FC = () => {
@@ -30,35 +23,13 @@ const LandingHeroSection: React.FC = () => {
       <div className="flex flex-col items-center gap-6 sm:gap-8 md:gap-10 w-full max-w-[974px] mx-auto">
         {/* 1. Trust badge */}
         <div
-          className="inline-flex items-center justify-center gap-2 sm:gap-4 rounded-full border px-2 py-2 pr-3 sm:pr-4 flex-wrap sm:flex-nowrap max-w-full"
+          className="inline-flex items-center justify-center gap-2 sm:gap-4 rounded-full border px-3 py-2 sm:px-4 sm:py-2 flex-wrap sm:flex-nowrap max-w-full"
           style={{
-            padding: "8px 12px 8px 8px",
-            gap: 12,
             borderRadius: 100,
             border: "1px solid var(--blue-400, #60A5FA)",
             background: "var(--blue-50, #EFF6FF)",
           }}
         >
-          <div className="flex items-center shrink-0">
-            {avatarSrcs.map((src, i) => (
-              <div
-                key={i}
-                className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-slate-200 border-2 border-[var(--blue-50)] shrink-0"
-                style={{ marginLeft: i === 0 ? 0 : -8 }}
-              >
-                <Image
-                  src={src}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-cover w-full h-full"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              </div>
-            ))}
-          </div>
           <span
             className="font-medium text-[var(--text-primary)] text-center sm:text-left text-sm sm:text-base md:text-lg"
             style={{
@@ -85,7 +56,6 @@ const LandingHeroSection: React.FC = () => {
             letterSpacing: "var(--Title-Title-1-letterSpacing, -0.8px)",
           }}
         >
-          Win More Cases with{" "}
           <span
             className="bg-clip-text text-transparent"
             style={{
@@ -95,7 +65,7 @@ const LandingHeroSection: React.FC = () => {
               backgroundClip: "text",
             }}
           >
-            AI-Powered Legal Research
+            Built for Legal Thinking
           </span>
         </h1>
 
@@ -111,9 +81,8 @@ const LandingHeroSection: React.FC = () => {
             letterSpacing: "-0.15px",
           }}
         >
-          Your AI senior counsel. Research precedents, analyze documents, and
-          draft pleadings in minutes—not hours. Built specifically for Indian
-          litigation.
+          A unified AI workspace that understands your documents, questions, and
+          workflows—so legal work stays precise and connected.
         </p>
 
         {/* 3. CTA button */}
@@ -129,13 +98,13 @@ const LandingHeroSection: React.FC = () => {
 
         {/* 4. Key metrics */}
         <div
-          className="w-full flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12 lg:gap-16 xl:gap-24 pt-6 sm:pt-8 pb-4 sm:pb-6"
+          className="w-full flex flex-nowrap items-start justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16 pt-6 sm:pt-8 pb-4 sm:pb-6"
           style={{ alignSelf: "stretch" }}
         >
           {metrics.map((item) => (
-            <div key={item.label} className="flex flex-col items-center gap-0.5 sm:gap-1">
+            <div key={item.label} className="flex flex-col items-center gap-0.5 sm:gap-1 flex-1 min-w-0">
               <span
-                className="text-center text-2xl sm:text-3xl md:text-4xl"
+                className="text-center text-2xl sm:text-3xl md:text-4xl shrink-0"
                 style={{
                   color: "var(--text-primary, #0F172A)",
                   fontFamily: "var(--Heading-H3-fontFamily, Inter)",
@@ -148,7 +117,7 @@ const LandingHeroSection: React.FC = () => {
                 {item.value}
               </span>
               <span
-                className="text-center text-xs sm:text-sm md:text-base"
+                className="text-center text-xs sm:text-sm md:text-base min-h-[2.5rem] sm:min-h-[3rem] flex items-start justify-center"
                 style={{
                   color: "var(--text-secondary, #475569)",
                   fontFamily: "var(--Heading-H6-fontFamily, Inter)",
