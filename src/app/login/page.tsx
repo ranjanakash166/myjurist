@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "../../components/AuthProvider";
-import { useTheme } from "next-themes";
 import CompanyInfo from "../../components/CompanyInfo";
 import Captcha from "../../components/Captcha";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import CtaArrowIcon from "@/components/landing/CtaArrowIcon";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -23,7 +23,6 @@ export default function LoginPage() {
   const [captchaValid, setCaptchaValid] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
-  const { theme } = useTheme();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -59,38 +58,46 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
-      {/* Left Side - Company Info */}
+    <div className="min-h-screen flex flex-col lg:flex-row font-[var(--Label-Label-1-fontFamily,Inter)]">
+      {/* Left Side - Company Info (landing dark panel) */}
       <div className="hidden lg:block lg:w-1/2">
         <CompanyInfo />
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
-        <Card className="w-full max-w-md">
-          <CardHeader>
+      {/* Right Side - Login Form (landing gradient + card) */}
+      <div
+        className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen"
+        style={{
+          background: "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",
+        }}
+      >
+        <Card className="w-full max-w-md bg-white border border-slate-200/80 shadow-xl rounded-2xl overflow-hidden">
+          <CardHeader className="space-y-1 pb-2">
             {/* Mobile Header */}
-            <div className="lg:hidden text-center mb-8">
+            <div className="lg:hidden text-center mb-6">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                  <img 
-                    src="/images/myjurist-logo.png" 
-                    alt="My Jurist" 
+                  <img
+                    src="/images/myjurist-logo.png"
+                    alt="My Jurist"
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <span className="font-bold text-foreground">My Jurist</span>
+                <span className="font-bold text-[#0f172a]">My Jurist</span>
               </div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-[#475569] text-sm">
                 Next Generation AI-Powered Legal Intelligence
               </p>
             </div>
 
             <div className="text-center">
-              <CardTitle className="text-3xl font-bold mb-2 text-foreground">
+              <CardTitle
+                className="text-3xl font-bold mb-2"
+                style={{ color: "var(--text-primary, #0f172a)" }}
+              >
                 Welcome Back
               </CardTitle>
-              <p className="text-muted-foreground">
+              <p style={{ color: "var(--text-secondary, #475569)" }}>
                 Sign in to your My Jurist account
               </p>
             </div>
@@ -99,7 +106,13 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label
+                  htmlFor="email"
+                  className="font-medium"
+                  style={{ color: "var(--text-primary, #0f172a)" }}
+                >
+                  Email Address
+                </Label>
                 <Input
                   type="email"
                   id="email"
@@ -109,11 +122,18 @@ export default function LoginPage() {
                   placeholder="Enter your email"
                   required
                   autoFocus
+                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label
+                  htmlFor="password"
+                  className="font-medium"
+                  style={{ color: "var(--text-primary, #0f172a)" }}
+                >
+                  Password
+                </Label>
                 <Input
                   type="password"
                   id="password"
@@ -122,11 +142,12 @@ export default function LoginPage() {
                   onChange={handleChange}
                   placeholder="Enter your password"
                   required
+                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]"
                 />
                 <div className="text-right">
                   <Link
                     href="/forgot-password"
-                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
+                    className="text-sm font-medium transition-colors text-[#2563eb] hover:text-[#1d4ed8]"
                   >
                     Forgot Password?
                   </Link>
@@ -144,18 +165,31 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading || !captchaValid}
-                className="w-full"
+                className="w-full rounded-full font-medium gap-3 px-10 py-5 text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100 disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100"
+                style={{
+                  padding: "20px 44px",
+                  borderRadius: 100,
+                  background: "var(--bg-black-solid, #0f172a)",
+                  color: "var(--text-on-dark-color, #fff)",
+                  fontFamily: "var(--Label-Label-1-fontFamily, Inter)",
+                  fontSize: "22px",
+                  fontWeight: 500,
+                  lineHeight: "28px",
+                }}
               >
-                {loading ? "Signing In..." : "Sign In"}
+                <span className="inline-flex items-center justify-center gap-3">
+                  {loading ? "Signing In..." : "Sign In"}
+                  {!loading && <CtaArrowIcon size={36} className="shrink-0" />}
+                </span>
               </Button>
             </form>
 
             <div className="mt-8 text-center">
-              <p className="text-muted-foreground">
+              <p style={{ color: "var(--text-secondary, #475569)" }}>
                 Don't have an account?{" "}
                 <Link
                   href="/contact"
-                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                  className="font-medium transition-colors text-[#2563eb] hover:text-[#1d4ed8]"
                 >
                   Contact us
                 </Link>

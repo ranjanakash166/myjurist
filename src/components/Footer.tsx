@@ -13,8 +13,8 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-t from-muted/80 to-background/40 py-12 border-t border-border">
-      <div className="container-legal text-center">
+    <footer className="bg-gradient-to-t from-muted/80 to-background/40 py-8 sm:py-12 border-t border-border overflow-hidden">
+      <div className="container-legal text-center max-w-full px-4">
         <div className="flex items-center justify-center space-x-3 mb-6 group">
           <div className="relative">
             <Scale className="h-8 w-8 text-primary group-hover:text-accent transition-colors duration-300" />
@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            className="landing-cta-button landing-cta-text group flex items-center justify-center w-full md:w-48 min-w-[200px] shadow-lg hover:shadow-xl transition-all duration-200 ease-out hover:brightness-110 hover:scale-105"
           >
             <Mail className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Request Demo
@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
             variant="outline"
             size="lg"
             onClick={handleContactUs}
-            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 transform hover:scale-105"
+            className="group flex items-center justify-center w-full md:w-48 min-w-[200px] p-4 border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 transform hover:scale-105"
           >
             <Phone className="mr-2 h-5 w-5 group-hover:animate-bounce" />
             Contact Us

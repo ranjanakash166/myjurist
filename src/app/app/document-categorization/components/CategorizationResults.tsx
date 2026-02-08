@@ -37,7 +37,7 @@ export default function CategorizationResults({ result }: CategorizationResultsP
 
 
   const getConfidenceColor = (confidence: number): string => {
-    if (confidence >= 0.9) return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+    if (confidence >= 0.9) return "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary";
     if (confidence >= 0.7) return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
     if (confidence >= 0.5) return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
     return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
@@ -58,7 +58,7 @@ export default function CategorizationResults({ result }: CategorizationResultsP
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
+            <CheckCircle className="w-5 h-5 text-primary" />
             Categorization Complete
           </CardTitle>
         </CardHeader>
@@ -69,7 +69,7 @@ export default function CategorizationResults({ result }: CategorizationResultsP
               <div className="text-sm text-muted-foreground">Documents Processed</div>
             </div>
             <div className="text-center p-4 bg-muted/50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-primary">
                 {result.categorization_results.filter(r => r.processing_status === 'completed').length}
               </div>
               <div className="text-sm text-muted-foreground">Successfully Processed</div>
@@ -157,7 +157,7 @@ export default function CategorizationResults({ result }: CategorizationResultsP
                           {docResult.assigned_categories.length} categories
                         </span>
                         <span className="flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3 text-green-600" />
+                          <CheckCircle className="w-3 h-3 text-primary" />
                           {docResult.processing_status}
                         </span>
                       </div>

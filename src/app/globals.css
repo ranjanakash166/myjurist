@@ -8,7 +8,7 @@ html {
 
 body {
   overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Mobile-specific overflow handling */
@@ -53,6 +53,101 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary) / 0.8);
+}
+
+/* Hide scrollbar but keep scroll behavior (e.g. for demo cards) */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Second section big image: slide up when in view */
+@keyframes slide-up-in {
+  from {
+    opacity: 0.6;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-up-in {
+  animation: slide-up-in 0.7s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .product-preview-initial {
+    opacity: 1;
+    transform: none;
+  }
+}
+.product-preview-initial {
+  opacity: 0;
+  transform: translateY(60px);
+}
+.product-preview-no-animation {
+  opacity: 1;
+  transform: none;
+}
+
+/* Shared CTA button text (primary: white text on dark background) */
+.landing-cta-text {
+  color: var(--text-white, #fff);
+  font-family: var(--Heading-H6-fontFamily, Inter);
+  font-size: var(--Heading-H6-fontSize, 20px);
+  font-style: normal;
+  font-weight: var(--Weights-Medium, 500);
+  line-height: var(--Heading-H6-lineHeight, 24px);
+  letter-spacing: var(--Heading-H6-letterSpacing, 0);
+}
+
+/* Shared CTA button – landing page primary action (Request a Demo, Contact Us).
+   Design spec: 20px 44px padding, pill shape, flex center, 12px gap. !important overrides Button/Link utilities. */
+.landing-cta-button,
+a.landing-cta-button,
+button.landing-cta-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 20px 44px !important;
+  min-height: unset !important;
+  border-radius: 100px;
+  background: var(--bg-black-solid, #0f172a);
+  color: var(--text-white, #fff);
+  font-family: var(--Heading-H6-fontFamily, Inter);
+  font-size: var(--Heading-H6-fontSize, 20px);
+  font-style: normal;
+  font-weight: var(--Weights-Medium, 500);
+  line-height: var(--Heading-H6-lineHeight, 24px);
+  letter-spacing: var(--Heading-H6-letterSpacing, 0);
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+}
+.landing-cta-button:hover,
+.landing-cta-button:focus-visible,
+a.landing-cta-button:hover,
+a.landing-cta-button:focus-visible,
+button.landing-cta-button:hover,
+button.landing-cta-button:focus-visible {
+  background: var(--bg-black-solid, #0f172a) !important;
+  color: var(--text-white, #fff) !important;
+  filter: brightness(1.1);
+}
+.landing-cta-button:active,
+a.landing-cta-button:active,
+button.landing-cta-button:active {
+  background: var(--bg-black-solid, #0f172a) !important;
+  color: var(--text-white, #fff) !important;
+  filter: brightness(0.95);
 }
 
 @layer base {
@@ -101,6 +196,50 @@ body {
     --input: 0 0% 25%;
     --ring: 0 0% 98%;
   }
+
+  /* App shell light: same indigo/slate family as dark, light backgrounds */
+  .app-shell {
+    --background: 230 45% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 40% 94%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 230 40% 94%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 230 40% 94%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 32% 90%;
+    --input: 214 32% 90%;
+    --ring: 239 84% 67%;
+  }
+
+  /* Dark app shell: "Ready to research something new" section palette – dark indigo–slate base, purple accent */
+  .dark .app-shell {
+    --background: 235 45% 10%;
+    --foreground: 210 40% 98%;
+    --card: 222 40% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 40% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 234 35% 16%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 234 35% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 234 35% 16%;
+    --accent-foreground: 210 40% 98%;
+    --border: 215 25% 22%;
+    --input: 215 25% 22%;
+    --ring: 239 84% 67%;
+  }
 }
 
 @layer base {
@@ -113,6 +252,61 @@ body {
 }
 
 @layer components {
+  /* Figma landing – design tokens */
+  .landing-page,
+  :root {
+    --bg-primary: #ffffff;
+    --bg-black-solid: #0f172a;
+    --b-w-white: #ffffff;
+    --text-on-dark-color: #ffffff;
+    --Label-Label-1-fontFamily: Inter, sans-serif;
+    --Label-Label-1-fontSize: 16px;
+    --Label-Label-1-lineHeight: 22px;
+    --Label-Label-1-letterSpacing: -0.18px;
+    --Weights-Regular: 400;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-white: #ffffff;
+    --green-500: #22c55e;
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-400: #60a5fa;
+    --blue-600: #2563eb;
+    --fuchsia-600: #c026d3;
+    --bg-tertiary: #f1f5f9;
+    --bg-secondary: #f8fafc;
+    --header-gradient: linear-gradient(
+      90deg,
+      #e0e7ff 0%,
+      #f5f3ff 50%,
+      #fce7f3 100%
+    );
+  }
+
+  /* Landing page: Inter with sans-serif fallback */
+  .landing-page {
+    font-family: 'Inter', sans-serif;
+    --landing-hero-bg: #f8fafc;
+    --landing-hero-headline: #0f172a;
+    --landing-hero-subtext: #475569;
+    --landing-hero-cta-bg: #0f172a;
+    --landing-hero-cta-text: #ffffff;
+    --landing-challenge-bg: #f1f5f9;
+    --landing-challenge-heading: #0f172a;
+    --landing-challenge-text: #475569;
+    --landing-challenge-accent: #64748b;
+    --landing-section-bg: #ffffff;
+    --landing-section-alt-bg: #f8fafc;
+    --landing-section-heading: #0f172a;
+    --landing-section-text: #475569;
+    --landing-header-border: #e5e7eb;
+    --landing-cta-strip-bg: #0f172a;
+    --landing-cta-strip-text: #ffffff;
+    --landing-footer-bg: #f1f5f9;
+    --landing-footer-text: #0f172a;
+    --landing-footer-muted: #64748b;
+  }
+
   /* Law-themed utility classes */
   .container-legal {
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;

@@ -6,7 +6,7 @@ export default function LegalResearchSkeleton() {
   return (
     <div className="space-y-6">
       {/* AI Summary Skeleton */}
-      <Card className="w-full">
+      <Card className="w-full bg-card border border-border">
         <CardHeader>
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-5 rounded" />
@@ -22,7 +22,7 @@ export default function LegalResearchSkeleton() {
           </div>
 
           {/* AI Summary Content */}
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 border">
+          <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-6 border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Skeleton className="h-5 w-5 rounded" />
               <Skeleton className="h-6 w-24" />
@@ -37,14 +37,14 @@ export default function LegalResearchSkeleton() {
           </div>
 
           {/* Key Legal Insights Skeleton */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-6 border">
+          <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-6 border border-border">
             <div className="flex items-center gap-2 mb-4">
               <Skeleton className="h-5 w-5 rounded" />
               <Skeleton className="h-6 w-36" />
             </div>
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border">
+                <div key={i} className="flex items-start gap-3 p-3 bg-card rounded-lg border border-border">
                   <Skeleton className="w-2 h-2 rounded-full mt-2 flex-shrink-0" />
                   <Skeleton className="h-4 flex-1 rounded" />
                 </div>
@@ -63,7 +63,7 @@ export default function LegalResearchSkeleton() {
 
         {/* Result Cards Skeleton - 3-4 cards as requested */}
         {[1, 2, 3, 4].map((index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+          <Card key={index} className="hover:shadow-lg transition-shadow duration-200 bg-card border border-border">
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="flex-1 min-w-0">

@@ -103,7 +103,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+        return 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary';
       case 'processing':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
       case 'failed':

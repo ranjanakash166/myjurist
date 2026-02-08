@@ -305,8 +305,8 @@ export default function TimelineExtractorPage() {
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
-            <Calendar className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg">
+            <Calendar className="w-5 h-5 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Timeline Extractor</h1>
         </div>
@@ -328,12 +328,12 @@ export default function TimelineExtractorPage() {
           clearTimelineResult();
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted/50">
-          <TabsTrigger value="new" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+          <TabsTrigger value="new" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
             <Upload className="w-4 h-4" />
             New Timeline
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger value="history" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
             <History className="w-4 h-4" />
             History
           </TabsTrigger>
@@ -364,9 +364,9 @@ export default function TimelineExtractorPage() {
           {/* Upload Section */}
           <Card className="w-full border-0 shadow-sm bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                  <Upload className="w-4 h-4 text-white" />
+              <CardTitle className="flex items-center gap-2 text-lg text-foreground">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Upload className="w-4 h-4 text-primary-foreground" />
                 </div>
                 Upload Documents for Timeline Extraction
               </CardTitle>
@@ -393,12 +393,12 @@ export default function TimelineExtractorPage() {
           {/* Results Section */}
           {timelineResult && (
             <Card className="w-full border shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg">
+              <CardHeader className="bg-primary/5 dark:bg-primary/10 rounded-t-lg border-b border-border">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                        <Calendar className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-primary-foreground" />
                       </div>
                       <CardTitle className="text-lg break-words truncate">
                         {timelineResult.timeline_title}
@@ -409,7 +409,7 @@ export default function TimelineExtractorPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
+                    <Badge className="bg-primary/20 text-primary-foreground border border-primary/40">
                       <CheckCircle className="w-3 h-3 mr-1" />
                       {selectedTimeline ? 'From History' : 'Generated'}
                     </Badge>

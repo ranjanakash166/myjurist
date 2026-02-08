@@ -1,10 +1,13 @@
 import './globals.css'
 import React, { ReactNode } from 'react';
+import { Inter } from 'next/font/google';
 import { ThemeProvider } from '../components/ThemeProvider';
 import { AuthProvider } from '../components/AuthProvider';
 import { Toaster } from '../components/ui/toaster';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
+
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://myjurist.com';
 
@@ -95,7 +98,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="shortcut icon" href="/icon.png" />
         <link rel="apple-touch-icon" href="/icon.png" />
       </head>
-      <body>
+      <body className={inter.className}>
         <Toaster />
         <ThemeProvider
           attribute="class"

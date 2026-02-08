@@ -279,13 +279,13 @@ export default function LegalResearchPage() {
  };
 
  const getSimilarityColor = (score: number) => {
- if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+ if (score >= 0.8) return "text-primary bg-primary/10 dark:text-primary dark:bg-primary/20";
  if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
  return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
  };
 
  const getConfidenceColor = (score: number) => {
- if (score >= 0.8) return "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20";
+ if (score >= 0.8) return "text-primary bg-primary/10 dark:text-primary dark:bg-primary/20";
  if (score >= 0.6) return "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/20";
  return "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20";
  };
@@ -337,8 +337,8 @@ export default function LegalResearchPage() {
  {/* Header */}
  <div className="space-y-2">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
- <BookOpen className="w-5 h-5 text-white" />
+ <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg">
+ <BookOpen className="w-5 h-5 text-primary-foreground" />
  </div>
  <h1 className="text-2xl font-bold text-foreground">Legal Research</h1>
  </div>
@@ -349,12 +349,12 @@ export default function LegalResearchPage() {
 
  {/* Tabs */}
  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
- <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted/50">
- <TabsTrigger value="search" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+ <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+ <TabsTrigger value="search" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
  <Search className="w-4 h-4" />
  Search
  </TabsTrigger>
- <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+ <TabsTrigger value="history" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
  <History className="w-4 h-4" />
  History
  </TabsTrigger>
@@ -363,7 +363,7 @@ export default function LegalResearchPage() {
  <TabsContent value="search" className="space-y-6 mt-6">
 
         {/* Search Form */}
-        <Card className="w-full border-2 shadow-lg bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/50 dark:to-gray-900/50">
+        <Card className="w-full border border-border shadow-lg bg-card">
           <CardContent className="pt-6">
  <form onSubmit={handleSearch} className="space-y-5">
  {/* Search Input */}
@@ -376,12 +376,12 @@ export default function LegalResearchPage() {
  placeholder="What legal information are you looking for?"
  value={query}
  onChange={(e) => setQuery(e.target.value)}
- className="h-14 text-base pl-12 pr-32 rounded-xl border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+ className="h-14 text-base pl-12 pr-32 rounded-xl border-border focus:ring-2 focus:ring-primary/20 focus:border-primary"
  disabled={isSearching}
  />
  <Button 
  type="submit" 
- className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md"
+ className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-6 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
  disabled={isSearching || !query.trim()}
  >
  {isSearching ? (
@@ -427,7 +427,7 @@ export default function LegalResearchPage() {
  </form>
 
  {/* Recent Searches from API */}
- <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800">
+ <div className="mt-6 pt-5 border-t border-border">
  <h3 className="text-xs font-medium text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wide">
  <Clock className="w-3.5 h-3.5" />
  Recent Searches
@@ -444,7 +444,7 @@ export default function LegalResearchPage() {
  <button
  key={index}
  onClick={() => handleQuickSearch(recentQuery)}
- className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800"
+ className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full bg-muted hover:bg-primary/10 hover:text-primary transition-colors border border-transparent hover:border-primary/40"
  >
  <Search className="w-3 h-3" />
  {recentQuery}
@@ -476,12 +476,12 @@ export default function LegalResearchPage() {
  {searchResults && (
  <div className="space-y-6">
         {/* AI Summary Section */}
-        <Card className="border-2 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-t-lg border-b">
+        <Card className="border border-border shadow-lg bg-card">
+          <CardHeader className="bg-primary/5 dark:bg-primary/10 rounded-t-lg border-b border-border">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
-                  <Brain className="w-5 h-5 text-white" />
+              <CardTitle className="flex items-center gap-3 text-xl text-foreground">
+                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                  <Brain className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <span>AI Summary</span>
               </CardTitle>
@@ -501,8 +501,8 @@ export default function LegalResearchPage() {
           <CardContent className="pt-6">
             {isSearching ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center shadow-lg">
-                  <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+                <div className="w-20 h-20 mx-auto mb-6 bg-primary/10 rounded-full flex items-center justify-center shadow-lg">
+                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
                 </div>
                 <h3 className="text-xl font-semibold mb-2 text-foreground">Generating AI Summary...</h3>
                 <p className="text-muted-foreground">
@@ -512,47 +512,45 @@ export default function LegalResearchPage() {
             ) : aiSummary ? (
               <div className="space-y-6">
                 {/* AI Summary Content */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-6 border-2 border-emerald-200 dark:border-emerald-800">
+                <div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border border-border">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
-                      <Sparkles className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                      <Sparkles className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <h3 className="font-bold text-lg text-foreground">Summary</h3>
                   </div>
-                  <div className="text-base leading-relaxed text-gray-700 dark:text-gray-300 prose prose-sm max-w-none">
- {(() => {
- const parsedData = getParsedAISummaryData();
- // Check if we got the raw JSON back (parsing failed)
- if (parsedData.ai_summary === aiSummary.ai_summary && aiSummary.ai_summary.includes('"ai_summary"')) {
- // Try to extract just the summary text from the JSON string
- try {
- const match = aiSummary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
- if (match) {
- return parseMarkdownText(match[1]);
- }
- } catch (e) {
- console.error('Failed to extract summary text:', e);
- }
- }
- return parseMarkdownText(parsedData.ai_summary);
- })()}
- </div>
+                  <div className="text-base leading-relaxed text-foreground max-w-none w-full">
+                    {(() => {
+                      const parsedData = getParsedAISummaryData();
+                      let textToShow = parsedData.ai_summary;
+                      if (parsedData.ai_summary === aiSummary.ai_summary && aiSummary.ai_summary.includes('"ai_summary"')) {
+                        try {
+                          const match = aiSummary.ai_summary.match(/"ai_summary":\s*"([^"]+)"/);
+                          if (match) textToShow = match[1];
+                        } catch (e) {
+                          console.error('Failed to extract summary text:', e);
+                        }
+                      }
+                      const normalized = normalizeContentLineBreaks(textToShow);
+                      return parseMarkdownText(normalized);
+                    })()}
+                  </div>
  </div>
 
                 {/* Key Legal Insights */}
                 {getParsedAISummaryData().key_legal_insights && getParsedAISummaryData().key_legal_insights.length > 0 && (
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl p-6 border-2 border-green-200 dark:border-green-800">
+                  <div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border border-border">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
-                        <Lightbulb className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                        <Lightbulb className="w-4 h-4 text-primary-foreground" />
                       </div>
                       <h3 className="font-bold text-lg text-foreground">Key Legal Insights</h3>
                     </div>
                     <div className="space-y-3">
                       {getParsedAISummaryData().key_legal_insights.map((insight: string, index: number) => (
-                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-green-100 dark:border-green-900/50 hover:shadow-md transition-shadow">
-                          <div className="w-2.5 h-2.5 bg-green-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
-                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(insight)}</span>
+                        <div key={index} className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-foreground flex-1">{parseBoldText(insight)}</span>
                         </div>
                       ))}
                     </div>
@@ -601,18 +599,18 @@ export default function LegalResearchPage() {
 
                 {/* Procedural Developments */}
                 {getParsedAISummaryData().procedural_developments && getParsedAISummaryData().procedural_developments.length > 0 && (
-                  <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 rounded-xl p-6 border-2 border-teal-200 dark:border-teal-800">
+                  <div className="bg-muted/50 rounded-xl p-6 border border-border">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-md">
-                        <Zap className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                        <Zap className="w-4 h-4 text-primary-foreground" />
                       </div>
                       <h3 className="font-bold text-lg text-foreground">Procedural Developments</h3>
                     </div>
                     <div className="space-y-3">
                       {getParsedAISummaryData().procedural_developments.map((development: string, index: number) => (
-                        <div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-teal-100 dark:border-teal-900/50 hover:shadow-md transition-shadow">
-                          <div className="w-2.5 h-2.5 bg-teal-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
-                          <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(development)}</span>
+                        <div key={index} className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
+                          <div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+                          <span className="text-sm leading-relaxed text-foreground flex-1">{parseBoldText(development)}</span>
                         </div>
                       ))}
                     </div>
@@ -641,27 +639,27 @@ export default function LegalResearchPage() {
 
                 {/* Legal Areas Covered */}
                 {getParsedAISummaryData().legal_areas_covered && getParsedAISummaryData().legal_areas_covered.length > 0 && (
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-lg p-6 border">
+                  <div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-6 border border-border">
                     <div className="flex items-center gap-2 mb-4">
-                      <Target className="w-5 h-5 text-emerald-500" />
-                      <h3 className="font-semibold text-lg">Legal Areas Covered</h3>
+                      <Target className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-lg text-foreground">Legal Areas Covered</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {getParsedAISummaryData().legal_areas_covered.map((area: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-3 py-1">
- {area}
- </Badge>
- ))}
- </div>
- </div>
- )}
+                        <Badge key={index} variant="secondary" className="bg-primary/20 text-foreground px-3 py-1">
+                          {area}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Sources Analyzed */}
                 {aiSummary.sources_analyzed && aiSummary.sources_analyzed.length > 0 && (
-                  <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/20 dark:to-slate-950/20 rounded-xl p-6 border-2 border-gray-200 dark:border-gray-800">
+                  <div className="bg-muted/50 rounded-xl p-6 border border-border">
                     <div className="flex items-center gap-3 mb-5">
-                      <div className="w-8 h-8 bg-gradient-to-br from-gray-500 to-slate-600 rounded-lg flex items-center justify-center shadow-md">
-                        <FileText className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center shadow-md border border-border">
+                        <FileText className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <h3 className="font-bold text-lg text-foreground">Sources Analyzed</h3>
                       <Badge variant="secondary" className="ml-auto">
@@ -683,8 +681,8 @@ export default function LegalResearchPage() {
  </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full flex items-center justify-center shadow-lg">
-                    <Brain className="w-10 h-10 text-emerald-500" />
+                  <div className="w-20 h-20 mx-auto mb-6 bg-primary/10 rounded-full flex items-center justify-center shadow-lg">
+                    <Brain className="w-10 h-10 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2 text-foreground">No AI Summary Available</h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
@@ -699,8 +697,8 @@ export default function LegalResearchPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
-                <FileText className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+                <FileText className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-foreground">Search Results</h2>
@@ -714,13 +712,13 @@ export default function LegalResearchPage() {
           {/* Results List */}
           <div className="space-y-4">
             {searchResults.results.map((result, index) => (
-              <Card key={index} className="border-2 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-xl transition-all duration-300 group">
+              <Card key={index} className="border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300 group bg-card">
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
                     {/* Result Number Badge */}
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                        <span className="text-white font-bold text-sm">{index + 1}</span>
+                      <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                        <span className="text-primary-foreground font-bold text-sm">{index + 1}</span>
                       </div>
                     </div>
                     
@@ -754,10 +752,10 @@ export default function LegalResearchPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-900/30 dark:to-gray-900/30 rounded-xl p-5 border border-slate-200 dark:border-slate-800">
+                  <div className="bg-muted/50 rounded-xl p-5 border border-border">
                     <SimpleMarkdownRenderer 
                       content={normalizeContentLineBreaks(result.content)} 
-                      className="text-sm leading-relaxed text-gray-700 dark:text-gray-300"
+                      className="text-sm leading-relaxed text-foreground"
                     />
                   </div>
                   <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
@@ -773,7 +771,7 @@ export default function LegalResearchPage() {
                     <Button
                       variant="default"
                       size="sm"
-                      className="h-9 text-xs gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                      className="h-9 text-xs gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                       onClick={() => handleViewFullDocument(result.document_id)}
                       disabled={isLoadingDocument}
                     >
@@ -816,9 +814,9 @@ export default function LegalResearchPage() {
 {/* Document Viewer Modal */}
 {selectedDocument && (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-background rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+ <div className="bg-background text-foreground rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-border">
  {/* Modal Header */}
- <div className="flex items-center justify-between p-6 border-b">
+ <div className="flex items-center justify-between p-6 border-b border-border">
  <div className="flex-1 min-w-0">
  <h2 className="text-xl font-semibold text-foreground truncate">
  {selectedDocument.title}
@@ -856,7 +854,7 @@ export default function LegalResearchPage() {
  
  {/* Modal Content */}
  <div className="flex-1 overflow-auto p-6">
- <div className="bg-muted/50 rounded-lg p-6 border">
+ <div className="bg-muted/50 rounded-lg p-6 border border-border">
  <SimpleMarkdownRenderer 
  content={normalizeContentLineBreaks(selectedDocument.full_content)} 
  className="text-sm leading-relaxed max-w-none"
@@ -868,7 +866,7 @@ export default function LegalResearchPage() {
  )}
  </TabsContent>
 
- <TabsContent value="history" className="space-y-6">
+ <TabsContent value="history" className="space-y-6 mt-6">
  <LegalResearchHistory />
  </TabsContent>
  </Tabs>

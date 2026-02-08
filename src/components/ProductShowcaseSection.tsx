@@ -32,8 +32,8 @@ const ProductShowcaseSection: React.FC = () => {
       title: 'Regulatory Compliance',
       description: 'Automated compliance checking and guidance. Stay compliant with AI-powered regulatory analysis and monitoring.',
       href: '/app/regulatory-compliance',
-      gradient: 'from-emerald-500 to-teal-600',
-      cardGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20'
+      gradient: 'from-primary to-blue-600',
+      cardGradient: 'from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-950/20'
     },
     {
       icon: FileEdit,
@@ -79,14 +79,14 @@ const ProductShowcaseSection: React.FC = () => {
   };
 
   return (
-    <section className="pt-8 pb-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="pt-6 sm:pt-8 pb-12 sm:pb-20 bg-background overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground mb-2 sm:mb-4">
             Augment All of Your Work on
           </h2>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground">
             One Integrated, Secure Platform
           </h2>
         </div>
@@ -131,7 +131,7 @@ const ProductShowcaseSection: React.FC = () => {
                           <Link href={product.href}>
                             <Button 
                               size="lg"
-                              className="bg-foreground text-background hover:bg-foreground/90 font-semibold text-base md:text-lg px-8 md:px-10 py-6 md:py-7 shadow-lg hover:shadow-xl transition-all duration-300"
+                              className="landing-cta-button landing-cta-text font-semibold shadow-lg hover:shadow-xl hover:brightness-110 transition-all duration-200 ease-out"
                             >
                               Explore {product.title}
                               <ArrowRight className="ml-2 h-5 w-5 md:h-6 md:w-6" />

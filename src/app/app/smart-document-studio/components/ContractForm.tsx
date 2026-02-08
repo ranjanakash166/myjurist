@@ -195,7 +195,7 @@ export function ContractForm({ template, onSubmit, onBack }: ContractFormProps) 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-primary" />
               <span>Required Information</span>
             </CardTitle>
             <CardDescription>

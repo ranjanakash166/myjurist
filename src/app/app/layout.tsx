@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3, Tag, Sparkles, Search } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3, Tag, Search, FileEdit } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -22,9 +22,8 @@ const getNavItems = (userRole?: string) => {
     { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "My Jurist Chat", icon: <Search className="w-6 h-6" />, href: "/app/my-jurist-chat" },
-    { label: "Patent Analysis", icon: <FileSearch className="w-6 h-6" />, href: "/app/patent-analysis" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
-    { label: "Smart Document Drafting", icon: <Sparkles className="w-6 h-6" />, href: "/app/smart-document-studio" },
+    { label: "Smart Drafting", icon: <FileEdit className="w-6 h-6" />, href: "/app/smart-drafting" },
   ];
 
   // Add organization management for super admins and org admins
@@ -67,7 +66,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground relative group">
+    <div className="app-shell min-h-screen flex bg-background text-foreground relative group">
+      {/* Portal target for modals so they inherit app-shell theme (inside app layout) */}
+      <div id="app-modal-root" aria-hidden="true" className="contents" />
       {/* Mobile Top Navbar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">

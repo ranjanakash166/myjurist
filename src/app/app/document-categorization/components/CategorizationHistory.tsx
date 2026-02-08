@@ -109,7 +109,7 @@ export default function CategorizationHistory() {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">Completed</Badge>;
+        return <Badge className="bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">Completed</Badge>;
       case 'processing':
         return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">Processing</Badge>;
       case 'failed':
@@ -122,7 +122,7 @@ export default function CategorizationHistory() {
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
+        return <CheckCircle className="w-4 h-4 text-primary" />;
       case 'processing':
         return <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />;
       case 'failed':

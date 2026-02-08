@@ -103,7 +103,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
   const getEventTypeColor = (eventType: string) => {
     const colors: { [key: string]: string } = {
       'filing': 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-      'hearing': 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+      'hearing': 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary',
       'judgment': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
       'amendment': 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
       'order': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
@@ -113,7 +113,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
   };
 
   const getConfidenceColor = (score: number) => {
-    if (score >= 0.8) return 'text-green-600 dark:text-green-400';
+    if (score >= 0.8) return 'text-primary dark:text-primary';
     if (score >= 0.6) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-red-600 dark:text-red-400';
   };
@@ -121,7 +121,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
   const getConfidenceLabelColor = (label: string) => {
     switch (label.toLowerCase()) {
       case 'high':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+        return 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary';
       case 'medium':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
       case 'low':
@@ -160,10 +160,10 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
+          <Card className="bg-primary/5 dark:bg-primary/10 border border-border">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Lightbulb className="w-5 h-5" />
+                <Lightbulb className="w-5 h-5 text-primary" />
                 Key Insights
               </CardTitle>
             </CardHeader>
@@ -171,7 +171,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
               <div className="space-y-2">
                 {timeline.summary.key_insights.map((insight, index) => (
                   <div key={index} className="flex items-start gap-2 text-sm">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                     <span className="text-muted-foreground">{insight}</span>
                   </div>
                 ))}
@@ -195,7 +195,7 @@ export default function EnhancedTimelineResults({ timeline, onExportCSV }: Enhan
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-green-500" />
+              <FileText className="w-4 h-4 text-primary" />
               <span className="text-sm font-medium">Documents</span>
             </div>
             <p className="text-2xl font-bold mt-1">{timeline.metadata.document_sources.length}</p>

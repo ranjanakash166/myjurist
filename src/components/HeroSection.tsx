@@ -17,9 +17,9 @@ const HeroSection: React.FC = () => {
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30"></div>
       
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+      <div className="relative z-10 text-center max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-10 sm:pb-12 w-full min-w-0">
         {/* Main Headline */}
-        <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-foreground leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 text-foreground leading-tight">
           Legal Intelligence, Evolved.
         </h1>
         
@@ -33,7 +33,7 @@ const HeroSection: React.FC = () => {
           <Button 
             onClick={handleRequestDemo}
             size="lg"
-            className="px-8 py-6 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="landing-cta-button landing-cta-text font-semibold transition-all duration-200 ease-out hover:brightness-110 hover:shadow-xl"
           >
             Request a Demo
             <ArrowRight className="ml-2 h-5 w-5" />
@@ -42,7 +42,7 @@ const HeroSection: React.FC = () => {
             variant="outline"
             size="lg"
             onClick={handleWatchVideo}
-            className="px-8 py-6 text-base font-semibold border-2 hover:bg-muted transition-all duration-200"
+            className="p-4 text-base font-semibold border-2 hover:bg-muted transition-all duration-200"
           >
             <Play className="mr-2 h-5 w-5" />
             Watch Video

@@ -1,228 +1,124 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ArrowLeft, Scale, Sparkles, Users, Mail, Linkedin, Twitter } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import ContactFormSection from '@/components/ContactFormSection';
+import React from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import ContactFormSection from "@/components/ContactFormSection";
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header with back button */}
-      <div className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
-        <div className="container-legal">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
-              <ArrowLeft className="h-6 w-6 text-primary group-hover:text-accent transition-colors duration-300" />
-              <span className="text-lg font-semibold text-muted-foreground group-hover:text-primary transition-colors duration-300">
-                Back to Home
-              </span>
-            </Link>
-            <div className="text-2xl font-bold text-foreground">
-              Contact Us
+    <div
+      className="min-h-screen flex flex-col lg:flex-row font-[var(--Label-Label-1-fontFamily,Inter)]"
+      style={{ color: "var(--text-primary, #0f172a)" }}
+    >
+      {/* Header - Back to Home aligned with left panel content (same padding + max-w-md mx-auto) */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 flex items-center h-16 px-4 sm:px-6 lg:px-0 transition-all duration-300"
+        style={{
+          background: "rgba(255,255,255,0.2)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
+        }}
+      >
+        <div className="w-full flex items-center justify-between lg:grid lg:grid-cols-2 lg:min-h-16">
+          <div className="hidden lg:block px-8 md:px-12">
+            <div className="max-w-md mx-auto">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-[#0f172a] hover:text-[#020617] hover:underline underline-offset-2 transition-colors font-medium"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Back to Home</span>
+              </Link>
             </div>
+          </div>
+          <div className="lg:hidden flex items-center">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-[#0f172a] hover:text-[#020617] hover:underline underline-offset-2 transition-colors font-medium"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Back to Home</span>
+            </Link>
+          </div>
+          <div className="flex items-center justify-end lg:pr-12">
+            <span
+              className="text-lg font-semibold hidden sm:block"
+              style={{ color: "var(--text-primary, #0f172a)" }}
+            >
+              Contact Us
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Main content with padding for fixed header */}
-      <div className="pt-20">
-        {/* Top Section - Company Information (Dark Background) */}
-        <section className="bg-primary text-primary-foreground py-20">
-          <div className="container-legal">
-            <div className="text-center max-w-4xl mx-auto">
-              {/* Header */}
-              <p className="text-lg font-serif mb-4 opacity-90">About Us</p>
-              
-              {/* Main Title */}
-              <h1 className="text-5xl md:text-6xl font-serif font-bold mb-8 leading-tight">
-                Legal Due Diligence Needs A New AI Partner
-              </h1>
-              
-              {/* Body Text */}
-              <div className="space-y-6 text-lg leading-relaxed">
-                <p>
-                  My Jurist was built for legal professionals who are tired of AI vendors overpromising and underdelivering. Too many solutions sound impressive in theory but fail to handle the real-world complexity of legal document analysis and contract drafting.
-                </p>
-                <p>
-                  At My Jurist, we combine deep legal expertise with purpose-built AI agents that seamlessly fit your workflows. Our technology goes beyond simple document summarization - it automates complex legal research, ensures full auditability, and delivers real operational impact. No black boxes. No shortcuts.
-                </p>
-              </div>
-            </div>
+      {/* Left Side - About Us (landing dark panel) */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-center pt-24 pb-12 px-8 md:px-12 min-h-screen"
+        style={{ background: "var(--bg-black-solid, #0f172a)" }}
+      >
+        <div className="max-w-md mx-auto space-y-6">
+          <p
+            className="text-base md:text-lg font-semibold opacity-90"
+            style={{ color: "var(--text-on-dark-color, #fff)" }}
+          >
+            About Us
+          </p>
+          <h1
+            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
+            style={{ color: "var(--text-on-dark-color, #fff)" }}
+          >
+            Legal Due Diligence Needs A New AI Partner
+          </h1>
+          <div
+            className="space-y-4 md:space-y-6 text-base md:text-lg leading-relaxed opacity-90"
+            style={{ color: "var(--text-on-dark-color, #fff)" }}
+          >
+            <p>
+              My Jurist was built for legal professionals who are tired of AI
+              vendors overpromising and underdelivering. Too many solutions
+              sound impressive in theory but fail to handle the real-world
+              complexity of legal document analysis and contract drafting.
+            </p>
+            <p>
+              At My Jurist, we combine deep legal expertise with purpose-built
+              AI agents that seamlessly fit your workflows. Our technology goes
+              beyond simple document summarization - it automates complex legal
+              research, ensures full auditability, and delivers real
+              operational impact. No black boxes. No shortcuts.
+            </p>
           </div>
-        </section>
-
-        {/* Bottom Section - Founder Information (White Background) */}
-        <section className="bg-background py-20">
-          <div className="container-legal">
-            <div className="text-center max-w-6xl mx-auto">
-              {/* Section Title */}
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">
-                Founded By Industry Veterans
-              </h2>
-              
-              {/* Introductory Text */}
-              <p className="text-lg text-muted-foreground mb-16 max-w-4xl mx-auto leading-relaxed">
-                Our team has built at the frontier of legal technology and AI. Shashank brings experience from leading law firms and business administration, Gaurav has engineered AI systems for highly regulated industries, and Akash has driven product strategy for legal AI solutions that transform how legal professionals work.
-              </p>
-              
-              {/* Founder Images */}
-              <div className="mb-16">
-                <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                  {/* Shashank */}
-                  <div className="text-center">
-                    <div className="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                      <Image 
-                        src="/images/shashank.jpeg" 
-                        alt="Shashank" 
-                        width={128} 
-                        height={128} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <Users className="h-16 w-16 text-primary-foreground hidden" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">Shashank</h3>
-                    <p className="text-primary font-semibold mb-2">Co-Founder & CEO</p>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      Holds degrees in Law and Business Administration. Dedicated to developing innovative legal AI solutions.
-                    </p>
-                    <p className="text-sm text-primary font-semibold mb-4">
-                      Reach out for partnership and business inquiries.
-                    </p>
-                    <div className="flex justify-center space-x-3">
-                      <a href="mailto:support@myjurist.io" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Mail className="h-4 w-4 text-primary" />
-                      </a>
-                      <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Linkedin className="h-4 w-4 text-primary" />
-                      </a>
-                      <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Twitter className="h-4 w-4 text-primary" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Gaurav */}
-                  <div className="text-center">
-                    <div className="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                      <Image 
-                        src="/images/gaurav.jpeg" 
-                        alt="Gaurav Suman" 
-                        width={128} 
-                        height={128} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <Users className="h-16 w-16 text-primary-foreground hidden" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">Gaurav Suman</h3>
-                    <p className="text-foreground font-semibold mb-2">Co-Founder & CTO</p>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      Leads technology and product development. Expert in AI systems for regulated industries.
-                    </p>
-                    <p className="text-sm text-foreground font-semibold mb-4">
-                      Reach out for technical inquiries and support.
-                    </p>
-                    <div className="flex justify-center space-x-3">
-                      <a href="mailto:support@myjurist.io" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Mail className="h-4 w-4 text-primary" />
-                      </a>
-                      <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Linkedin className="h-4 w-4 text-primary" />
-                      </a>
-                      <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Twitter className="h-4 w-4 text-primary" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Akash */}
-                  <div className="text-center">
-                    <div className="w-32 h-32 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                      <Image 
-                        src="/images/akash-ranjan.jpeg" 
-                        alt="Akash Ranjan" 
-                        width={128} 
-                        height={128} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <Users className="h-16 w-16 text-primary-foreground hidden" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground mb-2">Akash Ranjan</h3>
-                    <p className="text-primary font-semibold mb-2">Co-Founder & CPO</p>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      Drives product strategy and user experience design. Focuses on creating intuitive legal AI solutions.
-                    </p>
-                    <p className="text-sm text-primary font-semibold mb-4">
-                      Reach out for product feedback and feature requests.
-                    </p>
-                    <div className="flex justify-center space-x-3">
-                      <a href="mailto:support@myjurist.io" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Mail className="h-4 w-4 text-primary" />
-                      </a>
-                      <a href="https://linkedin.com/company/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Linkedin className="h-4 w-4 text-primary" />
-                      </a>
-                      <a href="https://twitter.com/myjurist" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors">
-                        <Twitter className="h-4 w-4 text-primary" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Company Values */}
-              <div className="grid md:grid-cols-3 gap-8 mb-16">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Scale className="h-8 w-8 text-primary-foreground" />
-                  </div>
-                  <h4 className="text-xl font-bold text-primary mb-2">Expertise</h4>
-                  <p className="text-muted-foreground">Deep knowledge in law and AI technology</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="h-8 w-8 text-primary-foreground" />
-                  </div>
-                  <h4 className="text-xl font-bold text-primary mb-2">Innovation</h4>
-                  <p className="text-muted-foreground">Pioneering AI solutions for legal industry</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-8 w-8 text-primary-foreground" />
-                  </div>
-                  <h4 className="text-xl font-bold text-primary mb-2">Vision</h4>
-                  <p className="text-muted-foreground">Transforming legal due diligence globally</p>
-                </div>
-              </div>
-            </div>
+          <div className="pt-4">
+            <Link
+              href="/about"
+              className="inline-flex items-center gap-2 font-semibold transition-colors group text-white hover:opacity-90"
+            >
+              Learn more about our team
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* Contact Form Section */}
-        <ContactFormSection />
+      {/* Right Side - Get In Touch Form (landing gradient + card) */}
+      <div
+        className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen pt-24"
+        style={{
+          background:
+            "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",
+        }}
+      >
+        <div className="w-full max-w-lg">
+          <ContactFormSection
+            title="Get In Touch"
+            subtitle="Ready to transform your legal due diligence process? Let's discuss how My Jurist can help."
+            inlineMode={true}
+            useLandingStyle={true}
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-export default ContactPage; 
+export default ContactPage;

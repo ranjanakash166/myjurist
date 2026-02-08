@@ -21,21 +21,21 @@ export default function CollapsibleSection({
   };
 
   return (
-    <div className={`glass-effect rounded-2xl overflow-hidden ${className}`}>
+    <div className={`rounded-2xl overflow-hidden bg-card border border-border shadow-sm ${className}`}>
       <button
         onClick={handleToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-slate-700/50 transition-colors"
+        className="w-full flex items-center justify-between p-4 bg-muted/80 hover:bg-accent transition-colors text-left"
       >
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
         {isCollapsed ? (
-          <ChevronDown className="w-5 h-5 text-slate-400" />
+          <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
         ) : (
-          <ChevronUp className="w-5 h-5 text-slate-400" />
+          <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
         )}
       </button>
       
       {!isCollapsed && (
-        <div className="p-4 border-t border-slate-700/50">
+        <div className="p-4 border-t border-border bg-card">
           {children}
         </div>
       )}

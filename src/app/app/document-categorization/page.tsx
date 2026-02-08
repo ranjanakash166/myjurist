@@ -89,8 +89,8 @@ export default function DocumentCategorizationPage() {
         </Card>
         
         <Card className="text-center p-6">
-          <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <FileCheck className="w-8 h-8 text-green-600 dark:text-green-400" />
+          <div className="p-3 bg-primary/10 dark:bg-primary/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <FileCheck className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold mb-2">Multi-Document Support</h3>
           <p className="text-muted-foreground text-sm">
@@ -113,12 +113,12 @@ export default function DocumentCategorizationPage() {
       <Card>
         <CardHeader>
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+              <TabsTrigger value="upload" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
                 <Upload className="w-4 h-4" />
                 Upload & Categorize
               </TabsTrigger>
-              <TabsTrigger value="results" className="flex items-center gap-2">
+              <TabsTrigger value="results" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
                 <CheckCircle className="w-4 h-4" />
                 Results
               </TabsTrigger>

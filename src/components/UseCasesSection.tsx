@@ -56,8 +56,8 @@ const UseCasesSection: React.FC = () => {
       ],
       roles: ['all', 'in-house', 'transactional'],
       image: 'compliance',
-      gradient: 'from-emerald-500 to-teal-600',
-      cardGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20'
+      gradient: 'from-primary to-blue-600',
+      cardGradient: 'from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-950/20'
     },
     {
       icon: FileEdit,
@@ -94,11 +94,11 @@ const UseCasesSection: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 md:py-20 bg-muted/30 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground mb-4">
             How Legal Professionals Use My Jurist
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -179,7 +179,7 @@ const UseCasesSection: React.FC = () => {
                   {/* CTA Button */}
                   <Button
                     variant="ghost"
-                    className="p-0 h-auto font-semibold text-foreground hover:text-foreground/80 group/btn transition-all duration-300"
+                    className="p-4 h-auto font-semibold text-foreground hover:text-foreground/80 group/btn transition-all duration-300"
                   >
                     <span className="group-hover/btn:translate-x-1 transition-transform duration-300 inline-block">
                       Learn More

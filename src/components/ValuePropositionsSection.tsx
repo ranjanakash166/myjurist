@@ -9,8 +9,8 @@ const ValuePropositionsSection: React.FC = () => {
       icon: Shield,
       title: 'Enterprise-Grade Security',
       description: 'Robust, industry-standard protection with zero training on your data. Your sensitive legal information stays secure and private.',
-      gradient: 'from-emerald-500 to-teal-600',
-      cardGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20'
+      gradient: 'from-primary to-blue-600',
+      cardGradient: 'from-primary/10 to-blue-50 dark:from-primary/20 dark:to-blue-950/20'
     },
     {
       icon: Sparkles,
@@ -36,14 +36,14 @@ const ValuePropositionsSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 md:py-20 bg-background overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground mb-4">
             Unlock Professional Class AI
           </h2>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground mb-6">
             For Your Legal Practice
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

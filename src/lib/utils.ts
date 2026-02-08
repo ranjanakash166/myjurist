@@ -369,44 +369,75 @@ export async function apiCallWithRefresh(
 }
 
 /**
+ * Ensures API content newlines display consistently.
+ * Replaces literal backslash-n (and backslash-r-backslash-n) with real newline characters
+ * so that content shows line breaks the same whether the API sent escaped or real newlines.
+ * @param content - The content string (e.g. from legal-research/history)
+ * @returns Content with literal \n converted to real newlines
+ */
+export function normalizeApiNewlines(content: string): string {
+  if (!content || typeof content !== "string") {
+    return content;
+  }
+  return content
+    .replace(/\\r\\n/g, "\n")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n");
+}
+
+/**
+ * Options for normalizeContentLineBreaks
+ * @param preserveSingleNewlines - When true, do not collapse single newlines (e.g. for legal research content so \n shows consistently as line break)
+ */
+export type NormalizeContentLineBreaksOptions = {
+  preserveSingleNewlines?: boolean;
+};
+
+/**
  * Normalizes content by collapsing excessive line breaks
+ * - Converts literal \n from API to real newlines first
  * - Collapses 3+ consecutive newlines into a double newline (paragraph break)
- * - Collapses single newlines within sentences into spaces
+ * - Optionally collapses single newlines within sentences (set preserveSingleNewlines for API content)
  * - Preserves intentional formatting like headers (## Page X)
  * - Keeps double newlines as paragraph breaks
  * @param content - The content string to normalize
+ * @param options - When preserveSingleNewlines is true, every \n is shown as a line break (use for legal-research history, etc.)
  * @returns Normalized content with collapsed line breaks
  */
-export function normalizeContentLineBreaks(content: string): string {
+export function normalizeContentLineBreaks(
+  content: string,
+  options?: NormalizeContentLineBreaksOptions
+): string {
   if (!content || content.trim() === '') {
     return content;
   }
 
-  let normalized = content;
+  const preserveSingleNewlines = options?.preserveSingleNewlines ?? false;
+  let normalized = normalizeApiNewlines(content);
 
   // Step 1: Collapse 3+ consecutive newlines into double newline (paragraph break)
   normalized = normalized.replace(/\n{3,}/g, '\n\n');
 
-  // Step 2: Collapse single newlines that appear within sentences
-  // Replace single newline followed by lowercase letter, number, or common punctuation
-  // This handles cases like "this\ncase" -> "this case"
-  normalized = normalized.replace(/([^\n\s])\n([a-z0-9,;:])/g, '$1 $2');
+  if (!preserveSingleNewlines) {
+    // Step 2: Collapse single newlines that appear within sentences
+    // Replace single newline followed by lowercase letter, number, or common punctuation
+    // This handles cases like "this\ncase" -> "this case"
+    normalized = normalized.replace(/([^\n\s])\n([a-z0-9,;:])/g, '$1 $2');
 
-  // Step 3: Handle newlines after punctuation that should be spaces
-  // Cases like "word.\n18." where the number continues the sentence
-  normalized = normalized.replace(/([.!?])\n(\d+\.\s*[A-Z])/g, '$1 $2');
-  
-  // Step 4: Handle newlines after numbers/periods that continue sentences
-  // Cases like "18.\nAs" where it's a numbered point but continues
-  // But preserve cases like "18.\n\nAs" which are paragraph breaks
-  normalized = normalized.replace(/(\d+\.)\n([a-z])/g, '$1 $2');
+    // Step 3: Handle newlines after punctuation that should be spaces
+    // Cases like "word.\n18." where the number continues the sentence
+    normalized = normalized.replace(/([.!?])\n(\d+\.\s*[A-Z])/g, '$1 $2');
+
+    // Step 4: Handle newlines after numbers/periods that continue sentences
+    // Cases like "18.\nAs" where it's a numbered point but continues
+    // But preserve cases like "18.\n\nAs" which are paragraph breaks
+    normalized = normalized.replace(/(\d+\.)\n([a-z])/g, '$1 $2');
+  }
 
   // Step 5: Collapse multiple spaces into single space (but preserve paragraph breaks)
   normalized = normalized.replace(/[ \t]+/g, ' ');
-  
   // Step 6: Clean up any remaining excessive newlines
   normalized = normalized.replace(/\n{3,}/g, '\n\n');
-
   // Step 7: Remove trailing whitespace from each line but preserve intentional line breaks
   normalized = normalized.split('\n').map(line => line.trimEnd()).join('\n');
 

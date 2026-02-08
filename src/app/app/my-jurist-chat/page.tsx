@@ -1,15 +1,86 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Search, Shield, Lightbulb, BookOpen } from "lucide-react";
+import { Send, Loader2, Search, Shield, BookOpen, Copy, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "../../../components/AuthProvider";
 import { toast } from '@/hooks/use-toast';
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 import { searchAgenticRAG, AgenticRAGSearchResponse, SearchResult } from "@/lib/agenticRagApi";
 import { normalizeContentLineBreaks } from "@/lib/utils";
+
+const RESULT_PREVIEW_LENGTH = 400;
+
+function ResultCard({ result, index }: { result: SearchResult; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = result.content.length > RESULT_PREVIEW_LENGTH;
+  const displayContent = isLong && !expanded
+    ? result.content.slice(0, RESULT_PREVIEW_LENGTH) + "..."
+    : result.content;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(result.content);
+      toast({ title: "Copied", description: "Content copied to clipboard" });
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
+
+  return (
+    <Card className="border-2 shadow-md hover:shadow-lg transition-shadow bg-card">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <Badge className="shrink-0 bg-primary text-primary-foreground">
+              {index + 1}
+            </Badge>
+            <h4 className="text-base font-semibold text-foreground truncate">{result.title}</h4>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 opacity-70 hover:opacity-100"
+            onClick={handleCopy}
+          >
+            <Copy className="h-4 w-4" />
+          </Button>
+        </div>
+        {result.section_header && (
+          <p className="text-sm text-muted-foreground italic mb-2">{result.section_header}</p>
+        )}
+        <p className="text-xs text-muted-foreground mb-3">Source: {result.source_file}</p>
+        <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none">
+          <SimpleMarkdownRenderer content={normalizeContentLineBreaks(displayContent)} />
+        </div>
+        {isLong && (
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs text-primary font-medium mt-2 flex items-center gap-1 hover:underline"
+          >
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        )}
+        {result.metadata?.url && (
+          <a
+            href={result.metadata.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline mt-3 inline-flex items-center gap-1"
+          >
+            <ExternalLink className="h-3 w-3" />
+            View source
+          </a>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 interface ChatMessage {
   id: string;
@@ -34,10 +105,6 @@ export default function MyJuristChatPage() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,71 +183,33 @@ export default function MyJuristChatPage() {
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
     if (response.results && response.results.length > 0) {
-      let content = `I found ${response.total_results} relevant result${response.total_results > 1 ? 's' : ''} for your query:\n\n`;
-      
-      response.results.forEach((result, index) => {
-        content += `**${result.title}**\n`;
-        if (result.section_header) {
-          content += `*${result.section_header}*\n`;
-        }
-        content += `${result.content}\n\n`;
-      });
-      
-      return content;
-    } else {
-      return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
+      return `I found **${response.total_results}** relevant result${response.total_results > 1 ? 's' : ''} for your query. See the sources below.`;
     }
+    return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
   };
 
-  const renderResultCard = (result: SearchResult, index: number) => {
-    return (
-      <Card key={index} className="mb-3 border-neutral-800 bg-neutral-900/50">
-        <CardContent className="p-4">
-          <div className="mb-3">
-            <h4 className="text-base font-semibold text-white mb-1">{result.title}</h4>
-            {result.section_header && (
-              <p className="text-sm text-neutral-400 italic mb-2">{result.section_header}</p>
-            )}
-            <p className="text-xs text-neutral-500">Source: {result.source_file}</p>
-          </div>
-          <p className="text-sm text-neutral-200 leading-relaxed whitespace-pre-wrap">{normalizeContentLineBreaks(result.content)}</p>
-          {result.metadata?.url && (
-            <a
-              href={result.metadata.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-blue-400 hover:text-blue-300 mt-3 inline-block"
-            >
-              View source →
-            </a>
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
 
 
   return (
-    <div className="h-screen flex flex-col bg-neutral-950">
+    <div className="h-screen max-h-screen flex flex-col bg-background overflow-x-hidden overflow-y-hidden">
       {/* Header */}
-      <div className="bg-neutral-900 border-b border-neutral-800 p-4">
+      <div className="bg-card border-b border-border p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-              <Search className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md">
+              <Search className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">My Jurist Chat</h1>
-              <p className="text-sm text-neutral-400">AI-powered legal search and research</p>
+              <h1 className="text-xl font-bold text-foreground">My Jurist Chat</h1>
+              <p className="text-sm text-muted-foreground">AI-powered legal search and research</p>
             </div>
           </div>
-          
           <div className="flex items-center gap-2">
-            <label className="text-sm text-neutral-400 mr-2">Top K:</label>
+            <label className="text-sm text-muted-foreground mr-2">Top K:</label>
             <select
               value={topK}
               onChange={(e) => setTopK(Number(e.target.value))}
-              className="bg-neutral-800 border border-neutral-700 text-white rounded px-2 py-1 text-sm"
+              className="bg-background border border-input text-foreground rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               {[5, 10, 15, 20, 25, 30].map((k) => (
                 <option key={k} value={k}>
@@ -192,19 +221,18 @@ export default function MyJuristChatPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 flex overflow-hidden min-h-0 p-4">
+        <div className="flex-1 flex flex-col min-h-0 border-2 border-border rounded-lg overflow-hidden bg-card">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
+            <div className="space-y-6">
             {messages.length === 0 && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-neutral-800 rounded-full flex items-center justify-center">
-                    <Search className="w-8 h-8 text-neutral-400" />
+              <div className="flex items-center justify-center min-h-[280px]">
+                <div className="text-center max-w-lg">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
+                    <Search className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">Welcome to My Jurist Chat</h3>
-                  <p className="text-neutral-400 mb-4 max-w-md">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">Welcome to My Jurist Chat</h3>
+                  <p className="text-muted-foreground mb-6">
                     Ask questions about legal cases, patents, regulatory compliance, or general legal topics.
                     I'll search through our legal database and provide you with relevant results.
                   </p>
@@ -213,7 +241,7 @@ export default function MyJuristChatPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => setInput("Supreme Court cases on data privacy")}
-                      className="text-neutral-300 border-neutral-700 hover:bg-neutral-800"
+                      className="border-primary/40 hover:bg-primary/10"
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
                       Legal Cases
@@ -221,17 +249,8 @@ export default function MyJuristChatPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setInput("Patent search for AI technology")}
-                      className="text-neutral-300 border-neutral-700 hover:bg-neutral-800"
-                    >
-                      <Lightbulb className="w-4 h-4 mr-2" />
-                      Patent Search
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
                       onClick={() => setInput("Regulatory compliance requirements")}
-                      className="text-neutral-300 border-neutral-700 hover:bg-neutral-800"
+                      className="border-primary/40 hover:bg-primary/10"
                     >
                       <Shield className="w-4 h-4 mr-2" />
                       Compliance
@@ -249,38 +268,41 @@ export default function MyJuristChatPage() {
                   }`}
                 >
                   {message.sender === "assistant" && (
-                    <div className="w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center">
-                      <Search className="w-4 h-4 text-neutral-400" />
+                    <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
+                      <Search className="w-4 h-4 text-primary-foreground" />
                     </div>
                   )}
-                  
                   <div
                     className={`max-w-3xl px-4 py-3 rounded-2xl ${
                       message.sender === "user"
-                        ? "bg-neutral-800 text-white rounded-br-md"
-                        : "bg-neutral-900 text-neutral-200 rounded-bl-md border border-neutral-700"
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : "bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
                     }`}
                   >
-                    <div className="whitespace-pre-wrap">
-                      <SimpleMarkdownRenderer content={message.content} />
-                    </div>
-                    <div className="text-xs text-neutral-500 mt-2">
-                      {formatTime(message.timestamp)}
-                    </div>
+                    {message.sender === "user" ? (
+                      <p className="text-[inherit] leading-relaxed whitespace-pre-wrap break-words">
+                        {message.content}
+                      </p>
+                    ) : (
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                        <SimpleMarkdownRenderer content={message.content} />
+                      </div>
+                    )}
                   </div>
-
                   {message.sender === "user" && (
-                    <div className="w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-8 h-8 shrink-0 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm">
                       U
                     </div>
                   )}
                 </div>
 
-                {/* Render detailed results if available */}
                 {message.response && message.response.results && message.response.results.length > 0 && (
                   <div className="mt-4 ml-11 max-w-3xl">
-                    <div className="space-y-2">
-                      {message.response.results.map((result, index) => renderResultCard(result, index))}
+                    <p className="text-sm font-semibold text-foreground mb-3">Sources</p>
+                    <div className="space-y-3">
+                      {message.response.results.map((result, index) => (
+                        <ResultCard key={index} result={result} index={index} />
+                      ))}
                     </div>
                   </div>
                 )}
@@ -289,29 +311,27 @@ export default function MyJuristChatPage() {
 
             {isLoading && (
               <div className="flex items-start gap-3 justify-start">
-                <div className="w-8 h-8 bg-neutral-800 rounded-full flex items-center justify-center">
-                  <Search className="w-4 h-4 text-neutral-400" />
+                <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
+                  <Search className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <div className="px-4 py-3 rounded-2xl bg-neutral-900 text-neutral-200 rounded-bl-md border border-neutral-700">
+                <div className="px-4 py-3 rounded-2xl bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Searching...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Searching legal database...</span>
                   </div>
                 </div>
               </div>
             )}
-
+            </div>
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input Area */}
-          <div className="bg-neutral-900 border-t border-neutral-800 p-4">
+          <div className="bg-card border-t border-border p-4 shadow-sm">
             {error && (
               <Alert variant="destructive" className="mb-4">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
             <form onSubmit={handleSendMessage} className="flex gap-3">
               <div className="flex-1 relative">
                 <Input
@@ -320,20 +340,19 @@ export default function MyJuristChatPage() {
                   placeholder="Ask a legal question... (3-1000 characters)"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="bg-neutral-800 border-neutral-700 text-white placeholder-neutral-400 focus:border-neutral-600"
+                  className="pr-14 bg-background border-input focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   disabled={isLoading}
                   minLength={3}
                   maxLength={1000}
                 />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-neutral-500">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
                   {input.length}/1000
-                </div>
+                </span>
               </div>
-              
               <Button
                 type="submit"
                 disabled={!input.trim() || isLoading || input.trim().length < 3 || input.trim().length > 1000}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

@@ -240,13 +240,13 @@ export default function SmartContractStudio() {
                 isActive 
                   ? 'border-blue-500 bg-blue-500 text-white' 
                   : isCompleted 
-                    ? 'border-green-500 bg-green-500 text-white'
+                    ? 'border-primary bg-primary text-primary-foreground'
                     : 'border-gray-300 bg-white text-gray-500'
               }`}>
                 <Icon className="w-5 h-5" />
               </div>
               <span className={`ml-2 text-sm font-medium ${
-                isActive ? 'text-blue-600' : isCompleted ? 'text-green-600' : 'text-gray-500'
+                isActive ? 'text-blue-600' : isCompleted ? 'text-primary' : 'text-gray-500'
               }`}>
                 {step.label}
               </span>

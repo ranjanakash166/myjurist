@@ -210,7 +210,7 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
                 )}
               </div>
               {updateError && <div className="text-red-500 text-sm mt-2">{updateError}</div>}
-              {updateSuccess && <div className="text-green-600 text-sm mt-2 flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />{updateSuccess}</div>}
+              {updateSuccess && <div className="text-primary text-sm mt-2 flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-primary" />{updateSuccess}</div>}
               <div className="pt-4 text-right">
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                   Close
