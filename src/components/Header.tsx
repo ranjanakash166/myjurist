@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Menu, X, MessageCircle, Calendar } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
+import MyJuristLogoWithWordmark from '@/components/landing/MyJuristLogoWithWordmark';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from './ThemeToggle';
@@ -74,21 +74,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Left Section - Logo */}
           <div className="flex items-center pr-8">
-            <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
-              <div className="relative w-12 h-12 md:w-14 md:h-14">
-                <Image 
-                  src="/images/myjurist-logo.png" 
-                  alt="My Jurist Logo" 
-                  width={56} 
-                  height={56} 
-                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg group-hover:bg-accent/20 transition-all duration-300"></div>
-              </div>
-              <span className="font-bold text-foreground text-lg md:text-xl whitespace-nowrap">
-                My Jurist
-              </span>
-            </Link>
+            <MyJuristLogoWithWordmark variant="light" size={41} href="/" className="hover:opacity-90 transition-opacity" />
           </div>
 
           {/* Center Section - Navigation */}
@@ -144,18 +130,7 @@ const Header: React.FC<HeaderProps> = ({ navigation, activeSection, scrollToSect
                 <div className="flex flex-col h-full">
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 border-b border-border">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                        <Image 
-                          src="/images/myjurist-logo.png" 
-                          alt="My Jurist" 
-                          width={32} 
-                          height={32}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                      <span className="text-lg font-bold text-foreground">My Jurist</span>
-                    </div>
+                    <MyJuristLogoWithWordmark variant="light" size={32} href="/" />
                   </div>
                   
                   {/* Navigation Items */}

@@ -228,7 +228,6 @@ const RELEASE_THRESHOLD_FRACTION = 0.5;
 /** Exit animation when cards scroll away */
 const EXIT_DURATION_MS = 500;
 const EXIT_EASING = "cubic-bezier(0.33, 1, 0.68, 1)";
-const STACKING_MIN_WIDTH_PX = 768;
 
 const OurSolutionSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -239,9 +238,6 @@ const OurSolutionSection: React.FC = () => {
   const exitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useLayoutEffect(() => {
-    const isDesktop = () =>
-      typeof window !== "undefined" && window.innerWidth >= STACKING_MIN_WIDTH_PX;
-
     const resetToNormal = () => {
       const sectionEl = sectionRef.current;
       if (sectionEl) {
@@ -281,10 +277,6 @@ const OurSolutionSection: React.FC = () => {
     };
 
     const updateOffsets = () => {
-      if (!isDesktop()) {
-        resetToNormal();
-        return;
-      }
       const prev = translateYRef.current;
       const sectionBottom = sectionRef.current?.getBoundingClientRect().bottom ?? 0;
       const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 800;
@@ -398,7 +390,7 @@ const OurSolutionSection: React.FC = () => {
                   }}
                   className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row shrink-0 will-change-transform ${
                     isAnimatedCard
-                      ? "h-[720px] sm:h-[760px] md:h-[500px] lg:h-[564px] min-h-0"
+                      ? "min-h-[564px]"
                       : "min-h-[320px] sm:min-h-[400px] md:min-h-[564px]"
                   }`}
                   style={{
@@ -410,7 +402,7 @@ const OurSolutionSection: React.FC = () => {
                   <div
                     className={`min-w-0 w-full overflow-x-hidden p-3 sm:p-6 md:p-10 lg:p-12 flex flex-col order-1 ${
                       isAnimatedCard
-                        ? "flex-1 min-h-0 overflow-y-auto overflow-x-hidden justify-start md:justify-center scrollbar-hide"
+                        ? "shrink-0 md:flex-1 md:justify-center"
                         : "flex-1 justify-center"
                     }`}
                   >
@@ -442,11 +434,11 @@ const OurSolutionSection: React.FC = () => {
                   <div
                     className={`rounded-b-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 order-2 ${
                       card.header === "Lightning-Fast Legal Research"
-                        ? "flex-1 flex flex-col min-h-0 h-[240px] sm:h-[280px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        ? "flex-1 flex flex-col min-h-[240px] sm:min-h-[280px] md:min-h-[500px] lg:min-h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : card.header === "Intelligent Document Analysis" ||
                           card.header === "Smart Legal Drafting" ||
                           card.header === "MyJurist Universal Chat"
-                        ? "flex-1 flex flex-col min-h-0 h-[240px] sm:h-[280px] md:h-[500px] lg:h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        ? "flex-1 flex flex-col min-h-[240px] sm:min-h-[280px] md:min-h-[500px] lg:min-h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : "w-full md:w-[min(50%,658px)] shrink-0 min-h-[200px] md:min-h-[564px] p-4 sm:p-6"
                     }`}
                     style={

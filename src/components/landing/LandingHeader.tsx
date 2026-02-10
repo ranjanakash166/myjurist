@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { Menu, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import MyJuristLogo from "./MyJuristLogo";
+import MyJuristLogoWithWordmark from "./MyJuristLogoWithWordmark";
 import CtaArrowIcon from "./CtaArrowIcon";
 
 const navItems = [
@@ -52,21 +51,8 @@ const LandingHeader: React.FC = () => {
           backgroundColor: isScrolled ? undefined : "transparent",
         }}
       >
-        {/* Logo: icon (transparent) + MyJurist wordmark image */}
-        <Link
-          href="/"
-          className="flex items-center gap-3 shrink-0"
-          style={{ color: "#0f172a" }}
-        >
-          <MyJuristLogo size={41} />
-          <Image
-            src="/images/myjurist-wordmark.png"
-            alt="My Jurist"
-            width={120}
-            height={32}
-            className="h-8 w-auto object-contain"
-          />
-        </Link>
+        {/* Logo: same as footer – icon + wordmark */}
+        <MyJuristLogoWithWordmark variant="light" size={41} href="/" />
 
         {/* Desktop nav – H6/Medium: Inter 20px, weight 500, line-height 24px */}
         <nav className="hidden lg:flex items-center gap-8 flex-1 justify-center">
