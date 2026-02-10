@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import ProfileModal from '../../components/ProfileModal';
+import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
 
 const getNavItems = (userRole?: string) => {
   const baseItems = [
@@ -73,16 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo and Company Name */}
-          <Link href="/app/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-              <img 
-                src="/images/myjurist-logo.png" 
-                alt="My Jurist" 
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <span className="text-lg font-bold text-foreground">My Jurist</span>
-          </Link>
+          <MyJuristLogoWithWordmark variant="light" size={32} href="/app/home" className="hover:opacity-80 transition-opacity" />
           
           {/* Mobile Menu */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -94,16 +86,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="w-72 p-0">
               <div className="flex flex-col h-full">
                 <div className="flex items-center p-6 border-b">
-                  <Link href="/app/home" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                      <img 
-                        src="/images/myjurist-logo.png" 
-                        alt="My Jurist" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                    <span className="text-xl font-bold text-foreground">My Jurist</span>
-                  </Link>
+                  <MyJuristLogoWithWordmark variant="light" size={40} href="/app/home" className="hover:opacity-80 transition-opacity" />
                 </div>
                 
                 <nav className="flex-1 p-4 space-y-2">
@@ -179,14 +162,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-16 hover:w-72 p-4 flex-col gap-4 bg-card border-r border-border min-h-screen transition-all duration-300 ease-in-out overflow-hidden group/sidebar">
         {/* Company Logo/Icon */}
         <Link href="/app/home" className="flex items-center justify-center mb-8 min-w-max hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-            <img 
-              src="/images/myjurist-logo.png" 
-              alt="My Jurist" 
-              className="w-full h-full object-contain"
-            />
+          <div className="flex items-center justify-center shrink-0">
+            <MyJuristLogoWithWordmark iconOnly size={40} href={false} />
           </div>
-          <span className="text-2xl font-bold text-foreground opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 ml-3">
+          <span className="text-2xl font-bold text-foreground opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 ml-3 whitespace-nowrap">
             My Jurist
           </span>
         </Link>

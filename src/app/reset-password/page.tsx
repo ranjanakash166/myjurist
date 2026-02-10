@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
 
 export default function ResetPasswordPage() {
   const [formData, setFormData] = useState({
@@ -98,15 +99,8 @@ export default function ResetPasswordPage() {
             <CardHeader>
               {/* Mobile Header */}
               <div className="lg:hidden text-center mb-8">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                    <img 
-                      src="/images/myjurist-logo.png" 
-                      alt="My Jurist" 
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                  <span className="font-bold text-foreground">My Jurist</span>
+                <div className="flex items-center justify-center mb-4">
+                  <MyJuristLogoWithWordmark variant="light" size={32} href="/" className="justify-center" />
                 </div>
                 <p className="text-muted-foreground text-sm">
                   Next Generation AI-Powered Legal Intelligence
@@ -170,15 +164,8 @@ export default function ResetPasswordPage() {
           <CardHeader>
             {/* Mobile Header */}
             <div className="lg:hidden text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
-                  <img 
-                    src="/images/myjurist-logo.png" 
-                    alt="My Jurist" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <span className="font-bold text-foreground">My Jurist</span>
+              <div className="flex items-center justify-center mb-4">
+                <MyJuristLogoWithWordmark variant="light" size={32} href="/" className="justify-center" />
               </div>
               <p className="text-muted-foreground text-sm">
                 Next Generation AI-Powered Legal Intelligence

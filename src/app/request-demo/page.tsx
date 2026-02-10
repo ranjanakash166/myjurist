@@ -4,6 +4,7 @@ import React from "react";
 import { ArrowLeft, Scale, Sparkles } from "lucide-react";
 import Link from "next/link";
 import ContactFormSection from "@/components/ContactFormSection";
+import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
 
 const RequestDemoPage: React.FC = () => {
   return (
@@ -59,22 +60,8 @@ const RequestDemoPage: React.FC = () => {
       >
         <div className="max-w-md mx-auto space-y-8">
           <div>
-            <div className="mb-8 flex items-center gap-3">
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
-              >
-                <Scale
-                  className="h-8 w-8"
-                  style={{ color: "var(--text-on-dark-color, #fff)" }}
-                />
-              </div>
-              <span
-                className="text-2xl font-bold"
-                style={{ color: "var(--text-on-dark-color, #fff)" }}
-              >
-                My Jurist
-              </span>
+            <div className="mb-8">
+              <MyJuristLogoWithWordmark variant="dark" size={41} href="/" />
             </div>
             <h1
               className="text-4xl md:text-5xl font-bold mb-4 leading-tight"
@@ -201,20 +188,8 @@ const RequestDemoPage: React.FC = () => {
         <div className="w-full max-w-lg">
           {/* Mobile: logo and back link */}
           <div className="lg:hidden text-center mb-6">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center shadow-lg overflow-hidden bg-white">
-                <img
-                  src="/images/myjurist-logo.png"
-                  alt="My Jurist"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span
-                className="font-bold text-xl"
-                style={{ color: "var(--text-primary, #0f172a)" }}
-              >
-                My Jurist
-              </span>
+            <div className="flex items-center justify-center mb-4">
+              <MyJuristLogoWithWordmark variant="light" size={32} href="/" className="justify-center" />
             </div>
             <p
               className="text-sm"

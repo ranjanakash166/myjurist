@@ -5,13 +5,15 @@ import React from "react";
 /**
  * My Jurist logo – "M" mark with blue-to-fuchsia gradient.
  * Design: 100×100 viewBox; use size prop to scale (e.g. header uses 41).
+ * Uses unique gradient IDs per instance so multiple logos on the page all render correctly.
  */
 const MyJuristLogo: React.FC<{ className?: string; size?: number }> = ({
   className = "",
   size = 100,
 }) => {
-  const gradientId0 = "myjurist-m-gradient-0";
-  const gradientId1 = "myjurist-m-gradient-1";
+  const id = React.useId().replace(/:/g, "");
+  const gradientId0 = `myjurist-m-grad-0-${id}`;
+  const gradientId1 = `myjurist-m-grad-1-${id}`;
 
   return (
     <svg
