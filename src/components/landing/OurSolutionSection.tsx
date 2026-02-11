@@ -228,6 +228,8 @@ const RELEASE_THRESHOLD_FRACTION = 0.5;
 /** Exit animation when cards scroll away */
 const EXIT_DURATION_MS = 500;
 const EXIT_EASING = "cubic-bezier(0.33, 1, 0.68, 1)";
+/** Below this width (px) the stacking animation is disabled; cards scroll normally. */
+const MOBILE_MAX_WIDTH_PX = 768;
 
 const OurSolutionSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -277,6 +279,13 @@ const OurSolutionSection: React.FC = () => {
     };
 
     const updateOffsets = () => {
+      const isMobile =
+        typeof window !== "undefined" && window.innerWidth < MOBILE_MAX_WIDTH_PX;
+      if (isMobile) {
+        resetToNormal();
+        return;
+      }
+
       const prev = translateYRef.current;
       const sectionBottom = sectionRef.current?.getBoundingClientRect().bottom ?? 0;
       const viewportHeight = typeof window !== "undefined" ? window.innerHeight : 800;
@@ -285,7 +294,6 @@ const OurSolutionSection: React.FC = () => {
       if (sectionBottom <= releaseThreshold) {
         if (!releasedRef.current) {
           releasedRef.current = true;
-          // Do not set section z-index -1; keep section background visible
           const exitY = -(typeof window !== "undefined" ? window.innerHeight : 800) - 200;
           for (let i = 0; i < CARD_COUNT; i++) {
             const el = cardRefs.current[i];
@@ -313,6 +321,7 @@ const OurSolutionSection: React.FC = () => {
         sectionEl.style.zIndex = "";
       }
       const rects = cardRefs.current.map((el) => el?.getBoundingClientRect() ?? null);
+
       for (let i = 0; i < CARD_COUNT; i++) {
         const el = cardRefs.current[i];
         const rect = rects[i];
@@ -320,7 +329,8 @@ const OurSolutionSection: React.FC = () => {
         const desiredTopPx = STICK_TOP_REM[i] * REM_PX;
         const currentTranslate = prev[i] ?? 0;
         const layoutTop = rect.top - currentTranslate;
-        const next = layoutTop > desiredTopPx ? 0 : desiredTopPx - layoutTop;
+        const rawNext = layoutTop > desiredTopPx ? 0 : desiredTopPx - layoutTop;
+        const next = Math.round(rawNext);
         prev[i] = next;
         el.style.transition = "";
         el.style.zIndex = String(i);
@@ -353,7 +363,7 @@ const OurSolutionSection: React.FC = () => {
     <section
       ref={sectionRef}
       id="solutions"
-      className="py-20 md:py-24 px-4"
+      className="pt-14 pb-10 md:py-20 lg:py-24 px-4"
       style={{ background: "var(--bg-tertiary, #F1F5F9)" }}
     >
       <div className="max-w-[1356px] mx-auto w-full overflow-x-clip">
@@ -382,7 +392,9 @@ const OurSolutionSection: React.FC = () => {
             return (
               <div
                 key={card.header}
-                className="min-h-[75vh] flex justify-center pt-4 md:pt-6"
+                className={`flex justify-center pt-4 md:pt-6 ${
+                  isAnimatedCard ? "min-h-[100vh]" : "min-h-[75vh]"
+                }`}
               >
                 <div
                   ref={(el) => {
@@ -390,21 +402,28 @@ const OurSolutionSection: React.FC = () => {
                   }}
                   className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row shrink-0 will-change-transform ${
                     isAnimatedCard
-                      ? "min-h-[564px]"
+                      ? "min-h-[1000px] sm:min-h-[1050px] md:min-h-[800px] lg:min-h-[850px]"
                       : "min-h-[320px] sm:min-h-[400px] md:min-h-[564px]"
                   }`}
                   style={{
                     width: "100%",
                     maxWidth: CARD_WIDTH,
                     zIndex: index,
+                    backfaceVisibility: "hidden",
                   }}
                 >
                   <div
-                    className={`min-w-0 w-full overflow-x-hidden p-3 sm:p-6 md:p-10 lg:p-12 flex flex-col order-1 ${
+                    className={`min-w-0 w-full p-3 sm:p-6 md:p-10 lg:p-12 flex flex-col order-1 ${
                       isAnimatedCard
-                        ? "shrink-0 md:flex-1 md:justify-center"
+                        ? "md:flex-1 md:justify-start"
                         : "flex-1 justify-center"
                     }`}
+                    style={isAnimatedCard ? { 
+                      overflowY: 'visible', 
+                      overflowX: 'hidden',
+                      height: 'auto',
+                      maxHeight: 'none'
+                    } : undefined}
                   >
                     <div className="mb-3 sm:mb-6 shrink-0">
                       <Icon />
@@ -432,13 +451,13 @@ const OurSolutionSection: React.FC = () => {
                     </ul>
                   </div>
                   <div
-                    className={`rounded-b-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 order-2 ${
+                    className={`rounded-b-2xl md:rounded-l-none md:rounded-r-[24px] overflow-hidden min-w-0 order-2 flex flex-col min-h-0 ${
                       card.header === "Lightning-Fast Legal Research"
-                        ? "flex-1 flex flex-col min-h-[240px] sm:min-h-[280px] md:min-h-[500px] lg:min-h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        ? "flex-1 pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-6 md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : card.header === "Intelligent Document Analysis" ||
                           card.header === "Smart Legal Drafting" ||
                           card.header === "MyJurist Universal Chat"
-                        ? "flex-1 flex flex-col min-h-[240px] sm:min-h-[280px] md:min-h-[500px] lg:min-h-[564px] pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
+                        ? "flex-1 pt-4 pr-4 pb-4 pl-4 sm:pt-6 sm:pr-6 sm:pb-6 sm:pl-6 md:pt-[113px] md:pr-[125px] md:pb-10 md:pl-[125px] overflow-hidden"
                         : "w-full md:w-[min(50%,658px)] shrink-0 min-h-[200px] md:min-h-[564px] p-4 sm:p-6"
                     }`}
                     style={
@@ -460,14 +479,14 @@ const OurSolutionSection: React.FC = () => {
                   >
                     {card.header === "Lightning-Fast Legal Research" ? (
                       <div
-                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
+                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-0 rounded-xl"
                         style={{ borderRadius: 12 }}
                       >
                         <LegalResearchDemoCard />
                       </div>
                     ) : card.header === "Intelligent Document Analysis" ? (
                       <div
-                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-[240px] rounded-xl"
+                        className="min-w-0 flex-1 overflow-hidden overflow-x-hidden w-full max-w-full md:max-w-[658px] h-full min-h-0 rounded-xl"
                         style={{ borderRadius: 12 }}
                       >
                         <SmartDraftingDemoCard />
@@ -492,8 +511,8 @@ const OurSolutionSection: React.FC = () => {
               </div>
             );
           })}
-        {/* Final spacer so last card can scroll up and stack */}
-        <div className="min-h-[30vh]" aria-hidden />
+        {/* Spacer: minimal on mobile (no stacking); larger on desktop so last card can scroll up and stack */}
+        <div className="min-h-6 md:min-h-[30vh]" aria-hidden />
         </div>
       </div>
     </section>
