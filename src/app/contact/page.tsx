@@ -65,8 +65,7 @@ const ContactPage: React.FC = () => {
             About Us
           </p>
           <h1
-            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
-            style={{ color: "var(--text-on-dark-color, #fff)" }}
+            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-[#2563EB] to-[#C026D3] bg-clip-text text-transparent"
           >
             Legal Due Diligence Needs A New AI Partner
           </h1>
@@ -114,6 +113,7 @@ const ContactPage: React.FC = () => {
             subtitle="Ready to transform your legal due diligence process? Let's discuss how My Jurist can help."
             inlineMode={true}
             useLandingStyle={true}
+            disableButtonAnimation={true}
           />
         </div>
       </div>

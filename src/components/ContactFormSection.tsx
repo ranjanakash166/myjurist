@@ -25,11 +25,13 @@ interface ContactFormSectionProps {
   buttonText?: string;
   inlineMode?: boolean;
   useLandingStyle?: boolean;
+  disableButtonAnimation?: boolean;
 }
 
 const inputLandingClass =
   'border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]';
 const labelLandingStyle = { color: 'var(--text-primary, #0f172a)' };
+const loginButtonBlueStyle = { backgroundColor: '#2F80ED', color: '#ffffff' };
 
 const ContactFormSection: React.FC<ContactFormSectionProps> = ({ 
   title = "Get In Touch",
@@ -37,7 +39,8 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
   showBackButton = false,
   buttonText = "Send Message",
   inlineMode = false,
-  useLandingStyle = false
+  useLandingStyle = false,
+  disableButtonAnimation = false,
 }) => {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -175,9 +178,14 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                   }}
                   className={
                     useLandingStyle
-                      ? 'landing-cta-button landing-cta-text mt-8 rounded-full font-medium gap-3 transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100'
+                      ? `landing-cta-button landing-cta-blue landing-cta-text mt-8 rounded-full font-medium gap-3 ${
+                          disableButtonAnimation
+                            ? ""
+                            : "transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100"
+                        }`
                       : 'mt-8'
                   }
+                  style={useLandingStyle ? loginButtonBlueStyle : undefined}
                 >
                   {useLandingStyle ? (
                     <span className="inline-flex items-center gap-3">
@@ -299,9 +307,14 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
                   disabled={isSubmitting}
                   className={
                     useLandingStyle
-                      ? 'landing-cta-button landing-cta-text w-full rounded-full font-medium gap-3 transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100 disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100'
+                      ? `landing-cta-button landing-cta-blue landing-cta-text w-full rounded-full font-medium gap-3 ${
+                          disableButtonAnimation
+                            ? ""
+                            : "transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100"
+                        } disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100`
                       : 'w-full'
                   }
+                  style={useLandingStyle ? loginButtonBlueStyle : undefined}
                 >
                   {useLandingStyle ? (
                     <span className="inline-flex items-center justify-center gap-3">

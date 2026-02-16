@@ -57,14 +57,11 @@ const AboutPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Title */}
           <div className="text-center max-w-4xl mx-auto mb-12 md:mb-16">
-            <h1
-              className="text-4xl md:text-5xl font-bold mb-6"
-              style={{ color: "var(--text-primary, #0f172a)" }}
-            >
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-[#2563EB] to-[#C026D3] bg-clip-text text-transparent">
               Founded By Industry Veterans
             </h1>
             <p
-              className="text-lg leading-relaxed"
+              className="text-lg leading-relaxed max-w-3xl mx-auto"
               style={{ color: "var(--text-secondary, #475569)" }}
             >
               Our team has built at the frontier of legal technology and AI.
@@ -419,7 +416,7 @@ const AboutPage: React.FC = () => {
               style={{
                 padding: "20px 44px",
                 borderRadius: 100,
-                background: "var(--bg-black-solid, #0f172a)",
+                background: "#2F80ED",
                 color: "var(--text-on-dark-color, #fff)",
                 fontSize: "22px",
                 lineHeight: "28px",
