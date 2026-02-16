@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import CtaArrowIcon from "@/components/landing/CtaArrowIcon";
+import { Eye, EyeOff } from "lucide-react";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
 
 export default function LoginPage() {
@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [captchaValid, setCaptchaValid] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -59,13 +60,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row font-[var(--Label-Label-1-fontFamily,Inter)]">
-      {/* Left Side - Company Info (landing dark panel) */}
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left Side - Company Info (dark panel) */}
       <div className="hidden lg:block lg:w-1/2">
         <CompanyInfo />
       </div>
 
-      {/* Right Side - Login Form (landing gradient + card) */}
+      {/* Right Side - Login Form (gradient background + card) */}
       <div
         className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen"
         style={{
@@ -85,13 +86,10 @@ export default function LoginPage() {
             </div>
 
             <div className="text-center">
-              <CardTitle
-                className="text-3xl font-bold mb-2"
-                style={{ color: "var(--text-primary, #0f172a)" }}
-              >
-                Welcome Back
+              <CardTitle className="text-3xl font-bold mb-2 text-[#0f172a]">
+                Welcome back
               </CardTitle>
-              <p style={{ color: "var(--text-secondary, #475569)" }}>
+              <p className="text-[#475569] text-sm">
                 Sign in to your My Jurist account
               </p>
             </div>
@@ -100,12 +98,8 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="font-medium"
-                  style={{ color: "var(--text-primary, #0f172a)" }}
-                >
-                  Email Address
+                <Label htmlFor="email" className="font-medium text-[#0f172a]">
+                  Email
                 </Label>
                 <Input
                   type="email"
@@ -113,37 +107,47 @@ export default function LoginPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Enter your email"
+                  placeholder="e.g. admin@mail.com"
                   required
                   autoFocus
-                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]"
+                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="font-medium"
-                  style={{ color: "var(--text-primary, #0f172a)" }}
-                >
+                <Label htmlFor="password" className="font-medium text-[#0f172a]">
                   Password
                 </Label>
-                <Input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  required
-                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-500 focus-visible:ring-[#2563eb] focus-visible:border-[#2563eb]"
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter password"
+                    required
+                    className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
                 <div className="text-right">
                   <Link
                     href="/forgot-password"
-                    className="text-sm font-medium transition-colors text-[#2563eb] hover:text-[#1d4ed8]"
+                    className="text-sm font-medium transition-colors text-[#2F80ED] hover:text-[#2563EB]"
                   >
-                    Forgot Password?
+                    Forgot password?
                   </Link>
                 </div>
               </div>
@@ -159,33 +163,23 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading || !captchaValid}
-                className="w-full rounded-full font-medium gap-3 px-10 py-5 text-white transition-all duration-200 ease-out hover:scale-105 hover:shadow-xl hover:brightness-110 active:scale-100 disabled:opacity-70 disabled:hover:scale-100 disabled:hover:brightness-100"
+                className="w-full h-11 rounded-lg font-semibold text-white transition-all duration-200 hover:opacity-90 disabled:opacity-70"
                 style={{
-                  padding: "20px 44px",
-                  borderRadius: 100,
-                  background: "var(--bg-black-solid, #0f172a)",
-                  color: "var(--text-on-dark-color, #fff)",
-                  fontFamily: "var(--Label-Label-1-fontFamily, Inter)",
-                  fontSize: "22px",
-                  fontWeight: 500,
-                  lineHeight: "28px",
+                  backgroundColor: "#2F80ED",
                 }}
               >
-                <span className="inline-flex items-center justify-center gap-3">
-                  {loading ? "Signing In..." : "Sign In"}
-                  {!loading && <CtaArrowIcon size={36} className="shrink-0" />}
-                </span>
+                {loading ? "Signing In..." : "Login"}
               </Button>
             </form>
 
             <div className="mt-8 text-center">
-              <p style={{ color: "var(--text-secondary, #475569)" }}>
+              <p className="text-sm text-[#475569]">
                 Don't have an account?{" "}
                 <Link
                   href="/contact"
-                  className="font-medium transition-colors text-[#2563eb] hover:text-[#1d4ed8]"
+                  className="font-medium transition-colors text-[#2F80ED] hover:text-[#2563EB]"
                 >
-                  Contact us
+                  Contact Us
                 </Link>
               </p>
             </div>
@@ -194,4 +188,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}
