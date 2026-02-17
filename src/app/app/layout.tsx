@@ -74,7 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo and Company Name */}
-          <MyJuristLogoWithWordmark variant="light" size={32} href="/app/home" className="hover:opacity-80 transition-opacity" />
+          <MyJuristLogoWithWordmark variant="dark" size={32} href="/app/home" className="hover:opacity-80 transition-opacity" />
           
           {/* Mobile Menu */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
