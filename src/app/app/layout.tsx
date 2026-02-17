@@ -74,7 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo and Company Name */}
-          <MyJuristLogoWithWordmark variant="light" size={32} href="/app/home" className="hover:opacity-80 transition-opacity" />
+          <MyJuristLogoWithWordmark variant="dark" size={32} href="/app/home" className="hover:opacity-80 transition-opacity" />
           
           {/* Mobile Menu */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
@@ -83,10 +83,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
+            <SheetContent
+              side="left"
+              className="w-72 p-0 border-r border-white/10 bg-[#0F172A] text-white"
+            >
               <div className="flex flex-col h-full">
-                <div className="flex items-center p-6 border-b">
-                  <MyJuristLogoWithWordmark variant="light" size={40} href="/app/home" className="hover:opacity-80 transition-opacity" />
+                <div className="flex items-center p-6 border-b border-white/10">
+                  <MyJuristLogoWithWordmark variant="dark" size={40} href="/app/home" className="hover:opacity-80 transition-opacity" />
                 </div>
                 
                 <nav className="flex-1 p-4 space-y-2">
@@ -96,16 +99,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center px-4 py-3 rounded-lg text-left font-medium transition-all duration-300 hover:scale-105 ${
+                        className={`flex items-center px-4 py-3 rounded-xl text-left font-medium transition-all duration-200 ${
                           isActive
-                            ? 'bg-primary text-primary-foreground shadow-lg'
-                            : 'hover:bg-accent text-muted-foreground hover:text-foreground'
+                            ? 'bg-white text-[#0F172A] shadow-md'
+                            : 'text-slate-300 hover:bg-white/10 hover:text-white'
                         }`}
                         onClick={() => setSidebarOpen(false)}
                       >
                         <div className="w-6 h-6 flex items-center justify-center mr-3">
                           {React.cloneElement(item.icon, { 
-                            className: `w-6 h-6 ${isActive ? 'text-primary-foreground' : ''}` 
+                            className: `w-6 h-6 ${isActive ? 'text-[#0F172A]' : 'text-slate-300'}`
                           })}
                         </div>
                         <span className="truncate">{item.label}</span>
@@ -114,11 +117,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   })}
                 </nav>
 
-                <div className="p-4 border-t">
+                <div className="p-4 border-t border-white/10">
                   {user && (
                     <button
                       type="button"
-                      className="flex items-center px-4 py-2 mb-4 w-full text-left hover:bg-accent rounded-lg transition-colors"
+                      className="flex items-center px-4 py-2 mb-4 w-full text-left hover:bg-white/10 rounded-lg transition-colors"
                       onClick={() => setProfileOpen(true)}
                     >
                       <Avatar className="w-8 h-8 mr-3">
@@ -127,10 +130,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">
+                        <p className="text-sm font-medium text-white truncate">
                           {user.full_name}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-xs text-slate-300 truncate">
                           {user.email}
                         </p>
                       </div>
@@ -145,7 +148,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         await logout();
                         router.push("/login");
                       }}
-                      className="w-full justify-start"
+                      className="w-full justify-start text-slate-200 hover:text-white hover:bg-white/10"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Logout

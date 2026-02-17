@@ -67,7 +67,7 @@ const GradientShieldIcon: React.FC<{ className?: string }> = ({ className = "" }
 const RequestDemoPage: React.FC = () => {
   return (
     <div
-      className="min-h-screen flex flex-col lg:flex-row font-[var(--Label-Label-1-fontFamily,Inter)]"
+      className="h-[100dvh] overflow-hidden flex flex-col lg:flex-row font-[var(--Label-Label-1-fontFamily,Inter)]"
       style={{ color: "var(--text-primary, #0f172a)" }}
     >
       {/* Header - Back to Home aligned with left panel content (same padding + max-w-md mx-auto) */}
@@ -113,7 +113,7 @@ const RequestDemoPage: React.FC = () => {
 
       {/* Left Side - Info panel (landing dark panel) */}
       <div
-        className="hidden lg:flex lg:w-1/2 flex-col justify-center pt-24 pb-12 px-8 md:px-12 min-h-screen relative overflow-hidden"
+        className="hidden lg:flex lg:w-1/2 lg:h-[100dvh] flex-col justify-center pt-20 pb-8 px-8 md:px-12 relative overflow-hidden"
         style={{ background: "var(--bg-black-solid, #0f172a)" }}
       >
         {/* Login-page style gavel image at left-bottom */}
@@ -131,7 +131,13 @@ const RequestDemoPage: React.FC = () => {
         <div className="max-w-md mx-auto space-y-8 relative z-10">
           <div>
             <div className="mb-8">
-              <MyJuristLogoWithWordmark variant="dark" size={41} href="/" />
+              <MyJuristLogoWithWordmark
+                variant="dark"
+                size={41}
+                wordmarkWidth={213}
+                wordmarkHeight={65}
+                href="/"
+              />
             </div>
             <h1
               className="text-4xl md:text-5xl font-bold mb-4 leading-tight bg-gradient-to-r from-[#2563EB] to-[#C026D3] bg-clip-text text-transparent"
@@ -224,7 +230,7 @@ const RequestDemoPage: React.FC = () => {
 
       {/* Right Side - Demo request form (landing gradient + card) */}
       <div
-        className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen pt-24"
+        className="flex-1 lg:w-1/2 h-[100dvh] flex items-center justify-center p-4 sm:p-6 lg:p-6 pt-20"
         style={{
           background:
             "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",

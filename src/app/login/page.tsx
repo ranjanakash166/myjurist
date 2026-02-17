@@ -60,15 +60,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="h-[100dvh] overflow-hidden flex flex-col lg:flex-row">
       {/* Left Side - Company Info (dark panel) */}
-      <div className="hidden lg:block lg:w-1/2">
+      <div className="hidden lg:block lg:w-1/2 lg:h-[100dvh]">
         <CompanyInfo />
       </div>
 
       {/* Right Side - Login Form (gradient background + card) */}
       <div
-        className="flex-1 lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 min-h-screen"
+        className="flex-1 lg:w-1/2 h-[100dvh] flex items-center justify-center p-4 sm:p-6 lg:p-6"
         style={{
           background: "linear-gradient(90deg, #eff6ff 0%, #f5f3ff 50%, #fce7f3 100%)",
         }}
@@ -110,7 +110,7 @@ export default function LoginPage() {
                   placeholder="e.g. admin@mail.com"
                   required
                   autoFocus
-                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg"
+                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg"
                 />
               </div>
 
@@ -127,7 +127,7 @@ export default function LoginPage() {
                     onChange={handleChange}
                     placeholder="Enter password"
                     required
-                    className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg pr-10"
+                    className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg pr-10"
                   />
                   <button
                     type="button"
