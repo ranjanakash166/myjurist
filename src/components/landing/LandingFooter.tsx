@@ -61,13 +61,14 @@ const LandingFooter: React.FC = () => {
                   key={badge.label}
                   className="flex flex-col items-center gap-2"
                 >
-                  <div className="relative h-10 w-10">
+                  <div className="relative h-20 w-20">
                     <Image
                       src={badge.src}
                       alt={badge.alt}
-                      width={40}
-                      height={40}
+                      width={80}
+                      height={80}
                       className="object-contain brightness-0 invert"
+                      style={{ aspectRatio: "1 / 1" }}
                     />
                   </div>
                   <span

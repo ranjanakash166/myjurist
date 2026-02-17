@@ -58,12 +58,6 @@ const ContactPage: React.FC = () => {
         style={{ background: "var(--bg-black-solid, #0f172a)" }}
       >
         <div className="max-w-md mx-auto space-y-6">
-          <p
-            className="text-base md:text-lg font-semibold opacity-90"
-            style={{ color: "var(--text-on-dark-color, #fff)" }}
-          >
-            About Us
-          </p>
           <h1
             className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-[#2563EB] to-[#C026D3] bg-clip-text text-transparent"
           >

@@ -94,7 +94,7 @@ const IconShieldDocument: React.FC<{ className?: string }> = ({ className = "" }
 
 export default function CompanyInfo() {
   return (
-    <div className="relative h-full min-h-[928px] w-full overflow-hidden bg-[#0f172a]">
+    <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#0f172a]">
       <div className="absolute bottom-[57px] left-[3px] z-0 opacity-30 mix-blend-luminosity">
         <Image
           src="/gavel.png"
@@ -107,7 +107,13 @@ export default function CompanyInfo() {
       </div>
 
       <div className="absolute left-[18.72%] top-[100px] z-10">
-        <MyJuristLogoWithWordmark variant="dark" size={65} href="/" />
+        <MyJuristLogoWithWordmark
+          variant="dark"
+          size={65}
+          wordmarkWidth={213}
+          wordmarkHeight={65}
+          href="/"
+        />
       </div>
 
       <div className="absolute left-[18.72%] top-[237px] z-10 w-[608px]">

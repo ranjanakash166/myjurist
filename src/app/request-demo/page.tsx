@@ -131,7 +131,13 @@ const RequestDemoPage: React.FC = () => {
         <div className="max-w-md mx-auto space-y-8 relative z-10">
           <div>
             <div className="mb-8">
-              <MyJuristLogoWithWordmark variant="dark" size={41} href="/" />
+              <MyJuristLogoWithWordmark
+                variant="dark"
+                size={41}
+                wordmarkWidth={213}
+                wordmarkHeight={65}
+                href="/"
+              />
             </div>
             <h1
               className="text-4xl md:text-5xl font-bold mb-4 leading-tight bg-gradient-to-r from-[#2563EB] to-[#C026D3] bg-clip-text text-transparent"
