@@ -110,7 +110,7 @@ export default function LoginPage() {
                   placeholder="e.g. admin@mail.com"
                   required
                   autoFocus
-                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg"
+                  className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg"
                 />
               </div>
 
@@ -127,7 +127,7 @@ export default function LoginPage() {
                     onChange={handleChange}
                     placeholder="Enter password"
                     required
-                    className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg pr-10"
+                    className="border-slate-200 bg-white text-[#0f172a] placeholder:text-slate-400 focus-visible:ring-[#2F80ED] focus-visible:border-[#2F80ED] h-11 rounded-lg pr-10"
                   />
                   <button
                     type="button"
