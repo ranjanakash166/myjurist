@@ -45,15 +45,9 @@ const LandingHeroSection: React.FC = () => {
 
         {/* 2. Headline – Title/Title-1/Bold (responsive) */}
         <h1
-          className="text-center max-w-[974px] w-full"
+          className="landing-hero-title text-center max-w-[974px] w-full"
           style={{
             color: "var(--text-primary, #0F172A)",
-            fontFamily: "var(--Title-Title-1-fontFamily, Inter)",
-            fontSize: "clamp(1.75rem, 5vw, 72px)",
-            fontStyle: "normal",
-            fontWeight: "var(--Weights-Bold, 700)",
-            lineHeight: "clamp(2.25rem, 6vw, 88px)",
-            letterSpacing: "var(--Title-Title-1-letterSpacing, -0.8px)",
           }}
         >
           <span

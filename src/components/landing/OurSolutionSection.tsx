@@ -25,11 +25,11 @@ const FIRST_CARD_RIGHT_PANEL_HEIGHT =
 const IconLightning: React.FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={44}
-    height={64}
+    width={32}
+    height={32}
     viewBox="0 0 22 32"
     fill="none"
-    className="w-11 h-16 shrink-0"
+    className="w-8 h-8 shrink-0"
     aria-hidden
   >
     <defs>
@@ -55,11 +55,11 @@ const IconLightning: React.FC = () => (
 const IconDocument: React.FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={40}
-    height={40}
+    width={32}
+    height={32}
     viewBox="0 0 32 32"
     fill="none"
-    className="w-10 h-10 shrink-0"
+    className="w-8 h-8 shrink-0"
     aria-hidden
   >
     <defs>
@@ -85,11 +85,11 @@ const IconDocument: React.FC = () => (
 const IconDocumentAnalysis: React.FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={40}
-    height={44}
+    width={32}
+    height={32}
     viewBox="0 0 26 29"
     fill="none"
-    className="w-10 h-11 shrink-0"
+    className="w-8 h-8 shrink-0"
     aria-hidden
   >
     <defs>
@@ -115,11 +115,11 @@ const IconDocumentAnalysis: React.FC = () => (
 const IconCheckCircle: React.FC = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={40}
-    height={40}
+    width={32}
+    height={32}
     viewBox="0 0 32 32"
     fill="none"
-    className="w-10 h-10 shrink-0"
+    className="w-8 h-8 shrink-0"
     aria-hidden
   >
     <defs>
@@ -400,12 +400,14 @@ const OurSolutionSection: React.FC = () => {
                   ref={(el) => {
                     cardRefs.current[index] = el;
                   }}
-                  className={`w-full max-w-[1356px] rounded-2xl md:rounded-3xl bg-white shadow-xl border border-slate-200/60 overflow-hidden flex flex-col md:flex-row shrink-0 will-change-transform ${
+                  className={`w-full max-w-[1356px] overflow-hidden rounded-2xl md:rounded-3xl border p-4 md:p-6 flex flex-col md:flex-row shrink-0 will-change-transform ${
                     isAnimatedCard
-                      ? "min-h-[1000px] sm:min-h-[1050px] md:min-h-[800px] lg:min-h-[850px]"
+                      ? "min-h-[760px] sm:min-h-[800px] md:min-h-[700px] lg:min-h-[740px]"
                       : "min-h-[320px] sm:min-h-[400px] md:min-h-[564px]"
                   }`}
                   style={{
+                    border: "1px solid var(--border-secondary, #E2E8F0)",
+                    background: "var(--bg-primary, #FFF)",
                     width: "100%",
                     maxWidth: CARD_WIDTH,
                     zIndex: index,
@@ -425,7 +427,16 @@ const OurSolutionSection: React.FC = () => {
                       maxHeight: 'none'
                     } : undefined}
                   >
-                    <div className="mb-3 sm:mb-6 shrink-0">
+                    <div
+                      className="mb-3 sm:mb-6 shrink-0 flex items-center justify-center rounded-2xl"
+                      style={{
+                        width: 80,
+                        height: 80,
+                        padding: 24,
+                        borderRadius: 16,
+                        background: "var(--blue-50, #EFF6FF)",
+                      }}
+                    >
                       <Icon />
                     </div>
                     <h3 className="mb-2 sm:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl break-words min-w-0" style={headerStyle}>

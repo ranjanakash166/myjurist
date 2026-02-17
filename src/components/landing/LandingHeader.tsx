@@ -28,23 +28,30 @@ const LandingHeader: React.FC = () => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    const ENTER_SCROLL_Y = 32;
+    const EXIT_SCROLL_Y = 16;
+    const handleScroll = () => {
+      const y = window.scrollY;
+      // Hysteresis avoids rapid state flipping near the top threshold.
+      setIsScrolled((prev) => (prev ? y > EXIT_SCROLL_Y : y > ENTER_SCROLL_Y));
+    };
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex flex-col justify-center items-stretch px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[250px] min-h-[72px] md:min-h-[90px] lg:min-h-[114px]"
+      className="fixed top-0 left-0 right-0 z-50 transition-[background-color,backdrop-filter] duration-300 flex flex-col justify-center items-stretch px-4 sm:px-6 md:px-8 lg:px-12 xl:px-[250px] min-h-[72px] md:min-h-[90px] lg:min-h-[114px]"
       style={{
         background: "transparent",
       }}
     >
       {/* Inner panel: transparent at top, glass effect when scrolled */}
       <div
-        className={`w-full max-w-full flex items-center justify-between gap-3 sm:gap-6 lg:gap-8 px-3 sm:px-6 py-2 sm:py-3 rounded-2xl md:rounded-3xl transition-all duration-300 ${
+        className={`w-full max-w-full flex items-center justify-between gap-3 sm:gap-6 lg:gap-8 px-3 sm:px-6 py-2 sm:py-3 rounded-2xl md:rounded-3xl transition-[background-color,backdrop-filter] duration-300 ${
           isScrolled
-            ? "bg-white/20 backdrop-blur-md border border-white/20 shadow-sm"
+            ? "bg-white/20 backdrop-blur-md shadow-none"
             : ""
         }`}
         style={{
@@ -52,7 +59,13 @@ const LandingHeader: React.FC = () => {
         }}
       >
         {/* Logo: same as footer – icon + wordmark */}
-        <MyJuristLogoWithWordmark variant="light" size={41} href="/" />
+        <MyJuristLogoWithWordmark
+          variant="light"
+          size={41}
+          wordmarkWidth={157}
+          wordmarkHeight={48}
+          href="/"
+        />
 
         {/* Desktop nav – H6/Medium: Inter 20px, weight 500, line-height 24px */}
         <nav className="hidden lg:flex items-center gap-8 flex-1 justify-center">
@@ -112,11 +125,17 @@ const LandingHeader: React.FC = () => {
           <Button
             asChild
             variant="outline"
-            className="rounded-full font-medium text-lg border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100"
+            className="rounded-full border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100"
             style={{
-              padding: "16px",
+              padding: "12px",
               borderRadius: 100,
               background: "var(--bg-primary)",
+              fontFamily: "var(--Heading-H6-fontFamily, Inter)",
+              fontSize: "var(--Heading-H6-fontSize, 20px)",
+              fontStyle: "normal",
+              fontWeight: "var(--Weights-Medium, 500)",
+              lineHeight: "var(--Heading-H6-lineHeight, 24px)",
+              letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
             }}
           >
             <Link href="/login">Login</Link>
@@ -124,7 +143,21 @@ const LandingHeader: React.FC = () => {
           {/* Contact Us – primary CTA in header */}
           <Button
             asChild
-            className="landing-cta-button landing-cta-text font-medium gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
+            className="rounded-full text-white gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
+            style={{
+              padding: "12px",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 100,
+              background: "var(--bg-black-solid, #0F172A)",
+              color: "var(--text-white, #FFF)",
+              fontFamily: "var(--Heading-H6-fontFamily, Inter)",
+              fontSize: "var(--Heading-H6-fontSize, 20px)",
+              fontStyle: "normal",
+              fontWeight: "var(--Weights-Medium, 500)",
+              lineHeight: "var(--Heading-H6-lineHeight, 24px)",
+              letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
+            }}
           >
             <Link href="/contact" className="flex items-center gap-2">
               <span
@@ -171,19 +204,39 @@ const LandingHeader: React.FC = () => {
                 <Button
                   asChild
                   variant="outline"
-                  className="rounded-full w-full text-base text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100"
+                  className="rounded-full w-full text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100"
                   style={{
-                    padding: "16px",
+                    padding: "12px",
                     borderRadius: 100,
                     background: "var(--bg-primary)",
                     color: "#0f172a",
+                    fontFamily: "var(--Heading-H6-fontFamily, Inter)",
+                    fontSize: "var(--Heading-H6-fontSize, 20px)",
+                    fontStyle: "normal",
+                    fontWeight: "var(--Weights-Medium, 500)",
+                    lineHeight: "var(--Heading-H6-lineHeight, 24px)",
+                    letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
                   }}
                 >
                   <Link href="/login">Login</Link>
                 </Button>
                 <Button
                   asChild
-                  className="landing-cta-button landing-cta-text rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
+                  className="rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
+                  style={{
+                    padding: "12px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderRadius: 100,
+                    background: "var(--bg-black-solid, #0F172A)",
+                    color: "var(--text-white, #FFF)",
+                    fontFamily: "var(--Heading-H6-fontFamily, Inter)",
+                    fontSize: "var(--Heading-H6-fontSize, 20px)",
+                    fontStyle: "normal",
+                    fontWeight: "var(--Weights-Medium, 500)",
+                    lineHeight: "var(--Heading-H6-lineHeight, 24px)",
+                    letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
+                  }}
                 >
                   <Link href="/contact" className="flex items-center gap-2">
                     <span

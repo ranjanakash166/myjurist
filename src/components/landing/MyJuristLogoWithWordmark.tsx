@@ -16,6 +16,9 @@ export interface MyJuristLogoWithWordmarkProps {
   className?: string;
   /** If true, show only the icon (no wordmark). Useful for very compact spots. */
   iconOnly?: boolean;
+  /** Optional explicit wordmark size (px). */
+  wordmarkWidth?: number;
+  wordmarkHeight?: number;
 }
 
 const MyJuristLogoWithWordmark: React.FC<MyJuristLogoWithWordmarkProps> = ({
@@ -24,8 +27,16 @@ const MyJuristLogoWithWordmark: React.FC<MyJuristLogoWithWordmarkProps> = ({
   href = "/",
   className = "",
   iconOnly = false,
+  wordmarkWidth,
+  wordmarkHeight,
 }) => {
-  const wordmarkHeight = size <= 28 ? "h-6" : size <= 32 ? "h-7" : "h-8";
+  const wordmarkClass = !wordmarkWidth && !wordmarkHeight
+    ? size <= 28
+      ? "h-6"
+      : size <= 32
+        ? "h-7"
+        : "h-8"
+    : "";
   const content = (
     <>
       <span className="shrink-0" style={{ width: size, height: size, minWidth: size, minHeight: size }}>
@@ -35,11 +46,15 @@ const MyJuristLogoWithWordmark: React.FC<MyJuristLogoWithWordmarkProps> = ({
         <Image
           src="/images/myjurist-wordmark.png"
           alt="My Jurist"
-          width={120}
-          height={32}
-          className={`w-auto object-contain ${wordmarkHeight} ${
+          width={wordmarkWidth ?? 120}
+          height={wordmarkHeight ?? 32}
+          className={`object-contain ${wordmarkClass} ${
             variant === "dark" ? "brightness-0 invert" : ""
           }`}
+          style={{
+            width: wordmarkWidth ? `${wordmarkWidth}px` : undefined,
+            height: wordmarkHeight ? `${wordmarkHeight}px` : undefined,
+          }}
         />
       )}
     </>

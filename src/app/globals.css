@@ -110,16 +110,16 @@ body {
 }
 
 /* Shared CTA button – landing page primary action (Request a Demo, Contact Us).
-   Design spec: 20px 44px padding, pill shape, flex center, 12px gap. !important overrides Button/Link utilities. */
+   Tuned for balanced icon/text pill without horizontal over-stretch. */
 .landing-cta-button,
 a.landing-cta-button,
 button.landing-cta-button {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 12px !important;
-  padding: 20px 44px !important;
-  min-height: unset !important;
+  gap: 10px !important;
+  padding: 16px !important;
+  min-height: 56px !important;
   border-radius: 100px;
   background: var(--bg-black-solid, #0f172a);
   color: var(--text-white, #fff);
@@ -173,6 +173,27 @@ button.landing-cta-blue:active {
   background: #2f80ed !important;
   color: #ffffff !important;
   filter: brightness(0.96);
+}
+
+/* Landing hero title typography tokens */
+.landing-hero-title {
+  font-family: var(--Title-Title-1-fontFamily, Inter);
+  font-size: var(--Title-Title-1-fontSize, 72px);
+  font-style: normal;
+  font-weight: var(--Weights-Bold, 700);
+  line-height: var(--Title-Title-1-lineHeight, 88px);
+  letter-spacing: var(--Title-Title-1-letterSpacing, -0.8px);
+}
+
+@media (max-width: 768px) {
+  .landing-hero-title {
+    font-family: var(--Heading-H4-fontFamily, Inter);
+    font-size: var(--Heading-H4-fontSize, 32px);
+    font-style: normal;
+    font-weight: var(--Weights-Bold, 700);
+    line-height: var(--Heading-H4-lineHeight, 38px);
+    letter-spacing: var(--Heading-H4-letterSpacing, -0.2px);
+  }
 }
 
 @layer base {
