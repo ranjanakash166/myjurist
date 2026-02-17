@@ -8,7 +8,7 @@ import CtaArrowIcon from "./CtaArrowIcon";
 const metrics = [
   { value: "50M+", label: "Indian Judgments & Precedents Indexed" },
   { value: "8hrs → 15min", label: "Reduce Research Time from Hours to Minutes" },
-  { value: "25+", label: "Coverage Across 25+ Indian Courts" },
+  { value: "25+", label: "Coverage Across\n25+ Indian Courts" },
 ];
 
 const LandingHeroSection: React.FC = () => {
@@ -118,6 +118,7 @@ const LandingHeroSection: React.FC = () => {
                   fontWeight: 500,
                   lineHeight: "24px",
                   letterSpacing: 0,
+                  whiteSpace: "pre-line",
                 }}
               >
                 {item.label}
