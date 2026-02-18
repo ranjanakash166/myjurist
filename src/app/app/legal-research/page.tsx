@@ -1,18 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { Search, FileText, Clock, BookOpen, Filter, Download, Copy, AlertCircle, CheckCircle, Loader2, X, FileText as FileTextIcon, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
+import { Search, FileText, Clock, BookOpen, Download, Copy, AlertCircle, Loader2, Brain, Sparkles, Target, Award, Lightbulb, Users, Zap, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, DocumentResponse, AISummaryResponse } from "@/lib/legalResearchApi";
-import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
+import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, AISummaryResponse } from "@/lib/legalResearchApi";
 import { toast } from '@/hooks/use-toast';
 import { normalizeContentLineBreaks, parseBoldText, parseMarkdownText } from "@/lib/utils";
 import LegalResearchHistory from "./components/LegalResearchHistory";
@@ -27,10 +25,11 @@ export default function LegalResearchPage() {
  const [searchResults, setSearchResults] = useState<LegalResearchResponse | null>(null);
  const [error, setError] = useState<string | null>(null);
  const [searchHistory, setSearchHistory] = useState<string[]>([]);
- const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
- const [isLoadingDocument, setIsLoadingDocument] = useState(false);
+ const [selectedCase, setSelectedCase] = useState<SearchResult | null>(null);
+ const [selectedCasePdfUrl, setSelectedCasePdfUrl] = useState<string | null>(null);
+ const [isLoadingCasePdf, setIsLoadingCasePdf] = useState(false);
+ const [casePdfError, setCasePdfError] = useState<string | null>(null);
  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
- const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
  
  // State variables for AI Summary
  const [aiSummary, setAiSummary] = useState<AISummaryResponse | null>(null);
@@ -79,13 +78,27 @@ export default function LegalResearchPage() {
       // Clear all search-related state when switching to search tab
       setSearchResults(null);
       setAiSummary(null);
-      setSelectedDocument(null);
-      setCurrentDocumentId(null);
+      setSelectedCase(null);
+      setSelectedCasePdfUrl((previousUrl) => {
+        if (previousUrl) {
+          window.URL.revokeObjectURL(previousUrl);
+        }
+        return null;
+      });
+      setCasePdfError(null);
       setError(null);
       setQuery("");
       setIsSearching(false);
     }
   }, [activeTab]);
+
+  React.useEffect(() => {
+    return () => {
+      if (selectedCasePdfUrl) {
+        window.URL.revokeObjectURL(selectedCasePdfUrl);
+      }
+    };
+  }, [selectedCasePdfUrl]);
 
  const handleSearch = async (e: React.FormEvent) => {
  e.preventDefault();
@@ -94,8 +107,14 @@ export default function LegalResearchPage() {
  // IMMEDIATELY clear all previous results before starting new search
  setSearchResults(null);
  setAiSummary(null);
- setSelectedDocument(null);
- setCurrentDocumentId(null);
+ setSelectedCase(null);
+ setSelectedCasePdfUrl((previousUrl) => {
+ if (previousUrl) {
+ window.URL.revokeObjectURL(previousUrl);
+ }
+ return null;
+ });
+ setCasePdfError(null);
  setError(null);
  setIsSearching(true);
  
@@ -160,48 +179,44 @@ export default function LegalResearchPage() {
  }
  };
 
- const handleViewFullDocument = async (documentId: string) => {
- setIsLoadingDocument(true);
- setError(null);
- 
+ const handleSelectCase = async (result: SearchResult) => {
+ setSelectedCase(result);
+ setCasePdfError(null);
+ setIsLoadingCasePdf(true);
+
  try {
- // Try to find the document in search results
- const searchResult = searchResults?.results.find(result => result.document_id === documentId);
- 
- if (searchResult) {
- // Create a DocumentResponse from the search result
- const document: DocumentResponse = {
- source_file: searchResult.source_file,
- title: searchResult.title,
- full_content: searchResult.content, // Use the content from search results
- content_length: searchResult.content.length,
- retrieval_time_ms: 0 // Not available from search results
- };
- 
- setSelectedDocument(document);
- setCurrentDocumentId(documentId); // Store the document ID
- 
- toast({
- title: "Document loaded",
- description: `Retrieved ${document.title}`,
- });
- } else {
- throw new Error("Document not found in search results");
+ const authHeaders = getAuthHeaders();
+ const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+
+ const blob = await downloadLegalDocumentPDF(
+ { document_id: result.document_id },
+ authToken,
+ getAuthHeaders,
+ refreshToken
+ );
+
+ const objectUrl = window.URL.createObjectURL(blob);
+ setSelectedCasePdfUrl((previousUrl) => {
+ if (previousUrl) {
+ window.URL.revokeObjectURL(previousUrl);
  }
+ return objectUrl;
+ });
  } catch (err: any) {
- setError(err.message || "Failed to load document");
+ console.error('Case PDF preview error:', err);
+ setCasePdfError(err.message || "Failed to load PDF preview.");
  toast({
- title: "Failed to load document",
- description: err.message || "Failed to load document",
+ title: "Failed to load PDF",
+ description: err.message || "Failed to load PDF preview.",
  variant: "destructive",
  });
  } finally {
- setIsLoadingDocument(false);
+ setIsLoadingCasePdf(false);
  }
  };
 
- const handleDownloadPDF = async (documentData: DocumentResponse) => {
- if (!currentDocumentId) {
+ const handleDownloadPDF = async (documentTitle: string, documentId: string) => {
+ if (!documentId) {
  toast({
  title: "Error",
  description: "Document ID not found. Please try viewing the document again.",
@@ -217,13 +232,13 @@ export default function LegalResearchPage() {
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
  // Download PDF using the older endpoint
- const blob = await downloadLegalDocumentPDF({ document_id: currentDocumentId }, authToken, getAuthHeaders, refreshToken);
+ const blob = await downloadLegalDocumentPDF({ document_id: documentId }, authToken, getAuthHeaders, refreshToken);
  
  // Create download link
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;
- link.download = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+ link.download = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
  document.body.appendChild(link);
  link.click();
  document.body.removeChild(link);
@@ -243,30 +258,6 @@ export default function LegalResearchPage() {
  } finally {
  setIsGeneratingPDF(false);
  }
- };
-
- const convertMarkdownToHTML = (markdown: string): string => {
- // Simple markdown to HTML conversion for basic elements
- let html = markdown
- // Headers
- .replace(/^### (.*$)/gim, '<h3>$1</h3>')
- .replace(/^## (.*$)/gim, '<h2>$1</h2>')
- .replace(/^# (.*$)/gim, '<h1>$1</h1>')
- // Bold
- .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
- // Italic
- .replace(/\*(.*?)\*/g, '<em>$1</em>')
- // Lists
- .replace(/^\* (.*$)/gim, '<li>$1</li>')
- .replace(/^\- (.*$)/gim, '<li>$1</li>')
- // Paragraphs
- .replace(/\n\n/g, '</p><p>')
- .replace(/^(.+)$/gm, '<p>$1</p>');
- 
- // Wrap lists
- html = html.replace(/<li>.*<\/li>/g, (match) => `<ul>${match}</ul>`);
- 
- return html;
  };
 
  const handleQuickSearch = (quickQuery: string) => {
@@ -701,100 +692,14 @@ export default function LegalResearchPage() {
                 <FileText className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Search Results</h2>
+                <h2 className="text-2xl font-bold text-foreground">Relevant cases</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   Found {searchResults.total_results} {searchResults.total_results === 1 ? 'result' : 'results'}
                 </p>
               </div>
             </div>
           </div>
-          
-          {/* Results List */}
-          <div className="space-y-4">
-            {searchResults.results.map((result, index) => (
-              <Card key={index} className="border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300 group bg-card">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start gap-4">
-                    {/* Result Number Badge */}
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                        <span className="text-primary-foreground font-bold text-sm">{index + 1}</span>
-                      </div>
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-3 mb-2">
-                        <Badge variant="outline" className="flex items-center gap-1.5 px-2.5 py-1">
-                          <Filter className="w-3 h-3" />
-                          <span className="text-xs font-medium">{formatFileName(result.source_file)}</span>
-                        </Badge>
-                        {result.section_header && (
-                          <Badge variant="outline" className="flex items-center gap-1.5 px-2.5 py-1">
-                            <BookOpen className="w-3 h-3" />
-                            <span className="text-xs font-medium">{result.section_header}</span>
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Action Button */}
-                    <div className="flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCopyContent(result.content)}
-                        className="h-9 w-9 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="bg-muted/50 rounded-xl p-5 border border-border">
-                    <SimpleMarkdownRenderer 
-                      content={normalizeContentLineBreaks(result.content)} 
-                      className="text-sm leading-relaxed text-foreground"
-                    />
-                  </div>
-                  <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopyContent(result.content)}
-                      className="h-9 text-xs gap-2"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      Copy
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="h-9 text-xs gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-                      onClick={() => handleViewFullDocument(result.document_id)}
-                      disabled={isLoadingDocument}
-                    >
-                      {isLoadingDocument ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          <FileTextIcon className="w-3.5 h-3.5" />
-                          View Full Document
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* No Results */}
-          {searchResults.results.length === 0 && (
+          {searchResults.results.length === 0 ? (
             <Card className="border-2">
               <CardContent className="pt-12 pb-12 text-center">
                 <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-slate-100 to-gray-100 dark:from-slate-800 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg">
@@ -806,64 +711,130 @@ export default function LegalResearchPage() {
                 </p>
               </CardContent>
             </Card>
+          ) : (
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+              <Card className="xl:col-span-4 border border-border overflow-hidden">
+                <CardHeader className="pb-3 border-b border-border">
+                  <CardTitle className="text-base">Cases</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="max-h-[70vh] overflow-y-auto">
+                    {searchResults.results.map((result, index) => {
+                      const isSelected = selectedCase?.document_id === result.document_id;
+                      return (
+                        <button
+                          key={result.document_id}
+                          type="button"
+                          onClick={() => handleSelectCase(result)}
+                          className={`w-full text-left p-4 border-b border-border transition-colors ${
+                            isSelected ? "bg-primary/10" : "hover:bg-muted/60"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="text-xs">
+                                  Case {index + 1}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground truncate">
+                                  {formatFileName(result.source_file)}
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium text-foreground line-clamp-2">
+                                {result.title}
+                              </p>
+                              {result.section_header && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                                  {result.section_header}
+                                </p>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyContent(result.content);
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="xl:col-span-8 border border-border overflow-hidden">
+                <CardHeader className="pb-3 border-b border-border">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <CardTitle className="text-base truncate">
+                        {selectedCase ? selectedCase.title : "Select a case to preview PDF"}
+                      </CardTitle>
+                      {selectedCase && (
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
+                          {formatFileName(selectedCase.source_file)}
+                        </p>
+                      )}
+                    </div>
+                    {selectedCase && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadPDF(selectedCase.title, selectedCase.document_id)}
+                        disabled={isGeneratingPDF}
+                      >
+                        {isGeneratingPDF ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4 mr-2" />
+                        )}
+                        {isGeneratingPDF ? "Generating PDF..." : "Download"}
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0 h-[70vh] bg-muted/20">
+                  {!selectedCase ? (
+                    <div className="h-full flex items-center justify-center text-sm text-muted-foreground px-4 text-center">
+                      Click any case on the left to render its PDF here.
+                    </div>
+                  ) : isLoadingCasePdf ? (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading PDF preview...
+                      </div>
+                    </div>
+                  ) : casePdfError ? (
+                    <div className="h-full flex items-center justify-center px-4">
+                      <Alert variant="destructive" className="max-w-md">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{casePdfError}</AlertDescription>
+                      </Alert>
+                    </div>
+                  ) : selectedCasePdfUrl ? (
+                    <iframe
+                      src={selectedCasePdfUrl}
+                      className="w-full h-full border-0"
+                      title={selectedCase.title}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                      PDF preview unavailable.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           )}
  </div>
  </div>
 )}
-
-{/* Document Viewer Modal */}
-{selectedDocument && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-background text-foreground rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-border">
- {/* Modal Header */}
- <div className="flex items-center justify-between p-6 border-b border-border">
- <div className="flex-1 min-w-0">
- <h2 className="text-xl font-semibold text-foreground truncate">
- {selectedDocument.title}
- </h2>
- <p className="text-sm text-muted-foreground mt-1">
- {selectedDocument.source_file} • {selectedDocument.content_length} characters
- </p>
- </div>
- <div className="flex items-center gap-2 ml-4">
- <Button
- variant="outline"
- size="sm"
- onClick={() => handleDownloadPDF(selectedDocument)}
- disabled={isGeneratingPDF}
- >
- {isGeneratingPDF ? (
- <Loader2 className="w-4 h-4 mr-2 animate-spin" />
- ) : (
- <Download className="w-4 h-4 mr-2" />
- )}
- {isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
- </Button>
- <Button
- variant="ghost"
- size="sm"
- onClick={() => {
- setSelectedDocument(null);
- setCurrentDocumentId(null);
- }}
- >
- <X className="w-4 h-4" />
- </Button>
- </div>
- </div>
- 
- {/* Modal Content */}
- <div className="flex-1 overflow-auto p-6">
- <div className="bg-muted/50 rounded-lg p-6 border border-border">
- <SimpleMarkdownRenderer 
- content={normalizeContentLineBreaks(selectedDocument.full_content)} 
- className="text-sm leading-relaxed max-w-none"
- />
- </div>
- </div>
- </div>
- </div>
- )}
  </TabsContent>
 
  <TabsContent value="history" className="space-y-6 mt-6">
