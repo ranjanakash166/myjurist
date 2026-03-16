@@ -226,13 +226,18 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  }
  };
 
- const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?: string) => {
- const targetDocumentId = documentId || (research.search_results.length > 0 ? research.search_results[0].document_id : null);
- 
- if (!targetDocumentId) {
+const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?: string) => {
+ const targetResult =
+ documentId
+ ? research.search_results.find(result => result.document_id === documentId || result.pdf_download_url === documentId)
+ : research.search_results[0];
+
+ const resolvedDocumentId = targetResult?.document_id || targetResult?.pdf_download_url;
+
+ if (!resolvedDocumentId) {
  toast({
  title: "No documents available",
- description: "No documents found in this research to download",
+ description: "No document ID found in this research to download",
  variant: "destructive",
  });
  return;
@@ -244,30 +249,15 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
- // If downloading a specific document, get its title from search results
- let documentTitle = '';
- if (documentId) {
- // Try to find the document title from the search results
- const searchResult = research.search_results.find(result => result.document_id === documentId);
- if (searchResult) {
- documentTitle = searchResult.title;
- }
- }
+ const documentTitle = targetResult?.title || research.query || "legal_research";
  
- // Download PDF using the older endpoint
- const blob = await downloadLegalDocumentPDF({ document_id: targetDocumentId }, authToken, getAuthHeaders, refreshToken);
+ const blob = await downloadLegalDocumentPDF({ document_id: resolvedDocumentId }, authToken, getAuthHeaders, refreshToken);
  
- // Create download link
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;
  
- // Generate filename based on document title or fallback to ID
- const filename = documentId 
- ? documentTitle 
- ? `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
- : `judgment_${targetDocumentId.slice(0, 8)}.pdf`
- : `legal_research_${research.research_id}.pdf`;
+ const filename = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
  
  link.download = filename;
  document.body.appendChild(link);
@@ -277,7 +267,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
 
  toast({
  title: "PDF downloaded",
- description: documentId ? "Original judgment PDF has been downloaded" : "Original research PDF has been downloaded",
+ description: "Original judgment PDF has been downloaded",
  });
  } catch (err: any) {
  console.error('PDF download error:', err);
@@ -291,13 +281,15 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  }
  };
 
- const handleViewFullDocument = async (documentId: string) => {
+const handleViewFullDocument = async (documentId: string) => {
  setIsLoadingDocument(true);
  setError(null);
  
  try {
  // Try to find the document in search results
- const searchResult = selectedResearch?.search_results.find(result => result.document_id === documentId);
+ const searchResult = selectedResearch?.search_results.find(
+ result => result.document_id === documentId || result.pdf_download_url === documentId
+);
  
  if (searchResult) {
  // Create a DocumentResponse from the search result
@@ -310,7 +302,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  };
  
  setSelectedDocument(document);
- setCurrentDocumentId(documentId); // Store the document ID
+ setCurrentDocumentId(documentId); // Store the document ID or key
  
  toast({
  title: "Document loaded",
@@ -331,11 +323,27 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  }
  };
 
- const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
- if (!currentDocumentId) {
+const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
+ if (!currentDocumentId || !selectedResearch) {
  toast({
  title: "Error",
- description: "Document ID not found. Please try viewing the document again.",
+ description: "Document information not found. Please try viewing the document again.",
+ variant: "destructive",
+ });
+ return;
+ }
+
+ const targetResult =
+ selectedResearch.search_results.find(
+ result => result.document_id === currentDocumentId || result.title === documentData.title
+ );
+
+ const resolvedDocumentId = targetResult?.document_id || targetResult?.pdf_download_url;
+
+ if (!resolvedDocumentId) {
+ toast({
+ title: "Error",
+ description: "Document ID not found for this document.",
  variant: "destructive",
  });
  return;
@@ -347,10 +355,8 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
- // Download PDF using the older endpoint
- const blob = await downloadLegalDocumentPDF({ document_id: currentDocumentId }, authToken, getAuthHeaders, refreshToken);
+ const blob = await downloadLegalDocumentPDF({ document_id: resolvedDocumentId }, authToken, getAuthHeaders, refreshToken);
  
- // Create download link
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;

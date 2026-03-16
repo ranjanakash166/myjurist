@@ -179,17 +179,23 @@ export default function LegalResearchPage() {
  }
  };
 
- const handleSelectCase = async (result: SearchResult) => {
+const handleSelectCase = async (result: SearchResult) => {
  setSelectedCase(result);
  setCasePdfError(null);
  setIsLoadingCasePdf(true);
 
  try {
+ // Determine the document ID to send in POST body
+ const documentId = result.document_id || result.pdf_download_url;
+ if (!documentId) {
+ throw new Error("Document ID is missing for this result. PDF cannot be generated.");
+ }
+
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
 
  const blob = await downloadLegalDocumentPDF(
- { document_id: result.document_id },
+ { document_id: documentId },
  authToken,
  getAuthHeaders,
  refreshToken
@@ -215,7 +221,9 @@ export default function LegalResearchPage() {
  }
  };
 
- const handleDownloadPDF = async (documentTitle: string, documentId: string) => {
+ const handleDownloadPDF = async (documentTitle: string, result: SearchResult) => {
+ const documentId = result.document_id || result.pdf_download_url;
+
  if (!documentId) {
  toast({
  title: "Error",
@@ -231,7 +239,7 @@ export default function LegalResearchPage() {
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
- // Download PDF using the older endpoint
+ // Download PDF using the POST endpoint with document_id in body
  const blob = await downloadLegalDocumentPDF({ document_id: documentId }, authToken, getAuthHeaders, refreshToken);
  
  // Create download link
@@ -720,7 +728,7 @@ export default function LegalResearchPage() {
                 <CardContent className="p-0">
                   <div className="max-h-[70vh] overflow-y-auto">
                     {searchResults.results.map((result, index) => {
-                      const isSelected = selectedCase?.document_id === result.document_id;
+                      const isSelected = selectedCase?.source_file === result.source_file;
                       return (
                         <button
                           key={result.document_id}
@@ -785,7 +793,7 @@ export default function LegalResearchPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownloadPDF(selectedCase.title, selectedCase.document_id)}
+                        onClick={() => handleDownloadPDF(selectedCase.title, selectedCase)}
                         disabled={isGeneratingPDF}
                       >
                         {isGeneratingPDF ? (
