@@ -26,7 +26,7 @@ export const PlanInfo: React.FC<PlanInfoProps> = ({ planInfo, isMobile = false }
             <div className="flex items-center gap-3 flex-1 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-medium text-muted-foreground">Plan:</span>
-                <Badge className={tierColor} variant="outline" className="text-xs px-1.5 py-0.5">
+                <Badge className={`${tierColor} text-xs px-1.5 py-0.5`} variant="outline">
                   {capitalizeWords(planInfo.plan_name)}
                 </Badge>
               </div>
@@ -53,7 +53,7 @@ export const PlanInfo: React.FC<PlanInfoProps> = ({ planInfo, isMobile = false }
           <div className="flex items-center gap-6 flex-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground">Plan:</span>
-              <Badge className={tierColor} variant="outline" className="text-sm px-2 py-0.5">
+              <Badge className={`${tierColor} text-sm px-2 py-0.5`} variant="outline">
                 {capitalizeWords(planInfo.plan_name)}
               </Badge>
             </div>
