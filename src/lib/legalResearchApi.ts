@@ -17,7 +17,13 @@ export interface SearchResult {
   section_header: string;
   similarity_score: number;
   chunk_index: number;
-  document_id: string;
+  // Legacy/document API identifier (may be absent with new enhanced-search)
+  document_id?: string;
+  // New fields from enhanced-search response for direct PDF access
+  pdf_filename?: string;
+  pdf_download_url?: string; // e.g. "high-court/2023/XYZ.pdf"
+  year?: number;
+  court_type?: string;
 }
 
 export interface IndexStats {

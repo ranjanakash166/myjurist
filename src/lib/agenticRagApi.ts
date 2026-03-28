@@ -7,6 +7,23 @@ export interface AgenticRAGSearchRequest {
   include_metadata?: boolean; // Optional: default: true
 }
 
+/** Regulatory / web-style hits */
+export interface RegulatoryResultMetadata {
+  url?: string;
+  domain?: string;
+}
+
+/** Legal case / judgment chunks (legal_documents variant) */
+export interface LegalCaseResultMetadata {
+  pdf_download_url?: string; // path passed to POST /legal-research/document/pdf as document_id
+  pdf_filename?: string;
+  year?: number;
+  court_type?: string;
+  index_name?: string;
+}
+
+export type AgenticSearchResultMetadata = RegulatoryResultMetadata & LegalCaseResultMetadata;
+
 export interface SearchResult {
   content: string;                  // Result content/text
   source_file: string;              // Source file/document name
@@ -14,11 +31,7 @@ export interface SearchResult {
   section_header: string;           // Section header (if applicable)
   similarity_score: number;        // Relevance score: 0.0 - 1.0
   chunk_index: number;              // Chunk index in document
-  metadata?: {                      // Optional metadata
-    url?: string;                   // URL (for regulatory results)
-    domain?: string;                // Domain (for regulatory results)
-    [key: string]: any;             // Additional metadata
-  };
+  metadata?: AgenticSearchResultMetadata;
 }
 
 export interface RoutingMetadata {
