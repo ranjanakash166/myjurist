@@ -1,25 +1,76 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Search, Shield, BookOpen, Copy, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Send,
+  Loader2,
+  Search,
+  Shield,
+  BookOpen,
+  Copy,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useAuth } from "../../../components/AuthProvider";
-import { toast } from '@/hooks/use-toast';
+import { toast } from "@/hooks/use-toast";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
-import { searchAgenticRAG, AgenticRAGSearchResponse, SearchResult } from "@/lib/agenticRagApi";
+import {
+  searchAgenticRAG,
+  AgenticRAGSearchResponse,
+  SearchResult,
+} from "@/lib/agenticRagApi";
+import { downloadLegalDocumentPDF } from "@/lib/legalResearchApi";
 import { normalizeContentLineBreaks } from "@/lib/utils";
 
 const RESULT_PREVIEW_LENGTH = 400;
 
-function ResultCard({ result, index }: { result: SearchResult; index: number }) {
+function formatCourtTypeLabel(courtType: string): string {
+  return courtType
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+interface ResultCardProps {
+  result: SearchResult;
+  index: number;
+  onViewPdf: (result: SearchResult) => void;
+  onDownloadPdf: (result: SearchResult) => void;
+  pdfActionBusy: boolean;
+}
+
+function ResultCard({
+  result,
+  index,
+  onViewPdf,
+  onDownloadPdf,
+  pdfActionBusy,
+}: ResultCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const hasPdf = Boolean(result.metadata?.pdf_download_url);
   const isLong = result.content.length > RESULT_PREVIEW_LENGTH;
   const displayContent = isLong && !expanded
     ? result.content.slice(0, RESULT_PREVIEW_LENGTH) + "..."
     : result.content;
+  const hasExcerpt = result.content.trim().length > 0;
 
   const handleCopy = async () => {
     try {
@@ -38,45 +89,117 @@ function ResultCard({ result, index }: { result: SearchResult; index: number }) 
             <Badge className="shrink-0 bg-primary text-primary-foreground">
               {index + 1}
             </Badge>
-            <h4 className="text-base font-semibold text-foreground truncate">{result.title}</h4>
+            <h4 className="text-base font-semibold text-foreground truncate">
+              {result.title}
+            </h4>
           </div>
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 shrink-0 opacity-70 hover:opacity-100"
             onClick={handleCopy}
+            disabled={!hasExcerpt}
+            title={hasExcerpt ? "Copy excerpt" : "No excerpt to copy"}
           >
             <Copy className="h-4 w-4" />
           </Button>
         </div>
+        {(result.metadata?.year != null || result.metadata?.court_type) && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {result.metadata?.year != null && (
+              <Badge variant="secondary" className="text-xs font-normal">
+                {result.metadata.year}
+              </Badge>
+            )}
+            {result.metadata?.court_type && (
+              <Badge variant="outline" className="text-xs font-normal">
+                {formatCourtTypeLabel(result.metadata.court_type)}
+              </Badge>
+            )}
+          </div>
+        )}
         {result.section_header && (
-          <p className="text-sm text-muted-foreground italic mb-2">{result.section_header}</p>
+          <p className="text-sm text-muted-foreground italic mb-2">
+            {result.section_header}
+          </p>
         )}
-        <p className="text-xs text-muted-foreground mb-3">Source: {result.source_file}</p>
-        <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none">
-          <SimpleMarkdownRenderer content={normalizeContentLineBreaks(displayContent)} />
+        <p className="text-xs text-muted-foreground mb-3">
+          Source: {result.source_file}
+        </p>
+        {hasExcerpt ? (
+          <>
+            <div className="text-sm text-foreground leading-relaxed prose prose-sm max-w-none">
+              <SimpleMarkdownRenderer
+                content={normalizeContentLineBreaks(displayContent)}
+              />
+            </div>
+            {isLong && (
+              <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="text-xs text-primary font-medium mt-2 flex items-center gap-1 hover:underline"
+              >
+                {expanded ? (
+                  <ChevronUp className="h-3 w-3" />
+                ) : (
+                  <ChevronDown className="h-3 w-3" />
+                )}
+                {expanded ? "Show less" : "Show more"}
+              </button>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground italic">
+            No excerpt available for this chunk.
+          </p>
+        )}
+        <div className="flex flex-wrap items-center gap-2 mt-3">
+          {hasPdf && (
+            <>
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                className="h-8 text-xs"
+                disabled={pdfActionBusy}
+                onClick={() => onViewPdf(result)}
+              >
+                {pdfActionBusy ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <FileText className="h-3 w-3 mr-1" />
+                )}
+                View PDF
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                disabled={pdfActionBusy}
+                onClick={() => onDownloadPdf(result)}
+              >
+                {pdfActionBusy ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Download className="h-3 w-3 mr-1" />
+                )}
+                Download
+              </Button>
+            </>
+          )}
+          {result.metadata?.url && (
+            <a
+              href={result.metadata.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+            >
+              <ExternalLink className="h-3 w-3" />
+              View source
+            </a>
+          )}
         </div>
-        {isLong && (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className="text-xs text-primary font-medium mt-2 flex items-center gap-1 hover:underline"
-          >
-            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            {expanded ? "Show less" : "Show more"}
-          </button>
-        )}
-        {result.metadata?.url && (
-          <a
-            href={result.metadata.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-primary hover:underline mt-3 inline-flex items-center gap-1"
-          >
-            <ExternalLink className="h-3 w-3" />
-            View source
-          </a>
-        )}
       </CardContent>
     </Card>
   );
@@ -90,7 +213,6 @@ interface ChatMessage {
   response?: AgenticRAGSearchResponse;
 }
 
-
 export default function MyJuristChatPage() {
   const { getAuthHeaders, refreshToken } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -98,13 +220,128 @@ export default function MyJuristChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [topK, setTopK] = useState<number>(10);
-  
+
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [pdfViewerUrl, setPdfViewerUrl] = useState<string | null>(null);
+  const [pdfViewerTitle, setPdfViewerTitle] = useState("");
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pdfActionBusy, setPdfActionBusy] = useState(false);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      if (pdfViewerUrl) {
+        window.URL.revokeObjectURL(pdfViewerUrl);
+      }
+    };
+  }, [pdfViewerUrl]);
+
+  const handleViewPdf = async (result: SearchResult) => {
+    const documentId = result.metadata?.pdf_download_url;
+    if (!documentId) return;
+
+    setPdfViewerTitle(result.title);
+    setPdfError(null);
+    setPdfDialogOpen(true);
+    setPdfLoading(true);
+    setPdfViewerUrl((prev) => {
+      if (prev) window.URL.revokeObjectURL(prev);
+      return null;
+    });
+    setPdfActionBusy(true);
+
+    try {
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace("Bearer ", "") || "";
+      const blob = await downloadLegalDocumentPDF(
+        { document_id: documentId },
+        authToken,
+        getAuthHeaders,
+        refreshToken
+      );
+      const url = window.URL.createObjectURL(blob);
+      setPdfViewerUrl(url);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load PDF preview.";
+      setPdfError(message);
+      toast({
+        title: "Failed to load PDF",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setPdfLoading(false);
+      setPdfActionBusy(false);
+    }
+  };
+
+  const handleDownloadPdf = async (result: SearchResult) => {
+    const documentId = result.metadata?.pdf_download_url;
+    if (!documentId) {
+      toast({
+        title: "Error",
+        description: "PDF path not available for this result.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPdfActionBusy(true);
+    try {
+      const authHeaders = getAuthHeaders();
+      const authToken = authHeaders.Authorization?.replace("Bearer ", "") || "";
+      const blob = await downloadLegalDocumentPDF(
+        { document_id: documentId },
+        authToken,
+        getAuthHeaders,
+        refreshToken
+      );
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const baseName =
+        result.metadata?.pdf_filename?.replace(/\.pdf$/i, "") || result.title;
+      link.download = `${baseName.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast({
+        title: "PDF downloaded",
+        description: "The document has been saved.",
+      });
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to download PDF.";
+      toast({
+        title: "PDF download failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setPdfActionBusy(false);
+    }
+  };
+
+  const handlePdfDialogOpenChange = (open: boolean) => {
+    setPdfDialogOpen(open);
+    if (!open) {
+      setPdfViewerUrl((prev) => {
+        if (prev) window.URL.revokeObjectURL(prev);
+        return null;
+      });
+      setPdfError(null);
+      setPdfLoading(false);
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +373,7 @@ export default function MyJuristChatPage() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     const queryText = input.trim();
     setInput("");
     setIsLoading(true);
@@ -161,19 +398,20 @@ export default function MyJuristChatPage() {
         response: response,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An error occurred";
+      setError(msg);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: "assistant",
-        content: `❌ **Error**\n\nI encountered an error while processing your query: ${err.message}\n\nPlease try again or contact support if the issue persists.`,
+        content: `❌ **Error**\n\nI encountered an error while processing your query: ${msg}\n\nPlease try again or contact support if the issue persists.`,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
       toast({
         title: "Error",
-        description: err.message || "An error occurred",
+        description: msg,
         variant: "destructive",
       });
     } finally {
@@ -183,15 +421,45 @@ export default function MyJuristChatPage() {
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
     if (response.results && response.results.length > 0) {
-      return `I found **${response.total_results}** relevant result${response.total_results > 1 ? 's' : ''} for your query. See the sources below.`;
+      return `I found **${response.total_results}** relevant result${response.total_results > 1 ? "s" : ""} for your query. See the sources below.`;
     }
     return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
   };
 
-
-
   return (
     <div className="h-screen max-h-screen flex flex-col bg-background overflow-x-hidden overflow-y-hidden">
+      <Dialog open={pdfDialogOpen} onOpenChange={handlePdfDialogOpenChange}>
+        <DialogContent className="max-w-4xl w-[95vw] h-[90vh] max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden sm:max-w-4xl">
+          <DialogHeader className="px-6 pt-6 pb-2 shrink-0 border-b border-border">
+            <DialogTitle className="truncate pr-8">{pdfViewerTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 bg-muted/20 flex flex-col">
+            {pdfLoading ? (
+              <div className="flex-1 flex items-center justify-center gap-2 text-sm text-muted-foreground p-8">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Loading PDF…
+              </div>
+            ) : pdfError ? (
+              <div className="flex-1 flex items-center justify-center p-6">
+                <Alert variant="destructive" className="max-w-md">
+                  <AlertDescription>{pdfError}</AlertDescription>
+                </Alert>
+              </div>
+            ) : pdfViewerUrl ? (
+              <iframe
+                src={pdfViewerUrl}
+                className="w-full flex-1 min-h-0 border-0 bg-background"
+                title={pdfViewerTitle}
+              />
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground p-8">
+                PDF preview unavailable.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="bg-card border-b border-border p-4 shadow-sm">
         <div className="flex items-center justify-between">
@@ -201,7 +469,9 @@ export default function MyJuristChatPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">My Jurist Chat</h1>
-              <p className="text-sm text-muted-foreground">AI-powered legal search and research</p>
+              <p className="text-sm text-muted-foreground">
+                AI-powered legal search and research
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -225,103 +495,126 @@ export default function MyJuristChatPage() {
         <div className="flex-1 flex flex-col min-h-0 border-2 border-border rounded-lg overflow-hidden bg-card">
           <div className="flex-1 min-h-0 overflow-y-auto p-4">
             <div className="space-y-6">
-            {messages.length === 0 && (
-              <div className="flex items-center justify-center min-h-[280px]">
-                <div className="text-center max-w-lg">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
-                    <Search className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">Welcome to My Jurist Chat</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Ask questions about legal cases, patents, regulatory compliance, or general legal topics.
-                    I'll search through our legal database and provide you with relevant results.
-                  </p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("Supreme Court cases on data privacy")}
-                      className="border-primary/40 hover:bg-primary/10"
-                    >
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      Legal Cases
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setInput("Regulatory compliance requirements")}
-                      className="border-primary/40 hover:bg-primary/10"
-                    >
-                      <Shield className="w-4 h-4 mr-2" />
-                      Compliance
-                    </Button>
+              {messages.length === 0 && (
+                <div className="flex items-center justify-center min-h-[280px]">
+                  <div className="text-center max-w-lg">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
+                      <Search className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      Welcome to My Jurist Chat
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Ask questions about legal cases, patents, regulatory
+                      compliance, or general legal topics. I&apos;ll search through
+                      our legal database and provide you with relevant results.
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setInput("Supreme Court cases on data privacy")
+                        }
+                        className="border-primary/40 hover:bg-primary/10"
+                      >
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        Legal Cases
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setInput("Regulatory compliance requirements")
+                        }
+                        className="border-primary/40 hover:bg-primary/10"
+                      >
+                        <Shield className="w-4 h-4 mr-2" />
+                        Compliance
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {messages.map((message) => (
-              <div key={message.id}>
-                <div
-                  className={`flex items-start gap-3 ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {message.sender === "assistant" && (
-                    <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
-                      <Search className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                  )}
+              {messages.map((message) => (
+                <div key={message.id}>
                   <div
-                    className={`max-w-3xl px-4 py-3 rounded-2xl ${
-                      message.sender === "user"
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
+                    className={`flex items-start gap-3 ${
+                      message.sender === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {message.sender === "user" ? (
-                      <p className="text-[inherit] leading-relaxed whitespace-pre-wrap break-words">
-                        {message.content}
-                      </p>
-                    ) : (
-                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
-                        <SimpleMarkdownRenderer content={message.content} />
+                    {message.sender === "assistant" && (
+                      <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
+                        <Search className="w-4 h-4 text-primary-foreground" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-3xl px-4 py-3 rounded-2xl ${
+                        message.sender === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
+                      }`}
+                    >
+                      {message.sender === "user" ? (
+                        <p className="text-[inherit] leading-relaxed whitespace-pre-wrap break-words">
+                          {message.content}
+                        </p>
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                          <SimpleMarkdownRenderer content={message.content} />
+                        </div>
+                      )}
+                    </div>
+                    {message.sender === "user" && (
+                      <div className="w-8 h-8 shrink-0 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm">
+                        U
                       </div>
                     )}
                   </div>
-                  {message.sender === "user" && (
-                    <div className="w-8 h-8 shrink-0 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm">
-                      U
-                    </div>
-                  )}
-                </div>
 
-                {message.response && message.response.results && message.response.results.length > 0 && (
-                  <div className="mt-4 ml-11 max-w-3xl">
-                    <p className="text-sm font-semibold text-foreground mb-3">Sources</p>
-                    <div className="space-y-3">
-                      {message.response.results.map((result, index) => (
-                        <ResultCard key={index} result={result} index={index} />
-                      ))}
+                  {message.response &&
+                    message.response.results &&
+                    message.response.results.length > 0 && (
+                      <div className="mt-4 ml-11 max-w-3xl">
+                        <Collapsible defaultOpen className="group/collapsible">
+                          <CollapsibleTrigger className="flex w-full items-center gap-2 text-sm font-semibold text-foreground rounded-md py-1.5 -ml-1 pl-1 pr-2 hover:bg-muted/60 text-left [&[data-state=open]>svg:first-child]:rotate-180">
+                            <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                            <span>
+                              Relevant cases ({message.response.results.length})
+                            </span>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="space-y-3 pt-3">
+                            {message.response.results.map((result, index) => (
+                              <ResultCard
+                                key={`${result.chunk_index}-${index}`}
+                                result={result}
+                                index={index}
+                                onViewPdf={handleViewPdf}
+                                onDownloadPdf={handleDownloadPdf}
+                                pdfActionBusy={pdfActionBusy}
+                              />
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
+                    )}
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="flex items-start gap-3 justify-start">
+                  <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
+                    <Search className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <div className="px-4 py-3 rounded-2xl bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span>Searching legal database...</span>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex items-start gap-3 justify-start">
-                <div className="w-8 h-8 shrink-0 bg-primary rounded-full flex items-center justify-center">
-                  <Search className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <div className="px-4 py-3 rounded-2xl bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span>Searching legal database...</span>
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
             </div>
             <div ref={chatEndRef} />
           </div>
@@ -351,7 +644,12 @@ export default function MyJuristChatPage() {
               </div>
               <Button
                 type="submit"
-                disabled={!input.trim() || isLoading || input.trim().length < 3 || input.trim().length > 1000}
+                disabled={
+                  !input.trim() ||
+                  isLoading ||
+                  input.trim().length < 3 ||
+                  input.trim().length > 1000
+                }
                 className="bg-primary hover:bg-primary/90 text-primary-foreground shrink-0"
               >
                 {isLoading ? (
@@ -367,4 +665,3 @@ export default function MyJuristChatPage() {
     </div>
   );
 }
-
