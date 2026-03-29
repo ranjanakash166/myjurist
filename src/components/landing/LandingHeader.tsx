@@ -120,14 +120,13 @@ const LandingHeader: React.FC = () => {
         </nav>
 
         {/* Right: Login + Contact Us */}
-        <div className="hidden lg:flex items-center gap-4 shrink-0">
+        <div className="hidden lg:flex items-center gap-6 shrink-0 pl-2">
           {/* Login – rounded pill */}
           <Button
             asChild
             variant="outline"
-            className="rounded-full border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100"
+            className="rounded-full border-[var(--text-secondary)]/20 text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-105 hover:shadow-md hover:bg-black/5 hover:border-[var(--text-secondary)]/30 active:scale-100 inline-flex items-center justify-center min-h-[44px] px-8 py-2.5 sm:px-9 sm:py-3"
             style={{
-              padding: "12px",
               borderRadius: 100,
               background: "var(--bg-primary)",
               fontFamily: "var(--Heading-H6-fontFamily, Inter)",
@@ -138,14 +137,15 @@ const LandingHeader: React.FC = () => {
               letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
             }}
           >
-            <Link href="/login">Login</Link>
+            <Link href="/login" className="inline-flex items-center justify-center">
+              Login
+            </Link>
           </Button>
           {/* Contact Us – primary CTA in header */}
           <Button
             asChild
-            className="rounded-full text-white gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100"
+            className="rounded-full text-white gap-2 transition-all duration-200 ease-out hover:scale-105 hover:shadow-lg hover:brightness-110 active:scale-100 inline-flex items-center justify-center min-h-[44px] px-5 py-2.5 sm:px-7 sm:py-3"
             style={{
-              padding: "12px",
               justifyContent: "center",
               alignItems: "center",
               borderRadius: 100,
@@ -159,7 +159,7 @@ const LandingHeader: React.FC = () => {
               letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
             }}
           >
-            <Link href="/contact" className="flex items-center gap-2">
+            <Link href="/contact" className="flex items-center justify-center gap-2">
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0 bg-[#22c55e]"
                 style={{ backgroundColor: "#22c55e" }}
@@ -200,13 +200,12 @@ const LandingHeader: React.FC = () => {
                   {item.label}
                 </Link>
               ))}
-              <div className="mt-6 flex flex-col gap-3">
+              <div className="mt-6 flex flex-col gap-4">
                 <Button
                   asChild
                   variant="outline"
-                  className="rounded-full w-full text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100"
+                  className="rounded-full w-full text-[#0f172a] hover:text-[#0f172a] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-md hover:bg-black/5 active:scale-100 inline-flex items-center justify-center min-h-[48px] px-8 py-3"
                   style={{
-                    padding: "12px",
                     borderRadius: 100,
                     background: "var(--bg-primary)",
                     color: "#0f172a",
@@ -218,13 +217,14 @@ const LandingHeader: React.FC = () => {
                     letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
                   }}
                 >
-                  <Link href="/login">Login</Link>
+                  <Link href="/login" className="inline-flex w-full items-center justify-center py-0.5">
+                    Login
+                  </Link>
                 </Button>
                 <Button
                   asChild
-                  className="rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100"
+                  className="rounded-full w-full gap-2 transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg hover:brightness-110 active:scale-100 inline-flex items-center justify-center min-h-[48px] px-6 py-3"
                   style={{
-                    padding: "12px",
                     justifyContent: "center",
                     alignItems: "center",
                     borderRadius: 100,
@@ -238,7 +238,7 @@ const LandingHeader: React.FC = () => {
                     letterSpacing: "var(--Heading-H6-letterSpacing, 0)",
                   }}
                 >
-                  <Link href="/contact" className="flex items-center gap-2">
+                  <Link href="/contact" className="flex w-full items-center justify-center gap-2 py-0.5">
                     <span
                       className="w-2.5 h-2.5 rounded-full shrink-0 bg-[#22c55e]"
                       style={{ backgroundColor: "#22c55e" }}
