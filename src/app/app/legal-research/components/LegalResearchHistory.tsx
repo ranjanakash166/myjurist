@@ -51,7 +51,7 @@ import {
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
-import { normalizeContentLineBreaks, parseBoldText } from "@/lib/utils";
+import { normalizeContentLineBreaks, parseBoldText, cn } from "@/lib/utils";
 
 interface LegalResearchHistoryProps {
  // No props needed since we removed the "Use This" functionality
@@ -287,6 +287,17 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
 const resolveLegalPdfDocumentId = (result: SearchResult) =>
  result.document_id || result.pdf_download_url || "";
 
+/** History/API may omit title; avoid .replace on undefined when naming the download file */
+const safePdfDownloadBasename = (documentData: DocumentResponse): string => {
+ const raw = documentData.title ?? documentData.source_file ?? "document";
+ const base = String(raw).replace(/[^a-z0-9]/gi, "_").toLowerCase();
+ return base || "document";
+};
+
+function getAppModalPortalContainer(): HTMLElement {
+ return document.getElementById("app-modal-root") ?? document.body;
+}
+
 const handleViewFullDocument = (result: SearchResult) => {
  const resolvedId = resolveLegalPdfDocumentId(result);
  if (!resolvedId) {
@@ -346,7 +357,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;
- link.download = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+ link.download = `${safePdfDownloadBasename(documentData)}.pdf`;
  document.body.appendChild(link);
  link.click();
  window.URL.revokeObjectURL(url);
@@ -945,12 +956,15 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </DialogContent>
  </Dialog>
 
- {/* Document viewer: portal to body + z above Radix Dialog (z-50) so it can receive focus/clicks */}
+ {/* Document viewer: portal to app-modal-root (same as Dialog) so theme tokens match app-shell */}
  {typeof document !== "undefined" &&
  selectedDocument &&
  createPortal(
  <div
- className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+ className={cn(
+ "fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4",
+ "animate-in fade-in-0 duration-200"
+ )}
  role="dialog"
  aria-modal="true"
  aria-labelledby="legal-research-doc-viewer-title"
@@ -962,7 +976,11 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  }}
  >
  <div
- className="bg-background text-foreground flex max-h-[90vh] w-full max-w-6xl flex-col rounded-lg border border-border shadow-xl"
+ className={cn(
+ "app-shell bg-background text-foreground flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden",
+ "border border-border shadow-lg sm:rounded-lg",
+ "animate-in fade-in-0 zoom-in-95 duration-200"
+ )}
  onClick={(e) => e.stopPropagation()}
  >
  {/* Modal Header */}
@@ -970,9 +988,9 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <div className="min-w-0 flex-1">
  <h2
  id="legal-research-doc-viewer-title"
- className="truncate text-xl font-semibold text-foreground"
+ className="truncate text-xl font-semibold leading-none tracking-tight text-foreground"
  >
- {selectedDocument.title}
+ {selectedDocument.title ?? selectedDocument.source_file ?? "Document"}
  </h2>
  <p className="text-sm text-muted-foreground mt-1">
  {selectedDocument.source_file} • {selectedDocument.content_length} characters
@@ -1016,7 +1034,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
  </div>,
- document.body
+ getAppModalPortalContainer()
  )}
  </div>
  );
