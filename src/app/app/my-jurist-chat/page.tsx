@@ -234,6 +234,14 @@ interface ChatMessage {
   response?: AgenticRAGSearchResponse;
 }
 
+function assistantHasAnswer(message: ChatMessage): boolean {
+  return (
+    message.sender === "assistant" &&
+    typeof message.response?.answer === "string" &&
+    message.response.answer.trim().length > 0
+  );
+}
+
 export default function MyJuristChatPage() {
   const { getAuthHeaders, refreshToken } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -585,6 +593,15 @@ export default function MyJuristChatPage() {
                         <p className="text-[inherit] leading-relaxed whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
+                      ) : assistantHasAnswer(message) ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                          <SimpleMarkdownRenderer
+                            className="text-sm"
+                            content={normalizeContentLineBreaks(
+                              message.response!.answer!.trim()
+                            )}
+                          />
+                        </div>
                       ) : (
                         <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
                           <SimpleMarkdownRenderer
@@ -599,58 +616,6 @@ export default function MyJuristChatPage() {
                       </div>
                     )}
                   </div>
-
-                  {message.sender === "assistant" &&
-                    message.response &&
-                    (filterNonEmptyStrings(message.response.related_sections).length >
-                      0 ||
-                      filterNonEmptyStrings(message.response.amendments_found).length >
-                        0) && (
-                      <div className="mt-3 ml-11 max-w-3xl space-y-2">
-                        {filterNonEmptyStrings(message.response.related_sections)
-                          .length > 0 && (
-                          <div className="flex flex-wrap gap-2 items-start">
-                            <span className="text-xs font-medium text-muted-foreground shrink-0 pt-0.5">
-                              Related sections
-                            </span>
-                            <div className="flex flex-wrap gap-1.5 min-w-0">
-                              {filterNonEmptyStrings(
-                                message.response.related_sections
-                              ).map((s, i) => (
-                                <Badge
-                                  key={`rel-${i}`}
-                                  variant="secondary"
-                                  className="text-xs font-normal max-w-full whitespace-normal h-auto py-1"
-                                >
-                                  {s}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {filterNonEmptyStrings(message.response.amendments_found)
-                          .length > 0 && (
-                          <div className="flex flex-wrap gap-2 items-start">
-                            <span className="text-xs font-medium text-muted-foreground shrink-0 pt-0.5">
-                              Amendments
-                            </span>
-                            <div className="flex flex-wrap gap-1.5 min-w-0">
-                              {filterNonEmptyStrings(
-                                message.response.amendments_found
-                              ).map((s, i) => (
-                                <Badge
-                                  key={`amd-${i}`}
-                                  variant="outline"
-                                  className="text-xs font-normal max-w-full whitespace-normal h-auto py-1"
-                                >
-                                  {s}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                   {message.response &&
                     message.response.results &&
@@ -676,20 +641,6 @@ export default function MyJuristChatPage() {
                             ))}
                           </CollapsibleContent>
                         </Collapsible>
-                      </div>
-                    )}
-
-                  {message.sender === "assistant" &&
-                    message.response &&
-                    typeof message.response.answer === "string" &&
-                    message.response.answer.trim().length > 0 && (
-                      <div className="mt-4 ml-11 max-w-3xl rounded-2xl border-2 border-border bg-card px-4 py-3 shadow-sm">
-                        <SimpleMarkdownRenderer
-                          className="text-sm"
-                          content={normalizeContentLineBreaks(
-                            message.response.answer.trim()
-                          )}
-                        />
                       </div>
                     )}
 

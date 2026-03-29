@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, parseBoldText, normalizeLooseBoldMarkers } from "@/lib/utils";
 
 interface SimpleMarkdownRendererProps {
   content: string;
@@ -19,8 +19,9 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
 
   // Function to parse markdown content
   const parseMarkdown = (text: string) => {
+    const preprocessed = normalizeLooseBoldMarkers(text);
     // Split content into lines
-    const lines = text.split('\n');
+    const lines = preprocessed.split('\n');
     const elements: React.ReactNode[] = [];
     let currentList: string[] = [];
     let currentParagraph: string[] = [];
@@ -96,40 +97,6 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
       return parts.length > 0 ? <>{parts}</> : parseBoldText(line);
     };
 
-    const parseBoldText = (text: string): React.ReactNode => {
-      // Handle bold text (**text**)
-      // Use regex to find all bold sections
-      const boldRegex = /\*\*([^*]+)\*\*/g;
-      let parts: React.ReactNode[] = [];
-      let lastIndex = 0;
-      let match;
-      let matchIndex = 0;
-
-      // Reset regex lastIndex to ensure we start from the beginning
-      boldRegex.lastIndex = 0;
-
-      while ((match = boldRegex.exec(text)) !== null) {
-        // Add text before the match
-        if (match.index > lastIndex) {
-          parts.push(text.slice(lastIndex, match.index));
-        }
-        // Add bold text with stronger styling (font-bold instead of font-semibold)
-        parts.push(
-          <strong key={`bold-${matchIndex++}`} className="font-bold text-foreground">
-            {match[1]}
-          </strong>
-        );
-        lastIndex = match.index + match[0].length;
-      }
-
-      // Add remaining text
-      if (lastIndex < text.length) {
-        parts.push(text.slice(lastIndex));
-      }
-
-      return parts.length > 0 ? <>{parts}</> : text;
-    };
-
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
 
@@ -162,14 +129,17 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
         return;
       }
 
-      // Handle headers
-      if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+      // Handle full-line **header** (use shared bold utility for nested **…**)
+      if (trimmedLine.startsWith("**") && trimmedLine.endsWith("**")) {
         flushParagraph();
         flushList();
         const headerText = trimmedLine.slice(2, -2);
         elements.push(
-          <h2 key={`header-${index}`} className="text-xl font-semibold text-foreground mb-3 mt-5">
-            {headerText}
+          <h2
+            key={`header-${index}`}
+            className="text-xl font-semibold text-foreground mb-3 mt-5"
+          >
+            {parseBoldText(headerText)}
           </h2>
         );
         return;

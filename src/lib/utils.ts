@@ -11,6 +11,15 @@ export function cn(...inputs: ClassValue[]) {
  * @param text - The text string to parse
  * @returns React node with bold text properly rendered
  */
+/**
+ * Normalizes common markdown typos such as `*Disclaimer:**` → `**Disclaimer:**`
+ * so **…** bold parsing applies consistently.
+ */
+export function normalizeLooseBoldMarkers(text: string): string {
+  if (!text) return text;
+  return text.replace(/\*([^*\n]+)\*\*/g, "**$1**");
+}
+
 export function parseBoldText(text: string): React.ReactNode {
   if (!text) return text;
   
