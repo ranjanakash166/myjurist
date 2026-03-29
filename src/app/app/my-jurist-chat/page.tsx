@@ -61,8 +61,8 @@ function getSourcesCollapsibleLabel(response: AgenticRAGSearchResponse): string 
 }
 
 function filterNonEmptyStrings(items: string[] | undefined): string[] {
-  if (!items?.length) return [];
-  return items.map((s) => s.trim()).filter(Boolean);
+  if (!items || !Array.isArray(items)) return [];
+  return items.map((s) => String(s).trim()).filter(Boolean);
 }
 
 interface ResultCardProps {
@@ -121,9 +121,7 @@ function ResultCard({
             <Copy className="h-4 w-4" />
           </Button>
         </div>
-        {(result.metadata?.year != null ||
-          result.metadata?.court_type ||
-          result.metadata?.relevance) && (
+        {(result.metadata?.year != null || result.metadata?.court_type) && (
           <div className="flex flex-wrap gap-2 mb-2">
             {result.metadata?.year != null && (
               <Badge variant="secondary" className="text-xs font-normal">
@@ -133,11 +131,6 @@ function ResultCard({
             {result.metadata?.court_type && (
               <Badge variant="outline" className="text-xs font-normal">
                 {formatCourtTypeLabel(result.metadata.court_type)}
-              </Badge>
-            )}
-            {result.metadata?.relevance && (
-              <Badge variant="outline" className="text-xs font-normal max-w-[min(100%,18rem)] truncate" title={result.metadata.relevance}>
-                {result.metadata.relevance}
               </Badge>
             )}
           </div>
@@ -448,11 +441,12 @@ export default function MyJuristChatPage() {
   };
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
-    if (response.answer?.trim()) {
-      return "";
+    const n = response.total_results ?? response.results?.length ?? 0;
+    if (response.results?.length) {
+      return `I found **${n}** relevant result${n !== 1 ? "s" : ""} for your query. See the sources below.`;
     }
-    if (response.results && response.results.length > 0) {
-      return `I found **${response.total_results}** relevant result${response.total_results > 1 ? "s" : ""} for your query. See the sources below.`;
+    if (response.answer?.trim()) {
+      return "Details for your query are shown below.";
     }
     return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
   };
@@ -593,15 +587,9 @@ export default function MyJuristChatPage() {
                         </p>
                       ) : (
                         <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
-                          {message.response?.answer?.trim() ? (
-                            <SimpleMarkdownRenderer
-                              content={normalizeContentLineBreaks(
-                                message.response.answer!
-                              )}
-                            />
-                          ) : (
-                            <SimpleMarkdownRenderer content={message.content} />
-                          )}
+                          <SimpleMarkdownRenderer
+                            content={message.content || "\u00a0"}
+                          />
                         </div>
                       )}
                     </div>
@@ -678,7 +666,7 @@ export default function MyJuristChatPage() {
                           <CollapsibleContent className="space-y-3 pt-3">
                             {message.response.results.map((result, index) => (
                               <ResultCard
-                                key={`${result.chunk_index}-${index}`}
+                                key={`${message.id}-src-${index}-${result.source_file ?? String(result.chunk_index)}`}
                                 result={result}
                                 index={index}
                                 onViewPdf={handleViewPdf}
@@ -688,6 +676,20 @@ export default function MyJuristChatPage() {
                             ))}
                           </CollapsibleContent>
                         </Collapsible>
+                      </div>
+                    )}
+
+                  {message.sender === "assistant" &&
+                    message.response &&
+                    typeof message.response.answer === "string" &&
+                    message.response.answer.trim().length > 0 && (
+                      <div className="mt-4 ml-11 max-w-3xl rounded-2xl border-2 border-border bg-card px-4 py-3 shadow-sm">
+                        <SimpleMarkdownRenderer
+                          className="text-sm"
+                          content={normalizeContentLineBreaks(
+                            message.response.answer.trim()
+                          )}
+                        />
                       </div>
                     )}
 
@@ -704,14 +706,18 @@ export default function MyJuristChatPage() {
                             message.response.suggestions
                           ).map((s, i) => (
                             <Button
-                              key={`sug-${i}`}
+                              key={`${message.id}-sug-${i}`}
                               type="button"
                               variant="outline"
                               size="sm"
                               className="h-auto min-h-8 max-w-full whitespace-normal text-left py-1.5 px-3 text-xs leading-snug"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 setInput(s);
-                                inputRef.current?.focus();
+                                queueMicrotask(() => {
+                                  inputRef.current?.focus();
+                                });
                               }}
                             >
                               {s}

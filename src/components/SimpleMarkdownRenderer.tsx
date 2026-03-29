@@ -133,6 +133,35 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
 
+      // ATX markdown headings (## Title) — render as real headings, do not show ## in body text
+      const atxHeading = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
+      if (atxHeading) {
+        flushParagraph();
+        flushList();
+        const level = Math.min(atxHeading[1].length, 6) as 1 | 2 | 3 | 4 | 5 | 6;
+        const headingText = atxHeading[2].trim();
+        const headingClass: Record<number, string> = {
+          1: "text-2xl font-semibold text-foreground mb-3 mt-1",
+          2: "text-xl font-semibold text-foreground mb-3 mt-5",
+          3: "text-lg font-semibold text-foreground mb-2 mt-4",
+          4: "text-base font-semibold text-foreground mb-2 mt-3",
+          5: "text-sm font-semibold text-foreground mb-2 mt-3",
+          6: "text-sm font-medium text-foreground mb-2 mt-2",
+        };
+        const tag = `h${level}` as const;
+        elements.push(
+          React.createElement(
+            tag,
+            {
+              key: `atx-${index}`,
+              className: headingClass[level] ?? headingClass[3],
+            },
+            parseInlineMarkdown(headingText)
+          )
+        );
+        return;
+      }
+
       // Handle headers
       if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
         flushParagraph();
