@@ -38,7 +38,10 @@ import {
   SearchResult,
 } from "@/lib/agenticRagApi";
 import { downloadLegalDocumentPDF } from "@/lib/legalResearchApi";
-import { normalizeContentLineBreaks } from "@/lib/utils";
+import {
+  normalizeContentLineBreaks,
+  stripSourcesAndDisclaimerFromAnswer,
+} from "@/lib/utils";
 
 const RESULT_PREVIEW_LENGTH = 400;
 
@@ -58,11 +61,6 @@ function getSourcesCollapsibleLabel(response: AgenticRAGSearchResponse): string 
     return `Reference links (${n})`;
   }
   return `Relevant cases (${n})`;
-}
-
-function filterNonEmptyStrings(items: string[] | undefined): string[] {
-  if (!items || !Array.isArray(items)) return [];
-  return items.map((s) => String(s).trim()).filter(Boolean);
 }
 
 interface ResultCardProps {
@@ -598,7 +596,9 @@ export default function MyJuristChatPage() {
                           <SimpleMarkdownRenderer
                             className="text-sm"
                             content={normalizeContentLineBreaks(
-                              message.response!.answer!.trim()
+                              stripSourcesAndDisclaimerFromAnswer(
+                                message.response!.answer!.trim()
+                              )
                             )}
                           />
                         </div>
@@ -641,40 +641,6 @@ export default function MyJuristChatPage() {
                             ))}
                           </CollapsibleContent>
                         </Collapsible>
-                      </div>
-                    )}
-
-                  {message.sender === "assistant" &&
-                    message.response &&
-                    filterNonEmptyStrings(message.response.suggestions).length >
-                      0 && (
-                      <div className="mt-4 ml-11 max-w-3xl">
-                        <p className="text-sm font-semibold text-foreground mb-2">
-                          Suggested follow-ups
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {filterNonEmptyStrings(
-                            message.response.suggestions
-                          ).map((s, i) => (
-                            <Button
-                              key={`${message.id}-sug-${i}`}
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              className="h-auto min-h-8 max-w-full whitespace-normal text-left py-1.5 px-3 text-xs leading-snug"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setInput(s);
-                                queueMicrotask(() => {
-                                  inputRef.current?.focus();
-                                });
-                              }}
-                            >
-                              {s}
-                            </Button>
-                          ))}
-                        </div>
                       </div>
                     )}
                 </div>
