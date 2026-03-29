@@ -452,12 +452,11 @@ export default function MyJuristChatPage() {
   };
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
-    const n = response.total_results ?? response.results?.length ?? 0;
-    if (response.results?.length) {
-      return `I found **${n}** relevant result${n !== 1 ? "s" : ""} for your query. See the sources below.`;
-    }
     if (response.answer?.trim()) {
-      return "Details for your query are shown below.";
+      return "";
+    }
+    if (response.results?.length) {
+      return "";
     }
     return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
   };
@@ -585,36 +584,36 @@ export default function MyJuristChatPage() {
                         <Search className="w-4 h-4 text-primary-foreground" />
                       </div>
                     )}
-                    <div
-                      className={`max-w-3xl px-4 py-3 rounded-2xl ${
-                        message.sender === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
-                      }`}
-                    >
-                      {message.sender === "user" ? (
+                    {message.sender === "user" ? (
+                      <div
+                        className="max-w-3xl px-4 py-3 rounded-2xl bg-primary text-primary-foreground rounded-br-md"
+                      >
                         <p className="text-[inherit] leading-relaxed whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
-                      ) : assistantHasAnswer(message) ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
-                          <SimpleMarkdownRenderer
-                            className="text-sm"
-                            content={normalizeContentLineBreaks(
-                              stripSourcesAndDisclaimerFromAnswer(
-                                message.response!.answer!.trim()
-                              )
-                            )}
-                          />
-                        </div>
-                      ) : (
-                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
-                          <SimpleMarkdownRenderer
-                            content={message.content || "\u00a0"}
-                          />
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : assistantHasAnswer(message) || message.content.trim() ? (
+                      <div
+                        className="max-w-3xl px-4 py-3 rounded-2xl bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
+                      >
+                        {assistantHasAnswer(message) ? (
+                          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                            <SimpleMarkdownRenderer
+                              className="text-sm"
+                              content={normalizeContentLineBreaks(
+                                stripSourcesAndDisclaimerFromAnswer(
+                                  message.response!.answer!.trim()
+                                )
+                              )}
+                            />
+                          </div>
+                        ) : (
+                          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                            <SimpleMarkdownRenderer content={message.content} />
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
                     {message.sender === "user" && (
                       <div className="w-8 h-8 shrink-0 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm">
                         U
