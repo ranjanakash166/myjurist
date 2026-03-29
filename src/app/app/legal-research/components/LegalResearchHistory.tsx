@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { 
  History, 
  Search, 
@@ -956,14 +957,33 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </DialogContent>
  </Dialog>
 
- {/* Document Viewer Modal */}
- {selectedDocument && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-background text-foreground rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-border">
+ {/* Document viewer: portal to body + z above Radix Dialog (z-50) so it can receive focus/clicks */}
+ {typeof document !== "undefined" &&
+ selectedDocument &&
+ createPortal(
+ <div
+ className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+ role="dialog"
+ aria-modal="true"
+ aria-labelledby="legal-research-doc-viewer-title"
+ onClick={(e) => {
+ if (e.target === e.currentTarget) {
+ setSelectedDocument(null);
+ setCurrentDocumentId(null);
+ }
+ }}
+ >
+ <div
+ className="bg-background text-foreground flex max-h-[90vh] w-full max-w-6xl flex-col rounded-lg border border-border shadow-xl"
+ onClick={(e) => e.stopPropagation()}
+ >
  {/* Modal Header */}
- <div className="flex items-center justify-between p-6 border-b border-border">
- <div className="flex-1 min-w-0">
- <h2 className="text-xl font-semibold text-foreground truncate">
+ <div className="flex items-center justify-between border-b border-border p-6">
+ <div className="min-w-0 flex-1">
+ <h2
+ id="legal-research-doc-viewer-title"
+ className="truncate text-xl font-semibold text-foreground"
+ >
  {selectedDocument.title}
  </h2>
  <p className="text-sm text-muted-foreground mt-1">
@@ -1007,7 +1027,8 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
  </div>
- </div>
+ </div>,
+ document.body
  )}
  </div>
  );

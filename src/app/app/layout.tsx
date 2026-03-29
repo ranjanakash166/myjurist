@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Scale, Calendar, FileCheck, Building2, BarChart3, Tag, Search, FileEdit } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Calendar, FileCheck, Building2, BarChart3, Tag, Search, FileEdit } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -20,7 +20,6 @@ const getNavItems = (userRole?: string) => {
     { label: "Dashboard", icon: <BarChart3 className="w-6 h-6" />, href: "/app/dashboard" },
     { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
     { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
-    { label: "Regulatory Compliance", icon: <Scale className="w-6 h-6" />, href: "/app/regulatory-compliance" },
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "My Jurist Chat", icon: <Search className="w-6 h-6" />, href: "/app/my-jurist-chat" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
