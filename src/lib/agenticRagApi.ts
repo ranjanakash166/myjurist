@@ -11,6 +11,8 @@ export interface AgenticRAGSearchRequest {
 export interface RegulatoryResultMetadata {
   url?: string;
   domain?: string;
+  title?: string;
+  relevance?: string;
 }
 
 /** Legal case / judgment chunks (legal_documents variant) */
@@ -50,6 +52,11 @@ export interface AgenticRAGSearchResponse {
   total_results: number;            // Total number of results
   processing_time_ms: number;       // Processing time in milliseconds
   routing_metadata?: RoutingMetadata; // Optional routing information
+  /** Markdown narrative (e.g. regulatory Q&A with AI analysis) */
+  answer?: string;
+  suggestions?: string[];
+  related_sections?: string[];
+  amendments_found?: string[];
 }
 
 export interface ValidationError {

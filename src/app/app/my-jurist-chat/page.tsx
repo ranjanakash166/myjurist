@@ -49,6 +49,22 @@ function formatCourtTypeLabel(courtType: string): string {
     .join(" ");
 }
 
+function getSourcesCollapsibleLabel(response: AgenticRAGSearchResponse): string {
+  const n = response.results.length;
+  if (
+    response.query_type === "regulatory_query" ||
+    response.rag_variant === "regulatory_compliance"
+  ) {
+    return `Reference links (${n})`;
+  }
+  return `Relevant cases (${n})`;
+}
+
+function filterNonEmptyStrings(items: string[] | undefined): string[] {
+  if (!items?.length) return [];
+  return items.map((s) => s.trim()).filter(Boolean);
+}
+
 interface ResultCardProps {
   result: SearchResult;
   index: number;
@@ -71,6 +87,7 @@ function ResultCard({
     ? result.content.slice(0, RESULT_PREVIEW_LENGTH) + "..."
     : result.content;
   const hasExcerpt = result.content.trim().length > 0;
+  const hasSourceUrl = Boolean(result.metadata?.url);
 
   const handleCopy = async () => {
     try {
@@ -104,7 +121,9 @@ function ResultCard({
             <Copy className="h-4 w-4" />
           </Button>
         </div>
-        {(result.metadata?.year != null || result.metadata?.court_type) && (
+        {(result.metadata?.year != null ||
+          result.metadata?.court_type ||
+          result.metadata?.relevance) && (
           <div className="flex flex-wrap gap-2 mb-2">
             {result.metadata?.year != null && (
               <Badge variant="secondary" className="text-xs font-normal">
@@ -114,6 +133,11 @@ function ResultCard({
             {result.metadata?.court_type && (
               <Badge variant="outline" className="text-xs font-normal">
                 {formatCourtTypeLabel(result.metadata.court_type)}
+              </Badge>
+            )}
+            {result.metadata?.relevance && (
+              <Badge variant="outline" className="text-xs font-normal max-w-[min(100%,18rem)] truncate" title={result.metadata.relevance}>
+                {result.metadata.relevance}
               </Badge>
             )}
           </div>
@@ -148,6 +172,10 @@ function ResultCard({
               </button>
             )}
           </>
+        ) : hasSourceUrl ? (
+          <p className="text-sm text-muted-foreground">
+            Full text is available at the source link below.
+          </p>
         ) : (
           <p className="text-sm text-muted-foreground italic">
             No excerpt available for this chunk.
@@ -420,6 +448,9 @@ export default function MyJuristChatPage() {
   };
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
+    if (response.answer?.trim()) {
+      return "";
+    }
     if (response.results && response.results.length > 0) {
       return `I found **${response.total_results}** relevant result${response.total_results > 1 ? "s" : ""} for your query. See the sources below.`;
     }
@@ -562,7 +593,15 @@ export default function MyJuristChatPage() {
                         </p>
                       ) : (
                         <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
-                          <SimpleMarkdownRenderer content={message.content} />
+                          {message.response?.answer?.trim() ? (
+                            <SimpleMarkdownRenderer
+                              content={normalizeContentLineBreaks(
+                                message.response.answer!
+                              )}
+                            />
+                          ) : (
+                            <SimpleMarkdownRenderer content={message.content} />
+                          )}
                         </div>
                       )}
                     </div>
@@ -573,6 +612,58 @@ export default function MyJuristChatPage() {
                     )}
                   </div>
 
+                  {message.sender === "assistant" &&
+                    message.response &&
+                    (filterNonEmptyStrings(message.response.related_sections).length >
+                      0 ||
+                      filterNonEmptyStrings(message.response.amendments_found).length >
+                        0) && (
+                      <div className="mt-3 ml-11 max-w-3xl space-y-2">
+                        {filterNonEmptyStrings(message.response.related_sections)
+                          .length > 0 && (
+                          <div className="flex flex-wrap gap-2 items-start">
+                            <span className="text-xs font-medium text-muted-foreground shrink-0 pt-0.5">
+                              Related sections
+                            </span>
+                            <div className="flex flex-wrap gap-1.5 min-w-0">
+                              {filterNonEmptyStrings(
+                                message.response.related_sections
+                              ).map((s, i) => (
+                                <Badge
+                                  key={`rel-${i}`}
+                                  variant="secondary"
+                                  className="text-xs font-normal max-w-full whitespace-normal h-auto py-1"
+                                >
+                                  {s}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {filterNonEmptyStrings(message.response.amendments_found)
+                          .length > 0 && (
+                          <div className="flex flex-wrap gap-2 items-start">
+                            <span className="text-xs font-medium text-muted-foreground shrink-0 pt-0.5">
+                              Amendments
+                            </span>
+                            <div className="flex flex-wrap gap-1.5 min-w-0">
+                              {filterNonEmptyStrings(
+                                message.response.amendments_found
+                              ).map((s, i) => (
+                                <Badge
+                                  key={`amd-${i}`}
+                                  variant="outline"
+                                  className="text-xs font-normal max-w-full whitespace-normal h-auto py-1"
+                                >
+                                  {s}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                   {message.response &&
                     message.response.results &&
                     message.response.results.length > 0 && (
@@ -581,7 +672,7 @@ export default function MyJuristChatPage() {
                           <CollapsibleTrigger className="flex w-full items-center gap-2 text-sm font-semibold text-foreground rounded-md py-1.5 -ml-1 pl-1 pr-2 hover:bg-muted/60 text-left [&[data-state=open]>svg:first-child]:rotate-180">
                             <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                             <span>
-                              Relevant cases ({message.response.results.length})
+                              {getSourcesCollapsibleLabel(message.response)}
                             </span>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-3 pt-3">
@@ -597,6 +688,36 @@ export default function MyJuristChatPage() {
                             ))}
                           </CollapsibleContent>
                         </Collapsible>
+                      </div>
+                    )}
+
+                  {message.sender === "assistant" &&
+                    message.response &&
+                    filterNonEmptyStrings(message.response.suggestions).length >
+                      0 && (
+                      <div className="mt-4 ml-11 max-w-3xl">
+                        <p className="text-sm font-semibold text-foreground mb-2">
+                          Suggested follow-ups
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {filterNonEmptyStrings(
+                            message.response.suggestions
+                          ).map((s, i) => (
+                            <Button
+                              key={`sug-${i}`}
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-auto min-h-8 max-w-full whitespace-normal text-left py-1.5 px-3 text-xs leading-snug"
+                              onClick={() => {
+                                setInput(s);
+                                inputRef.current?.focus();
+                              }}
+                            >
+                              {s}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
                     )}
                 </div>
