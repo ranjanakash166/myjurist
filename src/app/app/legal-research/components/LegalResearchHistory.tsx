@@ -46,7 +46,8 @@ import {
  LegalResearchHistoryParams,
  downloadLegalDocumentPDF,
  AISummaryResponse,
- DocumentResponse
+ DocumentResponse,
+ SearchResult,
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
@@ -282,69 +283,53 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
  }
  };
 
-const handleViewFullDocument = async (documentId: string) => {
- setIsLoadingDocument(true);
- setError(null);
- 
- try {
- // Try to find the document in search results
- const searchResult = selectedResearch?.search_results.find(
- result => result.document_id === documentId || result.pdf_download_url === documentId
-);
- 
- if (searchResult) {
- // Create a DocumentResponse from the search result
- const document: DocumentResponse = {
- source_file: searchResult.source_file,
- title: searchResult.title,
- full_content: searchResult.content, // Use the content from search results
- content_length: searchResult.content.length,
- retrieval_time_ms: 0 // Not available from search results
- };
- 
- setSelectedDocument(document);
- setCurrentDocumentId(documentId); // Store the document ID or key
- 
- toast({
- title: "Document loaded",
- description: `Retrieved ${document.title}`,
- });
- } else {
- throw new Error("Document not found in search results");
- }
- } catch (err: any) {
- setError(err.message || "Failed to load document");
- toast({
- title: "Failed to load document",
- description: err.message || "Failed to load document",
- variant: "destructive",
- });
- } finally {
- setIsLoadingDocument(false);
- }
- };
+/** Same ID resolution as legal-research/page.tsx for POST /legal-research/document/pdf */
+const resolveLegalPdfDocumentId = (result: SearchResult) =>
+ result.document_id || result.pdf_download_url || "";
 
-const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
- if (!currentDocumentId || !selectedResearch) {
+const handleViewFullDocument = (result: SearchResult) => {
+ const resolvedId = resolveLegalPdfDocumentId(result);
+ if (!resolvedId) {
  toast({
- title: "Error",
- description: "Document information not found. Please try viewing the document again.",
+ title: "No document reference",
+ description: "This result does not include a document id or PDF path.",
  variant: "destructive",
  });
  return;
  }
 
- const targetResult =
- selectedResearch.search_results.find(
- result => result.document_id === currentDocumentId || result.title === documentData.title
- );
+ setIsLoadingDocument(true);
+ setError(null);
 
- const resolvedDocumentId = targetResult?.document_id || targetResult?.pdf_download_url;
+ const doc: DocumentResponse = {
+ source_file: result.source_file,
+ title: result.title,
+ full_content: result.content,
+ content_length: result.content.length,
+ retrieval_time_ms: 0,
+ };
+
+ // Close the research Dialog first so Radix focus trap / pointer blocking does not cover the viewer.
+ setIsDetailModalOpen(false);
+ setCurrentDocumentId(resolvedId);
+
+ window.setTimeout(() => {
+ setSelectedDocument(doc);
+ setIsLoadingDocument(false);
+ toast({
+ title: "Document loaded",
+ description: `Retrieved ${doc.title}`,
+ });
+ }, 0);
+};
+
+const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
+ const resolvedDocumentId = currentDocumentId;
 
  if (!resolvedDocumentId) {
  toast({
  title: "Error",
- description: "Document ID not found for this document.",
+ description: "Document information not found. Please try viewing the document again.",
  variant: "destructive",
  });
  return;
@@ -364,8 +349,8 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  link.download = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
  document.body.appendChild(link);
  link.click();
- document.body.removeChild(link);
  window.URL.revokeObjectURL(url);
+ document.body.removeChild(link);
 
  toast({
  title: "PDF downloaded",
@@ -932,8 +917,11 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  variant="outline"
  size="sm"
  className="h-8 text-xs"
- onClick={() => handleViewFullDocument(result.document_id)}
- disabled={isLoadingDocument}
+ onClick={() => handleViewFullDocument(result)}
+ disabled={
+ isLoadingDocument ||
+ (!result.document_id && !result.pdf_download_url)
+ }
  >
  {isLoadingDocument ? (
  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
