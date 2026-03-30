@@ -176,6 +176,22 @@ export const downloadLegalDocumentPDF = async (
   getAuthHeaders: () => Record<string, string>,
   refreshToken: () => Promise<boolean>
 ): Promise<Blob> => {
+  const canTryPathFallback = request.document_id.includes('/') || request.document_id.toLowerCase().endsWith('.pdf');
+
+  const tryPathFallback = async () => {
+    if (!canTryPathFallback) return null;
+    try {
+      return await downloadOriginalLegalDocumentPDF(
+        request.document_id,
+        authToken,
+        getAuthHeaders,
+        refreshToken
+      );
+    } catch (fallbackError) {
+      return null;
+    }
+  };
+
   // Use direct fetch for binary PDF downloads to avoid JSON parsing issues
   const authHeaders = getAuthHeaders();
   
@@ -190,6 +206,11 @@ export const downloadLegalDocumentPDF = async (
   });
 
   if (!response.ok) {
+    if (response.status === 500 || response.status === 502 || response.status === 404) {
+      const fallbackBlob = await tryPathFallback();
+      if (fallbackBlob) return fallbackBlob;
+    }
+
     if (response.status === 422) {
       try {
         const errorData: ValidationError = await response.json();
@@ -215,6 +236,10 @@ export const downloadLegalDocumentPDF = async (
         });
         
         if (!retryResponse.ok) {
+          if (retryResponse.status === 500 || retryResponse.status === 502 || retryResponse.status === 404) {
+            const fallbackBlob = await tryPathFallback();
+            if (fallbackBlob) return fallbackBlob;
+          }
           throw new Error(`HTTP error! status: ${retryResponse.status}`);
         }
         

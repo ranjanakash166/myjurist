@@ -240,18 +240,13 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  }
  };
 
-const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?: string) => {
- const targetResult =
- documentId
- ? research.search_results.find(result => result.document_id === documentId || result.pdf_download_url === documentId)
- : research.search_results[0];
+const handleDownloadPDF = async (documentTitle: string, result: SearchResult) => {
+ const documentId = result.document_id || result.pdf_download_url;
 
- const resolvedDocumentId = targetResult?.document_id || targetResult?.pdf_download_url;
-
- if (!resolvedDocumentId) {
+ if (!documentId) {
  toast({
- title: "No documents available",
- description: "No document ID found in this research to download",
+ title: "Error",
+ description: "Document ID not found. Please try viewing the document again.",
  variant: "destructive",
  });
  return;
@@ -263,17 +258,12 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
- const documentTitle = targetResult?.title || research.query || "legal_research";
- 
- const blob = await downloadLegalDocumentPDF({ document_id: resolvedDocumentId }, authToken, getAuthHeaders, refreshToken);
+ const blob = await downloadLegalDocumentPDF({ document_id: documentId }, authToken, getAuthHeaders, refreshToken);
  
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;
- 
- const filename = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
- 
- link.download = filename;
+ link.download = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
  document.body.appendChild(link);
  link.click();
  document.body.removeChild(link);
@@ -281,7 +271,7 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
 
  toast({
  title: "PDF downloaded",
- description: "Original judgment PDF has been downloaded",
+ description: "Original PDF document has been downloaded",
  });
  } catch (err: any) {
  console.error('PDF download error:', err);
@@ -293,7 +283,7 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
  } finally {
  setIsGeneratingPDF(false);
  }
- };
+};
 
 /** Same ID resolution as legal-research/page.tsx for POST /legal-research/document/pdf */
 const resolveLegalPdfDocumentId = (result: SearchResult) =>
@@ -1076,7 +1066,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <Button
  variant="outline"
  size="sm"
- onClick={() => handleDownloadPDF(selectedResearch, resolveLegalPdfDocumentId(selectedHistoryCase))}
+ onClick={() => handleDownloadPDF(selectedHistoryCase.title || "legal_research", selectedHistoryCase)}
  disabled={isGeneratingPDF}
  >
  {isGeneratingPDF ? (
