@@ -739,13 +739,17 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
 
  {/* AI Summary */}
  {selectedResearch.ai_summary && (
- <Card className="bg-card border-border">
- <CardHeader>
- <CardTitle className="flex items-center gap-2 text-foreground">
- <Brain className="w-5 h-5 text-primary" />
- AI Summary
- </CardTitle>
- </CardHeader>
+<Card className="border border-border shadow-lg bg-card">
+<CardHeader className="bg-primary/5 dark:bg-primary/10 rounded-t-lg border-b border-border">
+<div className="flex items-center justify-between">
+<CardTitle className="flex items-center gap-3 text-xl text-foreground">
+<div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Brain className="w-5 h-5 text-primary-foreground" />
+</div>
+<span>AI Summary</span>
+</CardTitle>
+</div>
+</CardHeader>
  <CardContent className="space-y-6">
  {(() => {
  const parsedData = getParsedAISummaryData(selectedResearch.ai_summary);
@@ -774,10 +778,12 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
 
- <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Sparkles className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">AI Summary</h3>
+<div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Sparkles className="w-4 h-4 text-primary-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Summary</h3>
  </div>
  <div className="text-sm leading-relaxed text-foreground">
    {(() => {
@@ -801,17 +807,19 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
 
- {parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
- <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Lightbulb className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Key Legal Insights</h3>
+{parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
+<div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Lightbulb className="w-4 h-4 text-primary-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Key Legal Insights</h3>
  </div>
  <div className="space-y-3">
  {parsedData.key_legal_insights.map((insight, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(insight)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-foreground flex-1">{parseBoldText(insight)}</span>
  </div>
  ))}
  </div>
@@ -819,16 +827,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.relevant_precedents && parsedData.relevant_precedents.length > 0 && (
- <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Award className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Relevant Precedents</h3>
+<div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-xl p-6 border-2 border-orange-200 dark:border-orange-800">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
+<Award className="w-4 h-4 text-white" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Relevant Precedents</h3>
  </div>
  <div className="space-y-3">
  {parsedData.relevant_precedents.map((precedent, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(precedent)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-orange-100 dark:border-orange-900/50 hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(precedent)}</span>
  </div>
  ))}
  </div>
@@ -836,16 +846,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.statutory_provisions && parsedData.statutory_provisions.length > 0 && (
- <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <BookOpen className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Statutory Provisions</h3>
+<div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-800">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+<BookOpen className="w-4 h-4 text-white" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Statutory Provisions</h3>
  </div>
  <div className="space-y-3">
  {parsedData.statutory_provisions.map((provision, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(provision)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-indigo-100 dark:border-indigo-900/50 hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-indigo-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(provision)}</span>
  </div>
  ))}
  </div>
@@ -853,16 +865,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.procedural_developments && parsedData.procedural_developments.length > 0 && (
- <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Zap className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Procedural Developments</h3>
+<div className="bg-muted/50 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Zap className="w-4 h-4 text-primary-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Procedural Developments</h3>
  </div>
  <div className="space-y-3">
  {parsedData.procedural_developments.map((development, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(development)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-foreground flex-1">{parseBoldText(development)}</span>
  </div>
  ))}
  </div>
@@ -870,16 +884,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.practical_implications && parsedData.practical_implications.length > 0 && (
- <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Users className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Practical Implications</h3>
+<div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-xl p-6 border-2 border-rose-200 dark:border-rose-800">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
+<Users className="w-4 h-4 text-white" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Practical Implications</h3>
  </div>
  <div className="space-y-3">
  {parsedData.practical_implications.map((implication, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(implication)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-rose-100 dark:border-rose-900/50 hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-rose-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(implication)}</span>
  </div>
  ))}
  </div>
@@ -887,14 +903,14 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.legal_areas_covered && parsedData.legal_areas_covered.length > 0 && (
- <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
+<div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-6 border border-border">
+<div className="flex items-center gap-2 mb-4">
  <Target className="w-5 h-5 text-primary" />
  <h3 className="font-semibold text-lg text-foreground">Legal Areas Covered</h3>
  </div>
  <div className="flex flex-wrap gap-2">
  {parsedData.legal_areas_covered.map((area, index) => (
- <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-primary/20 dark:text-foreground px-3 py-1">
+<Badge key={index} variant="secondary" className="bg-primary/20 text-foreground px-3 py-1">
  {parseBoldText(area)}
  </Badge>
  ))}
@@ -904,14 +920,20 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
 
  {/* Sources Analyzed */}
  {selectedResearch.ai_summary.sources_analyzed && selectedResearch.ai_summary.sources_analyzed.length > 0 && (
- <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <FileText className="w-5 h-5 text-muted-foreground" />
- <h3 className="font-semibold text-lg text-foreground">Sources Analyzed</h3>
+<div className="bg-muted/50 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center shadow-md border border-border">
+<FileText className="w-4 h-4 text-muted-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Sources Analyzed</h3>
+<Badge variant="secondary" className="ml-auto">
+{selectedResearch.ai_summary.sources_analyzed.length} {selectedResearch.ai_summary.sources_analyzed.length === 1 ? 'source' : 'sources'}
+</Badge>
  </div>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  {selectedResearch.ai_summary.sources_analyzed.map((source, index) => (
- <div key={index} className="text-sm text-muted-foreground bg-muted rounded px-3 py-2 border border-border">
+<div key={index} className="flex items-center gap-2 text-sm text-foreground bg-white/70 dark:bg-gray-800/70 rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+<FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
  {formatFileName(source)}
  </div>
  ))}
