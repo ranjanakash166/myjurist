@@ -179,6 +179,21 @@ export default function LegalResearchPage() {
  }
  };
 
+const buildCaseCopyText = (result: SearchResult) => {
+ const lines = [
+ `Title: ${result.title || "N/A"}`,
+ `Source: ${formatFileName(result.source_file)}`,
+ ];
+ if (result.section_header) lines.push(`Section: ${result.section_header}`);
+ if (result.court_type) lines.push(`Court: ${result.court_type}`);
+ if (result.year) lines.push(`Year: ${result.year}`);
+ if (typeof result.similarity_score === "number") {
+ lines.push(`Match: ${(result.similarity_score * 100).toFixed(1)}%`);
+ }
+ lines.push("", "Content:", result.content || "");
+ return lines.join("\n");
+};
+
 const handleSelectCase = async (result: SearchResult) => {
  setSelectedCase(result);
  setCasePdfError(null);
@@ -751,18 +766,38 @@ const handleSelectCase = async (result: SearchResult) => {
                               <p className="text-sm font-medium text-foreground line-clamp-2">
                                 {result.title}
                               </p>
-                              {result.section_header && (
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                                  {result.section_header}
-                                </p>
-                              )}
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                {result.section_header && (
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {result.section_header}
+                                  </p>
+                                )}
+                                {typeof result.similarity_score === "number" && (
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-[10px] ${getSimilarityColor(result.similarity_score)}`}
+                                  >
+                                    {(result.similarity_score * 100).toFixed(1)}%
+                                  </Badge>
+                                )}
+                                {result.court_type && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {result.court_type}
+                                  </Badge>
+                                )}
+                                {result.year && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {result.year}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleCopyContent(result.content);
+                                handleCopyContent(buildCaseCopyText(result));
                               }}
                               className="h-8 w-8 p-0"
                             >
@@ -787,6 +822,33 @@ const handleSelectCase = async (result: SearchResult) => {
                         <p className="text-xs text-muted-foreground mt-1 truncate">
                           {formatFileName(selectedCase.source_file)}
                         </p>
+                      )}
+                      {selectedCase && (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {selectedCase.section_header && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedCase.section_header}
+                            </Badge>
+                          )}
+                          {typeof selectedCase.similarity_score === "number" && (
+                            <Badge
+                              variant="secondary"
+                              className={`text-[10px] ${getSimilarityColor(selectedCase.similarity_score)}`}
+                            >
+                              Match {(selectedCase.similarity_score * 100).toFixed(1)}%
+                            </Badge>
+                          )}
+                          {selectedCase.court_type && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedCase.court_type}
+                            </Badge>
+                          )}
+                          {selectedCase.year && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedCase.year}
+                            </Badge>
+                          )}
+                        </div>
                       )}
                     </div>
                     {selectedCase && (

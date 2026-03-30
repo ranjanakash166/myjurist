@@ -285,6 +285,21 @@ const handleDownloadPDF = async (documentTitle: string, result: SearchResult) =>
  }
 };
 
+const buildCaseCopyText = (result: SearchResult) => {
+ const lines = [
+ `Title: ${result.title || "N/A"}`,
+ `Source: ${formatFileName(result.source_file)}`,
+ ];
+ if (result.section_header) lines.push(`Section: ${result.section_header}`);
+ if (result.court_type) lines.push(`Court: ${result.court_type}`);
+ if (result.year) lines.push(`Year: ${result.year}`);
+ if (typeof result.similarity_score === "number") {
+ lines.push(`Match: ${(result.similarity_score * 100).toFixed(1)}%`);
+ }
+ lines.push("", "Content:", result.content || "");
+ return lines.join("\n");
+};
+
 /** Same ID resolution as legal-research/page.tsx for POST /legal-research/document/pdf */
 const resolveLegalPdfDocumentId = (result: SearchResult) =>
  result.document_id || result.pdf_download_url || "";
@@ -626,12 +641,6 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <FileText className="w-3 h-3" />
  {research.total_results} results
  </span>
- {research.search_time_ms && (
- <span className="flex items-center gap-1">
- <Clock className="w-3 h-3" />
- {research.search_time_ms}ms
- </span>
- )}
  {research.ai_summary && (
  <span className="flex items-center gap-1">
  <Brain className="w-3 h-3" />
@@ -726,12 +735,6 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <span className="text-muted-foreground">Top K:</span>
  <p>{selectedResearch.top_k}</p>
  </div>
- {selectedResearch.search_time_ms && (
- <div>
- <span className="text-muted-foreground">Search Time:</span>
- <p>{selectedResearch.search_time_ms}ms</p>
- </div>
- )}
  </div>
  </div>
  </CardContent>
@@ -763,6 +766,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  variant="outline"
  size="sm"
  onClick={() => handleCopyContent(parsedData.ai_summary)}
+className="mt-1"
  >
  <Copy className="w-4 h-4 mr-2" />
  Copy Summary
@@ -771,6 +775,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  variant="outline"
  size="sm"
  onClick={() => handleDownloadSummary(selectedResearch, parsedData)}
+className="mt-1"
  >
  <Download className="w-4 h-4 mr-2" />
  Download Summary
@@ -1029,7 +1034,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  size="sm"
  onClick={(e) => {
  e.stopPropagation();
- handleCopyContent(result.content);
+ handleCopyContent(buildCaseCopyText(result));
  }}
  className="h-8 w-8 p-0"
  >
@@ -1097,22 +1102,6 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <Download className="w-4 h-4 mr-2" />
  )}
  {isGeneratingPDF ? "Generating PDF..." : "Download"}
- </Button>
- <Button
- variant="outline"
- size="sm"
- onClick={() => handleViewFullDocument(selectedHistoryCase)}
- disabled={
- isLoadingDocument ||
- (!selectedHistoryCase.document_id && !selectedHistoryCase.pdf_download_url)
- }
- >
- {isLoadingDocument ? (
- <Loader2 className="w-4 h-4 mr-2 animate-spin" />
- ) : (
- <FileTextIcon className="w-4 h-4 mr-2" />
- )}
- Full Document
  </Button>
  </div>
  )}
