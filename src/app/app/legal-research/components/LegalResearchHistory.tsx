@@ -70,6 +70,10 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
  const [isLoadingDocument, setIsLoadingDocument] = useState(false);
  const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
+ const [selectedHistoryCase, setSelectedHistoryCase] = useState<SearchResult | null>(null);
+ const [selectedHistoryCasePdfUrl, setSelectedHistoryCasePdfUrl] = useState<string | null>(null);
+ const [isLoadingHistoryCasePdf, setIsLoadingHistoryCasePdf] = useState(false);
+ const [historyCasePdfError, setHistoryCasePdfError] = useState<string | null>(null);
  
  // Pagination
  const [currentPage, setCurrentPage] = useState(1);
@@ -114,6 +118,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  useEffect(() => {
  loadHistory();
  }, []);
+
+ useEffect(() => {
+ return () => {
+ if (selectedHistoryCasePdfUrl) {
+ window.URL.revokeObjectURL(selectedHistoryCasePdfUrl);
+ }
+ };
+ }, [selectedHistoryCasePdfUrl]);
 
  const handleRefresh = () => {
  loadHistory(1, false);
@@ -379,6 +391,47 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  }
  };
 
+ const handleSelectHistoryCase = async (result: SearchResult) => {
+ setSelectedHistoryCase(result);
+ setHistoryCasePdfError(null);
+ setIsLoadingHistoryCasePdf(true);
+
+ try {
+ const documentId = result.document_id || result.pdf_download_url;
+ if (!documentId) {
+ throw new Error("Document ID is missing for this result. PDF cannot be generated.");
+ }
+
+ const authHeaders = getAuthHeaders();
+ const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+
+ const blob = await downloadLegalDocumentPDF(
+ { document_id: documentId },
+ authToken,
+ getAuthHeaders,
+ refreshToken
+ );
+
+ const objectUrl = window.URL.createObjectURL(blob);
+ setSelectedHistoryCasePdfUrl((previousUrl) => {
+ if (previousUrl) {
+ window.URL.revokeObjectURL(previousUrl);
+ }
+ return objectUrl;
+ });
+ } catch (err: any) {
+ console.error('History case PDF preview error:', err);
+ setHistoryCasePdfError(err.message || "Failed to load PDF preview.");
+ toast({
+ title: "Failed to load PDF",
+ description: err.message || "Failed to load PDF preview.",
+ variant: "destructive",
+ });
+ } finally {
+ setIsLoadingHistoryCasePdf(false);
+ }
+ };
+
  const formatDate = (dateString: string) => {
  const date = new Date(dateString);
  return date.toLocaleDateString('en-US', {
@@ -455,6 +508,24 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  const matchesFilter = filterType === "all" || item.search_type === filterType;
  return matchesSearch && matchesFilter;
  });
+
+ useEffect(() => {
+ if (!isDetailModalOpen || !selectedResearch) return;
+
+ setSelectedHistoryCase(null);
+ setHistoryCasePdfError(null);
+ setSelectedHistoryCasePdfUrl((previousUrl) => {
+ if (previousUrl) {
+ window.URL.revokeObjectURL(previousUrl);
+ }
+ return null;
+ });
+
+ const firstResult = selectedResearch.search_results[0];
+ if (firstResult) {
+ handleSelectHistoryCase(firstResult);
+ }
+ }, [isDetailModalOpen, selectedResearch]);
 
  return (
    <div className="w-full space-y-6">
@@ -873,80 +944,202 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </CardTitle>
  </CardHeader>
  <CardContent>
- <div className="space-y-4">
- {selectedResearch.search_results.map((result, index) => (
- <Card key={index} className="hover:shadow-lg transition-shadow duration-200 bg-card border-border">
- <CardHeader className="pb-3">
- <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
- <div className="flex-1 min-w-0">
- <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
- <span className="flex items-center gap-1">
- <Filter className="w-3 h-3" />
+ {selectedResearch.search_results.length === 0 ? (
+ <Card className="border border-border">
+ <CardContent className="pt-10 pb-10 text-center">
+ <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+ <Search className="w-8 h-8 text-muted-foreground" />
+ </div>
+ <h3 className="text-lg font-semibold mb-2 text-foreground">No results found</h3>
+ <p className="text-muted-foreground">No case results are available in this history item.</p>
+ </CardContent>
+ </Card>
+ ) : (
+ <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+ <Card className="xl:col-span-4 border border-border overflow-hidden">
+ <CardHeader className="pb-3 border-b border-border">
+ <CardTitle className="text-base">Cases</CardTitle>
+ </CardHeader>
+ <CardContent className="p-0">
+ <div className="max-h-[70vh] overflow-y-auto">
+ {selectedResearch.search_results.map((result, index) => {
+ const isSelected = selectedHistoryCase?.source_file === result.source_file;
+ return (
+ <button
+ key={`${result.document_id || result.pdf_download_url || result.source_file}-${index}`}
+ type="button"
+ onClick={() => handleSelectHistoryCase(result)}
+ className={`w-full text-left p-4 border-b border-border transition-colors ${
+ isSelected ? "bg-primary/10" : "hover:bg-muted/60"
+ }`}
+ >
+ <div className="flex items-start justify-between gap-3">
+ <div className="min-w-0 flex-1">
+ <div className="flex items-center gap-2 mb-2">
+ <Badge variant="outline" className="text-xs">
+ Case {index + 1}
+ </Badge>
+ <span className="text-xs text-muted-foreground truncate">
  {formatFileName(result.source_file)}
  </span>
- {result.section_header && (
- <span className="flex items-center gap-1">
- <BookOpen className="w-3 h-3" />
- {result.section_header}
- </span>
- )}
  </div>
+ <p className="text-sm font-medium text-foreground line-clamp-2">
+ {result.title}
+ </p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                {result.section_header && (
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {result.section_header}
+                                  </p>
+                                )}
+                                {typeof result.similarity_score === "number" && (
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-[10px] ${getSimilarityColor(result.similarity_score)}`}
+                                  >
+                                    {(result.similarity_score * 100).toFixed(1)}%
+                                  </Badge>
+                                )}
+                                {result.court_type && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {result.court_type}
+                                  </Badge>
+                                )}
+                                {result.year && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {result.year}
+                                  </Badge>
+                                )}
+                              </div>
  </div>
- <div className="flex items-center gap-2 flex-shrink-0">
  <Button
  variant="ghost"
  size="sm"
- onClick={() => handleCopyContent(result.content)}
+ onClick={(e) => {
+ e.stopPropagation();
+ handleCopyContent(result.content);
+ }}
  className="h-8 w-8 p-0"
  >
- <Copy className="w-4 h-4" />
+ <Copy className="w-3.5 h-3.5" />
  </Button>
  </div>
+ </button>
+ );
+ })}
  </div>
- </CardHeader>
- <CardContent className="pt-0">
- <div className="bg-muted/50 rounded-lg p-4 border">
- <SimpleMarkdownRenderer 
- content={normalizeContentLineBreaks(result.content)} 
- className="text-sm leading-relaxed"
- />
+ </CardContent>
+ </Card>
+
+ <Card className="xl:col-span-8 border border-border overflow-hidden">
+ <CardHeader className="pb-3 border-b border-border">
+ <div className="flex items-center justify-between gap-3">
+ <div className="min-w-0">
+ <CardTitle className="text-base truncate">
+ {selectedHistoryCase ? selectedHistoryCase.title : "Select a case to preview PDF"}
+ </CardTitle>
+ {selectedHistoryCase && (
+ <p className="text-xs text-muted-foreground mt-1 truncate">
+ {formatFileName(selectedHistoryCase.source_file)}
+ </p>
+ )}
+                      {selectedHistoryCase && (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {selectedHistoryCase.section_header && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedHistoryCase.section_header}
+                            </Badge>
+                          )}
+                          {typeof selectedHistoryCase.similarity_score === "number" && (
+                            <Badge
+                              variant="secondary"
+                              className={`text-[10px] ${getSimilarityColor(selectedHistoryCase.similarity_score)}`}
+                            >
+                              Match {(selectedHistoryCase.similarity_score * 100).toFixed(1)}%
+                            </Badge>
+                          )}
+                          {selectedHistoryCase.court_type && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedHistoryCase.court_type}
+                            </Badge>
+                          )}
+                          {selectedHistoryCase.year && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedHistoryCase.year}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
  </div>
- <div className="flex items-center justify-between mt-3 pt-3 border-t">
- <div className="flex items-center gap-4 text-xs text-muted-foreground">
- </div>
+ {selectedHistoryCase && (
  <div className="flex items-center gap-2">
  <Button
  variant="outline"
  size="sm"
- onClick={() => handleCopyContent(result.content)}
- className="h-8 text-xs"
+ onClick={() => handleDownloadPDF(selectedResearch, resolveLegalPdfDocumentId(selectedHistoryCase))}
+ disabled={isGeneratingPDF}
  >
- <Copy className="w-3 h-3 mr-1" />
- Copy
+ {isGeneratingPDF ? (
+ <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+ ) : (
+ <Download className="w-4 h-4 mr-2" />
+ )}
+ {isGeneratingPDF ? "Generating PDF..." : "Download"}
  </Button>
  <Button
  variant="outline"
  size="sm"
- className="h-8 text-xs"
- onClick={() => handleViewFullDocument(result)}
+ onClick={() => handleViewFullDocument(selectedHistoryCase)}
  disabled={
  isLoadingDocument ||
- (!result.document_id && !result.pdf_download_url)
+ (!selectedHistoryCase.document_id && !selectedHistoryCase.pdf_download_url)
  }
  >
  {isLoadingDocument ? (
- <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+ <Loader2 className="w-4 h-4 mr-2 animate-spin" />
  ) : (
- <FileTextIcon className="w-3 h-3 mr-1" />
+ <FileTextIcon className="w-4 h-4 mr-2" />
  )}
  Full Document
  </Button>
  </div>
+ )}
  </div>
+ </CardHeader>
+ <CardContent className="p-0 h-[70vh] bg-muted/20">
+ {!selectedHistoryCase ? (
+ <div className="h-full flex items-center justify-center text-sm text-muted-foreground px-4 text-center">
+ Click any case on the left to render its PDF here.
+ </div>
+ ) : isLoadingHistoryCasePdf ? (
+ <div className="h-full flex items-center justify-center">
+ <div className="flex items-center gap-2 text-sm text-muted-foreground">
+ <Loader2 className="w-4 h-4 animate-spin" />
+ Loading PDF preview...
+ </div>
+ </div>
+ ) : historyCasePdfError ? (
+ <div className="h-full flex items-center justify-center px-4">
+ <Alert variant="destructive" className="max-w-md">
+ <AlertCircle className="h-4 w-4" />
+ <AlertDescription>{historyCasePdfError}</AlertDescription>
+ </Alert>
+ </div>
+ ) : selectedHistoryCasePdfUrl ? (
+ <iframe
+ src={selectedHistoryCasePdfUrl}
+ className="w-full h-full border-0"
+ title={selectedHistoryCase.title || "Case PDF preview"}
+ />
+ ) : (
+ <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+ PDF preview unavailable.
+ </div>
+ )}
  </CardContent>
  </Card>
- ))}
  </div>
+ )}
  </CardContent>
  </Card>
  </div>
