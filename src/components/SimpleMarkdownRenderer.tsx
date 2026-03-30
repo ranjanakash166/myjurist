@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, parseBoldText, normalizeLooseBoldMarkers } from "@/lib/utils";
 
 interface SimpleMarkdownRendererProps {
   content: string;
@@ -19,8 +19,9 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
 
   // Function to parse markdown content
   const parseMarkdown = (text: string) => {
+    const preprocessed = normalizeLooseBoldMarkers(text);
     // Split content into lines
-    const lines = text.split('\n');
+    const lines = preprocessed.split('\n');
     const elements: React.ReactNode[] = [];
     let currentList: string[] = [];
     let currentParagraph: string[] = [];
@@ -96,51 +97,49 @@ export default function SimpleMarkdownRenderer({ content, className }: SimpleMar
       return parts.length > 0 ? <>{parts}</> : parseBoldText(line);
     };
 
-    const parseBoldText = (text: string): React.ReactNode => {
-      // Handle bold text (**text**)
-      // Use regex to find all bold sections
-      const boldRegex = /\*\*([^*]+)\*\*/g;
-      let parts: React.ReactNode[] = [];
-      let lastIndex = 0;
-      let match;
-      let matchIndex = 0;
-
-      // Reset regex lastIndex to ensure we start from the beginning
-      boldRegex.lastIndex = 0;
-
-      while ((match = boldRegex.exec(text)) !== null) {
-        // Add text before the match
-        if (match.index > lastIndex) {
-          parts.push(text.slice(lastIndex, match.index));
-        }
-        // Add bold text with stronger styling (font-bold instead of font-semibold)
-        parts.push(
-          <strong key={`bold-${matchIndex++}`} className="font-bold text-foreground">
-            {match[1]}
-          </strong>
-        );
-        lastIndex = match.index + match[0].length;
-      }
-
-      // Add remaining text
-      if (lastIndex < text.length) {
-        parts.push(text.slice(lastIndex));
-      }
-
-      return parts.length > 0 ? <>{parts}</> : text;
-    };
-
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
 
-      // Handle headers
-      if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+      // ATX markdown headings (## Title) — render as real headings, do not show ## in body text
+      const atxHeading = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
+      if (atxHeading) {
+        flushParagraph();
+        flushList();
+        const level = Math.min(atxHeading[1].length, 6) as 1 | 2 | 3 | 4 | 5 | 6;
+        const headingText = atxHeading[2].trim();
+        const headingClass: Record<number, string> = {
+          1: "text-2xl font-semibold text-foreground mb-3 mt-1",
+          2: "text-xl font-semibold text-foreground mb-3 mt-5",
+          3: "text-lg font-semibold text-foreground mb-2 mt-4",
+          4: "text-base font-semibold text-foreground mb-2 mt-3",
+          5: "text-sm font-semibold text-foreground mb-2 mt-3",
+          6: "text-sm font-medium text-foreground mb-2 mt-2",
+        };
+        const tag = `h${level}` as const;
+        elements.push(
+          React.createElement(
+            tag,
+            {
+              key: `atx-${index}`,
+              className: headingClass[level] ?? headingClass[3],
+            },
+            parseInlineMarkdown(headingText)
+          )
+        );
+        return;
+      }
+
+      // Handle full-line **header** (use shared bold utility for nested **…**)
+      if (trimmedLine.startsWith("**") && trimmedLine.endsWith("**")) {
         flushParagraph();
         flushList();
         const headerText = trimmedLine.slice(2, -2);
         elements.push(
-          <h2 key={`header-${index}`} className="text-xl font-semibold text-foreground mb-3 mt-5">
-            {headerText}
+          <h2
+            key={`header-${index}`}
+            className="text-xl font-semibold text-foreground mb-3 mt-5"
+          >
+            {parseBoldText(headerText)}
           </h2>
         );
         return;

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { 
  History, 
  Search, 
@@ -45,11 +46,12 @@ import {
  LegalResearchHistoryParams,
  downloadLegalDocumentPDF,
  AISummaryResponse,
- DocumentResponse
+ DocumentResponse,
+ SearchResult,
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
-import { normalizeContentLineBreaks, parseBoldText } from "@/lib/utils";
+import { normalizeContentLineBreaks, parseBoldText, cn } from "@/lib/utils";
 
 interface LegalResearchHistoryProps {
  // No props needed since we removed the "Use This" functionality
@@ -281,69 +283,64 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
  }
  };
 
-const handleViewFullDocument = async (documentId: string) => {
- setIsLoadingDocument(true);
- setError(null);
- 
- try {
- // Try to find the document in search results
- const searchResult = selectedResearch?.search_results.find(
- result => result.document_id === documentId || result.pdf_download_url === documentId
-);
- 
- if (searchResult) {
- // Create a DocumentResponse from the search result
- const document: DocumentResponse = {
- source_file: searchResult.source_file,
- title: searchResult.title,
- full_content: searchResult.content, // Use the content from search results
- content_length: searchResult.content.length,
- retrieval_time_ms: 0 // Not available from search results
- };
- 
- setSelectedDocument(document);
- setCurrentDocumentId(documentId); // Store the document ID or key
- 
- toast({
- title: "Document loaded",
- description: `Retrieved ${document.title}`,
- });
- } else {
- throw new Error("Document not found in search results");
- }
- } catch (err: any) {
- setError(err.message || "Failed to load document");
- toast({
- title: "Failed to load document",
- description: err.message || "Failed to load document",
- variant: "destructive",
- });
- } finally {
- setIsLoadingDocument(false);
- }
- };
+/** Same ID resolution as legal-research/page.tsx for POST /legal-research/document/pdf */
+const resolveLegalPdfDocumentId = (result: SearchResult) =>
+ result.document_id || result.pdf_download_url || "";
 
-const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
- if (!currentDocumentId || !selectedResearch) {
+/** History/API may omit title; avoid .replace on undefined when naming the download file */
+const safePdfDownloadBasename = (documentData: DocumentResponse): string => {
+ const raw = documentData.title ?? documentData.source_file ?? "document";
+ const base = String(raw).replace(/[^a-z0-9]/gi, "_").toLowerCase();
+ return base || "document";
+};
+
+function getAppModalPortalContainer(): HTMLElement {
+ return document.getElementById("app-modal-root") ?? document.body;
+}
+
+const handleViewFullDocument = (result: SearchResult) => {
+ const resolvedId = resolveLegalPdfDocumentId(result);
+ if (!resolvedId) {
  toast({
- title: "Error",
- description: "Document information not found. Please try viewing the document again.",
+ title: "No document reference",
+ description: "This result does not include a document id or PDF path.",
  variant: "destructive",
  });
  return;
  }
 
- const targetResult =
- selectedResearch.search_results.find(
- result => result.document_id === currentDocumentId || result.title === documentData.title
- );
+ setIsLoadingDocument(true);
+ setError(null);
 
- const resolvedDocumentId = targetResult?.document_id || targetResult?.pdf_download_url;
+ const doc: DocumentResponse = {
+ source_file: result.source_file,
+ title: result.title,
+ full_content: result.content,
+ content_length: result.content.length,
+ retrieval_time_ms: 0,
+ };
+
+ // Close the research Dialog first so Radix focus trap / pointer blocking does not cover the viewer.
+ setIsDetailModalOpen(false);
+ setCurrentDocumentId(resolvedId);
+
+ window.setTimeout(() => {
+ setSelectedDocument(doc);
+ setIsLoadingDocument(false);
+ toast({
+ title: "Document loaded",
+ description: `Retrieved ${doc.title}`,
+ });
+ }, 0);
+};
+
+const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
+ const resolvedDocumentId = currentDocumentId;
 
  if (!resolvedDocumentId) {
  toast({
  title: "Error",
- description: "Document ID not found for this document.",
+ description: "Document information not found. Please try viewing the document again.",
  variant: "destructive",
  });
  return;
@@ -360,11 +357,11 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;
- link.download = `${documentData.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+ link.download = `${safePdfDownloadBasename(documentData)}.pdf`;
  document.body.appendChild(link);
  link.click();
- document.body.removeChild(link);
  window.URL.revokeObjectURL(url);
+ document.body.removeChild(link);
 
  toast({
  title: "PDF downloaded",
@@ -931,8 +928,11 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  variant="outline"
  size="sm"
  className="h-8 text-xs"
- onClick={() => handleViewFullDocument(result.document_id)}
- disabled={isLoadingDocument}
+ onClick={() => handleViewFullDocument(result)}
+ disabled={
+ isLoadingDocument ||
+ (!result.document_id && !result.pdf_download_url)
+ }
  >
  {isLoadingDocument ? (
  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -956,15 +956,41 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </DialogContent>
  </Dialog>
 
- {/* Document Viewer Modal */}
- {selectedDocument && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-background text-foreground rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col border border-border">
+ {/* Document viewer: portal to app-modal-root (same as Dialog) so theme tokens match app-shell */}
+ {typeof document !== "undefined" &&
+ selectedDocument &&
+ createPortal(
+ <div
+ className={cn(
+ "fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4",
+ "animate-in fade-in-0 duration-200"
+ )}
+ role="dialog"
+ aria-modal="true"
+ aria-labelledby="legal-research-doc-viewer-title"
+ onClick={(e) => {
+ if (e.target === e.currentTarget) {
+ setSelectedDocument(null);
+ setCurrentDocumentId(null);
+ }
+ }}
+ >
+ <div
+ className={cn(
+ "app-shell bg-background text-foreground flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden",
+ "border border-border shadow-lg sm:rounded-lg",
+ "animate-in fade-in-0 zoom-in-95 duration-200"
+ )}
+ onClick={(e) => e.stopPropagation()}
+ >
  {/* Modal Header */}
- <div className="flex items-center justify-between p-6 border-b border-border">
- <div className="flex-1 min-w-0">
- <h2 className="text-xl font-semibold text-foreground truncate">
- {selectedDocument.title}
+ <div className="flex items-center justify-between border-b border-border p-6">
+ <div className="min-w-0 flex-1">
+ <h2
+ id="legal-research-doc-viewer-title"
+ className="truncate text-xl font-semibold leading-none tracking-tight text-foreground"
+ >
+ {selectedDocument.title ?? selectedDocument.source_file ?? "Document"}
  </h2>
  <p className="text-sm text-muted-foreground mt-1">
  {selectedDocument.source_file} • {selectedDocument.content_length} characters
@@ -1007,7 +1033,8 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
  </div>
- </div>
+ </div>,
+ getAppModalPortalContainer()
  )}
  </div>
  );

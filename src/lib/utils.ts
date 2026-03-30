@@ -11,6 +11,61 @@ export function cn(...inputs: ClassValue[]) {
  * @param text - The text string to parse
  * @returns React node with bold text properly rendered
  */
+/**
+ * Normalizes common markdown typos such as `*Disclaimer:**` → `**Disclaimer:**`
+ * so **…** bold parsing applies consistently.
+ */
+export function normalizeLooseBoldMarkers(text: string): string {
+  if (!text) return text;
+  return text.replace(/\*([^*\n]+)\*\*/g, "**$1**");
+}
+
+/**
+ * Removes "Sources" and "Disclaimer" sections from agentic answer markdown so the UI
+ * only shows substantive content; reference URLs stay in the separate links list.
+ */
+export function stripSourcesAndDisclaimerFromAnswer(text: string): string {
+  if (!text?.trim()) return text;
+
+  const isNoiseHeadingTitle = (raw: string): boolean => {
+    const t = raw.trim();
+    const first = t.split(/\s+/)[0]?.toLowerCase() ?? "";
+    return /^sources?$/.test(first) || /^disclaimer\b/i.test(t);
+  };
+
+  const lines = text.split("\n");
+  const out: string[] = [];
+  let skipping = false;
+
+  for (const line of lines) {
+    const atx = line.match(/^(#{1,6})\s+(.+)$/);
+    if (atx) {
+      const title = atx[2].trim();
+      if (isNoiseHeadingTitle(title)) {
+        skipping = true;
+        continue;
+      }
+      skipping = false;
+      out.push(line);
+      continue;
+    }
+
+    const boldLine = line.match(/^\*{2}\s*([^*]+?)\s*\*{2}\s*$/);
+    if (boldLine) {
+      const inner = boldLine[1].trim();
+      if (isNoiseHeadingTitle(inner)) {
+        skipping = true;
+        continue;
+      }
+    }
+
+    if (skipping) continue;
+    out.push(line);
+  }
+
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 export function parseBoldText(text: string): React.ReactNode {
   if (!text) return text;
   

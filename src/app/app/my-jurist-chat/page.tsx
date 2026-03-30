@@ -38,7 +38,10 @@ import {
   SearchResult,
 } from "@/lib/agenticRagApi";
 import { downloadLegalDocumentPDF } from "@/lib/legalResearchApi";
-import { normalizeContentLineBreaks } from "@/lib/utils";
+import {
+  normalizeContentLineBreaks,
+  stripSourcesAndDisclaimerFromAnswer,
+} from "@/lib/utils";
 
 const RESULT_PREVIEW_LENGTH = 400;
 
@@ -47,6 +50,22 @@ function formatCourtTypeLabel(courtType: string): string {
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+function getSourcesCollapsibleLabel(response: AgenticRAGSearchResponse): string {
+  const n = response.results.length;
+  if (
+    response.query_type === "regulatory_query" ||
+    response.rag_variant === "regulatory_compliance"
+  ) {
+    return `Reference links (${n})`;
+  }
+  return `Relevant cases (${n})`;
+}
+
+function filterNonEmptyStrings(items: string[] | undefined): string[] {
+  if (!items || !Array.isArray(items)) return [];
+  return items.map((s) => String(s).trim()).filter(Boolean);
 }
 
 interface ResultCardProps {
@@ -71,6 +90,7 @@ function ResultCard({
     ? result.content.slice(0, RESULT_PREVIEW_LENGTH) + "..."
     : result.content;
   const hasExcerpt = result.content.trim().length > 0;
+  const hasSourceUrl = Boolean(result.metadata?.url);
 
   const handleCopy = async () => {
     try {
@@ -148,6 +168,10 @@ function ResultCard({
               </button>
             )}
           </>
+        ) : hasSourceUrl ? (
+          <p className="text-sm text-muted-foreground">
+            Full text is available at the source link below.
+          </p>
         ) : (
           <p className="text-sm text-muted-foreground italic">
             No excerpt available for this chunk.
@@ -211,6 +235,14 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   response?: AgenticRAGSearchResponse;
+}
+
+function assistantHasAnswer(message: ChatMessage): boolean {
+  return (
+    message.sender === "assistant" &&
+    typeof message.response?.answer === "string" &&
+    message.response.answer.trim().length > 0
+  );
 }
 
 export default function MyJuristChatPage() {
@@ -420,8 +452,11 @@ export default function MyJuristChatPage() {
   };
 
   const formatResponse = (response: AgenticRAGSearchResponse): string => {
-    if (response.results && response.results.length > 0) {
-      return `I found **${response.total_results}** relevant result${response.total_results > 1 ? "s" : ""} for your query. See the sources below.`;
+    if (response.answer?.trim()) {
+      return "";
+    }
+    if (response.results?.length) {
+      return "";
     }
     return `I couldn't find any specific results for your query. Please try rephrasing your question or using different keywords.`;
   };
@@ -549,23 +584,36 @@ export default function MyJuristChatPage() {
                         <Search className="w-4 h-4 text-primary-foreground" />
                       </div>
                     )}
-                    <div
-                      className={`max-w-3xl px-4 py-3 rounded-2xl ${
-                        message.sender === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
-                      }`}
-                    >
-                      {message.sender === "user" ? (
+                    {message.sender === "user" ? (
+                      <div
+                        className="max-w-3xl px-4 py-3 rounded-2xl bg-primary text-primary-foreground rounded-br-md"
+                      >
                         <p className="text-[inherit] leading-relaxed whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
-                      ) : (
-                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
-                          <SimpleMarkdownRenderer content={message.content} />
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : assistantHasAnswer(message) || message.content.trim() ? (
+                      <div
+                        className="max-w-3xl px-4 py-3 rounded-2xl bg-card text-foreground rounded-bl-md border-2 border-border shadow-sm"
+                      >
+                        {assistantHasAnswer(message) ? (
+                          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                            <SimpleMarkdownRenderer
+                              className="text-sm"
+                              content={normalizeContentLineBreaks(
+                                stripSourcesAndDisclaimerFromAnswer(
+                                  message.response!.answer!.trim()
+                                )
+                              )}
+                            />
+                          </div>
+                        ) : (
+                          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-strong:text-foreground">
+                            <SimpleMarkdownRenderer content={message.content} />
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
                     {message.sender === "user" && (
                       <div className="w-8 h-8 shrink-0 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm">
                         U
@@ -581,13 +629,13 @@ export default function MyJuristChatPage() {
                           <CollapsibleTrigger className="flex w-full items-center gap-2 text-sm font-semibold text-foreground rounded-md py-1.5 -ml-1 pl-1 pr-2 hover:bg-muted/60 text-left [&[data-state=open]>svg:first-child]:rotate-180">
                             <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                             <span>
-                              Relevant cases ({message.response.results.length})
+                              {getSourcesCollapsibleLabel(message.response)}
                             </span>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="space-y-3 pt-3">
                             {message.response.results.map((result, index) => (
                               <ResultCard
-                                key={`${result.chunk_index}-${index}`}
+                                key={`${message.id}-src-${index}-${result.source_file ?? String(result.chunk_index)}`}
                                 result={result}
                                 index={index}
                                 onViewPdf={handleViewPdf}
@@ -597,6 +645,40 @@ export default function MyJuristChatPage() {
                             ))}
                           </CollapsibleContent>
                         </Collapsible>
+                      </div>
+                    )}
+
+                  {message.sender === "assistant" &&
+                    message.response &&
+                    filterNonEmptyStrings(message.response.suggestions).length >
+                      0 && (
+                      <div className="mt-4 ml-11 max-w-3xl">
+                        <p className="text-sm font-semibold text-foreground mb-2">
+                          Suggested follow-ups
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {filterNonEmptyStrings(
+                            message.response.suggestions
+                          ).map((s, i) => (
+                            <Button
+                              key={`${message.id}-sug-${i}`}
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-auto min-h-8 max-w-full whitespace-normal text-left py-1.5 px-3 text-xs leading-snug"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setInput(s);
+                                queueMicrotask(() => {
+                                  inputRef.current?.focus();
+                                });
+                              }}
+                            >
+                              {s}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
                     )}
                 </div>
