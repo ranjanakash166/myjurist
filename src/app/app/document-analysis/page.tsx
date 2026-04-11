@@ -939,7 +939,7 @@ export default function DocumentAnalysisPage() {
           setCollapsedSteps({});
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-feature-tabs-list rounded-lg border border-border">
           <TabsTrigger value="new" className="text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">New Analysis</TabsTrigger>
           <TabsTrigger value="history" className="text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">History</TabsTrigger>
         </TabsList>

@@ -243,7 +243,7 @@ export default function SmartContractStudio() {
 
         {/* Main Content */}
         <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'studio' | 'history')} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-feature-tabs-list rounded-lg border border-border">
             <TabsTrigger value="studio">Smart Document Studio</TabsTrigger>
             <TabsTrigger value="history">Document History</TabsTrigger>
           </TabsList>
