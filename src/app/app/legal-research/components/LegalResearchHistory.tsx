@@ -45,6 +45,7 @@ import {
  LegalResearchHistoryItem, 
  LegalResearchHistoryParams,
  downloadLegalDocumentPDF,
+ resolveLegalResearchPdfDocumentId,
  AISummaryResponse,
  DocumentResponse,
  SearchResult,
@@ -241,7 +242,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  };
 
 const handleDownloadPDF = async (documentTitle: string, result: SearchResult) => {
- const documentId = result.document_id || result.pdf_download_url;
+ const documentId = resolveLegalResearchPdfDocumentId(result);
 
  if (!documentId) {
  toast({
@@ -300,10 +301,6 @@ const buildCaseCopyText = (result: SearchResult) => {
  return lines.join("\n");
 };
 
-/** Same ID resolution as legal-research/page.tsx for POST /legal-research/document/pdf */
-const resolveLegalPdfDocumentId = (result: SearchResult) =>
- result.document_id || result.pdf_download_url || "";
-
 /** History/API may omit title; avoid .replace on undefined when naming the download file */
 const safePdfDownloadBasename = (documentData: DocumentResponse): string => {
  const raw = documentData.title ?? documentData.source_file ?? "document";
@@ -316,7 +313,7 @@ function getAppModalPortalContainer(): HTMLElement {
 }
 
 const handleViewFullDocument = (result: SearchResult) => {
- const resolvedId = resolveLegalPdfDocumentId(result);
+ const resolvedId = resolveLegalResearchPdfDocumentId(result);
  if (!resolvedId) {
  toast({
  title: "No document reference",
@@ -402,7 +399,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  setIsLoadingHistoryCasePdf(true);
 
  try {
- const documentId = result.document_id || result.pdf_download_url;
+ const documentId = resolveLegalResearchPdfDocumentId(result);
  if (!documentId) {
  throw new Error("Document ID is missing for this result. PDF cannot be generated.");
  }
@@ -983,7 +980,7 @@ className="mt-1"
  const isSelected = selectedHistoryCase?.source_file === result.source_file;
  return (
  <button
- key={`${result.document_id || result.pdf_download_url || result.source_file}-${index}`}
+ key={`${resolveLegalResearchPdfDocumentId(result) || result.source_file}-${index}`}
  type="button"
  onClick={() => handleSelectHistoryCase(result)}
  className={`w-full text-left p-4 border-b border-border transition-colors ${

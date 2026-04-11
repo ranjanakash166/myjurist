@@ -8,9 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 
 import { useAuth } from "../../../components/AuthProvider";
-import { searchLegalResearch, downloadLegalDocumentPDF, LegalResearchRequest, LegalResearchResponse, SearchResult, AISummaryResponse } from "@/lib/legalResearchApi";
+import {
+  searchLegalResearch,
+  searchLegalResearchKeywordSearch,
+  downloadLegalDocumentPDF,
+  resolveLegalResearchPdfDocumentId,
+  LegalResearchRequest,
+  LegalResearchResponse,
+  SearchResult,
+  AISummaryResponse,
+} from "@/lib/legalResearchApi";
 import { toast } from '@/hooks/use-toast';
 import { normalizeContentLineBreaks, parseBoldText, parseMarkdownText } from "@/lib/utils";
 import LegalResearchHistory from "./components/LegalResearchHistory";
@@ -21,6 +31,7 @@ export default function LegalResearchPage() {
  const [query, setQuery] = useState("");
  const [searchType, setSearchType] = useState<"general" | "supreme_court" | "high_court">("general");
  const [topK, setTopK] = useState(5);
+ const [searchMode, setSearchMode] = useState<"research" | "case">("research");
  const [isSearching, setIsSearching] = useState(false);
  const [searchResults, setSearchResults] = useState<LegalResearchResponse | null>(null);
  const [error, setError] = useState<string | null>(null);
@@ -93,6 +104,20 @@ export default function LegalResearchPage() {
   }, [activeTab]);
 
   React.useEffect(() => {
+    setSearchResults(null);
+    setAiSummary(null);
+    setSelectedCase(null);
+    setSelectedCasePdfUrl((previousUrl) => {
+      if (previousUrl) {
+        window.URL.revokeObjectURL(previousUrl);
+      }
+      return null;
+    });
+    setCasePdfError(null);
+    setError(null);
+  }, [searchMode]);
+
+  React.useEffect(() => {
     return () => {
       if (selectedCasePdfUrl) {
         window.URL.revokeObjectURL(selectedCasePdfUrl);
@@ -122,17 +147,23 @@ export default function LegalResearchPage() {
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
- // Single API call: Enhanced search with AI summary
- const searchRequest: LegalResearchRequest = {
+ const basePayload = {
  query: query.trim(),
  top_k: topK,
  search_type: searchType,
- include_ai_summary: true,
  summary_type: summaryType,
  max_summary_length: maxLength,
  };
 
- const searchResponse = await searchLegalResearch(searchRequest, authToken, getAuthHeaders, refreshToken);
+ const searchRequest: LegalResearchRequest = {
+ ...basePayload,
+ include_ai_summary: true,
+ };
+
+ const searchResponse =
+ searchMode === "research"
+ ? await searchLegalResearch(searchRequest, authToken, getAuthHeaders, refreshToken)
+ : await searchLegalResearchKeywordSearch(basePayload, authToken, getAuthHeaders, refreshToken);
  setSearchResults(searchResponse);
  
  // Set AI summary from the response if available
@@ -181,13 +212,17 @@ export default function LegalResearchPage() {
 
 const buildCaseCopyText = (result: SearchResult) => {
  const lines = [
- `Title: ${result.title || "N/A"}`,
+ `Title: ${result.title?.trim() ? result.title : formatFileName(result.source_file)}`,
  `Source: ${formatFileName(result.source_file)}`,
  ];
  if (result.section_header) lines.push(`Section: ${result.section_header}`);
  if (result.court_type) lines.push(`Court: ${result.court_type}`);
  if (result.year) lines.push(`Year: ${result.year}`);
- if (typeof result.similarity_score === "number") {
+ if (
+ typeof result.similarity_score === "number" &&
+ result.similarity_score >= 0 &&
+ result.similarity_score <= 1
+ ) {
  lines.push(`Match: ${(result.similarity_score * 100).toFixed(1)}%`);
  }
  lines.push("", "Content:", result.content || "");
@@ -200,8 +235,7 @@ const handleSelectCase = async (result: SearchResult) => {
  setIsLoadingCasePdf(true);
 
  try {
- // Determine the document ID to send in POST body
- const documentId = result.document_id || result.pdf_download_url;
+ const documentId = resolveLegalResearchPdfDocumentId(result);
  if (!documentId) {
  throw new Error("Document ID is missing for this result. PDF cannot be generated.");
  }
@@ -237,7 +271,7 @@ const handleSelectCase = async (result: SearchResult) => {
  };
 
  const handleDownloadPDF = async (documentTitle: string, result: SearchResult) => {
- const documentId = result.document_id || result.pdf_download_url;
+ const documentId = resolveLegalResearchPdfDocumentId(result);
 
  if (!documentId) {
  toast({
@@ -290,6 +324,12 @@ const handleSelectCase = async (result: SearchResult) => {
  const formatFileName = (filePath: string) => {
  const parts = filePath.split('/');
  return parts[parts.length - 1]?.replace('.md', '') || filePath;
+ };
+
+ const formatCaseTitle = (result: SearchResult) => {
+ const t = result.title?.trim();
+ if (t) return t;
+ return formatFileName(result.source_file);
  };
 
  const getSimilarityColor = (score: number) => {
@@ -379,6 +419,28 @@ const handleSelectCase = async (result: SearchResult) => {
         {/* Search Form */}
         <Card className="w-full border border-border shadow-lg bg-card">
           <CardContent className="pt-6">
+ <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+ <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+ Search mode
+ </span>
+ <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-1">
+ <span
+ className={`text-xs sm:text-sm ${searchMode === "research" ? "font-medium text-foreground" : "text-muted-foreground"}`}
+ >
+ Legal research
+ </span>
+ <Switch
+ checked={searchMode === "case"}
+ onCheckedChange={(checked) => setSearchMode(checked ? "case" : "research")}
+ aria-label="Switch to case search; turn off for legal research"
+ />
+ <span
+ className={`text-xs sm:text-sm ${searchMode === "case" ? "font-medium text-foreground" : "text-muted-foreground"}`}
+ >
+ Case search
+ </span>
+ </div>
+ </div>
  <form onSubmit={handleSearch} className="space-y-5">
  {/* Search Input */}
  <div className="relative">
@@ -387,7 +449,11 @@ const handleSelectCase = async (result: SearchResult) => {
  </div>
  <Input
  type="text"
- placeholder="What legal information are you looking for?"
+ placeholder={
+ searchMode === "research"
+ ? "What legal information are you looking for?"
+ : "Case name, citation, or keywords (e.g. Minerva Mills v. Union of India)"
+ }
  value={query}
  onChange={(e) => setQuery(e.target.value)}
  className="h-14 text-base pl-12 pr-32 rounded-xl border-border focus:ring-2 focus:ring-primary/20 focus:border-primary"
@@ -744,9 +810,10 @@ const handleSelectCase = async (result: SearchResult) => {
                   <div className="max-h-[70vh] overflow-y-auto">
                     {searchResults.results.map((result, index) => {
                       const isSelected = selectedCase?.source_file === result.source_file;
+                      const rowKey = result.document_id ?? (result.chunk_id != null ? String(result.chunk_id) : `row-${index}`);
                       return (
                         <button
-                          key={result.document_id}
+                          key={rowKey}
                           type="button"
                           onClick={() => handleSelectCase(result)}
                           className={`w-full text-left p-4 border-b border-border transition-colors ${
@@ -764,7 +831,7 @@ const handleSelectCase = async (result: SearchResult) => {
                                 </span>
                               </div>
                               <p className="text-sm font-medium text-foreground line-clamp-2">
-                                {result.title}
+                                {formatCaseTitle(result)}
                               </p>
                               <div className="mt-1 flex flex-wrap items-center gap-2">
                                 {result.section_header && (
@@ -772,7 +839,9 @@ const handleSelectCase = async (result: SearchResult) => {
                                     {result.section_header}
                                   </p>
                                 )}
-                                {typeof result.similarity_score === "number" && (
+                                {typeof result.similarity_score === "number" &&
+                                  result.similarity_score >= 0 &&
+                                  result.similarity_score <= 1 && (
                                   <Badge
                                     variant="secondary"
                                     className={`text-[10px] ${getSimilarityColor(result.similarity_score)}`}
@@ -816,7 +885,7 @@ const handleSelectCase = async (result: SearchResult) => {
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <CardTitle className="text-base truncate">
-                        {selectedCase ? selectedCase.title : "Select a case to preview PDF"}
+                        {selectedCase ? formatCaseTitle(selectedCase) : "Select a case to preview PDF"}
                       </CardTitle>
                       {selectedCase && (
                         <p className="text-xs text-muted-foreground mt-1 truncate">
@@ -830,7 +899,9 @@ const handleSelectCase = async (result: SearchResult) => {
                               {selectedCase.section_header}
                             </Badge>
                           )}
-                          {typeof selectedCase.similarity_score === "number" && (
+                          {typeof selectedCase.similarity_score === "number" &&
+                            selectedCase.similarity_score >= 0 &&
+                            selectedCase.similarity_score <= 1 && (
                             <Badge
                               variant="secondary"
                               className={`text-[10px] ${getSimilarityColor(selectedCase.similarity_score)}`}
@@ -855,7 +926,7 @@ const handleSelectCase = async (result: SearchResult) => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownloadPDF(selectedCase.title, selectedCase)}
+                        onClick={() => handleDownloadPDF(formatCaseTitle(selectedCase), selectedCase)}
                         disabled={isGeneratingPDF}
                       >
                         {isGeneratingPDF ? (
@@ -891,7 +962,7 @@ const handleSelectCase = async (result: SearchResult) => {
                     <iframe
                       src={selectedCasePdfUrl}
                       className="w-full h-full border-0"
-                      title={selectedCase.title}
+                      title={formatCaseTitle(selectedCase)}
                     />
                   ) : (
                     <div className="h-full flex items-center justify-center text-sm text-muted-foreground">

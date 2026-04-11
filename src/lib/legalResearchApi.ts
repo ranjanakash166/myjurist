@@ -1,22 +1,26 @@
 import { API_BASE_URL } from "../app/constants";
 import { apiCallWithRefresh } from "./utils";
 
-export interface LegalResearchRequest {
+/** Fields shared by enhanced-search and enhanced-keyword-search request bodies */
+export type LegalResearchSearchBase = {
   query: string;
   top_k: number;
   search_type: "general" | "supreme_court" | "high_court";
-  include_ai_summary?: boolean;
   summary_type?: "comprehensive" | "brief" | "detailed";
   max_summary_length?: number;
+};
+
+export interface LegalResearchRequest extends LegalResearchSearchBase {
+  include_ai_summary?: boolean;
 }
 
 export interface SearchResult {
   content: string;
   source_file: string;
-  title: string;
-  section_header: string;
-  similarity_score: number;
-  chunk_index: number;
+  title?: string;
+  section_header?: string;
+  similarity_score?: number;
+  chunk_index?: number;
   // Legacy/document API identifier (may be absent with new enhanced-search)
   document_id?: string;
   // New fields from enhanced-search response for direct PDF access
@@ -24,6 +28,31 @@ export interface SearchResult {
   pdf_download_url?: string; // e.g. "high-court/2023/XYZ.pdf"
   year?: number;
   court_type?: string;
+  /** Keyword / enhanced-keyword-search */
+  rank?: number;
+  chunk_id?: number;
+  score?: number;
+  content_preview?: string;
+  index_name?: string;
+}
+
+/**
+ * Resolves the value for POST /legal-research/document/pdf `document_id`.
+ * Keyword search hits often omit a UUID; the PDF API expects a storage path like
+ * `supreme-court/2014/2014_10_1_354_EN.pdf` (see downloadOriginalLegalDocumentPDF), not chunk_id.
+ */
+export function resolveLegalResearchPdfDocumentId(result: SearchResult): string {
+  const doc = result.document_id?.trim();
+  if (doc) return doc;
+  const url = result.pdf_download_url?.trim();
+  if (url) return url;
+  const court = result.court_type?.trim();
+  const year = result.year;
+  const pdf = result.pdf_filename?.trim();
+  if (court && year != null && pdf) {
+    return `${court}/${year}/${pdf}`;
+  }
+  return "";
 }
 
 export interface IndexStats {
@@ -36,19 +65,21 @@ export interface IndexStats {
 }
 
 export interface AISummaryResponse {
-  summary_id: string;
-  user_query: string;
+  summary_id?: string;
+  user_query?: string;
   ai_summary: string;
-  key_legal_insights: string[];
-  relevant_precedents: string[];
-  statutory_provisions: string[];
-  procedural_developments: string[];
-  practical_implications: string[];
-  legal_areas_covered: string[];
-  confidence_score: number;
-  sources_analyzed: string[];
-  processing_time_ms: number;
-  summary_type: string;
+  key_legal_insights?: string[];
+  relevant_precedents?: string[];
+  statutory_provisions?: string[];
+  procedural_developments?: string[];
+  practical_implications?: string[];
+  legal_areas_covered?: string[];
+  confidence_score?: number;
+  sources_analyzed?: string[];
+  processing_time_ms?: number | null;
+  summary_type?: string;
+  provider?: string;
+  model?: string;
 }
 
 export interface LegalResearchResponse {
@@ -56,7 +87,7 @@ export interface LegalResearchResponse {
   results: SearchResult[];
   total_results: number;
   search_time_ms: number;
-  index_stats: IndexStats;
+  index_stats?: IndexStats;
   ai_summary?: AISummaryResponse;
 }
 
@@ -68,31 +99,97 @@ export interface ValidationError {
   }>;
 }
 
-export const searchLegalResearch = async (
-  request: LegalResearchRequest,
-  authToken: string,
-  getAuthHeaders: () => Record<string, string>,
-  refreshToken: () => Promise<boolean>
-): Promise<LegalResearchResponse> => {
-  // Use direct fetch to avoid apiCallWithRefresh issues
+function normalizeSearchResult(item: Record<string, unknown>): SearchResult {
+  const preview = typeof item.content_preview === 'string' ? item.content_preview : undefined;
+  const titleRaw = item.title;
+  const titleFromPreview =
+    preview
+      ?.split('\n')
+      .map((s) => s.trim())
+      .find(Boolean)
+      ?.slice(0, 120) ?? '';
+  const title =
+    typeof titleRaw === 'string' && titleRaw.trim()
+      ? titleRaw
+      : titleFromPreview || undefined;
+
+  const apiDocumentId =
+    typeof item.document_id === 'string' && item.document_id.trim() ? item.document_id.trim() : undefined;
+  const pdf_download_url =
+    typeof item.pdf_download_url === 'string' && item.pdf_download_url.trim()
+      ? item.pdf_download_url.trim()
+      : undefined;
+  const pdf_filename =
+    typeof item.pdf_filename === 'string' && item.pdf_filename.trim() ? item.pdf_filename.trim() : undefined;
+  const court_type = typeof item.court_type === 'string' ? item.court_type : undefined;
+  const year = typeof item.year === 'number' ? item.year : undefined;
+  const pathFromMetadata =
+    court_type && year != null && pdf_filename ? `${court_type}/${year}/${pdf_filename}` : undefined;
+  const document_id = apiDocumentId ?? pdf_download_url ?? pathFromMetadata ?? undefined;
+
+  return {
+    content: String(item.content ?? ''),
+    source_file: String(item.source_file ?? ''),
+    title,
+    section_header: typeof item.section_header === 'string' ? item.section_header : undefined,
+    similarity_score: typeof item.similarity_score === 'number' ? item.similarity_score : undefined,
+    chunk_index: typeof item.chunk_index === 'number' ? item.chunk_index : undefined,
+    document_id,
+    pdf_filename,
+    pdf_download_url,
+    year,
+    court_type,
+    rank: typeof item.rank === 'number' ? item.rank : undefined,
+    chunk_id: typeof item.chunk_id === 'number' ? item.chunk_id : undefined,
+    score: typeof item.score === 'number' ? item.score : undefined,
+    content_preview: preview,
+    index_name: typeof item.index_name === 'string' ? item.index_name : undefined,
+  };
+}
+
+function normalizeLegalResearchResponse(data: unknown): LegalResearchResponse {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid search response');
+  }
+  const r = data as Record<string, unknown>;
+  const rawResults = Array.isArray(r.results) ? r.results : [];
+  return {
+    query: String(r.query ?? ''),
+    results: rawResults.map((row) => normalizeSearchResult(row as Record<string, unknown>)),
+    total_results: Number(r.total_results ?? 0),
+    search_time_ms: Number(r.search_time_ms ?? 0),
+    ...(r.index_stats && typeof r.index_stats === 'object'
+      ? { index_stats: r.index_stats as IndexStats }
+      : {}),
+    ...(r.ai_summary && typeof r.ai_summary === 'object'
+      ? { ai_summary: r.ai_summary as AISummaryResponse }
+      : {}),
+  };
+}
+
+async function postLegalResearchSearch(
+  pathSuffix: string,
+  body: unknown,
+  getAuthHeaders: () => Record<string, string>
+): Promise<LegalResearchResponse> {
   const authHeaders = getAuthHeaders();
-  
-  const response = await fetch(`${API_BASE_URL}/legal-research/enhanced-search`, {
+
+  const response = await fetch(`${API_BASE_URL}/${pathSuffix}`, {
     method: 'POST',
     headers: {
-      'accept': 'application/json',
+      accept: 'application/json',
       'Content-Type': 'application/json',
       ...authHeaders,
     },
-    body: JSON.stringify(request),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
     if (response.status === 422) {
       try {
         const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-      } catch (jsonError) {
+        throw new Error(`Validation error: ${errorData.detail.map((err) => err.msg).join(', ')}`);
+      } catch {
         throw new Error(`Validation error: ${response.status} ${response.statusText}`);
       }
     }
@@ -103,10 +200,39 @@ export const searchLegalResearch = async (
   }
 
   try {
-    return await response.json();
-  } catch (jsonError) {
+    const json: unknown = await response.json();
+    return normalizeLegalResearchResponse(json);
+  } catch (e) {
+    if (e instanceof Error && e.message === 'Invalid search response') {
+      throw e;
+    }
     throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
   }
+}
+
+export const searchLegalResearch = async (
+  request: LegalResearchRequest,
+  _authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  _refreshToken: () => Promise<boolean>
+): Promise<LegalResearchResponse> => {
+  return postLegalResearchSearch('legal-research/enhanced-search', request, getAuthHeaders);
+};
+
+export const searchLegalResearchKeywordSearch = async (
+  request: LegalResearchSearchBase,
+  _authToken: string,
+  getAuthHeaders: () => Record<string, string>,
+  _refreshToken: () => Promise<boolean>
+): Promise<LegalResearchResponse> => {
+  const body = {
+    query: request.query,
+    top_k: request.top_k,
+    search_type: request.search_type,
+    summary_type: request.summary_type,
+    max_summary_length: request.max_summary_length,
+  };
+  return postLegalResearchSearch('legal-research/enhanced-keyword-search', body, getAuthHeaders);
 };
 
 export interface DocumentResponse {
@@ -206,7 +332,12 @@ export const downloadLegalDocumentPDF = async (
   });
 
   if (!response.ok) {
-    if (response.status === 500 || response.status === 502 || response.status === 404) {
+    if (
+      response.status === 500 ||
+      response.status === 502 ||
+      response.status === 404 ||
+      response.status === 400
+    ) {
       const fallbackBlob = await tryPathFallback();
       if (fallbackBlob) return fallbackBlob;
     }
@@ -236,7 +367,12 @@ export const downloadLegalDocumentPDF = async (
         });
         
         if (!retryResponse.ok) {
-          if (retryResponse.status === 500 || retryResponse.status === 502 || retryResponse.status === 404) {
+          if (
+            retryResponse.status === 500 ||
+            retryResponse.status === 502 ||
+            retryResponse.status === 404 ||
+            retryResponse.status === 400
+          ) {
             const fallbackBlob = await tryPathFallback();
             if (fallbackBlob) return fallbackBlob;
           }
