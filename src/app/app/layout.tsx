@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Calendar, FileCheck, Building2, BarChart3, Tag, Search, FileEdit } from "lucide-react";
+import { Home, FileText, FileSearch, Menu, X, LogOut, User, Calendar, FileCheck, Building2, BarChart3, Tag, Search } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "../../components/AuthProvider";
 import { usePathname } from "next/navigation";
@@ -23,7 +23,6 @@ const getNavItems = (userRole?: string) => {
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "My Jurist Chat", icon: <Search className="w-6 h-6" />, href: "/app/my-jurist-chat" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
-    { label: "Smart Drafting", icon: <FileEdit className="w-6 h-6" />, href: "/app/smart-drafting" },
   ];
 
   // Add organization management for super admins and org admins
