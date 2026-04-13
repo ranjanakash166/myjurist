@@ -45,6 +45,7 @@ import {
  LegalResearchHistoryItem, 
  LegalResearchHistoryParams,
  downloadLegalDocumentPDF,
+ resolveLegalResearchPdfDocumentId,
  AISummaryResponse,
  DocumentResponse,
  SearchResult,
@@ -70,6 +71,10 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  const [selectedDocument, setSelectedDocument] = useState<DocumentResponse | null>(null);
  const [isLoadingDocument, setIsLoadingDocument] = useState(false);
  const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(null);
+ const [selectedHistoryCase, setSelectedHistoryCase] = useState<SearchResult | null>(null);
+ const [selectedHistoryCasePdfUrl, setSelectedHistoryCasePdfUrl] = useState<string | null>(null);
+ const [isLoadingHistoryCasePdf, setIsLoadingHistoryCasePdf] = useState(false);
+ const [historyCasePdfError, setHistoryCasePdfError] = useState<string | null>(null);
  
  // Pagination
  const [currentPage, setCurrentPage] = useState(1);
@@ -114,6 +119,14 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  useEffect(() => {
  loadHistory();
  }, []);
+
+ useEffect(() => {
+ return () => {
+ if (selectedHistoryCasePdfUrl) {
+ window.URL.revokeObjectURL(selectedHistoryCasePdfUrl);
+ }
+ };
+ }, [selectedHistoryCasePdfUrl]);
 
  const handleRefresh = () => {
  loadHistory(1, false);
@@ -228,18 +241,13 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  }
  };
 
-const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?: string) => {
- const targetResult =
- documentId
- ? research.search_results.find(result => result.document_id === documentId || result.pdf_download_url === documentId)
- : research.search_results[0];
+const handleDownloadPDF = async (documentTitle: string, result: SearchResult) => {
+ const documentId = resolveLegalResearchPdfDocumentId(result);
 
- const resolvedDocumentId = targetResult?.document_id || targetResult?.pdf_download_url;
-
- if (!resolvedDocumentId) {
+ if (!documentId) {
  toast({
- title: "No documents available",
- description: "No document ID found in this research to download",
+ title: "Error",
+ description: "Document ID not found. Please try viewing the document again.",
  variant: "destructive",
  });
  return;
@@ -251,17 +259,12 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
  const authHeaders = getAuthHeaders();
  const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
  
- const documentTitle = targetResult?.title || research.query || "legal_research";
- 
- const blob = await downloadLegalDocumentPDF({ document_id: resolvedDocumentId }, authToken, getAuthHeaders, refreshToken);
+ const blob = await downloadLegalDocumentPDF({ document_id: documentId }, authToken, getAuthHeaders, refreshToken);
  
  const url = window.URL.createObjectURL(blob);
  const link = document.createElement('a');
  link.href = url;
- 
- const filename = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
- 
- link.download = filename;
+ link.download = `${documentTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
  document.body.appendChild(link);
  link.click();
  document.body.removeChild(link);
@@ -269,7 +272,7 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
 
  toast({
  title: "PDF downloaded",
- description: "Original judgment PDF has been downloaded",
+ description: "Original PDF document has been downloaded",
  });
  } catch (err: any) {
  console.error('PDF download error:', err);
@@ -281,11 +284,22 @@ const handleDownloadPDF = async (research: LegalResearchHistoryItem, documentId?
  } finally {
  setIsGeneratingPDF(false);
  }
- };
+};
 
-/** Same ID resolution as legal-research/page.tsx for POST /legal-research/document/pdf */
-const resolveLegalPdfDocumentId = (result: SearchResult) =>
- result.document_id || result.pdf_download_url || "";
+const buildCaseCopyText = (result: SearchResult) => {
+ const lines = [
+ `Title: ${result.title || "N/A"}`,
+ `Source: ${formatFileName(result.source_file)}`,
+ ];
+ if (result.section_header) lines.push(`Section: ${result.section_header}`);
+ if (result.court_type) lines.push(`Court: ${result.court_type}`);
+ if (result.year) lines.push(`Year: ${result.year}`);
+ if (typeof result.similarity_score === "number") {
+ lines.push(`Match: ${(result.similarity_score * 100).toFixed(1)}%`);
+ }
+ lines.push("", "Content:", result.content || "");
+ return lines.join("\n");
+};
 
 /** History/API may omit title; avoid .replace on undefined when naming the download file */
 const safePdfDownloadBasename = (documentData: DocumentResponse): string => {
@@ -299,7 +313,7 @@ function getAppModalPortalContainer(): HTMLElement {
 }
 
 const handleViewFullDocument = (result: SearchResult) => {
- const resolvedId = resolveLegalPdfDocumentId(result);
+ const resolvedId = resolveLegalResearchPdfDocumentId(result);
  if (!resolvedId) {
  toast({
  title: "No document reference",
@@ -379,6 +393,47 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  }
  };
 
+ const handleSelectHistoryCase = async (result: SearchResult) => {
+ setSelectedHistoryCase(result);
+ setHistoryCasePdfError(null);
+ setIsLoadingHistoryCasePdf(true);
+
+ try {
+ const documentId = resolveLegalResearchPdfDocumentId(result);
+ if (!documentId) {
+ throw new Error("Document ID is missing for this result. PDF cannot be generated.");
+ }
+
+ const authHeaders = getAuthHeaders();
+ const authToken = authHeaders.Authorization?.replace('Bearer ', '') || '';
+
+ const blob = await downloadLegalDocumentPDF(
+ { document_id: documentId },
+ authToken,
+ getAuthHeaders,
+ refreshToken
+ );
+
+ const objectUrl = window.URL.createObjectURL(blob);
+ setSelectedHistoryCasePdfUrl((previousUrl) => {
+ if (previousUrl) {
+ window.URL.revokeObjectURL(previousUrl);
+ }
+ return objectUrl;
+ });
+ } catch (err: any) {
+ console.error('History case PDF preview error:', err);
+ setHistoryCasePdfError(err.message || "Failed to load PDF preview.");
+ toast({
+ title: "Failed to load PDF",
+ description: err.message || "Failed to load PDF preview.",
+ variant: "destructive",
+ });
+ } finally {
+ setIsLoadingHistoryCasePdf(false);
+ }
+ };
+
  const formatDate = (dateString: string) => {
  const date = new Date(dateString);
  return date.toLocaleDateString('en-US', {
@@ -455,6 +510,24 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  const matchesFilter = filterType === "all" || item.search_type === filterType;
  return matchesSearch && matchesFilter;
  });
+
+ useEffect(() => {
+ if (!isDetailModalOpen || !selectedResearch) return;
+
+ setSelectedHistoryCase(null);
+ setHistoryCasePdfError(null);
+ setSelectedHistoryCasePdfUrl((previousUrl) => {
+ if (previousUrl) {
+ window.URL.revokeObjectURL(previousUrl);
+ }
+ return null;
+ });
+
+ const firstResult = selectedResearch.search_results[0];
+ if (firstResult) {
+ handleSelectHistoryCase(firstResult);
+ }
+ }, [isDetailModalOpen, selectedResearch]);
 
  return (
    <div className="w-full space-y-6">
@@ -565,12 +638,6 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <FileText className="w-3 h-3" />
  {research.total_results} results
  </span>
- {research.search_time_ms && (
- <span className="flex items-center gap-1">
- <Clock className="w-3 h-3" />
- {research.search_time_ms}ms
- </span>
- )}
  {research.ai_summary && (
  <span className="flex items-center gap-1">
  <Brain className="w-3 h-3" />
@@ -665,12 +732,6 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <span className="text-muted-foreground">Top K:</span>
  <p>{selectedResearch.top_k}</p>
  </div>
- {selectedResearch.search_time_ms && (
- <div>
- <span className="text-muted-foreground">Search Time:</span>
- <p>{selectedResearch.search_time_ms}ms</p>
- </div>
- )}
  </div>
  </div>
  </CardContent>
@@ -678,13 +739,17 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
 
  {/* AI Summary */}
  {selectedResearch.ai_summary && (
- <Card className="bg-card border-border">
- <CardHeader>
- <CardTitle className="flex items-center gap-2 text-foreground">
- <Brain className="w-5 h-5 text-primary" />
- AI Summary
- </CardTitle>
- </CardHeader>
+<Card className="border border-border shadow-lg bg-card">
+<CardHeader className="bg-primary/5 dark:bg-primary/10 rounded-t-lg border-b border-border">
+<div className="flex items-center justify-between">
+<CardTitle className="flex items-center gap-3 text-xl text-foreground">
+<div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Brain className="w-5 h-5 text-primary-foreground" />
+</div>
+<span>AI Summary</span>
+</CardTitle>
+</div>
+</CardHeader>
  <CardContent className="space-y-6">
  {(() => {
  const parsedData = getParsedAISummaryData(selectedResearch.ai_summary);
@@ -698,6 +763,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  variant="outline"
  size="sm"
  onClick={() => handleCopyContent(parsedData.ai_summary)}
+className="mt-1"
  >
  <Copy className="w-4 h-4 mr-2" />
  Copy Summary
@@ -706,6 +772,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  variant="outline"
  size="sm"
  onClick={() => handleDownloadSummary(selectedResearch, parsedData)}
+className="mt-1"
  >
  <Download className="w-4 h-4 mr-2" />
  Download Summary
@@ -713,10 +780,12 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
 
- <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Sparkles className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">AI Summary</h3>
+<div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Sparkles className="w-4 h-4 text-primary-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Summary</h3>
  </div>
  <div className="text-sm leading-relaxed text-foreground">
    {(() => {
@@ -740,17 +809,19 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </div>
  </div>
 
- {parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
- <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Lightbulb className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Key Legal Insights</h3>
+{parsedData.key_legal_insights && parsedData.key_legal_insights.length > 0 && (
+<div className="bg-primary/5 dark:bg-primary/10 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Lightbulb className="w-4 h-4 text-primary-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Key Legal Insights</h3>
  </div>
  <div className="space-y-3">
  {parsedData.key_legal_insights.map((insight, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(insight)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-foreground flex-1">{parseBoldText(insight)}</span>
  </div>
  ))}
  </div>
@@ -758,16 +829,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.relevant_precedents && parsedData.relevant_precedents.length > 0 && (
- <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Award className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Relevant Precedents</h3>
+<div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-xl p-6 border-2 border-orange-200 dark:border-orange-800">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center shadow-md">
+<Award className="w-4 h-4 text-white" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Relevant Precedents</h3>
  </div>
  <div className="space-y-3">
  {parsedData.relevant_precedents.map((precedent, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(precedent)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-orange-100 dark:border-orange-900/50 hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-orange-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(precedent)}</span>
  </div>
  ))}
  </div>
@@ -775,16 +848,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.statutory_provisions && parsedData.statutory_provisions.length > 0 && (
- <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <BookOpen className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Statutory Provisions</h3>
+<div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-xl p-6 border-2 border-indigo-200 dark:border-indigo-800">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+<BookOpen className="w-4 h-4 text-white" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Statutory Provisions</h3>
  </div>
  <div className="space-y-3">
  {parsedData.statutory_provisions.map((provision, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(provision)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-indigo-100 dark:border-indigo-900/50 hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-indigo-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(provision)}</span>
  </div>
  ))}
  </div>
@@ -792,16 +867,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.procedural_developments && parsedData.procedural_developments.length > 0 && (
- <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Zap className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Procedural Developments</h3>
+<div className="bg-muted/50 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-md">
+<Zap className="w-4 h-4 text-primary-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Procedural Developments</h3>
  </div>
  <div className="space-y-3">
  {parsedData.procedural_developments.map((development, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(development)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-card rounded-lg border border-border hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-primary rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-foreground flex-1">{parseBoldText(development)}</span>
  </div>
  ))}
  </div>
@@ -809,16 +886,18 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.practical_implications && parsedData.practical_implications.length > 0 && (
- <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <Users className="w-5 h-5 text-primary" />
- <h3 className="font-semibold text-lg text-foreground">Practical Implications</h3>
+<div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 rounded-xl p-6 border-2 border-rose-200 dark:border-rose-800">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
+<Users className="w-4 h-4 text-white" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Practical Implications</h3>
  </div>
  <div className="space-y-3">
  {parsedData.practical_implications.map((implication, index) => (
- <div key={index} className="flex items-start gap-3 p-3 bg-muted/80 rounded-lg border border-border">
- <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
- <span className="text-sm text-foreground">{parseBoldText(implication)}</span>
+<div key={index} className="flex items-start gap-4 p-4 bg-white/70 dark:bg-gray-800/70 rounded-lg border border-rose-100 dark:border-rose-900/50 hover:shadow-md transition-shadow">
+<div className="w-2.5 h-2.5 bg-rose-500 rounded-full mt-2 flex-shrink-0 shadow-sm"></div>
+<span className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 flex-1">{parseBoldText(implication)}</span>
  </div>
  ))}
  </div>
@@ -826,14 +905,14 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  )}
 
  {parsedData.legal_areas_covered && parsedData.legal_areas_covered.length > 0 && (
- <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
+<div className="bg-primary/5 dark:bg-primary/10 rounded-lg p-6 border border-border">
+<div className="flex items-center gap-2 mb-4">
  <Target className="w-5 h-5 text-primary" />
  <h3 className="font-semibold text-lg text-foreground">Legal Areas Covered</h3>
  </div>
  <div className="flex flex-wrap gap-2">
  {parsedData.legal_areas_covered.map((area, index) => (
- <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-primary/20 dark:text-foreground px-3 py-1">
+<Badge key={index} variant="secondary" className="bg-primary/20 text-foreground px-3 py-1">
  {parseBoldText(area)}
  </Badge>
  ))}
@@ -843,14 +922,20 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
 
  {/* Sources Analyzed */}
  {selectedResearch.ai_summary.sources_analyzed && selectedResearch.ai_summary.sources_analyzed.length > 0 && (
- <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-card dark:to-primary/10 rounded-lg p-6 border border-border">
- <div className="flex items-center gap-2 mb-4">
- <FileText className="w-5 h-5 text-muted-foreground" />
- <h3 className="font-semibold text-lg text-foreground">Sources Analyzed</h3>
+<div className="bg-muted/50 rounded-xl p-6 border border-border">
+<div className="flex items-center gap-3 mb-5">
+<div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center shadow-md border border-border">
+<FileText className="w-4 h-4 text-muted-foreground" />
+</div>
+<h3 className="font-bold text-lg text-foreground">Sources Analyzed</h3>
+<Badge variant="secondary" className="ml-auto">
+{selectedResearch.ai_summary.sources_analyzed.length} {selectedResearch.ai_summary.sources_analyzed.length === 1 ? 'source' : 'sources'}
+</Badge>
  </div>
- <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
  {selectedResearch.ai_summary.sources_analyzed.map((source, index) => (
- <div key={index} className="text-sm text-muted-foreground bg-muted rounded px-3 py-2 border border-border">
+<div key={index} className="flex items-center gap-2 text-sm text-foreground bg-white/70 dark:bg-gray-800/70 rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+<FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
  {formatFileName(source)}
  </div>
  ))}
@@ -873,80 +958,186 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  </CardTitle>
  </CardHeader>
  <CardContent>
- <div className="space-y-4">
- {selectedResearch.search_results.map((result, index) => (
- <Card key={index} className="hover:shadow-lg transition-shadow duration-200 bg-card border-border">
- <CardHeader className="pb-3">
- <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
- <div className="flex-1 min-w-0">
- <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
- <span className="flex items-center gap-1">
- <Filter className="w-3 h-3" />
+ {selectedResearch.search_results.length === 0 ? (
+ <Card className="border border-border">
+ <CardContent className="pt-10 pb-10 text-center">
+ <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+ <Search className="w-8 h-8 text-muted-foreground" />
+ </div>
+ <h3 className="text-lg font-semibold mb-2 text-foreground">No results found</h3>
+ <p className="text-muted-foreground">No case results are available in this history item.</p>
+ </CardContent>
+ </Card>
+ ) : (
+ <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+ <Card className="xl:col-span-4 border border-border overflow-hidden">
+ <CardHeader className="pb-3 border-b border-border">
+ <CardTitle className="text-base">Cases</CardTitle>
+ </CardHeader>
+ <CardContent className="p-0">
+ <div className="max-h-[70vh] overflow-y-auto">
+ {selectedResearch.search_results.map((result, index) => {
+ const isSelected = selectedHistoryCase?.source_file === result.source_file;
+ return (
+ <button
+ key={`${resolveLegalResearchPdfDocumentId(result) || result.source_file}-${index}`}
+ type="button"
+ onClick={() => handleSelectHistoryCase(result)}
+ className={`w-full text-left p-4 border-b border-border transition-colors ${
+ isSelected ? "bg-primary/10" : "hover:bg-muted/60"
+ }`}
+ >
+ <div className="flex items-start justify-between gap-3">
+ <div className="min-w-0 flex-1">
+ <div className="flex items-center gap-2 mb-2">
+ <Badge variant="outline" className="text-xs">
+ Case {index + 1}
+ </Badge>
+ <span className="text-xs text-muted-foreground truncate">
  {formatFileName(result.source_file)}
  </span>
- {result.section_header && (
- <span className="flex items-center gap-1">
- <BookOpen className="w-3 h-3" />
- {result.section_header}
- </span>
- )}
  </div>
+ <p className="text-sm font-medium text-foreground line-clamp-2">
+ {result.title}
+ </p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                {result.section_header && (
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {result.section_header}
+                                  </p>
+                                )}
+                                {typeof result.similarity_score === "number" && (
+                                  <Badge
+                                    variant="secondary"
+                                    className={`text-[10px] ${getSimilarityColor(result.similarity_score)}`}
+                                  >
+                                    {(result.similarity_score * 100).toFixed(1)}%
+                                  </Badge>
+                                )}
+                                {result.court_type && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {result.court_type}
+                                  </Badge>
+                                )}
+                                {result.year && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {result.year}
+                                  </Badge>
+                                )}
+                              </div>
  </div>
- <div className="flex items-center gap-2 flex-shrink-0">
  <Button
  variant="ghost"
  size="sm"
- onClick={() => handleCopyContent(result.content)}
+ onClick={(e) => {
+ e.stopPropagation();
+ handleCopyContent(buildCaseCopyText(result));
+ }}
  className="h-8 w-8 p-0"
  >
- <Copy className="w-4 h-4" />
+ <Copy className="w-3.5 h-3.5" />
  </Button>
  </div>
+ </button>
+ );
+ })}
  </div>
- </CardHeader>
- <CardContent className="pt-0">
- <div className="bg-muted/50 rounded-lg p-4 border">
- <SimpleMarkdownRenderer 
- content={normalizeContentLineBreaks(result.content)} 
- className="text-sm leading-relaxed"
- />
+ </CardContent>
+ </Card>
+
+ <Card className="xl:col-span-8 border border-border overflow-hidden">
+ <CardHeader className="pb-3 border-b border-border">
+ <div className="flex items-center justify-between gap-3">
+ <div className="min-w-0">
+ <CardTitle className="text-base truncate">
+ {selectedHistoryCase ? selectedHistoryCase.title : "Select a case to preview PDF"}
+ </CardTitle>
+ {selectedHistoryCase && (
+ <p className="text-xs text-muted-foreground mt-1 truncate">
+ {formatFileName(selectedHistoryCase.source_file)}
+ </p>
+ )}
+                      {selectedHistoryCase && (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {selectedHistoryCase.section_header && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedHistoryCase.section_header}
+                            </Badge>
+                          )}
+                          {typeof selectedHistoryCase.similarity_score === "number" && (
+                            <Badge
+                              variant="secondary"
+                              className={`text-[10px] ${getSimilarityColor(selectedHistoryCase.similarity_score)}`}
+                            >
+                              Match {(selectedHistoryCase.similarity_score * 100).toFixed(1)}%
+                            </Badge>
+                          )}
+                          {selectedHistoryCase.court_type && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedHistoryCase.court_type}
+                            </Badge>
+                          )}
+                          {selectedHistoryCase.year && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {selectedHistoryCase.year}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
  </div>
- <div className="flex items-center justify-between mt-3 pt-3 border-t">
- <div className="flex items-center gap-4 text-xs text-muted-foreground">
- </div>
+ {selectedHistoryCase && (
  <div className="flex items-center gap-2">
  <Button
  variant="outline"
  size="sm"
- onClick={() => handleCopyContent(result.content)}
- className="h-8 text-xs"
+ onClick={() => handleDownloadPDF(selectedHistoryCase.title || "legal_research", selectedHistoryCase)}
+ disabled={isGeneratingPDF}
  >
- <Copy className="w-3 h-3 mr-1" />
- Copy
- </Button>
- <Button
- variant="outline"
- size="sm"
- className="h-8 text-xs"
- onClick={() => handleViewFullDocument(result)}
- disabled={
- isLoadingDocument ||
- (!result.document_id && !result.pdf_download_url)
- }
- >
- {isLoadingDocument ? (
- <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+ {isGeneratingPDF ? (
+ <Loader2 className="w-4 h-4 mr-2 animate-spin" />
  ) : (
- <FileTextIcon className="w-3 h-3 mr-1" />
+ <Download className="w-4 h-4 mr-2" />
  )}
- Full Document
+ {isGeneratingPDF ? "Generating PDF..." : "Download"}
  </Button>
  </div>
+ )}
  </div>
+ </CardHeader>
+ <CardContent className="p-0 h-[70vh] bg-muted/20">
+ {!selectedHistoryCase ? (
+ <div className="h-full flex items-center justify-center text-sm text-muted-foreground px-4 text-center">
+ Click any case on the left to render its PDF here.
+ </div>
+ ) : isLoadingHistoryCasePdf ? (
+ <div className="h-full flex items-center justify-center">
+ <div className="flex items-center gap-2 text-sm text-muted-foreground">
+ <Loader2 className="w-4 h-4 animate-spin" />
+ Loading PDF preview...
+ </div>
+ </div>
+ ) : historyCasePdfError ? (
+ <div className="h-full flex items-center justify-center px-4">
+ <Alert variant="destructive" className="max-w-md">
+ <AlertCircle className="h-4 w-4" />
+ <AlertDescription>{historyCasePdfError}</AlertDescription>
+ </Alert>
+ </div>
+ ) : selectedHistoryCasePdfUrl ? (
+ <iframe
+ src={selectedHistoryCasePdfUrl}
+ className="w-full h-full border-0"
+ title={selectedHistoryCase.title || "Case PDF preview"}
+ />
+ ) : (
+ <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+ PDF preview unavailable.
+ </div>
+ )}
  </CardContent>
  </Card>
- ))}
  </div>
+ )}
  </CardContent>
  </Card>
  </div>
