@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { throwPublicHttpError } from "./apiClientErrors";
 
 // Enhanced Contract Interfaces
 export interface ContractCategory {
@@ -96,8 +97,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('GET /enhanced-contracts/categories', response.status, errorText, {
+          default: 'Could not load contract categories. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -122,8 +124,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch templates for category ${category}: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('GET /enhanced-contracts/templates', response.status, errorText, {
+          default: 'Could not load templates for this category. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -148,8 +151,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch all templates: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('GET /enhanced-contracts/templates/all', response.status, errorText, {
+          default: 'Could not load contract templates. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -174,8 +178,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch template details for ${templateId}: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError(`GET /enhanced-contracts/templates/${templateId}`, response.status, errorText, {
+          default: 'Could not load this template. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -200,8 +205,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to search templates: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('GET /enhanced-contracts/search', response.status, errorText, {
+          default: 'Could not search templates. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -229,8 +235,10 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to validate contract inputs: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('POST /enhanced-contracts/validate', response.status, errorText, {
+          validation: 'Could not validate these contract fields. Please check them and try again.',
+          default: 'Could not validate contract inputs. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -256,8 +264,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to generate contract: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('POST /enhanced-contracts/draft', response.status, errorText, {
+          default: 'Could not generate this contract. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -289,8 +298,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch contract drafts: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError('GET /enhanced-contracts/drafts', response.status, errorText, {
+          default: 'Could not load your contract drafts. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -326,8 +336,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to fetch contract draft ${contractId}: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError(`GET /enhanced-contracts/drafts/${contractId}`, response.status, errorText, {
+          default: 'Could not load this contract draft. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -352,8 +363,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to delete contract draft ${contractId}: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError(`DELETE /enhanced-contracts/drafts/${contractId}`, response.status, errorText, {
+          default: 'Could not delete this contract draft. Please try again.',
+        });
       }
 
       const data = await response.json();
@@ -380,8 +392,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to download contract PDF ${contractId}: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError(`GET /enhanced-contracts/drafts/${contractId}/download/pdf`, response.status, errorText, {
+          default: 'Could not download this contract as PDF. Please try again.',
+        });
       }
 
       const blob = await response.blob();
@@ -406,8 +419,9 @@ export class EnhancedContractApi {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`Failed to download contract Word ${contractId}: ${response.status} ${response.statusText} - ${errorText}`);
+        throwPublicHttpError(`GET /enhanced-contracts/drafts/${contractId}/download/word`, response.status, errorText, {
+          default: 'Could not download this contract as Word. Please try again.',
+        });
       }
 
       const blob = await response.blob();

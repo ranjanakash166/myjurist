@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, FileText, Check, Plus, Upload, Settings, AlertTriangle, FileUp, X, Clock, CheckCircle } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
+import { daEnsureOk } from '@/lib/documentAnalysisApi';
 
 interface ApiResponse {
   document_id: string;
@@ -146,16 +148,13 @@ export default function DocumentAnalysisPage() {
         headers: getAuthHeaders(),
       });
       
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to fetch chats');
-      }
+      await daEnsureOk(res, 'GET /chats', 'Could not load your document chats. Please try again.');
       
       const data = await res.json();
       setChats(data.chats || []);
       setChatTotalCount(data.total || 0);
-    } catch (err: any) {
-      setChatsError(err.message || 'Failed to fetch chats');
+    } catch (err: unknown) {
+      setChatsError(getUserFacingError(err, 'Could not load your document chats. Please try again.'));
       setChats([]);
       setChatTotalCount(0);
     } finally {
@@ -217,10 +216,7 @@ export default function DocumentAnalysisPage() {
           document_ids: selectedDocIds,
         }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to create session');
-      }
+      await daEnsureOk(res, 'POST /chats/{id}/sessions', 'Could not create this session. Please try again.');
       const data = await res.json();
       setCreatedSession(data);
       setSessionSuccess(true);
@@ -230,8 +226,8 @@ export default function DocumentAnalysisPage() {
       // Fetch documents for the new session
       await fetchChatDocuments(createdChat.id);
       await fetchSessionDocuments(createdChat.id, data.id);
-    } catch (err: any) {
-      setSessionError(err.message || 'An error occurred while creating session.');
+    } catch (err: unknown) {
+      setSessionError(getUserFacingError(err, 'Could not create this session. Please try again.'));
     } finally {
       setSessionLoading(false);
     }
@@ -271,16 +267,13 @@ export default function DocumentAnalysisPage() {
             headers: getAuthHeaders(),
           });
           
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            throw new Error(err?.detail?.[0]?.msg || 'Failed to fetch sessions');
-          }
+          await daEnsureOk(res, 'GET /chats/{id}/sessions', 'Could not load sessions for this chat. Please try again.');
           
           const data = await res.json();
           setSessions(data.sessions || []);
           setSessionTotalCount(data.total || 0);
-        } catch (err: any) {
-          setSessionsError(err.message || 'Failed to fetch sessions');
+        } catch (err: unknown) {
+          setSessionsError(getUserFacingError(err, 'Could not load sessions for this chat. Please try again.'));
           setSessions([]);
           setSessionTotalCount(0);
         } finally {
@@ -318,10 +311,7 @@ export default function DocumentAnalysisPage() {
         headers,
         body: formData,
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to upload documents');
-      }
+      await daEnsureOk(res, 'POST /chats/{id}/documents', 'Could not upload your documents. Please try again.');
       const data = await res.json();
       
       // Check if upload was successful
@@ -335,13 +325,10 @@ export default function DocumentAnalysisPage() {
       } else {
         // Handle upload failure
         const failedDocs = data.failed_documents || [];
-        const errorMessage = failedDocs.length > 0 
-          ? `Failed to upload: ${failedDocs.join(', ')}`
-          : 'Failed to upload documents';
-        throw new Error(errorMessage);
+        throw new Error('Some documents could not be uploaded. Please try again with supported files.');
       }
-    } catch (err: any) {
-      setUploadError(err.message || 'An error occurred while uploading documents.');
+    } catch (err: unknown) {
+      setUploadError(getUserFacingError(err, 'Could not upload your documents. Please try again.'));
     } finally {
       setUploading(false);
     }
@@ -389,18 +376,16 @@ export default function DocumentAnalysisPage() {
         headers: getAuthHeaders(),
         body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Chat failed");
-      }
+      await daEnsureOk(res, 'POST /chat', 'Could not get a response for your message. Please try again.');
       const data = await res.json();
       await simulateStreaming(data.response);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = getUserFacingError(err, 'Could not get a response for your message. Please try again.');
       setChatMessages(prev => [
         ...prev,
-        { sender: "system", text: "(Error) " + (err.message || "An error occurred during chat."), time: new Date() },
+        { sender: "system", text: "(Error) " + msg, time: new Date() },
       ]);
-      setChatError(err.message || "An error occurred during chat.");
+      setChatError(msg);
     } finally {
       setChatLoading(false);
     }
@@ -429,16 +414,13 @@ export default function DocumentAnalysisPage() {
       const res = await fetch(`${API_BASE_URL}/chats/${chat.id}/sessions?skip=${skip}&limit=${limit}&active_only=true`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Failed to fetch sessions");
-      }
+      await daEnsureOk(res, 'GET /chats/{id}/sessions (history)', 'Could not load sessions for this chat. Please try again.');
       const data = await res.json();
       setSessions(data.sessions || []);
       setSessionTotalCount(data.total || 0);
       setSessionPage(0); // Reset to first page
-    } catch (err: any) {
-      setSessionsError(err.message || "Failed to load chat sessions.");
+    } catch (err: unknown) {
+      setSessionsError(getUserFacingError(err, 'Could not load chat sessions. Please try again.'));
     } finally {
       setSessionsLoading(false);
     }
@@ -458,10 +440,7 @@ export default function DocumentAnalysisPage() {
       const res = await fetch(`${API_BASE_URL}/chats/${session.chat_id}/sessions/${session.id}/messages?skip=0&limit=100`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Failed to fetch session messages");
-      }
+      await daEnsureOk(res, 'GET /chats/.../messages', 'Could not load messages for this session. Please try again.');
       const data = await res.json();
       const chatHistory = data.messages.map((msg: Message) => [
         { sender: "user", text: msg.user_message, time: new Date(msg.timestamp) },
@@ -475,11 +454,12 @@ export default function DocumentAnalysisPage() {
         await fetchChatDocuments(session.chat_id);
         await fetchSessionDocuments(session.chat_id, session.id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = getUserFacingError(err, 'Could not load this chat session. Please try again.');
       setChatMessages([
-        { sender: "system", text: "(Error) " + (err.message || "Failed to load chat session."), time: new Date() },
+        { sender: "system", text: "(Error) " + msg, time: new Date() },
       ]);
-      setChatError(err.message || "Failed to load chat session.");
+      setChatError(msg);
     } finally {
       setChatLoading(false);
     }
@@ -497,9 +477,7 @@ export default function DocumentAnalysisPage() {
       const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents/${documentId}/download`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        throw new Error("Download failed");
-      }
+      await daEnsureOk(res, 'GET /chats/.../documents/.../download', 'Could not download this document. Please try again.');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -509,9 +487,9 @@ export default function DocumentAnalysisPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Download error:', err);
-      alert('Failed to download document: ' + err.message);
+      alert(getUserFacingError(err, 'Could not download this document. Please try again.'));
     }
   };
 
@@ -527,17 +505,15 @@ export default function DocumentAnalysisPage() {
       const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents/${documentId}/download`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        throw new Error("View failed");
-      }
+      await daEnsureOk(res, 'GET /chats/.../documents/.../download (view)', 'Could not open this document. Please try again.');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       setPdfUrl(url);
       setPdfFilename(filename);
       setPdfModalOpen(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('View error:', err);
-      alert('Failed to view document: ' + err.message);
+      alert(getUserFacingError(err, 'Could not open this document. Please try again.'));
     }
   };
 
@@ -604,16 +580,13 @@ export default function DocumentAnalysisPage() {
           description: chatDescription,
         }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Failed to create chat");
-      }
+      await daEnsureOk(res, 'POST /chats', 'Could not create this chat. Please try again.');
       const data = await res.json();
       setCreatedChat(data);
       setNewChatSuccess(true);
       setNewAnalysisStep('upload');
-    } catch (err: any) {
-      setNewChatError(err.message || "An error occurred while creating chat.");
+    } catch (err: unknown) {
+      setNewChatError(getUserFacingError(err, 'Could not create this chat. Please try again.'));
     } finally {
       setNewChatLoading(false);
     }
@@ -642,10 +615,7 @@ export default function DocumentAnalysisPage() {
           document_ids: documentIds, // Include all uploaded documents
         }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to create session');
-      }
+      await daEnsureOk(res, 'POST /chats/{id}/sessions (auto)', 'Could not create this session. Please try again.');
       const data = await res.json();
       setCreatedSession(data);
       setSessionSuccess(true);
@@ -658,8 +628,8 @@ export default function DocumentAnalysisPage() {
       
       // Collapse previous steps
       setCollapsedSteps({ create: true, upload: true, select: true, chat: false });
-    } catch (err: any) {
-      setSessionError(err.message || 'An error occurred while creating session.');
+    } catch (err: unknown) {
+      setSessionError(getUserFacingError(err, 'Could not create this session. Please try again.'));
     } finally {
       setSessionLoading(false);
     }
@@ -720,10 +690,7 @@ export default function DocumentAnalysisPage() {
         body: JSON.stringify({ message: userMsg }),
       });
       
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to send message');
-      }
+      await daEnsureOk(res, 'POST /chats/.../sessions/.../messages', 'Could not send your message. Please try again.');
       
       const data = await res.json();
       
@@ -744,11 +711,12 @@ export default function DocumentAnalysisPage() {
           last_activity: new Date().toISOString()
         } : null);
       }
-    } catch (err: any) {
-      setChatError(err.message || 'An error occurred while sending message.');
+    } catch (err: unknown) {
+      const msg = getUserFacingError(err, 'Could not send your message. Please try again.');
+      setChatError(msg);
       setChatMessages(prev => [
         ...prev,
-        { sender: "system", text: "(Error) " + (err.message || "An error occurred during chat."), time: new Date() },
+        { sender: "system", text: "(Error) " + msg, time: new Date() },
       ]);
     } finally {
       setChatLoading(false);
@@ -763,12 +731,10 @@ export default function DocumentAnalysisPage() {
       const res = await fetch(`${API_BASE_URL}/chats/${chatId}/documents`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        throw new Error('Failed to fetch chat documents');
-      }
+      await daEnsureOk(res, 'GET /chats/{id}/documents', 'Could not load documents for this chat.');
       const data = await res.json();
       setChatDocuments(data.documents || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching chat documents:', err);
     } finally {
       setChatDocumentsLoading(false);
@@ -783,9 +749,7 @@ export default function DocumentAnalysisPage() {
       const res = await fetch(`${API_BASE_URL}/chats/${chatId}/sessions/${sessionId}/documents`, {
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        throw new Error('Failed to fetch session documents');
-      }
+      await daEnsureOk(res, 'GET /chats/.../sessions/.../documents', 'Could not load session documents.');
       const data = await res.json();
       
       // Handle different response formats
@@ -833,15 +797,12 @@ export default function DocumentAnalysisPage() {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to delete document');
-      }
+      await daEnsureOk(res, 'DELETE /chats/.../documents', 'Could not delete this document. Please try again.');
       // Refresh document lists after delete
       await fetchChatDocuments(chatId);
       if (sessionId) await fetchSessionDocuments(chatId, sessionId);
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete document');
+    } catch (err: unknown) {
+      alert(getUserFacingError(err, 'Could not delete this document. Please try again.'));
     }
   };
 
@@ -857,17 +818,14 @@ export default function DocumentAnalysisPage() {
           method: 'PUT',
           headers: getAuthHeaders(),
         });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err?.detail?.[0]?.msg || 'Failed to add document to session');
-        }
+        await daEnsureOk(res, 'PUT /chats/.../sessions/.../documents', 'Could not add this document to the session.');
       }
       // Refresh session documents after adding
       await fetchSessionDocuments(chatId, sessionId);
       setAddToSessionSuccessTrigger(t => t + 1);
       toast({ title: 'Added to session', description: 'Document(s) added to session context.' });
-    } catch (err: any) {
-      alert(err.message || 'Failed to add document to session');
+    } catch (err: unknown) {
+      alert(getUserFacingError(err, 'Could not add documents to this session. Please try again.'));
     }
   };
 
@@ -888,10 +846,7 @@ export default function DocumentAnalysisPage() {
         headers,
         body: formData,
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || 'Failed to upload documents');
-      }
+      await daEnsureOk(res, 'POST /chats/.../documents (new)', 'Could not upload these documents. Please try again.');
       const data = await res.json();
       const uploadedDocs = data.uploaded_documents || [];
       // Add each uploaded doc to session context
@@ -900,16 +855,13 @@ export default function DocumentAnalysisPage() {
           method: 'PUT',
           headers: getAuthHeaders(),
         });
-        if (!putRes.ok) {
-          const err = await putRes.json().catch(() => ({}));
-          throw new Error(err?.detail?.[0]?.msg || 'Failed to add document to session');
-        }
+        await daEnsureOk(putRes, 'PUT session documents (upload new)', 'Could not attach an uploaded document to this session.');
       }
       await fetchChatDocuments(chatId);
       await fetchSessionDocuments(chatId, sessionId);
       toast({ title: 'Documents uploaded', description: 'New documents added to chat and session context.' });
-    } catch (err: any) {
-      toast({ title: 'Upload failed', description: err.message || 'Failed to upload documents', variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Upload failed', description: getUserFacingError(err, 'Could not upload documents. Please try again.'), variant: 'destructive' });
     } finally {
       setUploadingNewDocuments(false);
     }

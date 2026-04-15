@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { fetchDashboardStats, type DashboardStats } from '@/lib/dashboardApi';
 import { fetchPlanInfo, fetchPlanUsage, type PlanInfo, type PlanUsage } from '@/lib/planApi';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import { useResponsive } from './hooks/useResponsive';
 import { LoadingSkeleton } from './components/shared/LoadingSkeleton';
 import { ErrorDisplay } from './components/shared/ErrorDisplay';
@@ -52,7 +53,10 @@ export default function DashboardPage() {
           setPlanInfo(planInfoResult.value);
           setPlanInfoError(null);
         } else {
-          const errorMsg = planInfoResult.reason instanceof Error ? planInfoResult.reason.message : String(planInfoResult.reason);
+          const errorMsg = getUserFacingError(
+            planInfoResult.reason,
+            'Could not load your plan information. Please try again.'
+          );
           setPlanInfoError(errorMsg);
           setPlanInfo(null);
         }
@@ -62,18 +66,23 @@ export default function DashboardPage() {
           setPlanUsage(planUsageResult.value);
           setPlanUsageError(null);
         } else {
-          const errorMsg = planUsageResult.reason instanceof Error ? planUsageResult.reason.message : String(planUsageResult.reason);
+          const errorMsg = getUserFacingError(
+            planUsageResult.reason,
+            'Could not load your usage details. Please try again.'
+          );
           setPlanUsageError(errorMsg);
           setPlanUsage(null);
         }
 
         // Set error only if dashboard data failed (required)
         if (dashboardDataResult.status === 'rejected') {
-          setError(dashboardDataResult.reason instanceof Error ? dashboardDataResult.reason.message : 'Failed to load dashboard data');
+          setError(
+            getUserFacingError(dashboardDataResult.reason, 'Could not load your dashboard. Please try again.')
+          );
         }
       } catch (err) {
         console.error('Unexpected error loading dashboard:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+        setError(getUserFacingError(err, 'Could not load your dashboard. Please try again.'));
       } finally {
         setLoading(false);
       }

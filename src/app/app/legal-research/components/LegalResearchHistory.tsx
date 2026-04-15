@@ -52,6 +52,7 @@ import {
 } from "@/lib/legalResearchApi";
 import SimpleMarkdownRenderer from "../../../../components/SimpleMarkdownRenderer";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import { normalizeContentLineBreaks, parseBoldText, cn } from "@/lib/utils";
 
 interface LegalResearchHistoryProps {
@@ -105,10 +106,10 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  setHasMore(response.length === itemsPerPage);
  setCurrentPage(page);
  } catch (err: any) {
- setError(err.message || "Failed to load research history");
+ setError(getUserFacingError(err, "Could not load research history. Please try again."));
  toast({
  title: "Failed to load history",
- description: err.message || "Failed to load research history",
+ description: getUserFacingError(err, "Could not load research history. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -235,7 +236,7 @@ export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
  console.error('Summary download error:', err);
  toast({
  title: "Summary download failed",
- description: err.message || "Failed to download summary. Please try again.",
+ description: getUserFacingError(err, "Could not download the summary. Please try again."),
  variant: "destructive",
  });
  }
@@ -278,7 +279,7 @@ const handleDownloadPDF = async (documentTitle: string, result: SearchResult) =>
  console.error('PDF download error:', err);
  toast({
  title: "PDF download failed",
- description: err.message || "Failed to download PDF. Please try again.",
+ description: getUserFacingError(err, "Could not download the PDF. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -385,7 +386,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  console.error('PDF download error:', err);
  toast({
  title: "PDF download failed",
- description: err.message || "Failed to download PDF. Please try again.",
+ description: getUserFacingError(err, "Could not download the PDF. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -423,10 +424,10 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  });
  } catch (err: any) {
  console.error('History case PDF preview error:', err);
- setHistoryCasePdfError(err.message || "Failed to load PDF preview.");
+ setHistoryCasePdfError(getUserFacingError(err, "Could not load the PDF preview. Please try again."));
  toast({
  title: "Failed to load PDF",
- description: err.message || "Failed to load PDF preview.",
+ description: getUserFacingError(err, "Could not load the PDF preview. Please try again."),
  variant: "destructive",
  });
  } finally {

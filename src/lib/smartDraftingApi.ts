@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { throwPublicHttpError } from "./apiClientErrors";
 
 /** Single question from the drafting API (e.g. landlord_name, type text, options null). */
 export interface DraftingQuestion {
@@ -48,12 +49,11 @@ export async function sendDraftingMessage(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg =
-      (err as { detail?: Array<{ msg?: string }> })?.detail?.[0]?.msg ||
-      (err as { message?: string }).message ||
-      res.statusText;
-    throw new Error(msg || "Drafting request failed");
+    const errorText = await res.text().catch(() => "");
+    throwPublicHttpError("POST /drafting", res.status, errorText, {
+      validation: "Could not continue drafting. Please check your input and try again.",
+      default: "Could not send your drafting message. Please try again.",
+    });
   }
 
   return res.json() as Promise<DraftingResponse>;
@@ -78,12 +78,10 @@ export async function downloadDraftContract(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg =
-      (err as { detail?: Array<{ msg?: string }> })?.detail?.[0]?.msg ||
-      (err as { message?: string }).message ||
-      res.statusText;
-    throw new Error(msg || `Download failed: ${res.statusText}`);
+    const errorText = await res.text().catch(() => "");
+    throwPublicHttpError(`GET /drafting/contract/${contractId}/${format}`, res.status, errorText, {
+      default: "Could not download your contract. Please try again.",
+    });
   }
 
   const blob = await res.blob();
@@ -120,12 +118,10 @@ export async function getDraftContractDocxBlob(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg =
-      (err as { detail?: Array<{ msg?: string }> })?.detail?.[0]?.msg ||
-      (err as { message?: string }).message ||
-      res.statusText;
-    throw new Error(msg || `Failed to fetch contract: ${res.statusText}`);
+    const errorText = await res.text().catch(() => "");
+    throwPublicHttpError(`GET /drafting/contract/${contractId}/docx`, res.status, errorText, {
+      default: "Could not load your contract for editing. Please try again.",
+    });
   }
 
   return res.blob();
@@ -152,12 +148,10 @@ export async function updateDraftContract(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg =
-      (err as { detail?: Array<{ msg?: string }> })?.detail?.[0]?.msg ||
-      (err as { message?: string }).message ||
-      res.statusText;
-    throw new Error(msg || `Update failed: ${res.statusText}`);
+    const errorText = await res.text().catch(() => "");
+    throwPublicHttpError(`PUT /drafting/contract/${contractId}`, res.status, errorText, {
+      default: "Could not save your contract changes. Please try again.",
+    });
   }
 
   const data = await res.json();

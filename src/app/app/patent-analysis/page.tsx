@@ -1,8 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Search, Gavel, ShieldCheck, AlertTriangle, FileText, Download, Clock, User, FileBarChart } from "lucide-react";
-import { API_BASE_URL } from "../../constants";
 import { useAuth } from "../../../components/AuthProvider";
+import { getUserFacingError } from "@/lib/apiClientErrors";
+import {
+  fetchPatentReportById,
+  fetchPatentReportHistory,
+  fetchPatentReportPdf,
+  postPatentComprehensiveReport,
+  postPatentDisclosureAnalysis,
+  postPatentExclusionsAnalysis,
+  postPatentNoveltyAnalysis,
+  postPatentPriorArtSearch,
+} from "@/lib/patentAnalysisApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,36 +201,14 @@ export default function PatentAnalysisPage() {
     setHistoryError(null);
     try {
       const offset = currentPage * limit;
-      const url = `${API_BASE_URL}/reports/patent/my-reports?limit=${limit}&offset=${offset}`;
-      
-      const headers = {
-        ...getAuthHeaders(),
-        'accept': 'application/json',
-      };
-      
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: headers,
-      });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('Error response:', errorText);
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          errorData = { detail: [{ msg: errorText }] };
-        }
-        throw new Error(errorData?.detail?.[0]?.msg || `HTTP ${res.status}: ${res.statusText}`);
-      }
-      
-      const data: ReportHistoryResponse = await res.json();
+      const data = (await fetchPatentReportHistory(getAuthHeaders, limit, offset)) as ReportHistoryResponse;
       setReportHistory(data.reports || []);
       setTotalCount(data.total_count || 0);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Fetch error:', err);
-      setHistoryError(err.message || "An error occurred while fetching report history.");
+      setHistoryError(
+        getUserFacingError(err, "Could not load your patent report history. Please try again.")
+      );
     } finally {
       setHistoryLoading(false);
     }
@@ -233,25 +221,16 @@ export default function PatentAnalysisPage() {
     setResult(null);
     setSearchResults(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/patents/search`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          query: desc,
-          top_k: 10,
-          min_score: 0.3,
-          include_full_document: false,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Search failed");
-      }
-      const data = await res.json();
+      const data = (await postPatentPriorArtSearch(getAuthHeaders, {
+        query: desc,
+        top_k: 10,
+        min_score: 0.3,
+        include_full_document: false,
+      })) as { results?: unknown[] };
       setSearchResults(data.results || []);
       setResult(null);
-    } catch (err: any) {
-      setError(err.message || "An error occurred during search.");
+    } catch (err: unknown) {
+      setError(getUserFacingError(err, "Could not run prior art search. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -269,30 +248,17 @@ export default function PatentAnalysisPage() {
     setExclusionsError(null);
     setExclusionsResult(null);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/patents/analysis/exclusions/detailed`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            invention_description: desc,
-            section_by_section: true,
-            include_case_law: false,
-            borderline_analysis: true,
-          }),
-        }
-      );
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Exclusions analysis failed");
-      }
-      const data: ExclusionsAnalysisResponse = await res.json();
+      const data = (await postPatentExclusionsAnalysis(getAuthHeaders, {
+        invention_description: desc,
+        section_by_section: true,
+        include_case_law: false,
+        borderline_analysis: true,
+      })) as ExclusionsAnalysisResponse;
       setExclusionsResult(data);
-    } catch (err: any) {
-      setExclusionsError(err.message || "An error occurred during exclusions analysis.");
+    } catch (err: unknown) {
+      setExclusionsError(
+        getUserFacingError(err, "Could not run exclusions analysis. Please try again.")
+      );
     } finally {
       setExclusionsLoading(false);
     }
@@ -305,31 +271,18 @@ export default function PatentAnalysisPage() {
     setDisclosureError(null);
     setDisclosureResult(null);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/patents/analysis/disclosure/detailed`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            invention_description: desc,
-            check_enablement: true,
-            check_best_mode: true,
-            check_clarity: true,
-            suggest_improvements: true,
-          }),
-        }
-      );
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Disclosure analysis failed");
-      }
-      const data: DisclosureAnalysisResponse = await res.json();
+      const data = (await postPatentDisclosureAnalysis(getAuthHeaders, {
+        invention_description: desc,
+        check_enablement: true,
+        check_best_mode: true,
+        check_clarity: true,
+        suggest_improvements: true,
+      })) as DisclosureAnalysisResponse;
       setDisclosureResult(data);
-    } catch (err: any) {
-      setDisclosureError(err.message || "An error occurred during disclosure analysis.");
+    } catch (err: unknown) {
+      setDisclosureError(
+        getUserFacingError(err, "Could not run disclosure analysis. Please try again.")
+      );
     } finally {
       setDisclosureLoading(false);
     }
@@ -342,30 +295,15 @@ export default function PatentAnalysisPage() {
     setNoveltyError(null);
     setNoveltyResult(null);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/patents/analysis/novelty/detailed`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({
-            invention_description: desc,
-            prior_art_focus: true,
-            feature_by_feature: true,
-            obviousness_analysis: true,
-          }),
-        }
-      );
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Novelty analysis failed");
-      }
-      const data: NoveltyAnalysisResponse = await res.json();
+      const data = (await postPatentNoveltyAnalysis(getAuthHeaders, {
+        invention_description: desc,
+        prior_art_focus: true,
+        feature_by_feature: true,
+        obviousness_analysis: true,
+      })) as NoveltyAnalysisResponse;
       setNoveltyResult(data);
-    } catch (err: any) {
-      setNoveltyError(err.message || "An error occurred during novelty analysis.");
+    } catch (err: unknown) {
+      setNoveltyError(getUserFacingError(err, "Could not run novelty analysis. Please try again."));
     } finally {
       setNoveltyLoading(false);
     }
@@ -389,26 +327,17 @@ export default function PatentAnalysisPage() {
     setReportError(null);
     setComprehensiveReport(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/reports/patent/comprehensive`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          invention_description: inventionDescription,
-          applicant_name: applicantName,
-          invention_title: inventionTitle,
-          report_format: "comprehensive"
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Report generation failed");
-      }
-      const data: ComprehensiveReport = await res.json();
+      const data = (await postPatentComprehensiveReport(getAuthHeaders, {
+        invention_description: inventionDescription,
+        applicant_name: applicantName,
+        invention_title: inventionTitle,
+        report_format: "comprehensive",
+      })) as ComprehensiveReport;
       setComprehensiveReport(data);
       // Start streaming the full report
       await simulateStreaming(data.full_report);
-    } catch (err: any) {
-      setReportError(err.message || "An error occurred during report generation.");
+    } catch (err: unknown) {
+      setReportError(getUserFacingError(err, "Could not generate this report. Please try again."));
     } finally {
       setReportLoading(false);
     }
@@ -443,15 +372,7 @@ export default function PatentAnalysisPage() {
 
   const handleDownloadReport = async (reportId: string, title: string) => {
     try {
-         const downloadurl = `${API_BASE_URL}/reports/patent/report/${reportId}/pdf`;
-      const res = await fetch(downloadurl, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        throw new Error("Download failed");
-      }
-      const blob = await res.blob();
+      const blob = await fetchPatentReportPdf(getAuthHeaders, reportId);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -460,9 +381,9 @@ export default function PatentAnalysisPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Download error:', err);
-      alert('Failed to download report: ' + err.message);
+      alert(getUserFacingError(err, "Could not download this report. Please try again."));
     }
   };
 
@@ -471,18 +392,12 @@ export default function PatentAnalysisPage() {
     setSelectedReportError(null);
     setShowReportModal(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/reports/patent/report/${reportId}`, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.detail?.[0]?.msg || "Failed to fetch report");
-      }
-      const data: ComprehensiveReport = await res.json();
+      const data = (await fetchPatentReportById(getAuthHeaders, reportId)) as ComprehensiveReport;
       setSelectedReport(data);
-    } catch (err: any) {
-      setSelectedReportError(err.message || "An error occurred while fetching report details.");
+    } catch (err: unknown) {
+      setSelectedReportError(
+        getUserFacingError(err, "Could not load this report. Please try again.")
+      );
     } finally {
       setSelectedReportLoading(false);
     }

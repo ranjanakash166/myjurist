@@ -1,5 +1,8 @@
 import { API_BASE_URL } from "../app/constants";
 import { apiCallWithRefresh } from "./utils";
+import { logApiFailure, PublicApiError, throwPublicHttpError } from "./apiClientErrors";
+
+const SESSION_EXPIRED_MESSAGE = "Your session has expired. Please sign in again.";
 
 /** Fields shared by enhanced-search and enhanced-keyword-search request bodies */
 export type LegalResearchSearchBase = {
@@ -149,7 +152,7 @@ function normalizeSearchResult(item: Record<string, unknown>): SearchResult {
 
 function normalizeLegalResearchResponse(data: unknown): LegalResearchResponse {
   if (!data || typeof data !== 'object') {
-    throw new Error('Invalid search response');
+    throw new PublicApiError("Could not read search results. Please try again.");
   }
   const r = data as Record<string, unknown>;
   const rawResults = Array.isArray(r.results) ? r.results : [];
@@ -185,28 +188,32 @@ async function postLegalResearchSearch(
   });
 
   if (!response.ok) {
+    const raw = await response.text().catch(() => "");
     if (response.status === 422) {
-      try {
-        const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map((err) => err.msg).join(', ')}`);
-      } catch {
-        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
-      }
+      logApiFailure(`POST /${pathSuffix} (422)`, response.status, raw);
+      throw new PublicApiError(
+        "Could not run this search. Please adjust your query and try again.",
+        { status: response.status }
+      );
     }
     if (response.status === 401) {
-      throw new Error('Authentication failed. Please log in again.');
+      logApiFailure(`POST /${pathSuffix} (401)`, response.status, raw);
+      throw new PublicApiError(SESSION_EXPIRED_MESSAGE, { status: response.status });
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throwPublicHttpError(`POST /${pathSuffix}`, response.status, raw, {
+      default: "Could not complete this search. Please try again.",
+    });
   }
 
   try {
     const json: unknown = await response.json();
     return normalizeLegalResearchResponse(json);
   } catch (e) {
-    if (e instanceof Error && e.message === 'Invalid search response') {
-      throw e;
-    }
-    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+    if (e instanceof PublicApiError) throw e;
+    logApiFailure(`POST /${pathSuffix} (parse JSON)`, response.status, String(e));
+    throw new PublicApiError("Received an unexpected response from search. Please try again.", {
+      status: response.status,
+    });
   }
 }
 
@@ -275,24 +282,30 @@ export const getLegalDocument = async (
   });
 
   if (!response.ok) {
+    const raw = await response.text().catch(() => "");
     if (response.status === 422) {
-      try {
-        const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-      } catch (jsonError) {
-        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
-      }
+      logApiFailure("POST /legal-research/document (422)", response.status, raw);
+      throw new PublicApiError(
+        "Could not open this document. Please check the reference and try again.",
+        { status: response.status }
+      );
     }
     if (response.status === 401) {
-      throw new Error('Authentication failed. Please log in again.');
+      logApiFailure("POST /legal-research/document (401)", response.status, raw);
+      throw new PublicApiError(SESSION_EXPIRED_MESSAGE, { status: response.status });
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throwPublicHttpError("POST /legal-research/document", response.status, raw, {
+      default: "Could not load this document. Please try again.",
+    });
   }
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+  } catch {
+    logApiFailure("POST /legal-research/document (parse JSON)", response.status, "(parse error)");
+    throw new PublicApiError("Received an unexpected document response. Please try again.", {
+      status: response.status,
+    });
   }
 };
 
@@ -343,13 +356,12 @@ export const downloadLegalDocumentPDF = async (
     }
 
     if (response.status === 422) {
-      try {
-        const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-      } catch (jsonError) {
-        // If JSON parsing fails, it might be a PDF response with wrong content type
-        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
-      }
+      const raw422 = await response.text().catch(() => "");
+      logApiFailure("POST /legal-research/document/pdf (422)", response.status, raw422);
+      throw new PublicApiError(
+        "Could not download this PDF with the selected case reference. Please try again.",
+        { status: response.status }
+      );
     }
     if (response.status === 401) {
       // Try to refresh token and retry
@@ -376,15 +388,24 @@ export const downloadLegalDocumentPDF = async (
             const fallbackBlob = await tryPathFallback();
             if (fallbackBlob) return fallbackBlob;
           }
-          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+          const retryRaw = await retryResponse.text().catch(() => "");
+          throwPublicHttpError(
+            "POST /legal-research/document/pdf (retry)",
+            retryResponse.status,
+            retryRaw,
+            { default: "Could not download this PDF. Please try again." }
+          );
         }
         
         return await retryResponse.blob();
       } else {
-        throw new Error('Authentication failed. Please log in again.');
+        throw new PublicApiError(SESSION_EXPIRED_MESSAGE, { status: 401 });
       }
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const rawFail = await response.text().catch(() => "");
+    throwPublicHttpError("POST /legal-research/document/pdf", response.status, rawFail, {
+      default: "Could not download this PDF. Please try again.",
+    });
   }
 
   // The backend returns binary PDF data directly
@@ -458,30 +479,37 @@ export const downloadOriginalLegalDocumentPDF = async (
         }
         
         if (!retryResponse.ok) {
-          const errorText = await retryResponse.text().catch(() => '');
-          throw new Error(`HTTP error! status: ${retryResponse.status}. URL: ${API_BASE_URL}/pdf/${retryEncodedPath}. Error: ${errorText}`);
+          const errorText = await retryResponse.text().catch(() => "");
+          throwPublicHttpError("GET /pdf (retry)", retryResponse.status, errorText, {
+            default: "Could not download this PDF. Please try again.",
+          });
         }
         
         return await retryResponse.blob();
       } else {
-        throw new Error('Authentication failed. Please log in again.');
+        throw new PublicApiError(SESSION_EXPIRED_MESSAGE, { status: 401 });
       }
     }
     if (response.status === 404) {
-      const errorText = await response.text().catch(() => '');
-      const attemptedUrl = response.url || `${API_BASE_URL}/pdf/${encodedPath}`;
-      throw new Error(`PDF not found (404). Document ID: ${documentId}. Attempted URL: ${attemptedUrl}. Error: ${errorText}`);
+      const errorText = await response.text().catch(() => "");
+      logApiFailure("GET /pdf (404)", 404, errorText);
+      throw new PublicApiError(
+        "Could not find this PDF. It may have been moved or removed.",
+        { status: 404 }
+      );
     }
     if (response.status === 422) {
-      try {
-        const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-      } catch (jsonError) {
-        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
-      }
+      const raw422 = await response.text().catch(() => "");
+      logApiFailure("GET /pdf (422)", response.status, raw422);
+      throw new PublicApiError(
+        "Could not download this PDF with the given reference. Please try again.",
+        { status: response.status }
+      );
     }
-    const errorText = await response.text().catch(() => '');
-    throw new Error(`HTTP error! status: ${response.status}. Error: ${errorText}`);
+    const errorText = await response.text().catch(() => "");
+    throwPublicHttpError("GET /pdf", response.status, errorText, {
+      default: "Could not download this PDF. Please try again.",
+    });
   }
 
   // Return the original PDF file
@@ -509,13 +537,12 @@ export const downloadLegalDocumentDOC = async (
 
   if (!response.ok) {
     if (response.status === 422) {
-      try {
-        const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-      } catch (jsonError) {
-        // If JSON parsing fails, it might be a DOC response with wrong content type
-        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
-      }
+      const raw422 = await response.text().catch(() => "");
+      logApiFailure("POST /legal-research/document (DOC 422)", response.status, raw422);
+      throw new PublicApiError(
+        "Could not download this document. Please check the reference and try again.",
+        { status: response.status }
+      );
     }
     if (response.status === 401) {
       // Try to refresh token and retry
@@ -533,15 +560,21 @@ export const downloadLegalDocumentDOC = async (
         });
         
         if (!retryResponse.ok) {
-          throw new Error(`HTTP error! status: ${retryResponse.status}`);
+          const retryRaw = await retryResponse.text().catch(() => "");
+          throwPublicHttpError("POST /legal-research/document (DOC retry)", retryResponse.status, retryRaw, {
+            default: "Could not download this document. Please try again.",
+          });
         }
         
         return await retryResponse.blob();
       } else {
-        throw new Error('Authentication failed. Please log in again.');
+        throw new PublicApiError(SESSION_EXPIRED_MESSAGE, { status: 401 });
       }
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const rawFail = await response.text().catch(() => "");
+    throwPublicHttpError("POST /legal-research/document (DOC)", response.status, rawFail, {
+      default: "Could not download this document. Please try again.",
+    });
   }
 
   // The backend returns binary DOC data directly
@@ -592,23 +625,29 @@ export const getLegalResearchHistory = async (
   });
 
   if (!response.ok) {
+    const raw = await response.text().catch(() => "");
     if (response.status === 422) {
-      try {
-        const errorData: ValidationError = await response.json();
-        throw new Error(`Validation error: ${errorData.detail.map(err => err.msg).join(', ')}`);
-      } catch (jsonError) {
-        throw new Error(`Validation error: ${response.status} ${response.statusText}`);
-      }
+      logApiFailure("GET /legal-research/history (422)", response.status, raw);
+      throw new PublicApiError(
+        "Could not load your research history. Please adjust filters and try again.",
+        { status: response.status }
+      );
     }
     if (response.status === 401) {
-      throw new Error('Authentication failed. Please log in again.');
+      logApiFailure("GET /legal-research/history (401)", response.status, raw);
+      throw new PublicApiError(SESSION_EXPIRED_MESSAGE, { status: response.status });
     }
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throwPublicHttpError("GET /legal-research/history", response.status, raw, {
+      default: "Could not load your research history. Please try again.",
+    });
   }
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+  } catch {
+    logApiFailure("GET /legal-research/history (parse JSON)", response.status, "(parse error)");
+    throw new PublicApiError("Received an unexpected history response. Please try again.", {
+      status: response.status,
+    });
   }
 }; 

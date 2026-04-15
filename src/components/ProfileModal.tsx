@@ -12,6 +12,7 @@ import {
 } from '@/lib/dashboardApi';
 import { Loader2, User as UserIcon, Mail, CheckCircle2, XCircle, Bot, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 
 /** Set to true to show preferred AI provider/model in the profile modal again. */
 const SHOW_PREFERRED_AI_IN_PROFILE = false;
@@ -44,7 +45,7 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
       setUpdateSuccess(null);
       fetchUserProfile(getAuthHeaders(), getAuthHeaders, refreshToken)
         .then(setProfile)
-        .catch((err) => setError(err.message || 'Failed to load profile'))
+        .catch((err) => setError(getUserFacingError(err, 'Could not load your profile. Please try again.')))
         .finally(() => setLoading(false));
       if (SHOW_PREFERRED_AI_IN_PROFILE) {
         fetchAvailableModels(getAuthHeaders(), getAuthHeaders, refreshToken)
@@ -111,8 +112,8 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
       // Refetch profile to update UI
       const updated = await fetchUserProfile(getAuthHeaders(), getAuthHeaders, refreshToken);
       setProfile(updated);
-    } catch (err: any) {
-      setUpdateError(err.message || 'Failed to update preferences');
+    } catch (err: unknown) {
+      setUpdateError(getUserFacingError(err, 'Could not update your preferences. Please try again.'));
     } finally {
       setUpdateLoading(false);
     }

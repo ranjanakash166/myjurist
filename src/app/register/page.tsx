@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 type RegistrationStep = "basic" | "otp" | "password";
 
@@ -65,8 +66,8 @@ export default function RegisterPage() {
       } else {
         setError(result.error || "Failed to send OTP");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred while sending OTP");
+    } catch (err: unknown) {
+      setError(getUserFacingError(err, "Could not send your verification code. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -85,8 +86,8 @@ export default function RegisterPage() {
       } else {
         setError(result.error || "OTP verification failed");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during OTP verification");
+    } catch (err: unknown) {
+      setError(getUserFacingError(err, "Could not verify your code. Please try again."));
     } finally {
       setLoading(false);
     }

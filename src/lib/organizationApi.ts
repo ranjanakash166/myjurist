@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { throwIfNotOk } from "./apiClientErrors";
 
 // Types for organization management
 export interface Organization {
@@ -74,10 +75,10 @@ export async function createOrganization(
       body: JSON.stringify(organizationData),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to create organization');
-    }
+    await throwIfNotOk(response, 'POST /organizations', {
+      validation: 'Could not create this organization. Please check the details and try again.',
+      default: 'Could not create this organization. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -105,10 +106,9 @@ export async function listOrganizations(
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to fetch organizations');
-    }
+    await throwIfNotOk(response, 'GET /organizations', {
+      default: 'Could not load organizations. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -132,10 +132,9 @@ export async function getOrganization(
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to fetch organization');
-    }
+    await throwIfNotOk(response, `GET /organizations/${organizationId}`, {
+      default: 'Could not load this organization. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -162,10 +161,10 @@ export async function updateOrganization(
       body: JSON.stringify(organizationData),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to update organization');
-    }
+    await throwIfNotOk(response, `PUT /organizations/${organizationId}`, {
+      validation: 'Could not update this organization. Please check the details and try again.',
+      default: 'Could not update this organization. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -189,10 +188,9 @@ export async function deleteOrganization(
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to delete organization');
-    }
+    await throwIfNotOk(response, `DELETE /organizations/${organizationId}`, {
+      default: 'Could not delete this organization. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -221,10 +219,9 @@ export async function listOrganizationUsers(
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to fetch organization users');
-    }
+    await throwIfNotOk(response, `GET /organizations/${organizationId}/users`, {
+      default: 'Could not load users for this organization. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -279,10 +276,10 @@ export async function createUser(
       body: JSON.stringify(userData),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to create user');
-    }
+    await throwIfNotOk(response, 'POST /users', {
+      validation: 'Could not create this user. Please check the details and try again.',
+      default: 'Could not create this user. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -309,10 +306,10 @@ export async function updateUser(
       body: JSON.stringify(userData),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to update user');
-    }
+    await throwIfNotOk(response, `PUT /users/${userId}`, {
+      validation: 'Could not update this user. Please check the details and try again.',
+      default: 'Could not update this user. Please try again.',
+    });
 
     const data = await response.json();
     return data;
@@ -336,10 +333,9 @@ export async function deleteUser(
       },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail?.[0]?.msg || 'Failed to delete user');
-    }
+    await throwIfNotOk(response, `DELETE /users/${userId}`, {
+      default: 'Could not delete this user. Please try again.',
+    });
 
     const data = await response.json();
     return data;

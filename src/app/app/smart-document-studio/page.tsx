@@ -16,6 +16,7 @@ import { TemplateSelector } from './components/TemplateSelector';
 import { ContractForm } from './components/ContractForm';
 import { ContractPreview } from './components/ContractPreview';
 import { ContractHistory } from './components/ContractHistory';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 
 export default function SmartContractStudio() {
   const { authenticatedFetch } = useAuthenticatedApi();
@@ -48,19 +49,7 @@ export default function SmartContractStudio() {
       setCategories(data);
     } catch (err) {
       console.error('Error loading categories:', err);
-      
-      // Check if it's a network error or API not available
-      if (err instanceof Error && (
-        err.message.includes('Failed to fetch') || 
-        err.message.includes('NetworkError') ||
-        err.message.includes('404') ||
-        err.message.includes('500')
-      )) {
-        setError('Failed to load contract categories. Please try again.');
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load contract categories. Please try again.';
-        setError(errorMessage);
-      }
+      setError(getUserFacingError(err, 'Could not load contract categories. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -76,19 +65,7 @@ export default function SmartContractStudio() {
       setCurrentStep('templates');
     } catch (err) {
       console.error('Error loading templates:', err);
-      
-      // Check if it's a network error or API not available
-      if (err instanceof Error && (
-        err.message.includes('Failed to fetch') || 
-        err.message.includes('NetworkError') ||
-        err.message.includes('404') ||
-        err.message.includes('500')
-      )) {
-        setError('Failed to load templates. Please try again.');
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load templates for this category. Please try again.';
-        setError(errorMessage);
-      }
+      setError(getUserFacingError(err, 'Could not load templates for this category. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -103,19 +80,7 @@ export default function SmartContractStudio() {
       setCurrentStep('form');
     } catch (err) {
       console.error('Error loading template details:', err);
-      
-      // Check if it's a network error or API not available
-      if (err instanceof Error && (
-        err.message.includes('Failed to fetch') || 
-        err.message.includes('NetworkError') ||
-        err.message.includes('404') ||
-        err.message.includes('500')
-      )) {
-        setError('Failed to load template details. Please try again.');
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load template details. Please try again.';
-        setError(errorMessage);
-      }
+      setError(getUserFacingError(err, 'Could not load template details. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -131,19 +96,7 @@ export default function SmartContractStudio() {
       setTemplates(data);
     } catch (err) {
       console.error('Error searching templates:', err);
-      
-      // Check if it's a network error or API not available
-      if (err instanceof Error && (
-        err.message.includes('Failed to fetch') || 
-        err.message.includes('NetworkError') ||
-        err.message.includes('404') ||
-        err.message.includes('500')
-      )) {
-        setError('Failed to search templates. Please try again.');
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to search templates. Please try again.';
-        setError(errorMessage);
-      }
+      setError(getUserFacingError(err, 'Could not search templates. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -170,19 +123,7 @@ export default function SmartContractStudio() {
       setCurrentStep('preview');
     } catch (err) {
       console.error('Error generating contract:', err);
-      
-      // Check if it's a network error or API not available
-      if (err instanceof Error && (
-        err.message.includes('Failed to fetch') || 
-        err.message.includes('NetworkError') ||
-        err.message.includes('404') ||
-        err.message.includes('500')
-      )) {
-        setError('Failed to generate contract. Please try again.');
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to generate contract. Please try again.';
-        setError(errorMessage);
-      }
+      setError(getUserFacingError(err, 'Could not generate this contract. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -354,8 +295,7 @@ export default function SmartContractStudio() {
                         document.body.removeChild(a);
                       } catch (err) {
                         console.error('Download error:', err);
-                        const errorMessage = err instanceof Error ? err.message : 'Failed to download contract. Please try again.';
-                        setError(errorMessage);
+                        setError(getUserFacingError(err, 'Could not download this contract. Please try again.'));
                       }
                     }}
                   />

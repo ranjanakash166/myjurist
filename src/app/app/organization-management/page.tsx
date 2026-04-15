@@ -31,6 +31,7 @@ import {
   type UpdateUserRequest,
   type User
 } from "@/lib/organizationApi";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 // Mobile Organization Card Component
 const MobileOrganizationCard: React.FC<{
@@ -545,7 +546,7 @@ export default function OrganizationManagementPage() {
         setTotalPages(1);
       }
     } catch (error: any) {
-      setError(error.message || "Failed to fetch organizations");
+      setError(getUserFacingError(error, "Could not load organizations. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -601,7 +602,7 @@ export default function OrganizationManagementPage() {
       });
       fetchOrganizations();
     } catch (error: any) {
-      setError(error.message || "Failed to create organization");
+      setError(getUserFacingError(error, "Could not create this organization. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -625,7 +626,7 @@ export default function OrganizationManagementPage() {
       setSelectedOrganization(null);
       fetchOrganizations();
     } catch (error: any) {
-      setError(error.message || "Failed to update organization");
+      setError(getUserFacingError(error, "Could not update this organization. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -649,7 +650,7 @@ export default function OrganizationManagementPage() {
       setSelectedOrganization(fullOrganization);
       setIsViewDialogOpen(true);
     } catch (error: any) {
-      setError(error.message || "Failed to fetch organization details");
+      setError(getUserFacingError(error, "Could not load organization details. Please try again."));
     }
   };
 
@@ -668,7 +669,7 @@ export default function OrganizationManagementPage() {
       setSelectedOrganization(null);
       fetchOrganizations();
     } catch (error: any) {
-      setError(error.message || "Failed to delete organization");
+      setError(getUserFacingError(error, "Could not delete this organization. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -683,7 +684,7 @@ export default function OrganizationManagementPage() {
       setSelectedOrganization(organization);
       setIsUsersDialogOpen(true);
     } catch (error: any) {
-      setUsersError(error.message || "Failed to fetch organization users");
+      setUsersError(getUserFacingError(error, "Could not load organization users. Please try again."));
     } finally {
       setUsersLoading(false);
     }
@@ -712,7 +713,7 @@ export default function OrganizationManagementPage() {
         setOrganizationUsers(response.users);
       }
     } catch (error: any) {
-      setError(error.message || "Failed to create user");
+      setError(getUserFacingError(error, "Could not create this user. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -748,7 +749,7 @@ export default function OrganizationManagementPage() {
         setOrganizationUsers(response.users);
       }
     } catch (error: any) {
-      setError(error.message || "Failed to update user");
+      setError(getUserFacingError(error, "Could not update this user. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -773,7 +774,7 @@ export default function OrganizationManagementPage() {
         setOrganizationUsers(response.users);
       }
     } catch (error: any) {
-      setError(error.message || "Failed to delete user");
+      setError(getUserFacingError(error, "Could not delete this user. Please try again."));
     } finally {
       setLoading(false);
     }

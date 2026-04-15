@@ -22,6 +22,7 @@ import {
   AISummaryResponse,
 } from "@/lib/legalResearchApi";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import { normalizeContentLineBreaks, parseBoldText, parseMarkdownText } from "@/lib/utils";
 import LegalResearchHistory from "./components/LegalResearchHistory";
 import LegalResearchSkeleton from "./components/LegalResearchSkeleton";
@@ -181,10 +182,10 @@ export default function LegalResearchPage() {
  description: `Found ${searchResponse.total_results} results${searchResponse.ai_summary ? ' and generated AI summary' : ''}`,
  });
  } catch (err: any) {
- setError(err.message || "An error occurred during search");
+ setError(getUserFacingError(err, "Could not complete this search. Please try again."));
  toast({
  title: "Search failed",
- description: err.message || "An error occurred during search",
+ description: getUserFacingError(err, "Could not complete this search. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -259,10 +260,10 @@ const handleSelectCase = async (result: SearchResult) => {
  });
  } catch (err: any) {
  console.error('Case PDF preview error:', err);
- setCasePdfError(err.message || "Failed to load PDF preview.");
+ setCasePdfError(getUserFacingError(err, "Could not load the PDF preview. Please try again."));
  toast({
  title: "Failed to load PDF",
- description: err.message || "Failed to load PDF preview.",
+ description: getUserFacingError(err, "Could not load the PDF preview. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -309,7 +310,7 @@ const handleSelectCase = async (result: SearchResult) => {
  console.error('PDF download error:', err);
  toast({
  title: "PDF download failed",
- description: err.message || "Failed to download PDF. Please try again.",
+ description: getUserFacingError(err, "Could not download the PDF. Please try again."),
  variant: "destructive",
  });
  } finally {

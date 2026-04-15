@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { throwPublicHttpError } from "./apiClientErrors";
 
 // Types for regulatory compliance
 export interface RegulatorySuggestionRequest {
@@ -57,9 +58,10 @@ export async function fetchRegulatorySuggestions(
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMsg = errorData?.detail?.[0]?.msg || `HTTP error! status: ${response.status}`;
-      throw new Error(errorMsg);
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('POST /regulatory-compliance/suggestions', response.status, errorText, {
+        default: 'Could not load regulatory suggestions. Please try again.',
+      });
     }
 
     const data = await response.json();
@@ -91,9 +93,10 @@ export async function submitRegulatoryQuery(
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMsg = errorData?.detail?.[0]?.msg || `HTTP error! status: ${response.status}`;
-      throw new Error(errorMsg);
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('POST /regulatory-compliance/query', response.status, errorText, {
+        default: 'Could not run this regulatory search. Please try again.',
+      });
     }
 
     const data = await response.json();

@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -52,8 +53,8 @@ export default function LoginPage() {
       } else {
         setError(result.error || "Login failed");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during login");
+    } catch (err: unknown) {
+      setError(getUserFacingError(err, "Could not sign you in. Please try again."));
     } finally {
       setLoading(false);
     }

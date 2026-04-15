@@ -21,6 +21,7 @@ import {
   Loader2
 } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import documentCategorizationApi from "../../../../lib/documentCategorizationApi";
 
 interface CategorizationHistoryItem {
@@ -65,7 +66,7 @@ export default function CategorizationHistory() {
       setTotalPages(Math.ceil(response.total / itemsPerPage));
       setCurrentPage(page);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch history';
+      const errorMessage = getUserFacingError(error, 'Could not load categorization history. Please try again.');
       setError(errorMessage);
       toast({
         title: "Error",
