@@ -4,21 +4,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Home,
   FileText,
   FileSearch,
   Menu,
+  MoreHorizontal,
   X,
   LogOut,
-  User,
   Calendar,
-  FileCheck,
   Building2,
-  BarChart3,
   Tag,
-  Search,
   LayoutGrid,
-  FileEdit,
   MessageSquare,
   Settings,
   Bell,
@@ -33,7 +28,7 @@ import ProfileModal from "../../components/ProfileModal";
 import { AppRouteLightTheme } from "@/components/AppRouteLightTheme";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
 
-type DesktopNavItem = {
+type AppNavItem = {
   label: string;
   icon: React.ReactElement;
   matches: string[];
@@ -43,34 +38,16 @@ type DesktopNavItem = {
   activeClassName?: string;
 };
 
+function pathMatchesNav(pathname: string | null, matches: string[]): boolean {
+  if (!pathname || matches.length === 0) return false;
+  return matches.some((m) => pathname === m || pathname.startsWith(`${m}/`));
+}
+
 const roleLabelMap: Record<string, string> = {
   super_admin: "Super Admin",
   org_admin: "Org Admin",
   member: "Member",
   user: "Member",
-};
-
-const getNavItems = (userRole?: string) => {
-  const baseItems = [
-    { label: "Home", icon: <Home className="w-6 h-6" />, href: "/app/home" },
-    { label: "Dashboard", icon: <BarChart3 className="w-6 h-6" />, href: "/app/dashboard" },
-    { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
-    { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
-    { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
-    { label: "My Jurist Chat", icon: <Search className="w-6 h-6" />, href: "/app/my-jurist-chat" },
-    { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
-  ];
-
-  // Add organization management for super admins and org admins
-  if (userRole === "super_admin" || userRole === "org_admin") {
-    baseItems.push({
-      label: "Manage Org",
-      icon: <Building2 className="w-6 h-6" />,
-      href: "/app/organization-management"
-    });
-  }
-
-  return baseItems;
 };
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -86,8 +63,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, isInitialized, router]);
 
-  const desktopNavItems = useMemo<DesktopNavItem[]>(() => {
-    const items: DesktopNavItem[] = [
+  const appNavItems = useMemo<AppNavItem[]>(() => {
+    const items: AppNavItem[] = [
       {
         label: "Dashboard",
         href: "/app/home",
@@ -171,24 +148,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return items;
   }, [logout, router, user?.role]);
 
-  const mobileNavItems = [
-    { label: "Home", icon: <LayoutGrid className="w-6 h-6" />, href: "/app/home" },
-    { label: "Dashboard", icon: <LayoutGrid className="w-6 h-6" />, href: "/app/dashboard" },
-    { label: "Legal Research", icon: <FileSearch className="w-6 h-6" />, href: "/app/legal-research" },
-    { label: "Document Analysis", icon: <FileText className="w-6 h-6" />, href: "/app/document-analysis" },
-    { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
-    { label: "My Jurist Chat", icon: <MessageSquare className="w-6 h-6" />, href: "/app/my-jurist-chat" },
-    { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
-    ...(user?.role === "super_admin" || user?.role === "org_admin"
-      ? [
-          {
-            label: "Manage Org",
-            icon: <Building2 className="w-6 h-6" />,
-            href: "/app/organization-management",
-          },
-        ]
-      : []),
-  ];
+  const mobileBottomNav = useMemo(
+    () =>
+      [
+        {
+          href: "/app/home",
+          label: "Home",
+          matches: ["/app/home", "/app/dashboard"],
+          icon: <LayoutGrid className="h-5 w-5" strokeWidth={1.9} />,
+        },
+        {
+          href: "/app/document-analysis",
+          label: "Docs",
+          matches: ["/app/document-analysis"],
+          icon: <FileText className="h-5 w-5" strokeWidth={1.9} />,
+        },
+        {
+          href: "/app/legal-research",
+          label: "Research",
+          matches: ["/app/legal-research"],
+          icon: <FileSearch className="h-5 w-5" strokeWidth={1.9} />,
+        },
+        {
+          href: "/app/my-jurist-chat",
+          label: "Chat",
+          matches: ["/app/my-jurist-chat"],
+          icon: <MessageSquare className="h-5 w-5" strokeWidth={1.9} />,
+        },
+      ],
+    []
+  );
 
   if (!isInitialized) {
     return (
@@ -224,7 +213,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="flex items-center justify-between">
           <MyJuristLogoWithWordmark
-            variant="dark"
+            variant="light"
             size={32}
             href="/app/home"
             className="hover:opacity-80 transition-opacity"
@@ -232,95 +221,108 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="w-5 h-5" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="md:hidden gap-2 px-2 text-foreground"
+                aria-label="Open navigation menu"
+              >
+                <Menu className="h-5 w-5 shrink-0" />
+                <span className="hidden text-sm font-medium sm:inline">Menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="w-72 p-0 border-r border-white/10 bg-[#0F172A] text-white"
+            className="w-72 border-r border-slate-200 bg-slate-50 p-0 text-slate-900"
             >
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div className="border-b border-slate-200 bg-white p-6">
                   <MyJuristLogoWithWordmark
-                    variant="dark"
+                  variant="light"
                     size={40}
                     href="/app/home"
                     className="hover:opacity-80 transition-opacity"
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-white/10 hover:text-white"
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2">
-                  {mobileNavItems.map((item) => {
-                    const isActive = pathname === item.href;
+                <nav className="flex-1 space-y-2 overflow-y-auto p-4">
+                  {appNavItems.map((item) => {
+                    const isActive = pathMatchesNav(pathname, item.matches);
+                    const rowClass = `flex w-full items-center rounded-xl px-4 py-3 text-left font-medium transition-all duration-200 ${
+                      isActive
+                        ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+                        : "text-slate-600 hover:bg-white hover:text-slate-900"
+                    }`;
+                    const iconClass = `h-6 w-6 shrink-0 ${isActive ? "text-slate-900" : "text-slate-500"}`;
+
+                    if (item.href) {
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={rowClass}
+                          onClick={() => setSidebarOpen(false)}
+                        >
+                          <span className="mr-3 flex h-6 w-6 items-center justify-center">
+                            {React.isValidElement(item.icon)
+                              ? React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, {
+                                  className: iconClass,
+                                })
+                              : item.icon}
+                          </span>
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    }
 
                     return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`flex items-center px-4 py-3 rounded-xl text-left font-medium transition-all duration-200 ${
-                          isActive
-                            ? "bg-white text-[#0F172A] shadow-md"
-                            : "text-slate-300 hover:bg-white/10 hover:text-white"
-                        }`}
-                        onClick={() => setSidebarOpen(false)}
+                      <button
+                        key={item.label}
+                        type="button"
+                        className={rowClass}
+                        onClick={async () => {
+                          await item.onClick?.();
+                          setSidebarOpen(false);
+                        }}
                       >
-                        <div className="w-6 h-6 flex items-center justify-center mr-3">
-                          {React.cloneElement(item.icon, {
-                            className: `w-6 h-6 ${
-                              isActive ? "text-[#0F172A]" : "text-slate-300"
-                            }`,
-                          })}
-                        </div>
+                        <span className="mr-3 flex h-6 w-6 items-center justify-center">
+                          {React.isValidElement(item.icon)
+                            ? React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, {
+                                className: iconClass,
+                              })
+                            : item.icon}
+                        </span>
                         <span className="truncate">{item.label}</span>
-                      </Link>
+                      </button>
                     );
                   })}
                 </nav>
 
-                <div className="p-4 border-t border-white/10">
+                <div className="border-t border-slate-200 bg-white p-4">
                   {user && (
                     <button
                       type="button"
-                      className="flex items-center px-4 py-2 mb-4 w-full text-left hover:bg-white/10 rounded-lg transition-colors"
-                      onClick={() => setProfileOpen(true)}
+                      className="mb-4 flex w-full items-center rounded-lg px-4 py-2 text-left transition-colors hover:bg-slate-100"
+                      onClick={() => {
+                        setProfileOpen(true);
+                        setSidebarOpen(false);
+                      }}
                     >
                       <Avatar className="w-8 h-8 mr-3">
-                        <AvatarFallback>{initials}</AvatarFallback>
+                        <AvatarFallback className="bg-slate-200 text-slate-800">{initials}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
+                        <p className="truncate text-sm font-medium text-slate-900">
                           {user.full_name}
                         </p>
-                        <p className="text-xs text-slate-300 truncate">
+                        <p className="truncate text-xs text-slate-500">
                           {roleLabel}
                         </p>
                       </div>
                     </button>
                   )}
 
-                  <div className="space-y-2">
-                    <ThemeToggle />
-                    <Button
-                      variant="ghost"
-                      onClick={async () => {
-                        await logout();
-                        router.push("/login");
-                      }}
-                      className="w-full justify-start text-slate-200 hover:text-white hover:bg-white/10"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </Button>
-                  </div>
                 </div>
               </div>
             </SheetContent>
@@ -339,13 +341,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         <TooltipProvider delayDuration={150}>
           <nav className="mt-4 flex flex-1 flex-col items-center gap-2">
-            {desktopNavItems.map((item, index) => {
-              const isActive = item.matches.some((match) => pathname.startsWith(match));
+            {appNavItems.map((item, index) => {
+              const isActive = pathMatchesNav(pathname, item.matches);
               const itemClassName = isActive
                 ? item.activeClassName ?? "bg-slate-100 text-slate-900"
                 : `${item.iconClassName} hover:bg-slate-100 hover:text-slate-900`;
               const commonClassName = `flex h-14 w-14 items-center justify-center rounded-[8px] transition-colors ${itemClassName} ${
-                index === desktopNavItems.length - 1 ? "mt-auto" : ""
+                index === appNavItems.length - 1 ? "mt-auto" : ""
               }`;
 
               return (
@@ -422,9 +424,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="overflow-x-hidden pt-16 md:pl-20 md:pt-20">
+      <main className="overflow-x-hidden pb-20 pt-16 md:pb-0 md:pl-20 md:pt-20">
         {children}
       </main>
+
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-1 pb-[env(safe-area-inset-bottom,0px)] pt-1 shadow-[0_-4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm md:hidden"
+        aria-label="Primary navigation"
+      >
+        <div className="mx-auto flex h-14 max-w-lg items-stretch justify-between gap-0.5">
+          {mobileBottomNav.map((item) => {
+            const isActive = pathMatchesNav(pathname, [...item.matches]);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 text-[10px] font-semibold leading-tight transition-colors ${
+                  isActive ? "text-primary" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                }`}
+              >
+                <span className={isActive ? "text-primary" : "text-slate-600"}>{item.icon}</span>
+                <span className="max-w-full truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 text-[10px] font-semibold leading-tight text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            aria-label="More navigation"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <MoreHorizontal className="h-5 w-5 text-slate-600" strokeWidth={1.9} />
+            <span className="max-w-full truncate">More</span>
+          </button>
+        </div>
+      </nav>
 
       <ProfileModal open={profileOpen} onOpenChange={setProfileOpen} />
     </div>

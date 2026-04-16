@@ -186,23 +186,25 @@ function ToolCard({
 
   return (
     <div className="rounded-[8px] bg-slate-100 p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
-          <Icon className="h-5 w-5" strokeWidth={1.9} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[20px] font-bold leading-6 tracking-tight text-slate-900">
-            {feature.title}
-          </p>
-          <p className="mt-0.5 text-sm leading-5 text-slate-600">
-            {feature.description}
-          </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="flex min-w-0 flex-1 items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
+            <Icon className="h-5 w-5" strokeWidth={1.9} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-bold leading-6 tracking-tight text-slate-900 sm:text-[20px]">
+              {feature.title}
+            </p>
+            <p className="mt-0.5 text-sm leading-5 text-slate-600">
+              {feature.description}
+            </p>
+          </div>
         </div>
 
         <Button
           asChild
           size="sm"
-          className="h-9 shrink-0 rounded-[8px] bg-slate-800 px-4 text-white hover:bg-slate-700"
+          className="h-9 w-full shrink-0 rounded-[8px] bg-slate-800 px-4 text-white hover:bg-slate-700 sm:w-auto sm:self-start"
         >
           <Link href={feature.href}>
             Launch
@@ -210,7 +212,6 @@ function ToolCard({
           </Link>
         </Button>
       </div>
-
     </div>
   );
 }
@@ -262,13 +263,13 @@ function HomeLoadingState() {
 function PlanDetailsCard({ planInfo, planError }: { planInfo: PlanInfo | null; planError: string | null }) {
   if (!planInfo) {
     return (
-      <section className="rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
+      <section className="w-full max-w-full overflow-hidden rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
             <LayoutGrid className="h-5 w-5" strokeWidth={1.9} />
           </div>
           <div className="min-w-0">
-            <p className="text-[20px] font-medium leading-6 text-slate-900">Plan details</p>
+            <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">Plan details</p>
             <p className="mt-1 text-sm leading-5 text-slate-700">
               {planError ?? "Plan information is not available right now."}
             </p>
@@ -279,60 +280,62 @@ function PlanDetailsCard({ planInfo, planError }: { planInfo: PlanInfo | null; p
   }
 
   return (
-    <section className="rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
+    <section className="w-full max-w-full overflow-hidden rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
+      <div className="flex flex-col gap-3">
+        <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
             <Scale className="h-5 w-5" strokeWidth={1.9} />
           </div>
-          <div className="min-w-0">
-            <p className="text-[20px] font-medium leading-6 text-slate-900">Plan details</p>
-            <p className="mt-1 text-sm leading-5 text-slate-700">
-              Your current subscription summary and status.
-            </p>
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">Plan details</p>
+              <p className="mt-1 text-sm leading-5 text-slate-700">
+                Your current subscription summary and status.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <span
-            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getPlanTierColor(
-              planInfo.plan_tier
-            )}`}
-          >
-            {capitalizeWords(planInfo.plan_name)}
-          </span>
-          <span
-            className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusColor(
-              planInfo.status
-            )}`}
-          >
-            {capitalizeWords(planInfo.status)}
-          </span>
+          <div className="flex flex-wrap gap-2 md:shrink-0 md:justify-end">
+            <span
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getPlanTierColor(
+                planInfo.plan_tier
+              )}`}
+            >
+              {capitalizeWords(planInfo.plan_name)}
+            </span>
+            <span
+              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusColor(
+                planInfo.status
+              )}`}
+            >
+              {capitalizeWords(planInfo.status)}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-[8px] bg-slate-100 p-3">
+      <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-[8px] bg-slate-100 p-2.5">
           <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Plan</p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-1.5 text-sm font-semibold text-slate-900">
             {capitalizeWords(planInfo.plan_name)}
           </p>
         </div>
-        <div className="rounded-[8px] bg-slate-100 p-3">
+        <div className="rounded-[8px] bg-slate-100 p-2.5">
           <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Tier</p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-1.5 text-sm font-semibold text-slate-900">
             {capitalizeWords(planInfo.plan_tier)}
           </p>
         </div>
-        <div className="rounded-[8px] bg-slate-100 p-3">
+        <div className="rounded-[8px] bg-slate-100 p-2.5">
           <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Type</p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-1.5 text-sm font-semibold text-slate-900">
             {capitalizeWords(planInfo.plan_kind)}
           </p>
         </div>
-        <div className="rounded-[8px] bg-slate-100 p-3">
+        <div className="rounded-[8px] bg-slate-100 p-2.5">
           <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Subscription</p>
-          <p className="mt-2 text-sm font-semibold text-slate-900">
+          <p className="mt-1.5 text-sm font-semibold text-slate-900">
             {planInfo.was_auto_created ? "Auto-created" : "Managed"}
           </p>
         </div>
@@ -353,8 +356,8 @@ function UsageFeatureCard({ feature }: { feature: FeatureUsage }) {
   const usageBarColor = getUsageBarColor(feature.usage_percentage);
 
   return (
-    <div className="rounded-[8px] bg-slate-100 p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="w-full max-w-full overflow-hidden rounded-[8px] bg-slate-100 p-4">
+      <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
             <Icon className="h-4 w-4" strokeWidth={1.9} />
@@ -378,7 +381,7 @@ function UsageFeatureCard({ feature }: { feature: FeatureUsage }) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+      <div className="mt-3 flex flex-col items-start gap-1 text-xs sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <span className="text-slate-500">
           {feature.current_count.toLocaleString()} / {feature.max_count.toLocaleString()} used
         </span>
@@ -399,13 +402,13 @@ function UsageSummaryCard({
 }) {
   if (!planUsage) {
     return (
-      <section className="rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
+      <section className="w-full max-w-full overflow-hidden rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
             <FileSearch className="h-5 w-5" strokeWidth={1.9} />
           </div>
           <div className="min-w-0">
-            <p className="text-[20px] font-medium leading-6 text-slate-900">Usage & limits</p>
+            <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">Usage & limits</p>
             <p className="mt-1 text-sm leading-5 text-slate-700">
               {usageError ?? "Usage details are not available right now."}
             </p>
@@ -420,15 +423,15 @@ function UsageSummaryCard({
   const periodEnd = planUsage.features[0]?.period_end;
 
   return (
-    <section className="rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
+    <section className="w-full max-w-full overflow-hidden rounded-[8px] border-[5px] border-white bg-[linear-gradient(95.86deg,#dbeafe_0.28%,#fae8ff_114.56%)] p-4 shadow-sm">
+      <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-[8px] bg-white text-slate-700 shadow-sm">
             <FileText className="h-5 w-5" strokeWidth={1.9} />
           </div>
-          <div className="min-w-0">
-            <p className="text-[20px] font-medium leading-6 text-slate-900">Usage & limits</p>
-            <p className="mt-1 text-sm leading-5 text-slate-700">
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">Usage & limits</p>
+            <p className="mt-1 break-words text-sm leading-5 text-slate-700">
               {periodStart && periodEnd
                 ? `Current period: ${formatPeriodDate(periodStart)} - ${formatPeriodDate(periodEnd)}`
                 : "Track usage across your available features."}
@@ -449,6 +452,35 @@ function UsageSummaryCard({
         </div>
       ) : null}
     </section>
+  );
+}
+
+function RecentActivitySection({
+  recentActivity,
+}: {
+  recentActivity: ActivityItem[];
+}) {
+  return (
+    <aside className="min-w-0 w-full max-w-full overflow-hidden rounded-[8px] bg-white p-4 shadow-sm xl:self-start">
+      <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">
+        Recent Activity
+      </p>
+
+      <div className="mt-4 space-y-1">
+        {recentActivity.length > 0 ? (
+          recentActivity.map((activity, index) => (
+            <ActivityRow
+              key={`${activity.timestamp}-${activity.title}-${index}`}
+              activity={activity}
+            />
+          ))
+        ) : (
+          <div className="rounded-[8px] bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            No recent activity yet.
+          </div>
+        )}
+      </div>
+    </aside>
   );
 }
 
@@ -533,8 +565,8 @@ export default function HomePage() {
   const recentActivity = dashboardData?.recent_activity.slice(0, 8) ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-6 text-slate-900 md:px-6 lg:px-8">
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_405px]">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-100 px-4 py-6 text-slate-900 md:px-6 lg:px-8">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_405px]">
         <div className="min-w-0 space-y-4">
           {error ? (
             <section className="rounded-[8px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -542,14 +574,18 @@ export default function HomePage() {
             </section>
           ) : null}
 
-          <div className="grid gap-4">
+          <div className="grid min-w-0 gap-4">
             <PlanDetailsCard planInfo={planInfo} planError={planInfoError} />
             <UsageSummaryCard planUsage={planUsage} usageError={planUsageError} />
           </div>
 
-          <section className="rounded-[8px] bg-white p-4 shadow-sm">
+          <div className="xl:hidden">
+            <RecentActivitySection recentActivity={recentActivity} />
+          </div>
+
+          <section className="w-full max-w-full overflow-hidden rounded-[8px] bg-white p-4 shadow-sm">
             <div className="mb-4">
-              <p className="text-[20px] font-medium leading-6 text-slate-900">
+              <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">
                 Explore AI Chat & Assistance tools
               </p>
               <p className="text-sm leading-5 text-slate-500">
@@ -557,7 +593,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid min-w-0 gap-4 lg:grid-cols-3">
               {assistantTools.map((feature) => (
                 <ToolCard
                   key={feature.title}
@@ -567,9 +603,9 @@ export default function HomePage() {
             </div>
           </section>
 
-          <section className="rounded-[8px] bg-white p-4 shadow-sm">
+          <section className="w-full max-w-full overflow-hidden rounded-[8px] bg-white p-4 shadow-sm">
             <div className="mb-4">
-              <p className="text-[20px] font-medium leading-6 text-slate-900">
+              <p className="text-lg font-medium leading-6 text-slate-900 sm:text-[20px]">
                 Explore Document Intelligence tools
               </p>
               <p className="text-sm leading-5 text-slate-500">
@@ -577,7 +613,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid min-w-0 gap-4 lg:grid-cols-3">
               {documentTools.map((feature) => (
                 <ToolCard
                   key={feature.title}
@@ -588,26 +624,9 @@ export default function HomePage() {
           </section>
         </div>
 
-        <aside className="rounded-[8px] bg-white p-4 shadow-sm">
-          <p className="text-[20px] font-medium leading-6 text-slate-900">
-            Recent Activity
-          </p>
-
-          <div className="mt-4 space-y-1">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((activity, index) => (
-                <ActivityRow
-                  key={`${activity.timestamp}-${activity.title}-${index}`}
-                  activity={activity}
-                />
-              ))
-            ) : (
-              <div className="rounded-[8px] bg-slate-50 px-4 py-6 text-sm text-slate-500">
-                No recent activity yet.
-              </div>
-            )}
-          </div>
-        </aside>
+        <div className="hidden xl:block">
+          <RecentActivitySection recentActivity={recentActivity} />
+        </div>
       </div>
     </div>
   );
