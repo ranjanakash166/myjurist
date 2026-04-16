@@ -416,7 +416,7 @@ export default function PatentAnalysisPage() {
       <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Patent Analysis</h1>
       
       <Tabs value={tab} onValueChange={(value) => setTab(value as 'quick' | 'detailed' | 'history')} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-auto">
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-feature-tabs-list rounded-lg border border-border">
           <TabsTrigger value="quick" className="text-xs sm:text-sm py-2 px-1 sm:px-3">Quick</TabsTrigger>
           <TabsTrigger value="detailed" className="text-xs sm:text-sm py-2 px-1 sm:px-3">Detailed</TabsTrigger>
           <TabsTrigger value="history" className="text-xs sm:text-sm py-2 px-1 sm:px-3">History</TabsTrigger>
@@ -497,7 +497,7 @@ export default function PatentAnalysisPage() {
 
               {/* Tabs for result details */}
               <Tabs value={quickTab} onValueChange={setQuickTab} className="w-full">
-                <TabsList className="mb-2">
+                <TabsList className="mb-2 p-1 bg-feature-tabs-list rounded-lg border border-border">
                   <TabsTrigger value="priorart">Prior Art</TabsTrigger>
                   <TabsTrigger value="exclusions">Exclusions</TabsTrigger>
                   <TabsTrigger value="disclosure">Disclosure</TabsTrigger>
@@ -981,7 +981,7 @@ export default function PatentAnalysisPage() {
                     </div>
                     {/* Report Tabs */}
                     <ReportTabs defaultValue="summary" className="w-full">
-                      <ReportTabsList className="mb-2">
+                      <ReportTabsList className="mb-2 p-1 bg-feature-tabs-list rounded-lg border border-border">
                         <ReportTabsTrigger value="summary">Summary</ReportTabsTrigger>
                         <ReportTabsTrigger value="full">Full Report</ReportTabsTrigger>
                         <ReportTabsTrigger value="disclaimer">Disclaimer</ReportTabsTrigger>

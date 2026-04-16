@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { Send, Paperclip, Mic, Search, Zap, Eye, FileText, Download, Eye as EyeIcon } from "lucide-react";
+import { Send, Paperclip, Search, FileText, Download, Eye as EyeIcon } from "lucide-react";
 import SimpleMarkdownRenderer from "../../../components/SimpleMarkdownRenderer";
 
 function formatTime(date: Date) {
@@ -246,14 +246,21 @@ export default function ChatInterface({
  MJ
  </div>
  )}
- <div
+<div
  className={`px-4 py-3 rounded-2xl max-w-md text-sm shadow-lg transition-all duration-200 ${
  msg.sender === "user"
- ? "bg-primary text-primary-foreground rounded-br-md border border-primary"
+ ? "bg-primary text-primary-foreground rounded-br-md border border-transparent shadow"
  : "bg-muted text-foreground rounded-bl-md border border-border"
  }`}
- >
- <SimpleMarkdownRenderer content={msg.text} className="text-sm leading-relaxed" />
+>
+ <SimpleMarkdownRenderer
+ content={msg.text}
+ className={`text-sm leading-relaxed ${
+ msg.sender === "user"
+ ? "[&_a]:text-primary-foreground [&_blockquote_div]:text-primary-foreground [&_h1]:text-primary-foreground [&_h2]:text-primary-foreground [&_h3]:text-primary-foreground [&_h4]:text-primary-foreground [&_h5]:text-primary-foreground [&_h6]:text-primary-foreground [&_li]:text-primary-foreground [&_p]:text-primary-foreground [&_ul]:text-primary-foreground text-primary-foreground"
+ : ""
+ }`}
+ />
  </div>
  {msg.sender === "user" && (
  <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-sm border border-border">
@@ -335,33 +342,11 @@ export default function ChatInterface({
  </div>
 
  {/* Enhanced Icon Bar */}
- <div className="flex items-center justify-between px-2">
- {/* Left Group - Functionality Icons */}
- <div className="flex items-center gap-2">
- <button
- type="button"
- className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
- title="Search"
- >
- <Search className="w-4 h-4" />
- </button>
- <button
- type="button"
- className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
- title="Generate"
- >
- <Zap className="w-4 h-4" />
- </button>
- <button
- type="button"
- className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
- title="Visual Search"
- >
- <Eye className="w-4 h-4" />
- </button> 
- </div>
- {/* Right Group - Action Icons */}
- <div className="flex items-center gap-2">
+<div className="flex items-center justify-end px-2">
+<div className="flex items-center gap-2">
+<span className="text-sm font-medium text-muted-foreground">
+ Add more documents
+</span>
  {/* Upload icon */}
  <button
  type="button"
@@ -387,13 +372,6 @@ export default function ChatInterface({
  }
  }}
  />
- </button>
- <button
- type="button"
- className="p-3 rounded-xl bg-muted hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 border border-border shadow-md hover:shadow-lg"
- title="Voice Input"
- >
- <Mic className="w-4 h-4" />
  </button>
  </div>
  </div>
