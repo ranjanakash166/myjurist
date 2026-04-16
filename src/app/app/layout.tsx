@@ -2,16 +2,53 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Home, FileText, FileSearch, Menu, X, LogOut, User, Calendar, FileCheck, Building2, BarChart3, Tag, Search } from "lucide-react";
-import { useTheme } from "next-themes";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Home,
+  FileText,
+  FileSearch,
+  Menu,
+  X,
+  LogOut,
+  User,
+  Calendar,
+  FileCheck,
+  Building2,
+  BarChart3,
+  Tag,
+  Search,
+  LayoutGrid,
+  FileEdit,
+  MessageSquare,
+  Settings,
+  Bell,
+} from "lucide-react";
 import { useAuth } from "../../components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ProfileModal from "../../components/ProfileModal";
+import { AppRouteLightTheme } from "@/components/AppRouteLightTheme";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
+
+type DesktopNavItem = {
+  label: string;
+  icon: React.ReactElement;
+  matches: string[];
+  href?: string;
+  onClick?: () => void | Promise<void>;
+  iconClassName?: string;
+  activeClassName?: string;
+};
+
+const roleLabelMap: Record<string, string> = {
+  super_admin: "Super Admin",
+  org_admin: "Org Admin",
+  member: "Member",
+  user: "Member",
+};
 
 const getNavItems = (userRole?: string) => {
   const baseItems = [
@@ -84,14 +121,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         activeClassName: "bg-orange-50 text-orange-600 ring-1 ring-orange-200",
       },
       {
-        label: "Smart Drafting",
-        href: "/app/smart-drafting",
-        icon: <FileEdit className="h-6 w-6" strokeWidth={1.9} />,
-        matches: ["/app/smart-drafting", "/app/smart-document-studio"],
-        iconClassName: "text-cyan-600",
-        activeClassName: "bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200",
-      },
-      {
         label: "My Jurist Chat",
         href: "/app/my-jurist-chat",
         icon: <MessageSquare className="h-6 w-6" strokeWidth={1.9} />,
@@ -150,7 +179,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     { label: "Timeline Extractor", icon: <Calendar className="w-6 h-6" />, href: "/app/timeline-extractor" },
     { label: "My Jurist Chat", icon: <MessageSquare className="w-6 h-6" />, href: "/app/my-jurist-chat" },
     { label: "Doc Categorization", icon: <Tag className="w-6 h-6" />, href: "/app/document-categorization" },
-    { label: "Smart Drafting", icon: <FileEdit className="w-6 h-6" />, href: "/app/smart-drafting" },
     ...(user?.role === "super_admin" || user?.role === "org_admin"
       ? [
           {
@@ -309,45 +337,47 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <MyJuristLogoWithWordmark iconOnly size={48} href={false} />
         </Link>
 
-        <nav className="mt-4 flex flex-1 flex-col items-center gap-2">
-          {desktopNavItems.map((item, index) => {
-            const isActive = item.matches.some((match) => pathname.startsWith(match));
-            const itemClassName = isActive
-              ? item.activeClassName ?? "bg-slate-100 text-slate-900"
-              : `${item.iconClassName} hover:bg-slate-100 hover:text-slate-900`;
+        <TooltipProvider delayDuration={150}>
+          <nav className="mt-4 flex flex-1 flex-col items-center gap-2">
+            {desktopNavItems.map((item, index) => {
+              const isActive = item.matches.some((match) => pathname.startsWith(match));
+              const itemClassName = isActive
+                ? item.activeClassName ?? "bg-slate-100 text-slate-900"
+                : `${item.iconClassName} hover:bg-slate-100 hover:text-slate-900`;
+              const commonClassName = `flex h-14 w-14 items-center justify-center rounded-[8px] transition-colors ${itemClassName} ${
+                index === desktopNavItems.length - 1 ? "mt-auto" : ""
+              }`;
 
-            if (item.href) {
               return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  title={item.label}
-                  aria-label={item.label}
-                  className={`flex h-14 w-14 items-center justify-center rounded-[8px] transition-colors ${itemClassName} ${
-                    index === desktopNavItems.length - 1 ? "mt-auto" : ""
-                  }`}
-                >
-                  {item.icon}
-                </Link>
+                <Tooltip key={item.label}>
+                  <TooltipTrigger asChild>
+                    {item.href ? (
+                      <Link
+                        href={item.href}
+                        aria-label={item.label}
+                        className={commonClassName}
+                      >
+                        {item.icon}
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        aria-label={item.label}
+                        onClick={item.onClick}
+                        className={commonClassName}
+                      >
+                        {item.icon}
+                      </button>
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>{item.label}</p>
+                  </TooltipContent>
+                </Tooltip>
               );
-            }
-
-            return (
-              <button
-                key={item.label}
-                type="button"
-                title={item.label}
-                aria-label={item.label}
-                onClick={item.onClick}
-                className={`flex h-14 w-14 items-center justify-center rounded-[8px] transition-colors ${itemClassName} ${
-                  index === desktopNavItems.length - 1 ? "mt-auto" : ""
-                }`}
-              >
-                {item.icon}
-              </button>
-            );
-          })}
-        </nav>
+            })}
+          </nav>
+        </TooltipProvider>
       </aside>
 
       <header className="fixed left-0 right-0 top-0 z-30 hidden h-20 border-b border-slate-200 bg-white md:flex md:items-center md:justify-between md:pl-[104px] md:pr-8">
@@ -359,9 +389,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="text-right">
             <p className="text-base font-medium leading-[22px] tracking-[-0.18px] text-slate-900">
               {formattedDate}
-            </p>
-            <p className="text-xs leading-4 tracking-[-0.12px] text-slate-600">
-              Today&apos;s Date
             </p>
           </div>
 
