@@ -835,11 +835,6 @@ const handleSelectCase = async (result: SearchResult) => {
                                 {formatCaseTitle(result)}
                               </p>
                               <div className="mt-1 flex flex-wrap items-center gap-2">
-                                {result.section_header && (
-                                  <p className="text-xs text-muted-foreground line-clamp-1">
-                                    {result.section_header}
-                                  </p>
-                                )}
                                 {typeof result.similarity_score === "number" &&
                                   result.similarity_score >= 0 &&
                                   result.similarity_score <= 1 && (

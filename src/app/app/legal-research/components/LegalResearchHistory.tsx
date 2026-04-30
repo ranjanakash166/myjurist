@@ -1002,11 +1002,6 @@ className="mt-1"
  {result.title}
  </p>
                               <div className="mt-1 flex flex-wrap items-center gap-2">
-                                {result.section_header && (
-                                  <p className="text-xs text-muted-foreground line-clamp-1">
-                                    {result.section_header}
-                                  </p>
-                                )}
                                 {typeof result.similarity_score === "number" && (
                                   <Badge
                                     variant="secondary"
