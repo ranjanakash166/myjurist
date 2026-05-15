@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "../app/constants";
 import { apiCallWithRefresh } from "./utils";
+import { logApiFailure, PublicApiError, throwPublicHttpError } from "./apiClientErrors";
 
 export interface AgenticRAGSearchRequest {
   query: string;              // Required: 3-1000 characters
@@ -95,38 +96,38 @@ export const searchAgenticRAG = async (
   );
 
   if (!response.ok) {
-    // Try to parse error response
-    let errorData: any;
+    const raw = await response.text().catch(() => '');
+    let errorData: Record<string, unknown> | null = null;
     try {
-      errorData = await response.json();
-    } catch (jsonError) {
-      // If JSON parsing fails, throw generic error
-      throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+      errorData = raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+    } catch {
+      /* body not JSON */
     }
 
-    // Handle authentication errors
-    if (response.status === 401 || response.status === 403 || errorData?.type === 'AuthenticationError') {
-      const authError = errorData as AuthenticationError;
-      throw new Error(authError.detail || 'Authentication required. Please log in again.');
+    if (
+      response.status === 401 ||
+      response.status === 403 ||
+      errorData?.type === 'AuthenticationError'
+    ) {
+      logApiFailure('POST /agentic-rag/search (auth)', response.status, raw);
+      throw new PublicApiError('Your session has expired. Please sign in again.', {
+        status: response.status,
+      });
     }
 
-    // Handle validation errors
-    if (response.status === 422) {
-      const validationError = errorData as ValidationError;
-      if (Array.isArray(validationError.detail)) {
-        throw new Error(`Validation error: ${validationError.detail.map(err => err.msg).join(', ')}`);
-      }
-      throw new Error(`Validation error: ${validationError.detail || response.statusText}`);
-    }
-
-    // Handle other errors
-    throw new Error(errorData?.detail || `HTTP error! status: ${response.status}`);
+    throwPublicHttpError('POST /agentic-rag/search', response.status, raw, {
+      validation: 'Could not run this search. Please adjust your question and try again.',
+      default: 'Could not complete this search. Please try again.',
+    });
   }
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    throw new Error(`Failed to parse response as JSON: ${response.status} ${response.statusText}`);
+  } catch {
+    logApiFailure('POST /agentic-rag/search (parse success body)', response.status, '(parse error)');
+    throw new PublicApiError('Received an unexpected response from search. Please try again.', {
+      status: response.status,
+    });
   }
 };
 

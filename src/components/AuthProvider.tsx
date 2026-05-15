@@ -1,6 +1,7 @@
 "use client";
 import React, { ReactNode, useEffect, useState, createContext, useContext, useCallback } from "react";
 import { API_BASE_URL } from "../app/constants";
+import { getUserFacingError, logApiFailure } from "@/lib/apiClientErrors";
 
 interface User {
   id: string;
@@ -297,9 +298,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.detail?.[0]?.msg || "Login failed";
-        return { success: false, error: errorMessage };
+        const raw = await response.text().catch(() => "");
+        logApiFailure("POST /auth/enhanced/login", response.status, raw);
+        if (response.status === 422) {
+          return { success: false, error: "Please check your email and password and try again." };
+        }
+        if (response.status === 401 || response.status === 403) {
+          return { success: false, error: "Invalid email or password. Please try again." };
+        }
+        return { success: false, error: "Could not sign you in. Please try again." };
       }
 
       const data: AuthResponse = await response.json();
@@ -328,8 +335,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || "An error occurred during login" };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: getUserFacingError(error, "Could not sign you in. Please try again."),
+      };
     }
   };
 
@@ -344,15 +354,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.detail?.[0]?.msg || "Failed to send OTP";
-        return { success: false, error: errorMessage };
+        const raw = await response.text().catch(() => "");
+        logApiFailure("POST /auth/register/send-otp", response.status, raw);
+        if (response.status === 422) {
+          return { success: false, error: "Please check the name and email you entered." };
+        }
+        return { success: false, error: "Could not send your verification code. Please try again." };
       }
 
       const data = await response.json();
       return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message || "An error occurred while sending OTP" };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: getUserFacingError(error, "Could not send your verification code. Please try again."),
+      };
     }
   };
 
@@ -367,9 +383,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.detail?.[0]?.msg || "OTP verification failed";
-        return { success: false, error: errorMessage };
+        const raw = await response.text().catch(() => "");
+        logApiFailure("POST /auth/register/verify-otp", response.status, raw);
+        if (response.status === 422) {
+          return { success: false, error: "Please check your code and password and try again." };
+        }
+        return { success: false, error: "Could not verify your code. Please try again." };
       }
 
       const data: AuthResponse = await response.json();
@@ -398,8 +417,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || "An error occurred during OTP verification" };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: getUserFacingError(error, "Could not verify your code. Please try again."),
+      };
     }
   };
 
@@ -414,9 +436,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.detail?.[0]?.msg || "Registration failed";
-        return { success: false, error: errorMessage };
+        const raw = await response.text().catch(() => "");
+        logApiFailure("POST /auth/register", response.status, raw);
+        if (response.status === 422) {
+          return { success: false, error: "Please check your details and try again." };
+        }
+        return { success: false, error: "Could not complete registration. Please try again." };
       }
 
       const data: AuthResponse = await response.json();
@@ -445,8 +470,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
       
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || "An error occurred during registration" };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: getUserFacingError(error, "Could not complete registration. Please try again."),
+      };
     }
   };
 
@@ -461,15 +489,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.detail?.[0]?.msg || "Failed to request password reset";
-        return { success: false, error: errorMessage };
+        const raw = await response.text().catch(() => "");
+        logApiFailure("POST /auth/password-reset", response.status, raw);
+        if (response.status === 422) {
+          return { success: false, error: "Please enter a valid email address." };
+        }
+        return { success: false, error: "Could not send a reset link. Please try again." };
       }
 
       const data = await response.json();
       return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message || "An error occurred while requesting password reset" };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: getUserFacingError(error, "Could not send a reset link. Please try again."),
+      };
     }
   };
 
@@ -484,15 +518,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.detail?.[0]?.msg || "Password reset failed";
-        return { success: false, error: errorMessage };
+        const raw = await response.text().catch(() => "");
+        logApiFailure("POST /auth/password-reset/confirm", response.status, raw);
+        if (response.status === 422) {
+          return { success: false, error: "Please check your new password and try again." };
+        }
+        return { success: false, error: "Could not reset your password. Please try again." };
       }
 
       const data = await response.json();
       return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message || "An error occurred during password reset" };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: getUserFacingError(error, "Could not reset your password. Please try again."),
+      };
     }
   };
 

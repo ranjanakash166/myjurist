@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { throwPublicHttpError } from "./apiClientErrors";
 
 export interface TimelineEvent {
   date: string;
@@ -173,8 +174,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to generate timeline');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('POST /timeline/generate/upload', response.status, errorText, {
+        default: 'Could not generate this timeline. Please try again.',
+      });
     }
 
     return response.json();
@@ -186,8 +189,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch timeline');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`GET /timeline/${timelineId}`, response.status, errorText, {
+        default: 'Could not load this timeline. Please try again.',
+      });
     }
 
     return response.json();
@@ -199,8 +204,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch enhanced timeline');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`GET /timeline/enhanced/${timelineId}`, response.status, errorText, {
+        default: 'Could not load this timeline. Please try again.',
+      });
     }
 
     return response.json();
@@ -215,8 +222,10 @@ export class TimelineApi {
     );
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch timelines');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('GET /timeline/list', response.status, errorText, {
+        default: 'Could not load your timelines. Please try again.',
+      });
     }
 
     return response.json();
@@ -229,8 +238,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to delete timeline');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`DELETE /timeline/${timelineId}`, response.status, errorText, {
+        default: 'Could not delete this timeline. Please try again.',
+      });
     }
   }
 
@@ -276,8 +287,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to fetch timeline documents');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`GET /timeline/${timelineId}/documents`, response.status, errorText, {
+        default: 'Could not load documents for this timeline. Please try again.',
+      });
     }
 
     return response.json();
@@ -289,8 +302,13 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to download document');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(
+        `GET /timeline/${timelineId}/documents/${documentId}/download`,
+        response.status,
+        errorText,
+        { default: 'Could not download this document. Please try again.' }
+      );
     }
 
     return response.blob();
@@ -303,8 +321,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to download document');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`GET /documents/${documentId}/download`, response.status, errorText, {
+        default: 'Could not download this document. Please try again.',
+      });
     }
 
     return response.blob();
@@ -316,8 +336,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to get document URL');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`GET /documents/${documentId}/url`, response.status, errorText, {
+        default: 'Could not open this document. Please try again.',
+      });
     }
 
     const data = await response.json();
@@ -331,8 +353,10 @@ export class TimelineApi {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error?.detail?.[0]?.msg || 'Failed to delete document');
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`DELETE /documents/${documentId}`, response.status, errorText, {
+        default: 'Could not delete this document. Please try again.',
+      });
     }
   }
 }

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -49,8 +50,8 @@ export default function ForgotPasswordPage() {
       } else {
         setError(result.error || "Failed to send password reset email");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred while requesting password reset");
+    } catch (err: unknown) {
+      setError(getUserFacingError(err, "Could not send a reset link. Please try again."));
     } finally {
       setLoading(false);
     }

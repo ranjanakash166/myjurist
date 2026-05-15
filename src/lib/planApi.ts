@@ -1,5 +1,10 @@
 import { API_BASE_URL } from "../app/constants";
 import { apiCallWithRefresh } from "./utils";
+import {
+  PublicApiError,
+  throwPublicHttpError,
+  USAGE_LIMIT_EXCEEDED_MESSAGE,
+} from "./apiClientErrors";
 
 // Types for plan data
 export interface PlanInfo {
@@ -84,7 +89,9 @@ export async function fetchPlanInfo(
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      throwPublicHttpError('GET /plans/me', response.status, errorText, {
+        default: 'Could not load your plan information. Please try again.',
+      });
     }
 
     const data = await response.json();
@@ -115,7 +122,14 @@ export async function fetchPlanUsage(
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      const status = response.status;
+      if (status === 429 || (status >= 500 && status < 600)) {
+        console.error('Error fetching plan usage:', status, errorText);
+        throw new PublicApiError(USAGE_LIMIT_EXCEEDED_MESSAGE, { status });
+      }
+      throwPublicHttpError('GET /plans/me/usage', status, errorText, {
+        default: 'Could not load your usage details. Please try again.',
+      });
     }
 
     const data = await response.json();
@@ -157,7 +171,10 @@ export async function fetchUsageHistory(
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('GET /plans/me/usage/history', response.status, errorText, {
+        default: 'Could not load your usage history. Please try again.',
+      });
     }
 
     const data = await response.json();
@@ -188,7 +205,10 @@ export async function fetchFeatureUsageDetail(
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(`GET /plans/me/usage/${feature}`, response.status, errorText, {
+        default: 'Could not load usage details for this feature. Please try again.',
+      });
     }
 
     const data = await response.json();

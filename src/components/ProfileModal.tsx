@@ -12,6 +12,10 @@ import {
 } from '@/lib/dashboardApi';
 import { Loader2, User as UserIcon, Mail, CheckCircle2, XCircle, Bot, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getUserFacingError } from '@/lib/apiClientErrors';
+
+/** Set to true to show preferred AI provider/model in the profile modal again. */
+const SHOW_PREFERRED_AI_IN_PROFILE = false;
 
 interface ProfileModalProps {
   open: boolean;
@@ -41,11 +45,13 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
       setUpdateSuccess(null);
       fetchUserProfile(getAuthHeaders(), getAuthHeaders, refreshToken)
         .then(setProfile)
-        .catch((err) => setError(err.message || 'Failed to load profile'))
+        .catch((err) => setError(getUserFacingError(err, 'Could not load your profile. Please try again.')))
         .finally(() => setLoading(false));
-      fetchAvailableModels(getAuthHeaders(), getAuthHeaders, refreshToken)
-        .then(setAvailable)
-        .catch(() => {});
+      if (SHOW_PREFERRED_AI_IN_PROFILE) {
+        fetchAvailableModels(getAuthHeaders(), getAuthHeaders, refreshToken)
+          .then(setAvailable)
+          .catch(() => {});
+      }
     } else {
       setProfile(null);
       setError(null);
@@ -106,8 +112,8 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
       // Refetch profile to update UI
       const updated = await fetchUserProfile(getAuthHeaders(), getAuthHeaders, refreshToken);
       setProfile(updated);
-    } catch (err: any) {
-      setUpdateError(err.message || 'Failed to update preferences');
+    } catch (err: unknown) {
+      setUpdateError(getUserFacingError(err, 'Could not update your preferences. Please try again.'));
     } finally {
       setUpdateLoading(false);
     }
@@ -151,66 +157,69 @@ export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) 
                   Account Created: {formatDate(profile.created_at)}
                 </div>
               </div>
-              <div className="border-t border-dashed border-neutral-300 dark:border-neutral-700 my-4" />
-              {/* Editable Preferred AI Provider & Model */}
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Bot className="w-4 h-4 text-neutral-500" />
-                  <span className="block text-xs text-muted-foreground">Preferred AI Provider & Model</span>
-                </div>
-                {editing && available ? (
-                  <div className="flex flex-col gap-2 mt-2 bg-neutral-50 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                    <div className="flex gap-2 items-center">
-                      <select
-                        className="border rounded px-2 py-1 text-sm bg-white dark:bg-black text-neutral-900 dark:text-neutral-100"
-                        value={editProvider}
-                        onChange={e => setEditProvider(e.target.value)}
-                      >
-                        <option value="" disabled>Select provider</option>
-                        {providerOptions.map((provider) => (
-                          <option key={provider} value={provider}>{provider}</option>
-                        ))}
-                      </select>
-                      <select
-                        className="border rounded px-2 py-1 text-sm bg-white dark:bg-black text-neutral-900 dark:text-neutral-100"
-                        value={editModel}
-                        onChange={e => setEditModel(e.target.value)}
-                        disabled={!editProvider}
-                      >
-                        <option value="" disabled>Select model</option>
-                        {modelOptions.map((model) => (
-                          <option key={model.model_name} value={model.model_name}>{model.display_name}</option>
-                        ))}
-                      </select>
+              {SHOW_PREFERRED_AI_IN_PROFILE && (
+                <>
+                  <div className="border-t border-dashed border-neutral-300 dark:border-neutral-700 my-4" />
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Bot className="w-4 h-4 text-neutral-500" />
+                      <span className="block text-xs text-muted-foreground">Preferred AI Provider & Model</span>
                     </div>
-                    <div className="flex gap-2 justify-end mt-2">
-                      <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={updateLoading}>Cancel</Button>
-                      {canSave && (
-                        <Button size="sm" onClick={handleSave} disabled={updateLoading || !editProvider || !editModel}>
-                          {updateLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}Save
-                        </Button>
-                      )}
-                    </div>
+                    {editing && available ? (
+                      <div className="flex flex-col gap-2 mt-2 bg-neutral-50 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                        <div className="flex gap-2 items-center">
+                          <select
+                            className="border rounded px-2 py-1 text-sm bg-white dark:bg-black text-neutral-900 dark:text-neutral-100"
+                            value={editProvider}
+                            onChange={e => setEditProvider(e.target.value)}
+                          >
+                            <option value="" disabled>Select provider</option>
+                            {providerOptions.map((provider) => (
+                              <option key={provider} value={provider}>{provider}</option>
+                            ))}
+                          </select>
+                          <select
+                            className="border rounded px-2 py-1 text-sm bg-white dark:bg-black text-neutral-900 dark:text-neutral-100"
+                            value={editModel}
+                            onChange={e => setEditModel(e.target.value)}
+                            disabled={!editProvider}
+                          >
+                            <option value="" disabled>Select model</option>
+                            {modelOptions.map((model) => (
+                              <option key={model.model_name} value={model.model_name}>{model.display_name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex gap-2 justify-end mt-2">
+                          <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={updateLoading}>Cancel</Button>
+                          {canSave && (
+                            <Button size="sm" onClick={handleSave} disabled={updateLoading || !editProvider || !editModel}>
+                              {updateLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}Save
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="block text-sm font-medium">
+                          <span className="inline-flex items-center gap-1">
+                            <Settings2 className="w-4 h-4 text-neutral-500" />
+                            {profile.preferred_ai_provider || '-'}
+                          </span>
+                          <span className="mx-2 text-neutral-400">/</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Bot className="w-4 h-4 text-neutral-500" />
+                            {profile.preferred_model || '-'}
+                          </span>
+                        </span>
+                        <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>Edit</Button>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="block text-sm font-medium">
-                      <span className="inline-flex items-center gap-1">
-                        <Settings2 className="w-4 h-4 text-neutral-500" />
-                        {profile.preferred_ai_provider || '-'}
-                      </span>
-                      <span className="mx-2 text-neutral-400">/</span>
-                      <span className="inline-flex items-center gap-1">
-                        <Bot className="w-4 h-4 text-neutral-500" />
-                        {profile.preferred_model || '-'}
-                      </span>
-                    </span>
-                    <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>Edit</Button>
-                  </div>
-                )}
-              </div>
-              {updateError && <div className="text-red-500 text-sm mt-2">{updateError}</div>}
-              {updateSuccess && <div className="text-primary text-sm mt-2 flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-primary" />{updateSuccess}</div>}
+                  {updateError && <div className="text-red-500 text-sm mt-2">{updateError}</div>}
+                  {updateSuccess && <div className="text-primary text-sm mt-2 flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-primary" />{updateSuccess}</div>}
+                </>
+              )}
               <div className="pt-4 text-right">
                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                   Close

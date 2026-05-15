@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app/constants";
+import { throwPublicHttpError } from "./apiClientErrors";
 
 export interface CategoryAssignment {
   category: string;
@@ -72,11 +73,10 @@ export class DocumentCategorizationApi {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.detail?.[0]?.msg || 
-        `HTTP error! status: ${response.status}`
-      );
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('POST /document-categorization/categorize', response.status, errorText, {
+        default: 'Could not categorize your documents. Please try again.',
+      });
     }
 
     return response.json();
@@ -109,7 +109,10 @@ export class DocumentCategorizationApi {
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError('GET /document-categorization/history', response.status, errorText, {
+        default: 'Could not load categorization history. Please try again.',
+      });
     }
 
     return response.json();
@@ -128,7 +131,13 @@ export class DocumentCategorizationApi {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text().catch(() => '');
+      throwPublicHttpError(
+        `GET /document-categorization/result/${requestId}`,
+        response.status,
+        errorText,
+        { default: 'Could not load this categorization result. Please try again.' }
+      );
     }
 
     return response.json();

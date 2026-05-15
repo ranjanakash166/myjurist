@@ -22,6 +22,7 @@ import {
   AISummaryResponse,
 } from "@/lib/legalResearchApi";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import { normalizeContentLineBreaks, parseBoldText, parseMarkdownText } from "@/lib/utils";
 import LegalResearchHistory from "./components/LegalResearchHistory";
 import LegalResearchSkeleton from "./components/LegalResearchSkeleton";
@@ -181,10 +182,10 @@ export default function LegalResearchPage() {
  description: `Found ${searchResponse.total_results} results${searchResponse.ai_summary ? ' and generated AI summary' : ''}`,
  });
  } catch (err: any) {
- setError(err.message || "An error occurred during search");
+ setError(getUserFacingError(err, "Could not complete this search. Please try again."));
  toast({
  title: "Search failed",
- description: err.message || "An error occurred during search",
+ description: getUserFacingError(err, "Could not complete this search. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -259,10 +260,10 @@ const handleSelectCase = async (result: SearchResult) => {
  });
  } catch (err: any) {
  console.error('Case PDF preview error:', err);
- setCasePdfError(err.message || "Failed to load PDF preview.");
+ setCasePdfError(getUserFacingError(err, "Could not load the PDF preview. Please try again."));
  toast({
  title: "Failed to load PDF",
- description: err.message || "Failed to load PDF preview.",
+ description: getUserFacingError(err, "Could not load the PDF preview. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -309,7 +310,7 @@ const handleSelectCase = async (result: SearchResult) => {
  console.error('PDF download error:', err);
  toast({
  title: "PDF download failed",
- description: err.message || "Failed to download PDF. Please try again.",
+ description: getUserFacingError(err, "Could not download the PDF. Please try again."),
  variant: "destructive",
  });
  } finally {
@@ -403,7 +404,7 @@ const handleSelectCase = async (result: SearchResult) => {
 
  {/* Tabs */}
  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
- <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+ <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-feature-tabs-list rounded-lg border border-border">
  <TabsTrigger value="search" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
  <Search className="w-4 h-4" />
  Search
@@ -834,11 +835,6 @@ const handleSelectCase = async (result: SearchResult) => {
                                 {formatCaseTitle(result)}
                               </p>
                               <div className="mt-1 flex flex-wrap items-center gap-2">
-                                {result.section_header && (
-                                  <p className="text-xs text-muted-foreground line-clamp-1">
-                                    {result.section_header}
-                                  </p>
-                                )}
                                 {typeof result.similarity_score === "number" &&
                                   result.similarity_score >= 0 &&
                                   result.similarity_score <= 1 && (

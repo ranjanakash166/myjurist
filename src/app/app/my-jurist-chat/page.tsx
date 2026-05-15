@@ -42,6 +42,7 @@ import {
   normalizeContentLineBreaks,
   stripSourcesAndDisclaimerFromAnswer,
 } from "@/lib/utils";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 const RESULT_PREVIEW_LENGTH = 400;
 
@@ -301,8 +302,7 @@ export default function MyJuristChatPage() {
       const url = window.URL.createObjectURL(blob);
       setPdfViewerUrl(url);
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to load PDF preview.";
+      const message = getUserFacingError(err, "Could not load the PDF preview. Please try again.");
       setPdfError(message);
       toast({
         title: "Failed to load PDF",
@@ -351,8 +351,7 @@ export default function MyJuristChatPage() {
         description: "The document has been saved.",
       });
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to download PDF.";
+      const message = getUserFacingError(err, "Could not download this PDF. Please try again.");
       toast({
         title: "PDF download failed",
         description: message,
@@ -432,7 +431,7 @@ export default function MyJuristChatPage() {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "An error occurred";
+      const msg = getUserFacingError(err, "Could not complete your search. Please try again.");
       setError(msg);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),

@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "../app/constants";
 import { apiCallWithRefresh } from "./utils";
+import { throwPublicHttpError } from "./apiClientErrors";
 
 // Types for dashboard data
 export interface DashboardStats {
@@ -96,7 +97,9 @@ export async function fetchDashboardStats(
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      throwPublicHttpError('GET /dashboard/stats', response.status, errorText, {
+        default: 'Could not load your dashboard. Please try again.',
+      });
     }
 
     const data = await response.json();
@@ -125,7 +128,10 @@ export async function fetchUserProfile(
   );
   
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const errorText = await response.text().catch(() => '');
+    throwPublicHttpError('GET /auth/me', response.status, errorText, {
+      default: 'Could not load your profile. Please try again.',
+    });
   }
   return response.json();
 }
@@ -148,7 +154,10 @@ export async function fetchAvailableModels(
   );
   
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const errorText = await response.text().catch(() => '');
+    throwPublicHttpError('GET /models/available', response.status, errorText, {
+      default: 'Could not load available models. Please try again.',
+    });
   }
   return response.json();
 }
@@ -174,9 +183,11 @@ export async function updatePreferences(
   );
   
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const errorMsg = errorData?.detail?.[0]?.msg || `HTTP error! status: ${response.status}`;
-    throw new Error(errorMsg);
+    const raw = JSON.stringify(await response.json().catch(() => ({})));
+    throwPublicHttpError('PUT /models/preferences', response.status, raw, {
+      validation: 'Could not save your model preferences. Please check your choices and try again.',
+      default: 'Could not update your preferences. Please try again.',
+    });
   }
   return response.json();
 }

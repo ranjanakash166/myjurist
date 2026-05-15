@@ -24,6 +24,7 @@ import {
   DraftingResponse,
 } from "@/lib/smartDraftingApi";
 import ContractEditor from "./ContractEditor";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 interface ChatMessage {
   id: string;
@@ -114,7 +115,7 @@ export default function SmartDraftingPage() {
         },
       ]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Request failed";
+      const msg = getUserFacingError(err, "Could not send your message. Please try again.");
       setError(msg);
       setMessages((prev) => [
         ...prev,
@@ -165,7 +166,7 @@ export default function SmartDraftingPage() {
         },
       ]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Request failed";
+      const msg = getUserFacingError(err, "Could not send your message. Please try again.");
       setError(msg);
       setMessages((prev) => [
         ...prev,
@@ -192,7 +193,7 @@ export default function SmartDraftingPage() {
     try {
       await downloadDraftContract(contractId, format, getAuthHeaders);
     } catch (err: unknown) {
-      setDownloadError(err instanceof Error ? err.message : "Download failed");
+      setDownloadError(getUserFacingError(err, "Could not download your contract. Please try again."));
     } finally {
       setDownloadFormat(null);
     }

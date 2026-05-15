@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { FileText, Search, Clock, Download, Trash2, Eye } from 'lucide-react';
 import { EnhancedContractApi, ContractDraftResponse } from '@/lib/enhancedContractApi';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 
 interface ContractHistoryProps {
   api: EnhancedContractApi;
@@ -31,19 +32,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
       setPage(pageNum);
     } catch (err) {
       console.error('Error loading contracts:', err);
-      
-      // Check if it's a network error or API not available
-      if (err instanceof Error && (
-        err.message.includes('Failed to fetch') || 
-        err.message.includes('NetworkError') ||
-        err.message.includes('404') ||
-        err.message.includes('500')
-      )) {
-        setError('Failed to load contract history. Please try again.');
-      } else {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load contract history. Please try again.';
-        setError(errorMessage);
-      }
+      setError(getUserFacingError(err, 'Could not load contract history. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -67,8 +56,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
       document.body.removeChild(a);
     } catch (err) {
       console.error('Download error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to download contract. Please try again.';
-      setError(errorMessage);
+      setError(getUserFacingError(err, 'Could not download this contract. Please try again.'));
     } finally {
       setIsDownloading(null);
     }
@@ -85,8 +73,7 @@ export function ContractHistory({ api }: ContractHistoryProps) {
       setTotalCount(prev => prev - 1);
     } catch (err) {
       console.error('Delete error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete contract. Please try again.';
-      setError(errorMessage);
+      setError(getUserFacingError(err, 'Could not delete this contract. Please try again.'));
     }
   };
 

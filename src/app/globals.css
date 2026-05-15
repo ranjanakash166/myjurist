@@ -345,6 +345,13 @@ button.landing-cta-blue:active {
     --blue-400: #60a5fa;
     --blue-600: #2563eb;
     --fuchsia-600: #c026d3;
+    --fuchsia-100: #fae8ff;
+    --feature-tabs-list-bg: linear-gradient(
+      91deg,
+      var(--blue-100, #dbeafe) -0.28%,
+      var(--fuchsia-100, #fae8ff) 114.56%
+    ),
+      var(--bg-primary, #fff);
     --bg-tertiary: #f1f5f9;
     --bg-secondary: #f8fafc;
     --header-gradient: linear-gradient(
@@ -353,6 +360,10 @@ button.landing-cta-blue:active {
       #f5f3ff 50%,
       #fce7f3 100%
     );
+  }
+
+  .bg-feature-tabs-list {
+    background: var(--feature-tabs-list-bg);
   }
 
   /* Landing page: Inter with sans-serif fallback */

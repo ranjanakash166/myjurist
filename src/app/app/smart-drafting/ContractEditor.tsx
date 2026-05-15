@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getDraftContractDocxBlob, updateDraftContract } from "@/lib/smartDraftingApi";
 import mammoth from "mammoth";
 import { toast } from "@/hooks/use-toast";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 /** Convert editor HTML to Markdown-style string so API gets original format (not HTML) for PDF/DOCX. */
 function htmlToMarkdownString(html: string): string {
@@ -51,7 +52,7 @@ function EditorToolbar({
     } catch (err) {
       toast({
         title: "Save failed",
-        description: err instanceof Error ? err.message : "Failed to save contract",
+        description: getUserFacingError(err, "Could not save your contract. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -149,7 +150,7 @@ export default function ContractEditor({ contractId, getAuthHeaders }: ContractE
       const result = await mammoth.convertToHtml({ arrayBuffer });
       setHtmlContent(result.value);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load document");
+      setLoadError(getUserFacingError(err, "Could not load this document. Please try again."));
       setHtmlContent(null);
     } finally {
       setLoading(false);

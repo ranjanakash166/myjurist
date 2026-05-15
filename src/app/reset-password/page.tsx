@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MyJuristLogoWithWordmark from "@/components/landing/MyJuristLogoWithWordmark";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 
 export default function ResetPasswordPage() {
   const [formData, setFormData] = useState({
@@ -78,8 +79,8 @@ export default function ResetPasswordPage() {
       } else {
         setError(result.error || "Password reset failed. Please try again or contact support.");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during password reset. Please try again.");
+    } catch (err: unknown) {
+      setError(getUserFacingError(err, "Could not reset your password. Please try again."));
     } finally {
       setLoading(false);
     }

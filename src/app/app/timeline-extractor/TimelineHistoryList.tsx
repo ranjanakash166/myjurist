@@ -9,6 +9,7 @@ import DocumentList from "../../../components/DocumentList";
 import DocumentViewerModal from "../../../components/DocumentViewerModal";
 import { useAuth } from "../../../components/AuthProvider";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 
 interface TimelineHistoryListProps {
   timelines: TimelineListItem[];
@@ -107,7 +108,7 @@ export default function TimelineHistoryList({
         setTimelineDocumentsMap(prev => new Map(prev).set(timelineId, documentsResponse.documents));
       } catch (err: any) {
         console.warn('Failed to fetch documents:', err);
-        setDocumentsErrorMap(prev => new Map(prev).set(timelineId, err.message || 'Failed to fetch documents'));
+        setDocumentsErrorMap(prev => new Map(prev).set(timelineId, getUserFacingError(err, 'Could not load documents for this timeline.')));
         setTimelineDocumentsMap(prev => new Map(prev).set(timelineId, []));
       } finally {
         setDocumentsLoadingMap(prev => new Map(prev).set(timelineId, false));

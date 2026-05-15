@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { fetchRegulatorySuggestions, submitRegulatoryQuery, RegulatoryQueryResponse, RegulatoryAmendment } from "@/lib/regulatoryComplianceApi";
 import { useToast } from "@/hooks/use-toast";
+import { getUserFacingError } from "@/lib/apiClientErrors";
 import SimpleMarkdownRenderer from "@/components/SimpleMarkdownRenderer";
 
 // Example queries for quick access
@@ -63,7 +64,7 @@ export default function RegulatoryCompliancePage() {
           console.error("Error fetching suggestions:", error);
           toast({
             title: "Error",
-            description: "Failed to fetch suggestions. Please try again.",
+            description: getUserFacingError(error, "Could not load suggestions. Please try again."),
             variant: "destructive",
           });
         } finally {
@@ -119,12 +120,9 @@ export default function RegulatoryCompliancePage() {
       });
     } catch (error) {
       console.error("Error submitting query:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Failed to submit query. Please try again.";
       toast({
         title: "Error",
-        description: errorMessage,
+        description: getUserFacingError(error, "Could not run this regulatory search. Please try again."),
         variant: "destructive",
       });
     } finally {

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { submitContactForm, ContactFormData } from '@/lib/contactApi';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import CtaArrowIcon from '@/components/landing/CtaArrowIcon';
 
 interface FormData {
@@ -102,7 +103,7 @@ const ContactFormSection: React.FC<ContactFormSectionProps> = ({
         setError('Failed to submit form. Please try again.');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');
+      setError(getUserFacingError(err, 'We could not send your message. Please try again shortly.'));
     } finally {
       setIsSubmitting(false);
     }

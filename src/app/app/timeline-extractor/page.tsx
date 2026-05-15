@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Download, FileText, Check, Plus, Upload, Clock, CheckCircle, AlertTriangle, Calendar, List, Trash2, X, History } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 
 interface TimelineEvent {
   date: string;
@@ -84,10 +85,10 @@ export default function TimelineExtractorPage() {
         description: `Successfully extracted ${data.total_events} events from ${data.document_sources.length} documents.` 
       });
     } catch (err: any) {
-      setApiError(err.message || 'An error occurred while generating timeline.');
+      setApiError(getUserFacingError(err, 'Could not generate this timeline. Please try again.'));
       toast({ 
         title: 'Generation Failed', 
-        description: err.message || 'Failed to generate timeline', 
+        description: getUserFacingError(err, 'Could not generate this timeline. Please try again.'), 
         variant: 'destructive' 
       });
     } finally {
@@ -171,7 +172,7 @@ export default function TimelineExtractorPage() {
       setTimelines(data.timelines);
       setHistoryTotalCount(data.total_count);
     } catch (err: any) {
-      setTimelinesError(err.message || 'Failed to fetch timelines');
+      setTimelinesError(getUserFacingError(err, 'Could not load timelines. Please try again.'));
       setTimelines([]);
       setHistoryTotalCount(0);
     } finally {
@@ -221,10 +222,10 @@ export default function TimelineExtractorPage() {
       window.history.replaceState({}, '', url.toString());
     } catch (err: any) {
       console.error('Error fetching timeline:', err);
-      setTimelinesError(err.message || 'Failed to load timeline');
+      setTimelinesError(getUserFacingError(err, 'Could not load this timeline. Please try again.'));
       toast({ 
         title: 'Load Failed', 
-        description: err.message || 'Failed to load timeline', 
+        description: getUserFacingError(err, 'Could not load this timeline. Please try again.'), 
         variant: 'destructive' 
       });
     } finally {
@@ -260,7 +261,7 @@ export default function TimelineExtractorPage() {
     } catch (err: any) {
       toast({ 
         title: 'Delete Failed', 
-        description: err.message || 'Failed to delete timeline', 
+        description: getUserFacingError(err, 'Could not delete this timeline. Please try again.'), 
         variant: 'destructive' 
       });
     }
@@ -328,7 +329,7 @@ export default function TimelineExtractorPage() {
           clearTimelineResult();
         }
       }} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-muted rounded-lg border border-border">
+        <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-feature-tabs-list rounded-lg border border-border">
           <TabsTrigger value="new" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
             <Upload className="w-4 h-4" />
             New Timeline

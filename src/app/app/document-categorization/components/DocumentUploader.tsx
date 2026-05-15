@@ -22,6 +22,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { toast } from '@/hooks/use-toast';
+import { getUserFacingError } from '@/lib/apiClientErrors';
 import documentCategorizationApi, { 
   DocumentCategorizationResponse,
   CategorizationRequest 
@@ -196,7 +197,7 @@ export default function DocumentUploader({
       });
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      const errorMessage = getUserFacingError(error, 'Could not categorize these documents. Please try again.');
       onError(errorMessage);
     }
   };
