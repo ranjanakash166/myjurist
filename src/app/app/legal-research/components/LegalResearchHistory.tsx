@@ -56,10 +56,10 @@ import { getUserFacingError } from '@/lib/apiClientErrors';
 import { normalizeContentLineBreaks, parseBoldText, cn } from "@/lib/utils";
 
 interface LegalResearchHistoryProps {
- // No props needed since we removed the "Use This" functionality
+  embedded?: boolean;
 }
 
-export default function LegalResearchHistory({}: LegalResearchHistoryProps) {
+export default function LegalResearchHistory({ embedded = false }: LegalResearchHistoryProps) {
  const { getAuthHeaders, refreshToken } = useAuth();
  const [history, setHistory] = useState<LegalResearchHistoryItem[]>([]);
  const [loading, setLoading] = useState(false);
@@ -531,10 +531,10 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  }, [isDetailModalOpen, selectedResearch]);
 
  return (
-   <div className="w-full space-y-6">
+   <div className={cn("w-full space-y-6", embedded && "max-w-6xl mx-auto")}>
 
  {/* Search and Filter Controls */}
- <Card className="w-full">
+ <Card className={cn("w-full", embedded && "border-slate-200 shadow-sm")}>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
  <Filter className="w-5 h-5" />
@@ -617,7 +617,7 @@ const handleDownloadPDFFromModal = async (documentData: DocumentResponse) => {
  <>
  {/* History Items */}
  {filteredHistory.map((research, index) => (
- <Card key={research.research_id} className="hover:shadow-lg transition-shadow duration-200 group">
+ <Card key={research.research_id} className={cn("hover:shadow-lg transition-shadow duration-200 group", embedded && "border-slate-200 shadow-sm")}>
  <CardHeader className="pb-3">
  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
  <div className="flex-1 min-w-0">

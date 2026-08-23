@@ -1,182 +1,134 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../../../components/AuthProvider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import React, { useState } from "react";
+import { PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { 
-  FileText, 
-  Upload, 
-  Settings, 
-  CheckCircle, 
-  AlertTriangle, 
-  Tag,
-  BarChart3,
-  FileCheck,
-  Sparkles
-} from "lucide-react";
-import { toast } from '@/hooks/use-toast';
-import DocumentUploader from "./components/DocumentUploader";
-import CategorizationResults from "./components/CategorizationResults";
-
-
-import { DocumentCategorizationResponse } from "../../../lib/documentCategorizationApi";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import DocumentViewerModal from "@/components/DocumentViewerModal";
+import { useDocumentCategorizationPageState } from "./hooks/useDocumentCategorizationPageState";
+import DocumentCategorizationShell from "./components/DocumentCategorizationShell";
+import DocumentCategorizationSidebar from "./components/DocumentCategorizationSidebar";
+import DocumentCategorizationUploadHero from "./components/DocumentCategorizationUploadHero";
+import DocumentCategorizationSelectedFiles from "./components/DocumentCategorizationSelectedFiles";
+import DocumentCategorizationShimmer from "./components/DocumentCategorizationShimmer";
+import DocumentCategorizationResultsPanel from "./components/DocumentCategorizationResultsPanel";
+import DocumentCategorizationFilesPanel from "./components/DocumentCategorizationFilesPanel";
 
 export default function DocumentCategorizationPage() {
-  const { getAuthHeaders } = useAuth();
-  const [activeTab, setActiveTab] = useState<'upload' | 'results'>('upload');
-  const [processing, setProcessing] = useState(false);
-  const [categorizationResult, setCategorizationResult] = useState<DocumentCategorizationResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const state = useDocumentCategorizationPageState();
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const handleCategorizationComplete = (result: DocumentCategorizationResponse) => {
-    setCategorizationResult(result);
-    setActiveTab('results');
-    toast({
-      title: "Categorization Complete",
-      description: `Successfully categorized ${result.total_documents} document(s)`,
-    });
-  };
+  const sidebar = (
+    <DocumentCategorizationSidebar
+      groupedHistory={state.groupedHistory}
+      historyLoading={state.historyLoading}
+      activeRequestId={state.activeRequestId}
+      onNewSession={() => {
+        state.resetToNewSession();
+        setMobileSidebarOpen(false);
+      }}
+      onSelectHistoryItem={(item) => {
+        void state.handleSelectHistoryItem(item);
+        setMobileSidebarOpen(false);
+      }}
+    />
+  );
 
-  const handleProcessingStart = () => {
-    setProcessing(true);
-    setError(null);
-  };
+  const renderWithFilesPanel = (main: React.ReactNode) => (
+    <div className="flex gap-4 max-w-[1400px] mx-auto w-full">
+      {main}
+      <DocumentCategorizationFilesPanel
+        sessionLabel={state.sessionLabel}
+        categoryCount={state.processing ? 0 : state.categoryCount}
+        files={state.resultFileItems}
+        localFiles={state.processing ? state.localFiles : undefined}
+        loading={state.resultsLoading}
+        onViewFile={
+          state.viewMode === "results" ? (name) => state.handleViewLocalFile(name) : undefined
+        }
+        onDownloadFile={
+          state.viewMode === "results" ? (name) => state.handleDownloadLocalFile(name) : undefined
+        }
+      />
+    </div>
+  );
 
-  const handleProcessingComplete = () => {
-    setProcessing(false);
-  };
+  const renderMain = () => {
+    if (state.viewMode === "upload") {
+      return (
+        <DocumentCategorizationUploadHero
+          multiLabel={state.multiLabel}
+          onMultiLabelChange={state.setMultiLabel}
+          confidenceThresholdPct={state.confidenceThresholdPct}
+          onConfidenceThresholdChange={state.setConfidenceThresholdPct}
+          customCategories={state.customCategories}
+          categoryInput={state.categoryInput}
+          onCategoryInputChange={state.setCategoryInput}
+          onAddCategory={state.handleAddCategory}
+          onRemoveCategory={state.handleRemoveCategory}
+          onSelectFiles={(files) => state.validateAndMergeFiles(files)}
+        />
+      );
+    }
 
-  const handleError = (errorMessage: string) => {
-    setError(errorMessage);
-    setProcessing(false);
-    toast({
-      title: "Error",
-      description: errorMessage,
-      variant: "destructive",
-    });
+    if (state.viewMode === "file-selection") {
+      return (
+        <DocumentCategorizationSelectedFiles
+          files={state.localFiles}
+          processing={state.processing}
+          categorizeError={state.categorizeError}
+          onSelectFiles={(files) => state.validateAndMergeFiles(files)}
+          onRemoveFile={state.handleRemoveLocalFile}
+          onProceedAndCategorize={() => void state.handleProceedAndCategorize()}
+        />
+      );
+    }
+
+    if (state.viewMode === "categorizing") {
+      return renderWithFilesPanel(<DocumentCategorizationShimmer />);
+    }
+
+    if (state.categorizationResult) {
+      return renderWithFilesPanel(
+        <DocumentCategorizationResultsPanel
+          result={state.categorizationResult}
+          loading={state.resultsLoading}
+        />
+      );
+    }
+
+    return null;
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-full">
-            <Tag className="w-8 h-8 text-primary" />
+    <>
+      <DocumentCategorizationShell sidebar={sidebar}>
+        <div className="space-y-4">
+          <div className="lg:hidden flex justify-end">
+            <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button type="button" variant="outline" size="sm" className="gap-2">
+                  <PanelLeft className="h-4 w-4" />
+                  Sessions
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] p-0">
+                {sidebar}
+              </SheetContent>
+            </Sheet>
           </div>
-          <h1 className="text-4xl font-bold text-foreground">Document Categorization</h1>
+          {renderMain()}
         </div>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Automatically categorize your legal documents using AI-powered analysis. 
-          Upload multiple documents and get intelligent category assignments with confidence scores.
-        </p>
-      </div>
+      </DocumentCategorizationShell>
 
-      {/* Features Grid */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <Card className="text-center p-6">
-          <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">AI-Powered Analysis</h3>
-          <p className="text-muted-foreground text-sm">
-            Advanced AI algorithms analyze document content and assign relevant categories
-          </p>
-        </Card>
-        
-        <Card className="text-center p-6">
-          <div className="p-3 bg-primary/10 dark:bg-primary/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <FileCheck className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Multi-Document Support</h3>
-          <p className="text-muted-foreground text-sm">
-            Process multiple documents simultaneously with efficient chunking for large files
-          </p>
-        </Card>
-        
-        <Card className="text-center p-6">
-          <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <BarChart3 className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Confidence Scoring</h3>
-          <p className="text-muted-foreground text-sm">
-            Get detailed confidence scores and reasoning for each category assignment
-          </p>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <Card>
-        <CardHeader>
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-            <TabsList className="grid w-full grid-cols-2 h-11 p-1 bg-feature-tabs-list rounded-lg border border-border">
-              <TabsTrigger value="upload" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
-                <Upload className="w-4 h-4" />
-                Upload & Categorize
-              </TabsTrigger>
-              <TabsTrigger value="results" className="flex items-center gap-2 text-sm py-2 px-2 sm:px-4 rounded-md data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm data-[state=inactive]:text-muted-foreground">
-                <CheckCircle className="w-4 h-4" />
-                Results
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardHeader>
-        
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
-            <TabsContent value="upload" className="space-y-6">
-              <DocumentUploader
-                onProcessingStart={handleProcessingStart}
-                onProcessingComplete={handleProcessingComplete}
-                onCategorizationComplete={handleCategorizationComplete}
-                onError={handleError}
-                processing={processing}
-              />
-            </TabsContent>
-            
-            <TabsContent value="results" className="space-y-6">
-              {categorizationResult ? (
-                <CategorizationResults result={categorizationResult} />
-              ) : (
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Results Yet</h3>
-                  <p className="text-muted-foreground">
-                    Upload and categorize documents to see results here
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-            
-
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      {/* Error Display */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {/* Processing Indicator */}
-      {processing && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <Card className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <h3 className="text-lg font-semibold mb-2">Processing Documents</h3>
-            <p className="text-muted-foreground">
-              AI is analyzing your documents and assigning categories...
-            </p>
-          </Card>
-        </div>
-      )}
-    </div>
+      <DocumentViewerModal
+        isOpen={state.documentModalOpen}
+        onClose={state.handleCloseDocumentModal}
+        documentUrl={state.documentUrl}
+        filename={state.documentModalFilename}
+        fileType={state.documentModalType}
+        fileSize={state.documentModalSize}
+      />
+    </>
   );
 }

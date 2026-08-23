@@ -43,6 +43,7 @@ import {
   stripSourcesAndDisclaimerFromAnswer,
 } from "@/lib/utils";
 import { getUserFacingError } from "@/lib/apiClientErrors";
+import { CHAT_PREFILL_KEY } from "@/app/app/legal-research/lib/legalResearchUtils";
 
 const RESULT_PREVIEW_LENGTH = 400;
 
@@ -275,6 +276,15 @@ export default function MyJuristChatPage() {
       }
     };
   }, [pdfViewerUrl]);
+
+  useEffect(() => {
+    const prefill = sessionStorage.getItem(CHAT_PREFILL_KEY);
+    if (prefill) {
+      setInput(prefill);
+      sessionStorage.removeItem(CHAT_PREFILL_KEY);
+      inputRef.current?.focus();
+    }
+  }, []);
 
   const handleViewPdf = async (result: SearchResult) => {
     const documentId = result.metadata?.pdf_download_url;
